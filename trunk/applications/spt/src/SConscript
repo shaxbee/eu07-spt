@@ -1,0 +1,5 @@
+Import('env')
+
+objects = env.Object(source = Split('main.cpp'))
+
+Return('objects')

@@ -10,9 +10,6 @@ buildDir = os.path.join('build', sys.platform);
 if not os.path.exists(os.path.join(buildDir, 'SConscript')):
     raise Errors.UserError("Platform %s is not supported" % sys.platform)
 
-# set appropiate build directory (eg. build/win32)
-BuildDir(buildDir, 'src')    
-
 # construct build environment
 env = Environment()
 
@@ -20,7 +17,7 @@ env = Environment()
 Export('env buildDir')
 
 # configure environment and check dependecies platform-wise
-SConscript(os.path.join(buildDir, 'SConstruct'))
+env = SConscript(os.path.join(buildDir, 'SConscript'))
 
 # build common library
 SConscript('src/SConscript')

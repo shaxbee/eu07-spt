@@ -1,0 +1,4 @@
+Import('env')
+
+objects = env.Object(Split('RailTracking.cpp'))
+env.StaticLibrary('sptCore', objects);

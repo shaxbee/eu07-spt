@@ -1,0 +1,17 @@
+import os.path
+
+# import build environment and build directory
+Import('env buildDir')
+
+# setup build directory
+buildDir = os.path.join(buildDir, 'common')
+BuildDir(buildDir, '#/src')
+
+env = env.Clone()
+env.Append(CPPPATH = '#/include')
+
+# export updated environment
+Export('env buildDir')
+
+# build libraries
+SConscript('sptCore/SConscript')

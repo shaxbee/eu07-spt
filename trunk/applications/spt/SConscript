@@ -1,0 +1,15 @@
+import os.path
+
+Import('env buildDir')
+
+applicationDir = '#/applications/spt/'
+
+buildDir = os.path.join(buildDir, applicationDir)
+env.BuildDir(buildDir, os.path.join(applicationDir, 'src'))
+
+env.Append(CPPPATH = [os.path.join(applicationDir, 'include')])
+
+objects = list()
+objects.append(SConscript('src/SConscript'))
+
+env.Program('spt', objects, LIBS=['osg', 'osgViewer'])
