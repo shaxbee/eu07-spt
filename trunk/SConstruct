@@ -16,7 +16,7 @@ env = Environment()
 # export environment and build dir for other scripts    
 Export('env buildDir')
 
-# configure environment and check dependecies platform-wise
+# configure environment and check dependencies platform-wise
 env = SConscript(os.path.join(buildDir, 'SConscript'))
 
 # build common library
