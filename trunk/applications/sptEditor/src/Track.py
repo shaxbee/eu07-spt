@@ -15,7 +15,7 @@ class RailTracking(object):
         element for given previous tracking element.
 
         Implementators should throw special kind of runtime exception,
-        UndeterminedRailTrackingException to indicate that this rail
+        UndeterminedTrackingException to indicate that this rail
         tracking element cannot determine next rail tracking element
         due to current connection state with other rail trackings.
 
@@ -80,7 +80,7 @@ class RailTracking(object):
         '''
         Sets at specified geoemtry point next rail tracking.
          
-        Method may throw some {@link IllegalArgumentException} if for
+        Method may throw some ValueError if for
         example point is None or rail tracking has already connected
         tracking at this point.
          
@@ -154,7 +154,7 @@ class Track(RailTracking):
             elif self.n2_tracking != None:
                 return self.n2_tracking
             else:
-                raise Exception, "Undetermined RailTracking"
+                raise UndterminedTrackingException, "Undetermined RailTracking"
         
         if previous == self.n1_tracking:
             return self.n2_tracking
@@ -284,7 +284,7 @@ class Switch(RailTracking):
                         or (self.n1_tracking != None and self.n2_tracking == None)):
                 return self.nc_tracking
             else:
-                raise Exception, "Previous rail tracking is null"
+                raise UndeterminedTrackingException, "Previous rail tracking is null"
 
         if previous == self.nc_tracking:
             return self.n1_tracking
@@ -326,7 +326,52 @@ class Switch(RailTracking):
             raise ValueError, "Tracking element in not bound"
 
 
+    def point2tracking(self, point):
+        if point == self.pc:
+            return self.nc_tracking
+        elif point == self.p1:
+            return self.n1_tracking
+        elif point == sekf.p2:
+            return self.n2_tracking
+        else:
+            raise ValueError, "Point not found"
+
+
+    def contains(self, point):
+        return point == self.pc or point == self.p1 or point == self.p2
+
+
+    def setTracking(self, point, next):
+        if point == None:
+            raise ValueError, "Point is null"
+        if not self.contains(point):
+            raise ValueError, "Point is not in geometry"
+
+        if point == self.pc:
+            self.nc_tracking = next
+        elif point == self.p1:
+            self.n1_tracking = next
+        elif point == self.p2:
+            self.n2_tracking = next
+
+
+
+
+class UndeterminedTrackingException(Exception):
+    '''
+    Exception indicating problem with determining next track.
+    '''
+
+    def __init__(self, message = None):
+        self.message = message
+
     
+    def __str__(self):
+        return repr(self.message)
+
+
+
+
 def coord2str(coord):
     '''
     Formats tuple (coordinate) into string.
