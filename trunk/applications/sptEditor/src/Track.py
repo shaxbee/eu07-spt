@@ -4,9 +4,103 @@ Created on 2009-03-04
 @author: adammo
 '''
 
-class Track(object):
+class RailTracking(object):
     '''
-    This is a track
+    Abstract class for rail tracking.
+    '''
+
+    def next(self, previous):
+        '''
+        Returns next tracking element in scope of this tracking
+        element for given previous tracking element.
+
+        Implementators should throw special kind of runtime exception,
+        UndeterminedRailTrackingException to indicate that this rail
+        tracking element cannot determine next rail tracking element
+        due to current connection state with other rail trackings.
+
+        @param previous Previous tracking element.
+        @type  previous RailTracking
+        @return Next rail tracking or None.
+        @rtype RailTracking
+        '''
+        pass # Implement it in subclasses
+
+
+    def nextPoint(self, point):
+        '''
+        Returns next geometry point for this rail tracking element.
+        '''
+        pass # Implement it in subclasses
+
+
+    def point2tracking(self, point):
+        '''
+        Gets the connected tracking element for given geometry point
+        of this track element. If geometry point doesn't fit to this
+        track geometry, method should throw ValueError.
+
+        @param point A geometry point
+        @return Corresponding connected tracking element or None if
+          tracking element is not bound on this end to any tracking
+          element.
+        @rtype RailTracking
+        '''
+        pass # Implement it in subclasses
+
+    
+    def tracking2point(self, tracking):
+        '''
+        Sets at specified geoemtry point next rail tracking.
+         
+        Method may throw some {@link IllegalArgumentException} if for
+        example point is null or rail tracking has already connected
+        tracking at this point.
+         
+        Implementator classes shouldn't check if the next rail tracking
+        is connected or not to some other rail trackings.
+
+        @param p Geometry point to set up next rail tracking for this
+          rail tracking. Point cannot be null and must be geometry point.
+        @param next Next rail tracking to set up. It may be null to
+          disconnect this rail tracking from the next one.
+        '''
+        pass # Implement it in subclass
+
+
+    def containsPoint(self, point):
+        '''
+        Returns true if this rail tracking element has given geometry
+        point.
+        '''
+        pass # Implement it in subclasses
+
+
+    def setTracking(self, point, next):
+        '''
+        Sets at specified geoemtry point next rail tracking.
+         
+        Method may throw some {@link IllegalArgumentException} if for
+        example point is None or rail tracking has already connected
+        tracking at this point.
+         
+        Implementator classes shouldn't check if the next rail tracking
+        is connected or not to some other rail trackings.
+         
+        @param point Geometry point to set up next rail tracking for
+          this rail tracking. Point cannot be null and must be geometry
+          point.
+        @param next Next rail tracking to set up. It may be null to
+          disconnect this rail tracking from the next one.
+        '''
+        pass # Implement it in subclasses
+
+
+
+
+class Track(RailTracking):
+    '''
+    This is a track. Can be a straight track, an arc.
     '''
 
     def __init__(self, p1=(0.0, 0.0, 0,0), v1=(0.0, 0.0, 0.0), v2=(0.0, 0.0, 0.0), p2=(0.0, 0.0, 0.0)):
@@ -18,16 +112,8 @@ class Track(object):
         self.v2 = v2
         self.p2 = p2
         
-        self.p1_tracking = None
-        self.p2_tracking = None
-        
-        
-    def coord2str(self, coord):
-        '''
-        Formats tuple (coordinate) into string.
-        '''
-        return "(%(x).3f,%(y).3f,%(z).3f)" % \
-            {'x': coord[0], 'y': coord[1], 'z': coord[2]}
+        self.n1_tracking = None
+        self.n2_tracking = None
         
 
     def __repr__(self):
@@ -35,10 +121,12 @@ class Track(object):
         Gives a detailed information about this object.
         '''
         return "Track[" \
-            + "p1=" + self.coord2str(self.p1) \
-            + ", v1=" + self.coord2str(self.v1) \
-            + ", v2=" + self.coord2str(self.v2) \
-            + ", p2=" + self.coord2str(self.p2)
+            + "p1=" + coord2str(self.p1) \
+            + ", v1=" + coord2str(self.v1) \
+            + ", v2=" + coord2str(self.v2) \
+            + ", p2=" + coord2str(self.p2) \
+            + "]"
+
             
     def __eq__(self,other):
         '''
@@ -59,17 +147,190 @@ class Track(object):
         Returns the next bound rail tracking.
         '''
         if previous == None:
-            if self.p1_tracking != None and self.p2_tracking != None:
+            if self.n1_tracking != None and self.n2_tracking != None:
                 raise ValueError, "Previous RailTracking was null"
-            elif self.p1_tracking != None:
-                return self.p1_tracking
-            elif self.p2_tracking != None:
-                return self.p2_tracking
+            elif self.n1_tracking != None:
+                return self.n1_tracking
+            elif self.n2_tracking != None:
+                return self.n2_tracking
             else:
                 raise Exception, "Undetermined RailTracking"
         
-        if previous == self.p1_tracking:
-            return self.p2_tracking
-        elif previous == self.p2_tracking:
-            return self.p1_tracking 
-        
+        if previous == self.n1_tracking:
+            return self.n2_tracking
+        elif previous == self.n2_tracking:
+            return self.n1_tracking 
+
+    
+    def nextPoint(self, point):
+        if self.p1 == point:
+            return self.p2
+        elif self.p2 == point:
+            return self.p1
+
+        raise ValueError, "Start point not found in geometry"
+
+
+    def tracking2point(self, tracking):
+        if tracking == None and self.n1_tracking == None \
+                and self.n2_tracking == None:
+            raise ValueError, "Cannot determine geometry point"
+            
+        if (tracking == None and self.n1_tracking == None) \
+                or (tracking != None and tracking == self.n1_tracking):
+            return self.p1
+        elif (tracking == None and self.n2_tracking == None) \
+                or (tracking != None and tracking == self.n2_tracking):
+            return self.p2
+        else:
+            raise ValueError, "Tracking element is not bound"
+
+    
+    def point2tracking(self, point):
+        if point == self.p1:
+            return self.n1_tracking
+        elif point == self.p2:
+            return self.n2_tracking
+        else:
+            raise ValueError, "Point not found"
+
+
+    def contains(self, point):
+        return point == self.p1 or point == self.p2
+
+
+    def setTracking(self, point, next):
+        if point == None:
+            raise ValueError, "Point is none"
+        if not self.contains(point):
+            raise ValueError, "Point is not in geometry"
+
+        if point == self.p1:
+            self.n1_tracking = next
+        elif point == self.p2:
+            self.n2_tracking = next
+
+
+
+class Switch(RailTracking):
+    '''
+    Rail switch class.
+    '''
+
+    def __init__(self, pc=(0.0, 0.0, 0.0), \
+                       p1=(0.0, 0.0, 0.0), \
+                       p2=(0.0, 0.0, 0.0), \
+                       vc1=(0.0, 0.0, 0.0), \
+                       vc2=(0.0, 0.0, 0.0), \
+                       v1=(0.0, 0.0, 0.0), \
+                       v2=(0.0, 0.0, 0.0)):
+        '''
+        Creates a switch.
+        '''
+
+        self.pc = pc
+        self.p1 = p1
+        self.p2 = p2
+        self.vc1 = vc1
+        self.vc2 = vc2
+        self.v1 = v1
+        self.v2 = v2
+
+        self.nc_tracking = None
+        self.n1_tracking = None
+        self.n2_tracking = None
+
+
+    def __repr__(self):
+        '''
+        Gives a detailed information about this object.
+        '''
+        return "Switch[" \
+            + "pc=" + coord2str(self.pc) \
+            + ", p1=" + coord2str(self.p1) \
+            + ", p2=" + coord2str(self.p2) \
+            + ", vc1=" + coord2str(self.vc1) \
+            + ", v1=" + coord2str(self.v1) \
+            + ", vc2=" + coord2str(self.vc2) \
+            + ", v2=" + coord2str(self.v2) \
+            + "]"
+
+
+    def __eq__(self, other):
+        '''
+        Compares this Switch with another
+        '''
+        if self is other:
+            return True
+        if not isinstance(other, Switch):
+            return False
+        return self.pc == other.pc \
+            and self.p1 == other.p1 \
+            and self.p2 == other.p2 \
+            and self.vc1 == other.vc1 \
+            and self.v1 == other.v1 \
+            and self.vc2 == other.vc2 \
+            and self.v2 == other.v2
+
+
+    def next(self, previous):
+        if previous == None:
+            if self.nc_tracking == None \
+                    and self.n1_tracking != None \
+                    and self.n2_tracking != None:
+                return self.n1_tracking
+            elif self.nc_tracking != None \
+                    and ((self.n1_tracking == None and self.n2_tracking != None) \
+                        or (self.n1_tracking != None and self.n2_tracking == None)):
+                return self.nc_tracking
+            else:
+                raise Exception, "Previous rail tracking is null"
+
+        if previous == self.nc_tracking:
+            return self.n1_tracking
+        elif previous == self.n1_tracking or previous == self.n2_tracking:
+            return self.nc_tracking
+
+        raise ValueError, "Previous tracking not found"
+
+
+    def nextPoint(self, start):
+        if start == self.pc:
+            return p1
+        elif start == self.p1 or start == self.p2:
+            return pc
+
+        raise ValueError, "Start point not found in geometry"
+
+
+    def tracking2point(self, tracking):
+        bits = 0
+
+        if tracking == self.nc_tracking \
+            or (tracking != None and tracking == self.nc_tracking):
+            bits |= 1
+        if tracking == self.n1_tracking \
+            or (tracking != None and tracking == self.n1_tracking):
+            bits |= 2
+        if tracking == self.n2_tracking \
+            or (tracking != None and tracking == self.n2_tracking):
+            bits |= 4
+
+        if bits == 1:
+            return self.pc
+        elif bits == 2:
+            return self.p1
+        elif bits == 4:
+            return self.p2
+        else:
+            raise ValueError, "Tracking element in not bound"
+
+
+    
+def coord2str(coord):
+    '''
+    Formats tuple (coordinate) into string.
+    '''
+    return "(%(x).3f,%(y).3f,%(z).3f)" % \
+        {'x': coord[0], 'y': coord[1], 'z': coord[2]}
+
