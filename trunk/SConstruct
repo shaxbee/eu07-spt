@@ -1,14 +1,20 @@
 import sys
 import os.path
 
-from SCons import Errors
+from SCons.Errors import UserError
+from build_support import GetPlatform
+
+platform = GetPlatform()
+
+if not platform:
+    raise UserError("Unknown platform %s" % sys.platform)
 
 # select platform
-buildDir = os.path.join('build', sys.platform);
+buildDir = os.path.join('build', platform);
 
 # if we don't have scripts for platform report error
 if not os.path.exists(os.path.join(buildDir, 'SConscript')):
-    raise Errors.UserError("Platform %s is not supported" % sys.platform)
+    raise UserError("Platform %s is not supported" % platform)
 
 # construct build environment
 env = Environment()
