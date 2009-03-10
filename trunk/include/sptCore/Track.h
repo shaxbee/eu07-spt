@@ -22,8 +22,8 @@ public:
     virtual Path* getPath(RailTracking* tracking);
     virtual Path* reverse(Path* path);
 
-    void setPrevious(RailTracking* previous);
-    void setNext(RailTracking* next);
+    inline void setPrevious(RailTracking* previous) { _path->_previous = previous; };
+    inline void setNext(RailTracking* next) { _path->_next = next; };
 
 private:
     boost::scoped_ptr<Path> _path;
