@@ -4,36 +4,31 @@
 
 using namespace sptCore;
 
-Path::Path(osg::Vec3Array* points, RailTracking* previous, RailTracking* next):
-    _points(points), _previous(previous), _next(next)
-{
-
-}; // Path::Path
-
-Path* Path::reverse()
+Path* Path::reverse() const
 {
     
-    osg::Vec3Array* reversed = new osg::Vec3Array(_points->size());
-    std::reverse_copy(_points->begin(), _points->end(), reversed->begin());
+    Path* reversed = new Path(size());
+    std::reverse_copy(begin(), end(), reversed->begin());
     
-    return new Path(reversed, _next, _previous);
+    return reversed;
     
 }; // Path::reverse
 
-Path* Path::straight(osg::Vec3 begin, osg::Vec3 end, RailTracking* previous, RailTracking* next)
+Path::Pair Path::straight(osg::Vec3 begin, osg::Vec3 end)
 {
 
-    osg::Vec3Array* points = new osg::Vec3Array(2);
-    points->push_back(begin);
-    points->push_back(end);
+    Path* path = new Path(2);
 
-    return new Path(points, previous, next);
+    path->push_back(begin);
+    path->push_back(end);
+
+    return std::make_pair(path, path->reverse());
 
 }; // Path::straight
 
-Path* Path::bezier(osg::Vec3 begin, osg::Vec3 controlBegin, osg::Vec3 end, osg::Vec3 controlEnd, RailTracking* previous, RailTracking* next)
+Path::Pair Path::bezier(osg::Vec3 begin, osg::Vec3 controlBegin, osg::Vec3 end, osg::Vec3 controlEnd)
 {
 
-    return new Path();
+    return Path::straight(begin, end);
 
 }; // Path::bezier

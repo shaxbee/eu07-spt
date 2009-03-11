@@ -2,47 +2,41 @@
 
 using namespace sptCore;
 
-Track::Track(osg::Vec3 p1, osg::Vec3 p2, RailTracking* previous)
-{
-//    _path = Path::straight(p1, p2, previous, NULL);
-
-}; // Track::Track(p1, p2, previous)
-
-Track::Track(osg::Vec3 p1, osg::Vec3 p2, osg::Vec3 cp1, osg::Vec3 cp2, RailTracking* previous):
-    _path(Path::bezier(p1, p2, cp1, cp2, previous, NULL))
+Track::Track(osg::Vec3 p1, osg::Vec3 p2):
+    _path(Path::straight(p1, p2))
 {
 
-}; // Track::Track(p1, p2, cp1, cp2, previous)
+}; // Track::Track(p1, p2)
 
-RailTracking* Track::getNext(RailTracking* tracking)
+Track::Track(osg::Vec3 p1, osg::Vec3 p2, osg::Vec3 cp1, osg::Vec3 cp2):
+    _path(Path::bezier(p1, p2, cp1, cp2))
 {
 
-    if(tracking == _path->_previous)
-        return _path->_next;
+}; // Track::Track(p1, p2, cp1, cp2)
 
-    if(tracking == _path->_next)
-        return _path->_previous;
+osg::Vec3 Track::getExit(osg::Vec3 entry)
+{
+
+    // if entrance == track begin
+    if(entry == _path.first->front())
+        return _path.first->back();
+
+    // if entrance == track end
+    if(entry == _path.second->front())
+        return _path.second->back();
 
 //    throw RailTrackingException("Unknown tracking");
 
 }; // RailTracking::getNext
 
-Path* Track::getPath(RailTracking* tracking)
+Path* Track::getPath(osg::Vec3 entry)
 {
 
-    if(tracking == _path->_previous)
+    if(entry == _path.first->front())
+        return _path.first.get();
 
-        return _path.get();
-
-    if(tracking == _path->_next)
-    {
-
-        if(!_reversedPath)
-            _reversedPath.reset(_path->reverse());
-
-        return _reversedPath.get();
-
-    };
+    if(entry == _path.second->front())
+        return _path.second.get();
 
 //    throw RailTrackingException("Unknown tracking");
 

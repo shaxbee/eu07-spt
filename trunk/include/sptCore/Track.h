@@ -13,24 +13,17 @@ class Track: public RailTracking
 {
 
 public:
-    Track(osg::Vec3 p1, osg::Vec3 p2, RailTracking* previous);
-    Track(osg::Vec3 p1, osg::Vec3 p2, osg::Vec3 cp1, osg::Vec3 cp2, RailTracking* previous);
+    Track(osg::Vec3 p1, osg::Vec3 p2);
+    Track(osg::Vec3 p1, osg::Vec3 p2, osg::Vec3 cp1, osg::Vec3 cp2);
 
     virtual ~Track();
 
-    virtual RailTracking* getNext(RailTracking* tracking);
-    virtual Path* getPath(RailTracking* tracking);
+    virtual osg::Vec3 getExit(osg::Vec3 entry);
+    virtual Path* getPath(osg::Vec3 entry);
     virtual Path* reverse(Path* path);
 
-    inline void setPrevious(RailTracking* previous) { _path->_previous = previous; };
-    inline void setNext(RailTracking* next) { _path->_next = next; };
-
 private:
-    boost::scoped_ptr<Path> _path;
-    boost::scoped_ptr<Path> _reversedPath;
-
-    boost::scoped_ptr<RailTracking> _previous;
-    boost::scoped_ptr<RailTracking> _next;
+    Path::Pair _path;
 
 };
 
