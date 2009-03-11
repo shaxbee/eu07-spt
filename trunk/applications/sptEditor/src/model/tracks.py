@@ -96,6 +96,13 @@ class RailTracking(object):
         pass # Implement it in subclasses
 
 
+    def getGeometry(self):
+        '''
+        Gets the geometry of the rail tracking expressed as end points.
+        '''
+        pass # Implement it in subclasses
+
+
 
 
 class Track(RailTracking):
@@ -103,7 +110,8 @@ class Track(RailTracking):
     This is a track. Can be a straight track, an arc.
     '''
 
-    def __init__(self, p1=(0.0, 0.0, 0,0), v1=(0.0, 0.0, 0.0), v2=(0.0, 0.0, 0.0), p2=(0.0, 0.0, 0.0)):
+    def __init__(self, p1=(0.0, 0.0, 0.0), v1=(0.0, 0.0, 0.0), \
+        v2=(0.0, 0.0, 0.0), p2=(0.0, 0.0, 0.0)):
         '''
         Constructor
         '''
@@ -112,8 +120,8 @@ class Track(RailTracking):
         self.v2 = v2
         self.p2 = p2
         
-        self.n1_tracking = None
-        self.n2_tracking = None
+        self.n1 = None
+        self.n2 = None
         
 
     def __repr__(self):
@@ -147,19 +155,19 @@ class Track(RailTracking):
         Returns the next bound rail tracking.
         '''
         if previous == None:
-            if self.n1_tracking != None and self.n2_tracking != None:
+            if self.n1 != None and self.n2 != None:
                 raise ValueError, "Previous RailTracking was null"
-            elif self.n1_tracking != None:
-                return self.n1_tracking
-            elif self.n2_tracking != None:
-                return self.n2_tracking
+            elif self.n1 != None:
+                return self.n1
+            elif self.n2 != None:
+                return self.n2
             else:
                 raise UndterminedTrackingException, "Undetermined RailTracking"
         
-        if previous == self.n1_tracking:
-            return self.n2_tracking
-        elif previous == self.n2_tracking:
-            return self.n1_tracking 
+        if previous == self.n1:
+            return self.n2
+        elif previous == self.n2:
+            return self.n1 
 
     
     def nextPoint(self, point):
@@ -172,15 +180,15 @@ class Track(RailTracking):
 
 
     def tracking2point(self, tracking):
-        if tracking == None and self.n1_tracking == None \
-                and self.n2_tracking == None:
+        if tracking == None and self.n1 == None \
+                and self.n2 == None:
             raise ValueError, "Cannot determine geometry point"
             
-        if (tracking == None and self.n1_tracking == None) \
-                or (tracking != None and tracking == self.n1_tracking):
+        if (tracking == None and self.n1 == None) \
+                or (tracking != None and tracking == self.n1):
             return self.p1
-        elif (tracking == None and self.n2_tracking == None) \
-                or (tracking != None and tracking == self.n2_tracking):
+        elif (tracking == None and self.n2 == None) \
+                or (tracking != None and tracking == self.n2):
             return self.p2
         else:
             raise ValueError, "Tracking element is not bound"
@@ -188,9 +196,9 @@ class Track(RailTracking):
     
     def point2tracking(self, point):
         if point == self.p1:
-            return self.n1_tracking
+            return self.n1
         elif point == self.p2:
-            return self.n2_tracking
+            return self.n2
         else:
             raise ValueError, "Point not found"
 
@@ -206,9 +214,36 @@ class Track(RailTracking):
             raise ValueError, "Point is not in geometry"
 
         if point == self.p1:
-            self.n1_tracking = next
+            self.n1 = next
         elif point == self.p2:
-            self.n2_tracking = next
+            self.n2 = next
+
+
+    def getGeometry(self):
+        return [self.p1, self.p2]
+
+
+    def getNormalVector(self, point):
+        '''
+        Gets a normal vector for given point
+        '''
+        if point == self.p1:
+            if self.v1[0] == 0 and self.v1[1] == 0 and self.v1[2] == 0:
+                return (self.p1[0] - self.p2[0], \
+                        self.p1[1] - self.p2[1], \
+                        self.p1[2] - self.p2[2])
+            else:
+                return (-x for x in self.v1)
+        elif point == self.p2:
+            if self.v2[0] == 0 and self.v2[1] == 0 and self.v2[2] == 0:
+                return (self.p2[0] - self.p1[0], \
+                        self.p2[1] - self.p1[1], \
+                        self.p2[2] - self.p1[2])
+            else:
+                return (-x for x in self.v2)
+        else:
+            return None
+
 
 
 
@@ -236,9 +271,9 @@ class Switch(RailTracking):
         self.v1 = v1
         self.v2 = v2
 
-        self.nc_tracking = None
-        self.n1_tracking = None
-        self.n2_tracking = None
+        self.nc = None
+        self.n1 = None
+        self.n2 = None
 
 
     def __repr__(self):
@@ -275,21 +310,21 @@ class Switch(RailTracking):
 
     def next(self, previous):
         if previous == None:
-            if self.nc_tracking == None \
-                    and self.n1_tracking != None \
-                    and self.n2_tracking != None:
-                return self.n1_tracking
-            elif self.nc_tracking != None \
-                    and ((self.n1_tracking == None and self.n2_tracking != None) \
-                        or (self.n1_tracking != None and self.n2_tracking == None)):
-                return self.nc_tracking
+            if self.nc == None \
+                    and self.n1 != None \
+                    and self.n2 != None:
+                return self.n1
+            elif self.nc != None \
+                    and ((self.n1 == None and self.n2 != None) \
+                        or (self.n1 != None and self.n2 == None)):
+                return self.nc
             else:
                 raise UndeterminedTrackingException, "Previous rail tracking is null"
 
-        if previous == self.nc_tracking:
-            return self.n1_tracking
-        elif previous == self.n1_tracking or previous == self.n2_tracking:
-            return self.nc_tracking
+        if previous == self.nc:
+            return self.n1
+        elif previous == self.n1 or previous == self.n2:
+            return self.nc
 
         raise ValueError, "Previous tracking not found"
 
@@ -306,14 +341,14 @@ class Switch(RailTracking):
     def tracking2point(self, tracking):
         bits = 0
 
-        if tracking == self.nc_tracking \
-            or (tracking != None and tracking == self.nc_tracking):
+        if tracking == self.nc \
+            or (tracking != None and tracking == self.nc):
             bits |= 1
-        if tracking == self.n1_tracking \
-            or (tracking != None and tracking == self.n1_tracking):
+        if tracking == self.n1 \
+            or (tracking != None and tracking == self.n1):
             bits |= 2
-        if tracking == self.n2_tracking \
-            or (tracking != None and tracking == self.n2_tracking):
+        if tracking == self.n2 \
+            or (tracking != None and tracking == self.n2):
             bits |= 4
 
         if bits == 1:
@@ -328,11 +363,11 @@ class Switch(RailTracking):
 
     def point2tracking(self, point):
         if point == self.pc:
-            return self.nc_tracking
+            return self.nc
         elif point == self.p1:
-            return self.n1_tracking
+            return self.n1
         elif point == sekf.p2:
-            return self.n2_tracking
+            return self.n2
         else:
             raise ValueError, "Point not found"
 
@@ -348,11 +383,41 @@ class Switch(RailTracking):
             raise ValueError, "Point is not in geometry"
 
         if point == self.pc:
-            self.nc_tracking = next
+            self.nc = next
         elif point == self.p1:
-            self.n1_tracking = next
+            self.n1 = next
         elif point == self.p2:
-            self.n2_tracking = next
+            self.n2 = next
+
+
+    def getGeometry(self):
+        return [self.pc, self.p1, self.p2]
+
+
+    def getNormalVector(self, point):
+        if point == self.pc:
+            if self.vc1[0] == 0 and self.vc1[1] == 0 and self.vc1[2] == 0:
+                return (self.pc[0] - self.p1[0], \
+                        self.pc[1] - self.p1[1], \
+                        self.pc[2] - self.p1[2])
+            else:
+                return (-x for x in self.vc1)
+        elif point == self.p1:
+            if self.v1[0] == 0 and self.v1[1] == 0 and self.v1[2] == 0:
+                return (self.p1[0] - self.pc[0], \
+                        self.p1[1] - self.pc[1], \
+                        self.p2[2] - self.pc[2])
+            else:
+                return (-x for x in self.v1)
+        elif point == self.p2:
+            if self.v2[0] == 0 and self.v2[1] == 0 and self.v2[2] == 0:
+                return (self.p2[0] - self.pc[0], \
+                        self.p2[1] - self.pc[1], \
+                        self.p2[2] - self.p2[2])
+            else:
+                return (-x for x in self.v2)
+        else:
+            return None
 
 
 
@@ -378,4 +443,19 @@ def coord2str(coord):
     '''
     return "(%(x).3f,%(y).3f,%(z).3f)" % \
         {'x': coord[0], 'y': coord[1], 'z': coord[2]}
+
+
+def isDisconnected(tracking):
+    '''
+    Checks if given rail tracking element is disconnected.
+
+    Disconnected track means such rail tracking element
+    that isn't connected to any other rail trackings.
+    '''
+    geometry = tracking.getGeometry()
+    for p in geometry:
+        if tracking.point2tracking(p) != None:
+            return False
+    return True
+
 

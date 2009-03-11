@@ -6,8 +6,10 @@ Created on 2009-03-01
 
 import logging
 import wx
+import yaml
 
-import Track
+import model.tracks
+import model.groups
 
 class Application(wx.App):
     '''
@@ -37,6 +39,9 @@ class MainWindow(wx.Frame):
         '''
 
         wx.Frame.__init__(self, parent, id, "EI07", size=(200,100))
+
+        self.path = None
+        self.group = None
 
         self.CreateMenu()
 
@@ -84,8 +89,9 @@ class MainWindow(wx.Frame):
         self.SetMenuBar(mainMenu)
 
         wx.EVT_MENU(self, wx.ID_OPEN, self.OnOpen)
+        wx.EVT_MENU(self, wx.ID_SAVE, self.OnSave)
         wx.EVT_MENU(self, wx.ID_CLOSE, self.OnExit)
-        wx.EVT_MENU(self, wx.ID_ABOUT, self.OnAbout)        
+        wx.EVT_MENU(self, wx.ID_ABOUT, self.OnAbout)
 
 
     def OnAbout(self, event):
@@ -134,21 +140,40 @@ class MainWindow(wx.Frame):
         
         if openDialog.ShowModal() == wx.ID_OK:
             path = openDialog.GetPath()
-            
-            track = Track.Track()
-            print track
-            
-            track2 = Track.Track((1,2,3),(1,0.5,2),(0,0,0),(2,3,1))
-            print track2
-            
-            track3 = Track.Track()            
-            
-            print track == track2
-            print track == track3
+            self.path = path
 
-            logging.warn(path)
+            self.group = yaml.load(file(path, "r"))
 
         self.workingDirectory = openDialog.GetDirectory()
+
+    def OnSave(self, event):
+        '''
+        Saves scenery file.
+        '''
+
+        saveDialog = wx.FileDialog(self, "Choose scenery file", \
+            self.workingDirectory, "", \
+            "Textual format (*.*)|*.*", wx.FD_SAVE)
+        saveDialog.CentreOnParent()
+        if self.path != None:
+            saveDialog.SetPath(self.path)
+
+        if saveDialog.ShowModal() == wx.ID_OK:
+            self.path = saveDialog.GetPath()
+
+            self.group = model.groups.Group()
+            track = model.tracks.Track()
+            self.group.insert(track)
+
+            text = yaml.dump(self.group)
+            print text
+
+            scenery_file = open(self.path, "w")
+            print scenery_file
+            scenery_file.write(yaml.dump(self.group))
+            scenery_file.close()
+
+        self.workingDirectory = saveDialog.GetDirectory()
 
 
 app = Application()
