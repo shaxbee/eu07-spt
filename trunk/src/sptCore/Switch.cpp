@@ -19,13 +19,32 @@ osg::Vec3 Switch::getExit(osg::Vec3 entry)
     if(entry == _straight.second->front())
        return _straight.second->back();
 
-
     if(entry == _diverted.first->front())
        return _diverted.first->back();
 
     if(entry == _diverted.second->front())
        return _diverted.second->back();
 
-//    throw RailTrackingException("Invalid entry point") 
+    throw UnknownEntryException() << PositionInfo(entry);
 
-};
+}; // Switch::getExit(entry)
+
+Path* Switch::getPath(osg::Vec3 entry)
+{
+
+    if(entry == _straight.first->front())
+       return _straight.first.get();
+
+    if(entry == _straight.second->front())
+       return _straight.second.get();
+
+    if(entry == _diverted.first->front())
+       return _diverted.first.get();
+
+    if(entry == _diverted.second->front())
+       return _diverted.second.get();
+
+    throw UnknownEntryException() << PositionInfo(entry);
+
+}; // Switch::getPath(entry)
+

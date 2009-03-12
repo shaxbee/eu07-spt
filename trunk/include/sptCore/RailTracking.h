@@ -1,6 +1,7 @@
 #ifndef SPTCORE_RAILTRACKING_H
 #define SPTCORE_RAILTRACKING_H 1
 
+#include <boost/exception.hpp> 
 #include <osg/Array>
 
 namespace sptCore
@@ -17,6 +18,11 @@ public:
     virtual osg::Vec3 getExit(osg::Vec3 entry) = 0;
     virtual Path* getPath(osg::Vec3 entry) = 0;
     virtual Path* reverse(Path* path) = 0;
+
+    typedef boost::error_info<struct tag_position, osg::Vec3f> PositionInfo;
+
+    class UnknownEntryException: public boost::exception { };
+    class UndeterminedExitException: public boost::exception { };
 
 }; // class sptCore::RailTracking
 

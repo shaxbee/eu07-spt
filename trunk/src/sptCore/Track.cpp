@@ -25,7 +25,7 @@ osg::Vec3 Track::getExit(osg::Vec3 entry)
     if(entry == _path.second->front())
         return _path.second->back();
 
-//    throw RailTrackingException("Unknown tracking");
+    throw UnknownEntryException() << PositionInfo(entry);
 
 }; // RailTracking::getNext
 
@@ -38,6 +38,6 @@ Path* Track::getPath(osg::Vec3 entry)
     if(entry == _path.second->front())
         return _path.second.get();
 
-//    throw RailTrackingException("Unknown tracking");
+    throw UnknownEntryException() << PositionInfo(entry);
 
 }; // RailTracking::getPath
