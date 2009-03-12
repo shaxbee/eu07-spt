@@ -10,6 +10,7 @@ import yaml
 
 import model.tracks
 import model.groups
+import ui.editor
 
 class Application(wx.App):
     '''
@@ -44,6 +45,7 @@ class MainWindow(wx.Frame):
         self.group = None
 
         self.CreateMenu()
+        self.CreateContent()
 
         config = wx.FileConfig.Get()
 	
@@ -92,6 +94,14 @@ class MainWindow(wx.Frame):
         wx.EVT_MENU(self, wx.ID_SAVE, self.OnSave)
         wx.EVT_MENU(self, wx.ID_CLOSE, self.OnExit)
         wx.EVT_MENU(self, wx.ID_ABOUT, self.OnAbout)
+
+
+    def CreateContent(self):
+        '''
+        Creates main content of application.
+        '''
+
+        ui.editor.SceneryEditor(self, wx.ID_ANY)
 
 
     def OnAbout(self, event):
