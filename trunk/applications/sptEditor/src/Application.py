@@ -19,6 +19,7 @@ class Application(wx.App):
     
     def __init__(self):
         wx.App.__init__(self)
+
     
     def OnInit(self):
         self.SetVendorName("SPT-Team")
@@ -27,6 +28,8 @@ class Application(wx.App):
         wx.FileConfig.Get()
         
         return True
+
+
     
         
 class MainWindow(wx.Frame):
@@ -38,17 +41,20 @@ class MainWindow(wx.Frame):
         '''
         Creates application window.
         '''
-
         wx.Frame.__init__(self, parent, id, "EI07", size=(200,100))
+
+        #self.SetIcon(wx.IconFromXPMData("w8_7.xpm"))
 
         self.path = None
         self.group = None
 
         self.CreateMenu()
+        self.CreateStatusBar()
         self.CreateContent()
 
         config = wx.FileConfig.Get()
-	
+
+        maximised = config.ReadInt("/EIFrame/maximised", 0)	
         posX = config.ReadInt("/EIFrame/x", 14)
         posY = config.ReadInt("/EIFrame/y", 14)
         width = config.ReadInt("/EIFrame/width", 680)
@@ -58,8 +64,10 @@ class MainWindow(wx.Frame):
 
         self.Move((posX, posY))
         self.SetSize((width, height))
+        self.Maximize(maximised)
 
         self.Bind(wx.EVT_CLOSE, self.OnExit)
+        self.Bind(wx.EVT_MAXIMIZE, self.OnMaximise)
 
         self.Show(True)
 
@@ -96,6 +104,14 @@ class MainWindow(wx.Frame):
         wx.EVT_MENU(self, wx.ID_ABOUT, self.OnAbout)
 
 
+    def CreateStatusBar(self):
+
+        bar = wx.StatusBar(self)
+        bar.SetStatusText("Ready.")
+
+        self.SetStatusBar(bar)
+
+
     def CreateContent(self):
         '''
         Creates main content of application.
@@ -129,13 +145,19 @@ class MainWindow(wx.Frame):
         size = self.GetSize()
         pos = self.GetPosition()
 
-        config.WriteInt("/EIFrame/x", pos.x)
-        config.WriteInt("/EIFrame/y", pos.y)
-        config.WriteInt("/EIFrame/width", size.width)
-        config.WriteInt("/EIFrame/height", size.height)
+        config.WriteInt("/EIFrame/maximised", self.IsMaximized())
+        if not self.IsMaximized():
+            config.WriteInt("/EIFrame/x", pos.x)
+            config.WriteInt("/EIFrame/y", pos.y)
+            config.WriteInt("/EIFrame/width", size.width)
+            config.WriteInt("/EIFrame/height", size.height)
         config.Write("/EIApp/workingDirectory", self.workingDirectory)
 
 	self.Destroy()
+
+
+    def OnMaximise(self, event):
+        print event
 
 
     def OnOpen(self, event):
