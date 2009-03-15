@@ -56,7 +56,7 @@ class PlanePart(wx.ScrolledWindow):
 
         self.logger = logging.getLogger('Paint')
 
-        self.scale = 1.0
+        self.scale = 4000.0
 
         self.minX = -1000.0
         self.minZ = -1000.0
@@ -103,9 +103,9 @@ class PlanePart(wx.ScrolledWindow):
         Converts 2D point of UI editor coordinates into 3D point
         of scenery coordinates.
         '''
-        return ((point[0] - 100.0) / self.scale * SCALE_FACTOR + self.minX, \
+        return (float(point[0] - 100) / self.scale * SCALE_FACTOR + self.minX, \
             0.0,
-            -((point[1] - 100.0) / self.scale * SCALE_FACTOR + self.minZ))
+            -(float(point[1] - 100) / self.scale * SCALE_FACTOR + self.minZ))
 
 
     def ModelToView(self, point):
@@ -113,8 +113,8 @@ class PlanePart(wx.ScrolledWindow):
         Converts 3D point of scenery coordiante into 2D point of
         UI editor coordinates.
         '''
-        return ((point[0] - self.minX) * self.scale / SCALE_FACTOR + 100, \
-            (-point[2] - self.minZ) * self.scale / SCALE_FACTOR + 100)
+        return (int((point[0] - self.minX) * self.scale / SCALE_FACTOR + 100), \
+            int((-point[2] - self.minZ) * self.scale / SCALE_FACTOR + 100))
 
 
     def OnSize(self, event):
@@ -125,9 +125,9 @@ class PlanePart(wx.ScrolledWindow):
     def ComputePreferredSize(self):
         (w, h) = self.GetSize()
         
-        return (max(w, (self.scale * (self.maxX - self.minX) \
-                / SCALE_FACTOR + 200)) + self.extentX,
-            max(h + self.extentY, (self.scale * (self.maxZ - self.minZ) \
+        return (max(w, int(self.scale * (self.maxX - self.minX) \
+                / SCALE_FACTOR) + 200) + self.extentX,
+            max(h + self.extentY, int(self.scale * (self.maxZ - self.minZ) \
                / SCALE_FACTOR) + 200) + self.extentY)
 
 
@@ -168,44 +168,54 @@ class PlanePart(wx.ScrolledWindow):
         '''
         Paints a grid.
         '''
-        center2D = self.ModelToView((0.0, 0.0, 0.0))        
+        center2D = self.ModelToView((0.0, 0.0, 0.0))
 
         xoffset = clip.x + clip.width
         yoffset = clip.y + clip.height
 
-        x = center2D[0]
-        while x > clip.width:
-            x = x - 100
-            dc.DrawLine(x, clip.y, x, yoffset)
-        x = center2D[0]
-        while x < xoffset:
-            dc.DrawLine(x, clip.y, x, yoffset)
-            x = x + 100
+        oldPen = dc.GetPen()
+        dc.SetPen(wx.Pen('#666666'))
+        try:
+            x = center2D[0]
+            while x > clip.x:
+                x = x - 100
+                dc.DrawLine(x, clip.y, x, yoffset)
+            x = center2D[0]
+            while x < xoffset:
+                dc.DrawLine(x, clip.y, x, yoffset)
+                x = x + 100
         
-        y = center2D[1]
-        while y > clip.height:
-            y = y - 100
-            dc.DrawLine(clip.x, y, xoffset, y)
-        y = center2D[1]
-        while y < clip.height:
-            dc.DrawLine(clip.x, y, xoffset, y)
-            y = y + 100
+            y = center2D[1]
+            while y > clip.y:
+                y = y - 100
+                dc.DrawLine(clip.x, y, xoffset, y)
+            y = center2D[1]
+            while y < yoffset:
+                dc.DrawLine(clip.x, y, xoffset, y)
+                y = y + 100
+        finally:
+            dc.SetPen(oldPen)
 
 
     def PaintMinMaxBounds(self, dc, clip):
         '''
         Paints the borders around min/max.
         '''
-        x = (self.maxX - self.minX) * self.scale / SCALE_FACTOR + 100
-        y = (self.maxZ - self.minZ) * self.scale / SCALE_FACTOR + 100
+        x = int((self.maxX - self.minX) * self.scale / SCALE_FACTOR) + 100
+        y = int((self.maxZ - self.minZ) * self.scale / SCALE_FACTOR) + 100
 
-        dc.DrawLine(clip.x, 100, clip.x + clip.width, 100)
+        oldPen = dc.GetPen()
+        dc.SetPen(wx.Pen("#999999"))
+        try:
+            dc.DrawLine(clip.x, 100, clip.x + clip.width, 100)
 
-        dc.DrawLine(x, clip.y, x, clip.x + clip.height)
+            dc.DrawLine(x, clip.y, x, clip.x + clip.height)
 
-        dc.DrawLine(clip.x + clip.width, y, clip.x, y)
+            dc.DrawLine(clip.x + clip.width, y, clip.x, y)
 
-        dc.DrawLine(100, clip.y + clip.height, 100, clip.y)
+            dc.DrawLine(100, clip.y + clip.height, 100, clip.y)
+        finally:
+            dc.SetPen(oldPen)
 
 
     def PaintForeground(self, dc, clip):
