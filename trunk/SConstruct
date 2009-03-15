@@ -15,6 +15,8 @@ buildDir = os.path.join('build', platform);
 # if we don't have scripts for platform report error
 if not os.path.exists(os.path.join(buildDir, 'SConscript')):
     raise UserError("Platform %s is not supported" % platform)
+    
+DefaultEnvironment(toolpath='#/build/site_tools')
 
 # construct build environment
 env = Environment()
@@ -25,10 +27,13 @@ Export('env buildDir')
 # configure environment and check dependencies platform-wise
 env = SConscript(os.path.join(buildDir, 'SConscript'))
 
-# build common library
+# common library
 SConscript('src/SConscript')
 
-# build applications
+# applications
 SConscript('applications/spt/SConscript')
 SConscript('applications/sptEditor/SConscript')
 SConscript('applications/sptServer/SConscript')
+
+# unit tests
+SConscript('applications/SConscript')

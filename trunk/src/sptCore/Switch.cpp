@@ -13,17 +13,21 @@ Switch::Switch(osg::Vec3 p1, osg::Vec3 cp1, osg::Vec3 p2, osg::Vec3 cp2, osg::Ve
 osg::Vec3 Switch::getExit(osg::Vec3 entry)
 {
 
+    // entry == begin
     if(entry == _straight.first->front())
-       return _straight.first->back();
+        if(_position == STRAIGHT)
+            return _straight.first->back();
+        else
+            return _diverted.first->back();
 
     if(entry == _straight.second->front())
-       return _straight.second->back();
+        return _straight.second->back();
 
     if(entry == _diverted.first->front())
-       return _diverted.first->back();
+        return _diverted.first->back();
 
     if(entry == _diverted.second->front())
-       return _diverted.second->back();
+        return _diverted.second->back();
 
     throw UnknownEntryException() << PositionInfo(entry);
 
@@ -33,7 +37,10 @@ Path* Switch::getPath(osg::Vec3 entry)
 {
 
     if(entry == _straight.first->front())
-       return _straight.first.get();
+        if(_position == STRAIGHT)
+            return _straight.first.get();
+        else
+            return _diverted.first.get();
 
     if(entry == _straight.second->front())
        return _straight.second.get();

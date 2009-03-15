@@ -20,9 +20,10 @@ public:
     virtual Path* reverse(Path* path) = 0;
 
     typedef boost::error_info<struct tag_position, osg::Vec3f> PositionInfo;
+    typedef boost::error_info<struct tag_path, Path*> PathInfo;
 
     class UnknownEntryException: public boost::exception { };
-    class UndeterminedExitException: public boost::exception { };
+    class UnknownPathException: public boost::exception { };
 
 }; // class sptCore::RailTracking
 

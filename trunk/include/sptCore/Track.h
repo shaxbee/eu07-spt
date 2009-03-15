@@ -14,7 +14,7 @@ class Track: public RailTracking
 
 public:
     Track(osg::Vec3 p1, osg::Vec3 p2);
-    Track(osg::Vec3 p1, osg::Vec3 p2, osg::Vec3 cp1, osg::Vec3 cp2);
+    Track(osg::Vec3 p1, osg::Vec3 cp1, osg::Vec3 p2, osg::Vec3 cp2);
 
     virtual ~Track();
 

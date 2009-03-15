@@ -13,9 +13,12 @@ public:
     Switch(osg::Vec3 p1, osg::Vec3 cp1, osg::Vec3 p2, osg::Vec3 cp2, osg::Vec3 p3, osg::Vec3 cp3); 
     virtual ~Switch() { };
 
-    virtual osg::Vec3 getExit(osg::Vec3 entry);
-    virtual Path* getPath(osg::Vec3 entry);
-    virtual Path* reverse(Path* path);
+    virtual osg::Vec3 getExit(osg::Vec3 entry) const;
+    virtual Path* getPath(osg::Vec3 entry) const;
+    virtual Path* reverse(Path* path) const;
+    
+    void getPosition() const { return _position; }
+    void setPosition(Position position) { _position = position; }
 
     typedef enum { STRAIGHT, DIVERTED } Position;
 

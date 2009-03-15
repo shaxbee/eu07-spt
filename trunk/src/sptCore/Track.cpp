@@ -8,8 +8,8 @@ Track::Track(osg::Vec3 p1, osg::Vec3 p2):
 
 }; // Track::Track(p1, p2)
 
-Track::Track(osg::Vec3 p1, osg::Vec3 p2, osg::Vec3 cp1, osg::Vec3 cp2):
-    _path(Path::bezier(p1, p2, cp1, cp2))
+Track::Track(osg::Vec3 p1, osg::Vec3 cp1, osg::Vec3 p2, osg::Vec3 cp2):
+    _path(Path::bezier(p1, cp1, p2, cp2))
 {
 
 }; // Track::Track(p1, p2, cp1, cp2)
@@ -41,3 +41,16 @@ Path* Track::getPath(osg::Vec3 entry)
     throw UnknownEntryException() << PositionInfo(entry);
 
 }; // RailTracking::getPath
+
+Path* Track::reverse(Path* path)
+{
+    
+    if(path == _path.first)
+        return _path.second;
+    
+    if(path == _path.second)
+        return _path.first;
+    
+    throw UnknownPathException() << PathInfo(path);
+    
+}; // RailTracking::reverse
