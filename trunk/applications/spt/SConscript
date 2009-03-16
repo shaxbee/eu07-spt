@@ -4,11 +4,10 @@ Import('env buildDir')
 
 # construct buildDir and set include path
 applicationDir = 'applications/spt/'
-buildDir = os.path.join('#/', buildDir, applicationDir)
-env.Append(CPPPATH = [os.path.join(applicationDir, 'include')])
+env.Append(CPPPATH = [os.path.join('#', applicationDir, 'include')])
 
 # build
-objects = SConscript('src/SConscript', build_dir=buildDir)
+objects = SConscript('src/SConscript', build_dir = os.path.join(buildDir, applicationDir))
 
 # link application
 program = env.Program(
@@ -17,5 +16,5 @@ program = env.Program(
     LIBS=['osg', 'osgViewer'])
 
 # install it
-env.Install('#/bin', program)
-env.Alias('install', '#/bin')
+prefix = GetOption('prefix')
+env.Install('#/bin' if not prefix else prefix, program)
