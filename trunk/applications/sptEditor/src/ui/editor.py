@@ -16,7 +16,6 @@ class SceneryEditor(wx.Panel):
 
     def __init__(self, parent, id = wx.ID_ANY):
         wx.Panel.__init__(self, parent, id, style = wx.BORDER_SUNKEN)
-        self.SetBackgroundColour('BLUE')        
 
         sizer = wx.FlexGridSizer(2, 2, 1, 1)
 
@@ -48,7 +47,7 @@ class PlanePart(wx.ScrolledWindow):
         wx.ScrolledWindow.__init__(self, parent, id, \
             style = wx.VSCROLL | wx.HSCROLL)
 
-        self.SetVirtualSizeHints(1000, 1000, -1, -1)
+#        self.SetVirtualSizeHints(1000, 1000, -1, -1)
 
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_SIZE, self.OnSize)
@@ -56,7 +55,7 @@ class PlanePart(wx.ScrolledWindow):
 
         self.logger = logging.getLogger('Paint')
 
-        self.scale = 4000.0
+        self.scale = 400.0
 
         self.minX = -1000.0
         self.minZ = -1000.0
@@ -67,7 +66,8 @@ class PlanePart(wx.ScrolledWindow):
         self.extentY = 0
 
         size = self.ComputePreferredSize() 
-        self.SetClientSize(size)
+        self.SetVirtualSize(size)
+        self.SetupScrolling()
 
 
     def ComputeMinMax(self, doScaling = False):
@@ -103,18 +103,22 @@ class PlanePart(wx.ScrolledWindow):
         Converts 2D point of UI editor coordinates into 3D point
         of scenery coordinates.
         '''
-        return (float(point[0] - 100) / self.scale * SCALE_FACTOR + self.minX, \
+        p3d = (float((point[0]-100)/self.scale * SCALE_FACTOR + self.minX), \
             0.0,
-            -(float(point[1] - 100) / self.scale * SCALE_FACTOR + self.minZ))
+            -float((point[1]-100)/self.scale * SCALE_FACTOR + self.minZ))
+        #print "point2=" + str(point) + " point3=" + str(p3d)
+        return p3d
 
 
     def ModelToView(self, point):
         '''
         Converts 3D point of scenery coordiante into 2D point of
         UI editor coordinates.
-        '''
-        return (int((point[0] - self.minX) * self.scale / SCALE_FACTOR + 100), \
+        '''        
+        p2d = (int((point[0] - self.minX) * self.scale / SCALE_FACTOR + 100), \
             int((-point[2] - self.minZ) * self.scale / SCALE_FACTOR + 100))
+        #print "point3=" + str(point) + " point2=" + str(p2d)
+        return p2d
 
 
     def OnSize(self, event):
@@ -131,12 +135,21 @@ class PlanePart(wx.ScrolledWindow):
                / SCALE_FACTOR) + 200) + self.extentY)
 
 
+    def SetupScrolling(self):
+        '''
+        Sets up scrolling of the window.
+        '''
+        self.SetScrollRate(20, 20)
+        
+
+
     def OnPaint(self, event):
 
         dc = wx.PaintDC(self)
         self.DoPrepareDC(dc)
 
         clip = self.GetUpdateRegion().GetBox()
+        (clip.x, clip.y) = self.CalcUnscrolledPosition(clip.x, clip.y)
 
         startTime = datetime.datetime.now()
         try:
@@ -196,6 +209,13 @@ class PlanePart(wx.ScrolledWindow):
         finally:
             dc.SetPen(oldPen)
 
+        oldPen = dc.GetPen()
+        dc.SetPen(wx.Pen('#ff0000'))
+        try:
+            dc.DrawPoint(center2D[0], center2D[1])
+        finally:
+            dc.SetPen(oldPen)
+
 
     def PaintMinMaxBounds(self, dc, clip):
         '''
@@ -209,11 +229,11 @@ class PlanePart(wx.ScrolledWindow):
         try:
             dc.DrawLine(clip.x, 100, clip.x + clip.width, 100)
 
-            dc.DrawLine(x, clip.y, x, clip.x + clip.height)
+            dc.DrawLine(x, clip.y, x, clip.y + clip.height)
 
-            dc.DrawLine(clip.x + clip.width, y, clip.x, y)
+            dc.DrawLine(clip.x, y, clip.x + clip.width, y)
 
-            dc.DrawLine(100, clip.y + clip.height, 100, clip.y)
+            dc.DrawLine(100, clip.y, 100, clip.y + clip.height)
         finally:
             dc.SetPen(oldPen)
 
@@ -240,8 +260,8 @@ class PlanePart(wx.ScrolledWindow):
         Updates 3D coordinates in case of mouse movement on frame status bar.
         '''
 
-        (x, y) = event.GetPosition()        
-        (a, b, c) = self.ViewToModel((x, y))
+        point = self.CalcUnscrolledPosition(event.GetPosition())
+        (a, b, c) = self.ViewToModel(point)
 
         bar = self.GetParent().GetParent().GetStatusBar()
         bar.SetStatusText("%.3f, %.3f, %.3f" % (a, b, c))
