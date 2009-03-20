@@ -33,12 +33,4 @@ env = SConscript(os.path.join(buildDir, 'SConscript'))
 SConscript('src/SConscript')
 
 # applications
-<<<<<<< .mine
 SConscript('applications/SConscript')
-=======
-SConscript('applications/spt/SConscript')
-SConscript('applications/sptEditor/SConscript')
-SConscript('applications/sptServer/SConscript')
-
-# unit tests
-SConscript('applications/SConscript')>>>>>>> .r20

@@ -9,7 +9,7 @@ Track::Track(osg::Vec3 p1, osg::Vec3 p2):
 }; // Track::Track(p1, p2)
 
 Track::Track(osg::Vec3 p1, osg::Vec3 cp1, osg::Vec3 p2, osg::Vec3 cp2):
-    _path(Path::bezier(p1, cp1, p2, cp2))
+    _path(Path::bezier(p1, cp1, p2, cp2, 32))
 {
 
 }; // Track::Track(p1, p2, cp1, cp2)
@@ -46,10 +46,10 @@ Path* Track::reverse(Path* path)
 {
     
     if(path == _path.first)
-        return _path.second;
+        return _path.second.get();
     
     if(path == _path.second)
-        return _path.first;
+        return _path.first.get();
     
     throw UnknownPathException() << PathInfo(path);
     

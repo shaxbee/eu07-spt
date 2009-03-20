@@ -16,5 +16,5 @@ program = env.Program(
     LIBS=['osg', 'osgViewer'])
 
 # install it
-prefix = GetOption('prefix')
+prefix = None
 env.Install('#/bin' if not prefix else prefix, program)

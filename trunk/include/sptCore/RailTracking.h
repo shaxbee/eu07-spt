@@ -31,12 +31,13 @@ class Path: public osg::Vec3Array
 {
 
 public:
+    Path(): osg::Vec3Array() { }
     Path(size_t size): osg::Vec3Array(size) { }
 
     typedef std::pair<osg::ref_ptr<Path>, osg::ref_ptr<Path> > Pair;
     
     static Pair straight(osg::Vec3 begin, osg::Vec3 end);
-    static Pair bezier(osg::Vec3 begin, osg::Vec3 cpBegin, osg::Vec3 end, osg::Vec3 cpEnd);
+    static Pair bezier(osg::Vec3 begin, osg::Vec3 cpBegin, osg::Vec3 end, osg::Vec3 cpEnd, int steps);
 
 private:
     Path* reverse() const;

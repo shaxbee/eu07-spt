@@ -1,0 +1,6 @@
+import os.path
+
+Import('env buildDir')
+
+for application in ['spt', 'sptEditor', 'sptServer']:
+    SConscript(os.path.join(application, 'SConscript'))
