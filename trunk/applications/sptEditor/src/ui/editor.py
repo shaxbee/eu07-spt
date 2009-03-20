@@ -21,16 +21,16 @@ class SceneryEditor(wx.Panel):
 
         corner = wx.Panel(self, name = "Corner")
         corner.SetBackgroundColour('WHITE')
-        leftRuler = wx.Panel(self, name = "Left ruler")
-        leftRuler.SetBackgroundColour('GREEN')
-        topRuler = wx.Panel(self, name = "Top ruler")
-        topRuler.SetBackgroundColour('RED')
-        area = PlanePart(self)
+        self.leftRuler = Ruler(self, orientation = wx.VERTICAL, \
+            name = "Left ruler")
+        self.topRuler = Ruler(self, orientation = wx.HORIZONTAL, \
+            name = "Top ruler")
+        self.part = PlanePart(self)
 
         sizer.Add(corner)
-        sizer.Add(topRuler, flag = wx.LEFT | wx.EXPAND)
-        sizer.Add(leftRuler, flag = wx.TOP | wx.EXPAND)
-        sizer.Add(area, 1, wx.EXPAND | wx.ALL)
+        sizer.Add(self.topRuler, flag = wx.LEFT | wx.EXPAND)
+        sizer.Add(self.leftRuler, flag = wx.TOP | wx.EXPAND)
+        sizer.Add(self.part, 1, wx.EXPAND | wx.ALL)
         sizer.AddGrowableCol(1, 1)
         sizer.AddGrowableRow(1, 1)
 
@@ -52,6 +52,8 @@ class PlanePart(wx.ScrolledWindow):
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_MOTION, self.OnMoveUpdateStatusBar)
+        self.Bind(wx.EVT_SCROLLWIN, parent.topRuler.HandleOnScroll)
+        self.Bind(wx.EVT_SCROLLWIN, parent.leftRuler.HandleOnScroll)
 
         self.logger = logging.getLogger('Paint')
 
@@ -259,10 +261,157 @@ class PlanePart(wx.ScrolledWindow):
         '''
         Updates 3D coordinates in case of mouse movement on frame status bar.
         '''
-
+        opoint = event.GetPosition()
         point = self.CalcUnscrolledPosition(event.GetPosition())
         (a, b, c) = self.ViewToModel(point)
 
         bar = self.GetParent().GetParent().GetStatusBar()
         bar.SetStatusText("%.3f, %.3f, %.3f" % (a, b, c))
 
+        self.GetParent().topRuler.UpdateMousePointer(opoint)
+        self.GetParent().leftRuler.UpdateMousePointer(opoint)
+
+
+
+
+class Ruler(wx.Control):
+    '''
+    A ruler for scenery editor.
+    '''
+
+    def __init__(self, parent, orientation, id = wx.ID_ANY, name = None):
+        wx.Window.__init__(self, parent, id = id, name = name)
+        self.SetBackgroundColour((255, 220, 153))
+        self.SetMinSize((24, 24))
+
+        self.orientation = orientation
+
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
+
+        self.offset = 0
+        self.pick = None
+
+
+    def OnSize(self, event):
+        '''
+        Refresh.
+        '''
+        self.Refresh()
+
+
+    def OnPaint(self, event):
+        '''
+        Paints a control.
+        '''
+        dc = wx.PaintDC(self)
+        clip = self.GetUpdateRegion().GetBox()
+
+        self.PaintScale(dc, clip)
+        self.PaintMousePointer(dc, clip)
+
+
+    def PaintScale(self, dc, clip):
+        '''
+        Paints scale.
+        '''
+        oldPen = dc.GetPen()
+        oldTextFg = dc.GetTextForeground()
+        oldFont = dc.GetFont()
+        try:
+            dc.SetPen(wx.Pen((0, 51, 153)))
+            dc.SetTextForeground((0, 51, 153))
+            dc.SetFont(wx.Font(8, wx.SWISS, wx.FONTSTYLE_NORMAL, \
+                wx.FONTWEIGHT_NORMAL))
+
+            part = self.GetParent().part
+            (unitX, unitZ) = part.GetScrollPixelsPerUnit()
+            (vx, vz) = part.GetViewStart()
+            (w, h) = self.GetSize()
+            if self.orientation == wx.VERTICAL:
+                self.offset = vz
+            elif self.orientation == wx.HORIZONTAL:
+                self.offset = vx
+            (p2x, p2z) = part.CalcUnscrolledPosition((vx, vz))
+
+            if self.orientation == wx.VERTICAL:
+
+                z = -(self.offset * unitZ % 100)
+                while z < h:
+                    (p3x, p3y, p3z) = part.ViewToModel((p2z, \
+                        z + self.offset * unitZ))
+                    label = "%d" % p3z
+                    (tw, th) = dc.GetTextExtent(label)
+                    if z >= clip.y-tw/2-1 and z <= clip.y+clip.height+tw/2+1:
+                        dc.DrawRotatedText(label, 15-th, z + tw/2, 90)
+                        dc.DrawLine(16, z, clip.width, z)
+                    z += 100
+
+            elif self.orientation == wx.HORIZONTAL:
+
+                x = -(self.offset * unitX % 100)
+                while x < w:
+                    (p3x, p3y, p3z) = part.ViewToModel( \
+                         (x + self.offset*unitX, p2z))
+                    label = "%d" % p3x                    
+                    (tw, th) = dc.GetTextExtent(label)
+                    if x >= clip.x-tw/2-1 and x <= clip.x+clip.width+tw/2+1:
+                        dc.DrawText(label, x-tw/2, 15-th)
+                        dc.DrawLine(x, 16, x, clip.height)
+                    x += 100
+
+        finally:
+            dc.SetPen(oldPen)
+            dc.SetTextForeground(oldTextFg)
+            dc.SetFont(oldFont)
+    
+
+    def PaintMousePointer(self, dc, clip):
+        '''
+        Draws mouse pointer on ruler.
+        '''
+        oldPen = dc.GetPen()
+        try:
+            dc.SetPen(wx.Pen('BLACK'))
+            if self.orientation == wx.HORIZONTAL and self.pick != None: 
+                dc.DrawLine(self.pick, 8, self.pick, 24)
+            elif self.orientation == wx.VERTICAL and self.pick != None:
+                dc.DrawLine(8, self.pick, 24, self.pick)
+        finally:
+            dc.SetPen(oldPen)
+
+
+    def HandleOnScroll(self, event):
+        '''
+        Handles scrolled window events.
+        '''
+        if event.GetOrientation() == self.orientation:
+            self.Refresh()
+        event.Skip()
+
+
+    def UpdateMousePointer(self, point):
+        '''
+        Updates mouse pointers and requests repaint events.
+        '''
+        if self.orientation == wx.HORIZONTAL:
+            if self.pick == None:
+                self.pick = point.x
+                self.RefreshRect(wx.Rect(point.x, 0, 1, 24))
+            else:
+                oldPick = self.pick
+                self.pick = point.x
+                self.RefreshRect(wx.Rect(min(self.pick, oldPick), 0, \
+                    abs(self.pick - oldPick)+1, 24))
+
+        elif self.orientation == wx.VERTICAL:
+            if self.pick == None:
+                self.pick = point.y
+                self.RefreshRect(wx.Rect(0, point.y, 24, 1))
+            else:
+                oldPick = self.pick
+                self.pick = point.y
+                self.RefreshRect(wx.Rect(0, min(self.pick, oldPick), 24, \
+                    abs(self.pick - oldPick)+1))
+
+        
