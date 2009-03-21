@@ -47,8 +47,6 @@ class PlanePart(wx.ScrolledWindow):
         wx.ScrolledWindow.__init__(self, parent, id, \
             style = wx.VSCROLL | wx.HSCROLL)
 
-#        self.SetVirtualSizeHints(1000, 1000, -1, -1)
-
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_MOTION, self.OnMoveUpdateStatusBar)
@@ -100,6 +98,20 @@ class PlanePart(wx.ScrolledWindow):
             return False
 
 
+    def GetScale(self):
+        return self.scale
+
+
+    def SetScale(self, scale):
+        self.scale = scale
+        self.SetVirtualSize(self.ComputePreferredSize())
+#        ScaleAll(scale)
+        self.Update()
+        self.Refresh()
+        self.GetParent().topRuler.Refresh()
+        self.GetParent().leftRuler.Refresh()
+
+
     def ViewToModel(self, point):
         '''
         Converts 2D point of UI editor coordinates into 3D point
@@ -121,6 +133,25 @@ class PlanePart(wx.ScrolledWindow):
             int((-point[2] - self.minZ) * self.scale / SCALE_FACTOR + 100))
         #print "point3=" + str(point) + " point2=" + str(p2d)
         return p2d
+
+
+    def CenterViewAt(self, x, y):
+        '''
+        Centers the view on following component point.
+        '''
+        (pw, ph) = self.GetVirtualSize()
+        (vw, vh) = self.GetSize()
+        (ux, uy) = self.GetScrollPixelsPerUnit()
+        x = x - vw / 2
+        y = y - vh / 2
+        x = max(0, x)
+        x = min(x, pw - vw)
+        y = max(0, y)
+        y = min(y, ph - vh)
+        self.Scroll(x / ux, y / uy)
+        # Update rulers
+        self.GetParent().leftRuler.Refresh()
+        self.GetParent().topRuler.Refresh()
 
 
     def OnSize(self, event):

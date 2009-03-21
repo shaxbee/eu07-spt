@@ -11,6 +11,9 @@ import yaml
 import model.tracks
 import model.groups
 import ui.editor
+import ui.dialog
+
+ID_CENTER_AT = wx.ID_HIGHEST + 1
 
 class Application(wx.App):
     '''
@@ -90,6 +93,15 @@ class MainWindow(wx.Frame):
 
         mainMenu.Append(fileMenu, "&File")
 
+        # Create view menu
+        viewMenu = wx.Menu()
+        viewMenu.Append(ID_CENTER_AT, "Center &at")
+        viewMenu.AppendSeparator()
+        viewMenu.Append(wx.ID_ZOOM_IN, "Zoom &in")
+        viewMenu.Append(wx.ID_ZOOM_OUT, "Zoom &out")
+
+        mainMenu.Append(viewMenu, "&View")
+
         # Create help menu
         helpMenu = wx.Menu()
         helpMenu.Append(wx.ID_ABOUT, "&About")
@@ -101,6 +113,9 @@ class MainWindow(wx.Frame):
         wx.EVT_MENU(self, wx.ID_OPEN, self.OnOpen)
         wx.EVT_MENU(self, wx.ID_SAVE, self.OnSave)
         wx.EVT_MENU(self, wx.ID_CLOSE, self.OnExit)
+        wx.EVT_MENU(self, ID_CENTER_AT, self.OnCenterAt)
+        wx.EVT_MENU(self, wx.ID_ZOOM_IN, self.OnZoomIn)
+        wx.EVT_MENU(self, wx.ID_ZOOM_OUT, self.OnZoomOut)
         wx.EVT_MENU(self, wx.ID_ABOUT, self.OnAbout)
 
 
@@ -116,8 +131,7 @@ class MainWindow(wx.Frame):
         '''
         Creates main content of application.
         '''
-
-        ui.editor.SceneryEditor(self, wx.ID_ANY)
+        self.editor = ui.editor.SceneryEditor(self, wx.ID_ANY)
 
 
     def OnAbout(self, event):
@@ -178,6 +192,7 @@ class MainWindow(wx.Frame):
 
         self.workingDirectory = openDialog.GetDirectory()
 
+
     def OnSave(self, event):
         '''
         Saves scenery file.
@@ -206,6 +221,32 @@ class MainWindow(wx.Frame):
             scenery_file.close()
 
         self.workingDirectory = saveDialog.GetDirectory()
+
+
+    def OnCenterAt(self, event):
+        '''
+        Displays "Center At" dialog
+        '''
+        dialog = ui.dialog.CenterAtDialog(self)
+        dialog.Show(True)
+
+
+    def OnZoomIn(self, event):
+        '''
+        Zooms in the scenery by increasing scale.
+        '''
+        scale = self.editor.part.GetScale()
+        self.editor.part.SetScale(scale * 2)        
+
+
+    def OnZoomOut(self, event):
+        '''
+        Zooms out the scenery by decreasing scale.
+        '''
+        scale = self.editor.part.GetScale()
+        self.editor.part.SetScale(scale / 2)
+
+
 
 
 app = Application()
