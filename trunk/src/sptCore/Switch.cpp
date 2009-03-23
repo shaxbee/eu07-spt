@@ -55,3 +55,19 @@ Path* Switch::getPath(osg::Vec3 entry) const
 
 }; // Switch::getPath(entry)
 
+Path* Switch::reverse(Path* path) const
+{
+
+    if(path->back() == _straight.first->back())
+        return _straight.second.get();
+
+    if(path->front() == _straight.second->front())
+        return _straight.first.get();
+
+    if(path->back() == _diverted.first->back())
+        return _diverted.second.get();
+
+    if(path->front() == _diverted.second->front())
+        return _diverted.first.get();
+
+}; // Switch::reverse

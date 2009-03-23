@@ -1,10 +1,8 @@
 #ifndef SPTCORE_TRACK_H
 #define SPTCORE_TRACK_H 1
 
-#include <osg/Vec3>
-#include <boost/scoped_ptr.hpp>
-
 #include "sptCore/RailTracking.h"
+#include "sptCore/Path.h"
 
 namespace sptCore
 {
@@ -16,11 +14,11 @@ public:
     Track(osg::Vec3 p1, osg::Vec3 p2);
     Track(osg::Vec3 p1, osg::Vec3 cp1, osg::Vec3 p2, osg::Vec3 cp2);
 
-    virtual ~Track();
+    virtual ~Track() { };
 
-    virtual osg::Vec3 getExit(osg::Vec3 entry);
-    virtual Path* getPath(osg::Vec3 entry);
-    virtual Path* reverse(Path* path);
+    virtual osg::Vec3 getExit(osg::Vec3 entry) const;
+    virtual Path* getPath(osg::Vec3 entry) const;
+    virtual Path* reverse(Path* path) const;
 
 private:
     Path::Pair _path;

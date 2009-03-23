@@ -2,16 +2,14 @@
 
 #include "sptCore/Track.h"
 
-namespace sptCore
-{
+using namespace sptCore;
 
 class TrackTestSuite: public CxxTest::TestSuite
 {
     
 public:
     TrackTestSuite():
-        _begin(0.0f, 0.0f, 0.0f), _end((10.0f, 10.0f, 10.0f), _track(_begin, _end) { };
-    
+        _begin(0.0f, 0.0f, 0.0f), _end(10.0f, 10.0f, 10.0f), _track(_begin, _end) { };
 
     void testGetExit()
     {
@@ -26,8 +24,8 @@ public:
     void testGetPath()
     {
         
-        TS_ASSERT_EQUALS(_track.getPath(_begin)->front, _end);
-        TS_ASSERT_EQUALS(_track.getPath(_end)->front, _begin);
+        TS_ASSERT_EQUALS(_track.getPath(_begin)->front(), _end);
+        TS_ASSERT_EQUALS(_track.getPath(_end)->front(), _begin);
        
         TS_ASSERT_DIFFERS(_track.getPath(_begin), _track.getPath(_end));
         
@@ -42,7 +40,10 @@ public:
         TS_ASSERT_DIFFERS(_track.getPath(_begin), _track.reverse(_track.getPath(_begin)));
         
     };
+
+private:
+    osg::Vec3 _begin;
+    osg::Vec3 _end;
+    Track _track;
     
 }; // TrackTestSuite
-
-};

@@ -2,6 +2,7 @@
 #define SPTCORE_SWITCH_H 1
 
 #include "sptCore/RailTracking.h"
+#include "sptCore/Path.h"
 
 namespace sptCore
 {

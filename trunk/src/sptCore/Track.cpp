@@ -14,7 +14,7 @@ Track::Track(osg::Vec3 p1, osg::Vec3 cp1, osg::Vec3 p2, osg::Vec3 cp2):
 
 }; // Track::Track(p1, p2, cp1, cp2)
 
-osg::Vec3 Track::getExit(osg::Vec3 entry)
+osg::Vec3 Track::getExit(osg::Vec3 entry) const
 {
 
     // if entrance == track begin
@@ -29,7 +29,7 @@ osg::Vec3 Track::getExit(osg::Vec3 entry)
 
 }; // RailTracking::getNext
 
-Path* Track::getPath(osg::Vec3 entry)
+Path* Track::getPath(osg::Vec3 entry) const
 {
 
     if(entry == _path.first->front())
@@ -42,7 +42,7 @@ Path* Track::getPath(osg::Vec3 entry)
 
 }; // RailTracking::getPath
 
-Path* Track::reverse(Path* path)
+Path* Track::reverse(Path* path) const
 {
     
     if(path == _path.first)

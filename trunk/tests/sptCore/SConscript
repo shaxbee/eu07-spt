@@ -1,0 +1,11 @@
+import os.path
+
+Import('env')
+
+#for node in Glob('*.t.h'):
+#    name = str(node)
+#    name = name[:name.find('.')]
+#    env.CxxTest('test_' + name, [node, os.path.join('#/src/sptCore/', name + '.cpp')])
+
+env.CxxTest('test_Switch', ['Switch.t.h', '#/src/sptCore/Switch.cpp', '#/src/sptCore/Path.cpp'], LIBS=['osg'])
+env.CxxTest('test_Track',  ['Track.t.h',  '#/src/sptCore/Track.cpp',  '#/src/sptCore/Path.cpp'], LIBS=['osg'])

@@ -3,14 +3,16 @@ import os.path
 # import build environment and build directory
 Import('env buildDir')
 
-# setup build directory
-buildDir = os.path.join('#/', buildDir, 'common')
-
 env = env.Clone()
 env.Append(CPPPATH = '#/include')
 
 # build libraries
-libraries = ['sptCore']
+libraries = ['sptCore', 'sptGFX']
 
 for library in libraries:
-    SConscript(os.path.join(library, 'SConscript'), exports='env', build_dir=buildDir)
+    SConscript(
+        os.path.join(library, 'SConscript'), 
+        build_dir=os.path.join(os.path.join('#', buildDir), library),
+        exports=['env'])
+
+env.Alias('install', '#/lib')
