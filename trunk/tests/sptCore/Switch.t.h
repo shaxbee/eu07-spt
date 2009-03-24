@@ -50,11 +50,11 @@ public:
         _switch.setPosition(Switch::STRAIGHT);
 
         // _begin -> _straight        
-        TS_ASSERT_EQUALS(_switch.getPath(_begin)->front(), _straight);
+        TS_ASSERT_EQUALS(_switch.getPath(_begin)->back(), _straight);
         // _diverted -> _begin
-        TS_ASSERT_EQUALS(_switch.getPath(_diverted)->front(), _begin);
+        TS_ASSERT_EQUALS(_switch.getPath(_diverted)->back(), _begin);
         // _straight -> _begin
-        TS_ASSERT_EQUALS(_switch.getPath(_straight)->front(), _begin);
+        TS_ASSERT_EQUALS(_switch.getPath(_straight)->back(), _begin);
         // _diverted != _straight        
         TS_ASSERT_DIFFERS(_switch.getPath(_diverted)->front(), _switch.getPath(_straight)->front());
 
@@ -64,11 +64,11 @@ public:
         _switch.setPosition(Switch::DIVERTED);        
         
         // _begin -> _diverted
-        TS_ASSERT_EQUALS(_switch.getPath(_begin)->front(), _diverted);
+        TS_ASSERT_EQUALS(_switch.getPath(_begin)->back(), _diverted);
         // _diverted -> _begin
-        TS_ASSERT_EQUALS(_switch.getPath(_diverted)->front(), _begin);
+        TS_ASSERT_EQUALS(_switch.getPath(_diverted)->back(), _begin);
         // _straight -> _begin
-        TS_ASSERT_EQUALS(_switch.getPath(_straight)->front(), _begin);
+        TS_ASSERT_EQUALS(_switch.getPath(_straight)->back(), _begin);
         // _diverted != _straight
         TS_ASSERT_DIFFERS(_switch.getPath(_diverted)->front(), _switch.getPath(_straight)->front());
                 

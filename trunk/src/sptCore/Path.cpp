@@ -32,21 +32,21 @@ Path::Path(osg::Vec3 front, osg::Vec3 frontCP, osg::Vec3 back, osg::Vec3 backCP,
     _frontCP(frontCP), _backCP(backCP), _frontRoll(frontRoll), _backRoll(backRoll)
 {
     
-    float delta = (float) 1 / (float) steps - 1;
+    float delta = (float) 1 / (float) steps;
     reserve(steps);
 
-    while(steps--)
+    for(unsigned int i = 0; i <= steps; i++)
     {
 
-        float omt = steps * delta; // current t along path (range from 0 .. 1)
-        float t = (1 - omt); // for faster computations we precalculate 1 - t
+        float t = i * delta; // current t along path (range from 0 .. 1)
+        float omt = t - 1; 
 
         // add point
         push_back(
             front   * (omt * omt * omt) + 
             frontCP * (3 * omt * omt * t) + 
-            back    * (3 * omt * t * t) + 
-            backCP  * (t * t * t)
+            backCP  * (3 * omt * t * t) + 
+            back    * (t * t * t)
         );
 
     };    

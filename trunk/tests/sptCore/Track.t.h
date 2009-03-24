@@ -24,8 +24,8 @@ public:
     void testGetPath()
     {
         
-        TS_ASSERT_EQUALS(_track.getPath(_begin)->front(), _end);
-        TS_ASSERT_EQUALS(_track.getPath(_end)->front(), _begin);
+        TS_ASSERT_EQUALS(_track.getPath(_begin)->back(), _end);
+        TS_ASSERT_EQUALS(_track.getPath(_end)->back(), _begin);
        
         TS_ASSERT_DIFFERS(_track.getPath(_begin), _track.getPath(_end));
         
