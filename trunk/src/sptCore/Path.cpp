@@ -39,7 +39,7 @@ Path::Path(osg::Vec3 front, osg::Vec3 frontCP, osg::Vec3 back, osg::Vec3 backCP,
     {
 
         float t = i * delta; // current t along path (range from 0 .. 1)
-        float omt = t - 1; 
+        float omt = 1 - t; 
 
         // add point
         push_back(

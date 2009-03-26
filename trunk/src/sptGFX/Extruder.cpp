@@ -55,9 +55,9 @@ void Extruder::transformProfile(osg::Vec3 dir, const osg::Vec3& offset, osg::Vec
 
     dir.normalize();
 
-    osg::Matrix transform = osg::Matrix::rotate(osg::Vec3(1.0f, 0.0f, 0.0f), dir);
+    osg::Matrix transform = osg::Matrix::rotate(osg::Vec3(0.0f, 0.0f, 1.0f), dir);
 
     for(osg::Vec3Array::iterator iter = _profile->begin(); iter != _profile->end(); iter++)
-        output->push_back((*iter + offset) * transform);
+        output->push_back(*iter * transform + offset);
 
 };
