@@ -7,13 +7,17 @@ Created on 2009-03-01
 import logging
 import wx
 import yaml
+import os.path
 
 import model.tracks
 import model.groups
+import model.scenery
 import ui.editor
 import ui.dialog
 
+# Stock items
 ID_CENTER_AT = wx.ID_HIGHEST + 1
+
 
 class Application(wx.App):
     '''
@@ -48,8 +52,10 @@ class MainWindow(wx.Frame):
 
         #self.SetIcon(wx.IconFromXPMData("w8_7.xpm"))
 
+        self.modified = False
         self.path = None
-        self.group = None
+
+        self.UpdateTitle()
 
         self.CreateMenu()
         self.CreateStatusBar()
@@ -110,8 +116,10 @@ class MainWindow(wx.Frame):
 
         self.SetMenuBar(mainMenu)
 
+        wx.EVT_MENU(self, wx.ID_NEW, self.OnNew)
         wx.EVT_MENU(self, wx.ID_OPEN, self.OnOpen)
         wx.EVT_MENU(self, wx.ID_SAVE, self.OnSave)
+        wx.EVT_MENU(self, wx.ID_SAVEAS, self.OnSaveAs)
         wx.EVT_MENU(self, wx.ID_CLOSE, self.OnExit)
         wx.EVT_MENU(self, ID_CENTER_AT, self.OnCenterAt)
         wx.EVT_MENU(self, wx.ID_ZOOM_IN, self.OnZoomIn)
@@ -153,6 +161,8 @@ class MainWindow(wx.Frame):
 
         Saves configuration options.
         '''
+        if not self.CheckIfModified():
+            return
 
         config = wx.FileConfig.Get()
 
@@ -174,7 +184,23 @@ class MainWindow(wx.Frame):
         print event
 
 
+    def OnNew(self, event):
+        '''
+        Creates new scenery
+        '''
+        if self.CheckIfModified():
+            self.NewScenery()
+
+
     def OnOpen(self, event):
+        '''
+        Called onOpen event.
+        '''
+        if self.CheckIfModified():
+            self.Open()
+
+
+    def Open(self):
         '''
         Opens a scenery file
         '''
@@ -186,9 +212,19 @@ class MainWindow(wx.Frame):
         
         if openDialog.ShowModal() == wx.ID_OK:
             path = openDialog.GetPath()
-            self.path = path
 
-            self.group = yaml.load(file(path, "r"))
+            try:
+                scenery = yaml.load(file(path, "r"))
+                if not isinstance(scenery, model.scenery.Scenery):
+                    raise Exception("Input file is not scenery")
+                self.editor.scenery = scenery
+                self.modified = False
+                self.path = path
+                self.UpdateTitle()
+            except Exception, inst:
+                wx.MessageBox("Error while reading scenery file:\n" \
+                    + str(inst), \
+                    "Open file error", wx.OK | wx.ICON_ERROR, self)
 
         self.workingDirectory = openDialog.GetDirectory()
 
@@ -196,6 +232,77 @@ class MainWindow(wx.Frame):
     def OnSave(self, event):
         '''
         Saves scenery file.
+        '''
+        self.Save()
+
+
+    def OnSaveAs(self, event):
+        '''
+        Saves scenery as another file.
+        '''
+        if self.CheckIfModified():
+            self.SaveAs()
+
+
+    def SaveScenery(self, path):
+        '''
+        Saves physically scenery into file.
+        '''
+        try:
+            scenery_file = open(path, "w")
+            scenery_file.write(yaml.dump(self.editor.scenery))
+            scenery_file.close()
+            self.path = path
+            self.modified = False
+            self.UpdateTitle()
+
+            return True
+        except Exception, inst:
+            wx.MessageBox("Error while writing scenery into file:\n" \
+                + str(inst), \
+                "Save file error", wx.OK | wx.ICON_ERROR, self)
+            return False
+
+
+    def NewScenery(self):
+        '''
+        Creates new scenery.
+        '''
+        self.editor.scenery = model.scenery.Scenery()
+        self.modified = False
+        self.path = "Unknown.txt"
+        self.UpdateTitle()
+
+
+    def CheckIfModified(self):
+        '''
+        A method that checks if current scenery file
+        is modified and should be saved?
+
+        Returns true if the action may be called.      
+        '''
+        if self.modified:
+            answer = wx.MessageBox("There are unsaved changes in " \
+                + "scenery.\nDo you want to save them?", "Save the file", \
+                wx.YES_NO_CANCEL | wx.ICON_QUESTION, self)
+            if answer == wx.NO:
+                return True
+            elif answer == wx.CANCEL:
+                return False
+            else:
+                if self.Save():
+                    return True
+                else:
+                    return False
+        else:
+            return True
+
+
+    def SaveAs(self):
+        '''
+        Method that saves the scenery as.
+
+        Returns true if the save was successful
         '''
 
         saveDialog = wx.FileDialog(self, "Choose scenery file", \
@@ -206,21 +313,50 @@ class MainWindow(wx.Frame):
             saveDialog.SetPath(self.path)
 
         if saveDialog.ShowModal() == wx.ID_OK:
-            self.path = saveDialog.GetPath()
+            path = saveDialog.GetPath()
 
-            self.group = model.groups.Group()
-            track = model.tracks.Track()
-            self.group.insert(track)
+            if os.path.exists(path):
+                answer = wx.MessageBox("Overwrite existing file?", "Confirm", \
+                    wx.YES_NO | wx.ICON_QUESTION, self)
+                if answer == wx.NO:
+                    return False
 
-            text = yaml.dump(self.group)
-            print text
 
-            scenery_file = open(self.path, "w")
-            print scenery_file
-            scenery_file.write(yaml.dump(self.group))
-            scenery_file.close()
+            self.workingDirectory = saveDialog.GetDirectory()
 
-        self.workingDirectory = saveDialog.GetDirectory()
+            return self.SaveScenery(path)
+        else:
+            return False
+
+
+    def Save(self):
+        '''
+        Saves the file.
+        Returns True if save was successful.
+        '''
+        if self.path == None:
+            return self.SaveAs()
+        else:
+            return self.SaveScenery(self.path)
+
+
+    def UpdateTitle(self):
+        '''
+        Updates frame title.
+        '''
+        
+        title = "["
+        if self.path == None:
+            title += "Unknown.txt"
+        else:
+            title += self.path
+        if self.modified:
+            title += " *] - "
+        else:
+            title += "] - "
+        title += "EI07"
+
+        self.SetTitle(title)
 
 
     def OnCenterAt(self, event):
@@ -248,8 +384,8 @@ class MainWindow(wx.Frame):
 
 
 
-
-app = Application()
-frame = MainWindow(None, wx.ID_ANY)
-app.MainLoop()
+if __name__ == '__main__':
+    app = Application()
+    frame = MainWindow(None, wx.ID_ANY)
+    app.MainLoop()
 
