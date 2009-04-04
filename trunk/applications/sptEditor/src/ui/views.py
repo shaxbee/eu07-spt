@@ -73,27 +73,27 @@ class TrackView(View):
         xspan = [self.track.p1[0], self.track.p2[0], \
                      self.track.p1[0] + self.track.v1[0], \
                      self.track.p2[0] + self.track.v2[0]]
-        zspan = [self.track.p1[2], self.track.p2[2], \
-                     self.track.p1[2] + self.track.v1[2], \
-                     self.track.p2[2] + self.track.v2[2]]
-        return (min(xspan), max(xspan), min(zspan), max(zspan)) 
+        yspan = [self.track.p1[1], self.track.p2[1], \
+                     self.track.p1[1] + self.track.v1[1], \
+                     self.track.p2[1] + self.track.v2[1]]
+        return (min(xspan), max(xspan), min(yspan), max(yspan)) 
     
     
-    def Scale(self, scale, oMinX, oMaxX, oMinZ, oMaxZ):
+    def Scale(self, scale, oMinX, oMaxX, oMinY, oMaxY):
         factor = float(scale / ui.editor.SCALE_FACTOR)
         
         self.curve[0].x = (self.track.p1[0] - oMinX) * factor + 100
-        self.curve[0].y = (-self.track.p1[2] - oMinZ) * factor + 100
+        self.curve[0].y = (-self.track.p1[1] - oMinY) * factor + 100
         self.curve[3].x = (self.track.p2[0] - oMinX) * factor + 100
-        self.curve[3].y = (-self.track.p2[2] - oMinZ) * factor + 100
+        self.curve[3].y = (-self.track.p2[1] - oMinY) * factor + 100
         
         self.curve[1].x = (self.track.p1[0] + self.track.v1[0] - oMinX) \
             * factor + 100;
-        self.curve[1].y = (-self.track.p1[2] - self.track.v1[2] - oMinZ) \
+        self.curve[1].y = (-self.track.p1[1] - self.track.v1[1] - oMinY) \
             * factor + 100;
         self.curve[2].x = (self.track.p2[0] + self.track.v2[0] - oMinX) \
             * factor + 100;
-        self.curve[2].y = (-self.track.p2[2] - self.track.v2[2] - oMinZ) \
+        self.curve[2].y = (-self.track.p2[1] - self.track.v2[1] - oMinY) \
             * factor + 100;        
         
     
@@ -104,12 +104,12 @@ class TrackView(View):
     def GetRepaintBounds(self):
         xspan = [self.curve[0].x, self.curve[1].x, \
                  self.curve[2].x, self.curve[3].x]
-        zspan = [self.curve[0].y, self.curve[1].y, \
+        yspan = [self.curve[0].y, self.curve[1].y, \
                  self.curve[2].y, self.curve[3].y]
         l = min(xspan)
         r = max(xspan)
-        t = min(zspan)
-        b = max(zspan)
+        t = min(yspan)
+        b = max(yspan)
         return wx.Rect(l, t, r-l, b-t)
 
 
@@ -139,44 +139,44 @@ class RailSwitchView(View):
                      self.switch.pc[0], \
                      self.switch.pc[0] + self.switch.vc1[0], \
                      self.switch.pc[0] + self.switch.vc2[0]]
-        zspan = [self.switch.p1[2], self.switch.p2[2], \
-                     self.switch.p1[2] + self.switch.v1[2], \
-                     self.switch.p2[2] + self.switch.v2[2], \
-                     self.switch.pc[2], \
-                     self.switch.pc[2] + self.switch.vc1[2], \
-                     self.switch.pc[2] + self.switch.vc2[2]]
-        return (min(xspan), max(xspan), min(zspan), max(zspan))
+        yspan = [self.switch.p1[1], self.switch.p2[1], \
+                     self.switch.p1[1] + self.switch.v1[1], \
+                     self.switch.p2[1] + self.switch.v2[1], \
+                     self.switch.pc[1], \
+                     self.switch.pc[1] + self.switch.vc1[1], \
+                     self.switch.pc[1] + self.switch.vc2[1]]
+        return (min(xspan), max(xspan), min(yspan), max(yspan))
     
     
-    def Scale(self, scale, oMinX, oMaxX, oMinZ, oMaxZ):
+    def Scale(self, scale, oMinX, oMaxX, oMinY, oMaxY):
         factor = float(scale / ui.editor.SCALE_FACTOR);
       
         self.straight[0].x = (self.switch.pc[0] - oMinX) * factor + 100;
-        self.straight[0].y = (-self.switch.pc[2] - oMinZ) * factor + 100;
+        self.straight[0].y = (-self.switch.pc[1] - oMinY) * factor + 100;
         self.straight[3].x = (self.switch.p1[0] - oMinX) * factor + 100;
-        self.straight[3].y = (-self.switch.p1[2] - oMinZ) * factor + 100;
+        self.straight[3].y = (-self.switch.p1[1] - oMinY) * factor + 100;
       
         self.straight[1].x = (self.switch.pc[0] + self.switch.vc1[0]-oMinX) \
             * factor + 100;
-        self.straight[1].y = (-self.switch.pc[2] - self.switch.vc1[2]-oMinZ) \
+        self.straight[1].y = (-self.switch.pc[1] - self.switch.vc1[1]-oMinY) \
             * factor + 100;
         self.straight[2].x = (self.switch.p1[0] + self.switch.v1[0]-oMinX) \
             * factor + 100;
-        self.straight[2].y = (-self.switch.p1[2] - self.switch.v1[2]-oMinZ) \
+        self.straight[2].y = (-self.switch.p1[1] - self.switch.v1[1]-oMinY) \
             * factor + 100;
       
         self.diverging[0].x = (self.switch.pc[0] - oMinX) * factor + 100;
-        self.diverging[0].y = (-self.switch.pc[2] - oMinZ) * factor + 100;
+        self.diverging[0].y = (-self.switch.pc[1] - oMinY) * factor + 100;
         self.diverging[3].x = (self.switch.p2[0] - oMinX) * factor + 100;
-        self.diverging[3].y = (-self.switch.p2[2] - oMinZ) * factor + 100;
+        self.diverging[3].y = (-self.switch.p2[1] - oMinY) * factor + 100;
       
         self.diverging[1].x = (self.switch.pc[0] + self.switch.vc2[0]-oMinX) \
             * factor + 100;
-        self.diverging[1].y = (-self.switch.pc[2] - self.switch.vc2[2]-oMinZ) \
+        self.diverging[1].y = (-self.switch.pc[1] - self.switch.vc2[1]-oMinY) \
             * factor + 100;
         self.diverging[2].x = (self.switch.p2[0] + self.switch.v2[0]-oMinX) \
             * factor + 100;
-        self.diverging[2].y = (-self.switch.p2[2] - self.switch.v2[2]-oMinZ) \
+        self.diverging[2].y = (-self.switch.p2[1] - self.switch.v2[1]-oMinY) \
             * factor + 100;
     
     
@@ -190,12 +190,12 @@ class RailSwitchView(View):
                  self.straight[2].x, self.straight[3].x, \
                  self.diverging[0].x, self.diverging[1].x, \
                  self.diverging[2].x, self.diverging[3].x]
-        zspan = [self.straight[0].y, self.straight[1].y, \
+        yspan = [self.straight[0].y, self.straight[1].y, \
                  self.straight[2].y, self.straight[3].y, \
                  self.diverging[0].y, self.diverging[1].y, \
                  self.diverging[2].y, self.diverging[3].y]
         l = min(xspan)
         r = max(xspan)
-        t = min(zspan)
-        b = max(zspan)
+        t = min(yspan)
+        b = max(yspan)
         return wx.Rect(l, t, r-l, b-t)

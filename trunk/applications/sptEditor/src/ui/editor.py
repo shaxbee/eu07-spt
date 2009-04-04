@@ -73,9 +73,9 @@ class PlanePart(wx.ScrolledWindow):
         self.scale = 400.0
 
         self.minX = -1000.0
-        self.minZ = -1000.0
+        self.minY = -1000.0
         self.maxX = 1000.0
-        self.maxZ = 1000.0
+        self.maxY = 1000.0
 
         self.extentX = 0
         self.extentY = 0
@@ -112,33 +112,33 @@ class PlanePart(wx.ScrolledWindow):
         Computes bounds of scenery expressed in scenery coordinates.
         """
         nMinX = -1000.0
-        nMinZ = 1000.0
+        nMinY = 1000.0
         nMaxX = -1000.0
-        nMaxZ = 1000.0
+        nMaxY = 1000.0
 
         # tracks
         for v in self.trackCache:
-            (vMinX, vMaxX, vMinZ, vMaxZ) = v.GetMinMax()
+            (vMinX, vMaxX, vMinY, vMaxY) = v.GetMinMax()
             nMinX = min(vMinX, nMinX)
             nMaxX = max(vMaxX, nMaxX)
-            nMinZ = min(vMinZ, nMinZ)
-            nMaxZ = max(vMaxZ, nMaxZ)
+            nMinY = min(vMinY, nMinY)
+            nMaxY = max(vMaxY, nMaxY)
         # switches
         for v in self.switchCache:
-            (vMinX, vMaxX, vMinZ, vMaxZ) = v.GetMinMax()
+            (vMinX, vMaxX, vMinY, vMaxY) = v.GetMinMax()
             nMinX = min(vMinX, nMinX)
             nMaxX = max(vMaxX, nMaxX)
-            nMinZ = min(vMinZ, nMinZ)
-            nMaxZ = max(vMaxZ, nMaxZ)
+            nMinY = min(vMinY, nMinY)
+            nMaxY = max(vMaxY, nMaxY)
         # base point
 
         # Changes
-        if doScaling or nMinX < self.minX or nMinZ < self.minZ \
-            or nMaxX > self.maxX or nMaxZ > self.maxZ:
+        if doScaling or nMinX < self.minX or nMinY < self.minY \
+            or nMaxX > self.maxX or nMaxY > self.maxY:
             self.minX = min(self.minX, nMinX)
-            self.minZ = min(self.minZ, nMinZ)
+            self.minY = min(self.minY, nMinY)
             self.maxX = max(self.maxX, nMaxX)
-            self.maxZ = max(self.maxZ, nMaxZ)
+            self.maxY = max(self.maxY, nMaxY)
 
             self.__ScaleAll(self.scale)
 
@@ -163,9 +163,9 @@ class PlanePart(wx.ScrolledWindow):
         
     def __ScaleAll(self, scale):
         for v in self.trackCache:
-            v.Scale(scale, self.minX, self.maxX, self.minZ, self.maxZ)
+            v.Scale(scale, self.minX, self.maxX, self.minY, self.maxY)
         for v in self.switchCache:
-            v.Scale(scale, self.minX, self.maxX, self.minZ, self.maxZ)
+            v.Scale(scale, self.minX, self.maxX, self.minY, self.maxY)
 
 
     def ViewToModel(self, point):
@@ -174,8 +174,8 @@ class PlanePart(wx.ScrolledWindow):
         of scenery coordinates.
         """
         p3d = (float((point[0]-100)/self.scale * SCALE_FACTOR + self.minX), \
-            0.0,
-            -float((point[1]-100)/self.scale * SCALE_FACTOR + self.minZ))
+            -float((point[1]-100)/self.scale * SCALE_FACTOR + self.minY), \
+            0.0)
         return p3d
 
 
@@ -185,7 +185,7 @@ class PlanePart(wx.ScrolledWindow):
         UI editor coordinates.
         """        
         p2d = (int((point[0] - self.minX) * self.scale / SCALE_FACTOR + 100), \
-            int((-point[2] - self.minZ) * self.scale / SCALE_FACTOR + 100))
+            int((-point[2] - self.minY) * self.scale / SCALE_FACTOR + 100))
         return p2d
 
 
@@ -218,7 +218,7 @@ class PlanePart(wx.ScrolledWindow):
         
         return (max(w, int(self.scale * (self.maxX - self.minX) \
                 / SCALE_FACTOR) + 200) + self.extentX,
-            max(h + self.extentY, int(self.scale * (self.maxZ - self.minZ) \
+            max(h + self.extentY, int(self.scale * (self.maxY - self.minY) \
                / SCALE_FACTOR) + 200) + self.extentY)
 
 
@@ -309,7 +309,7 @@ class PlanePart(wx.ScrolledWindow):
         Paints the borders around min/max.
         """
         x = int((self.maxX - self.minX) * self.scale / SCALE_FACTOR) + 100
-        y = int((self.maxZ - self.minZ) * self.scale / SCALE_FACTOR) + 100
+        y = int((self.maxY - self.minY) * self.scale / SCALE_FACTOR) + 100
 
         oldPen = dc.GetPen()
         dc.SetPen(wx.Pen("#999999"))
@@ -438,34 +438,34 @@ class Ruler(wx.Control):
                 wx.FONTWEIGHT_NORMAL))
 
             part = self.GetParent().parts[0]
-            (unitX, unitZ) = part.GetScrollPixelsPerUnit()
-            (vx, vz) = part.GetViewStart()
+            (unitX, unitY) = part.GetScrollPixelsPerUnit()
+            (vx, vy) = part.GetViewStart()
             (w, h) = self.GetSize()
             if self.orientation == wx.VERTICAL:
-                self.offset = vz
+                self.offset = vy
             elif self.orientation == wx.HORIZONTAL:
                 self.offset = vx
-            (p2x, p2z) = part.CalcUnscrolledPosition((vx, vz))
+            (p2x, p2y) = part.CalcUnscrolledPosition((vx, vy))
 
             if self.orientation == wx.VERTICAL:
 
-                z = -(self.offset * unitZ % 100)
-                while z < h:
-                    (p3x, p3y, p3z) = part.ViewToModel((p2z, \
-                        z + self.offset * unitZ))
-                    label = "%d" % p3z
+                y = -(self.offset * unitY % 100)
+                while y < h:
+                    (p3x, p3y, p3z) = part.ViewToModel((p2x, \
+                        y + self.offset * unitY))
+                    label = "%d" % p3y
                     (tw, th) = dc.GetTextExtent(label)
-                    if z >= clip.y-tw/2-1 and z <= clip.y+clip.height+tw/2+1:
-                        dc.DrawRotatedText(label, 15-th, z + tw/2, 90)
-                        dc.DrawLine(16, z, clip.width, z)
-                    z += 100
+                    if y >= clip.y-tw/2-1 and y <= clip.y+clip.height+tw/2+1:
+                        dc.DrawRotatedText(label, 15-th, y + tw/2, 90)
+                        dc.DrawLine(16, y, clip.width, y)
+                    y += 100
 
             elif self.orientation == wx.HORIZONTAL:
 
                 x = -(self.offset * unitX % 100)
                 while x < w:
                     (p3x, p3y, p3z) = part.ViewToModel( \
-                         (x + self.offset*unitX, p2z))
+                         (x + self.offset*unitX, p2y))
                     label = "%d" % p3x                    
                     (tw, th) = dc.GetTextExtent(label)
                     if x >= clip.x-tw/2-1 and x <= clip.x+clip.width+tw/2+1:
