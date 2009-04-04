@@ -16,7 +16,7 @@ class Scenery:
 
     def __init__(self):
         self.listeners = []
-        self.tracks = groups.Group()
+        self.tracks = groups.RailContainer()
 
 
     def AddRailTracking(self, tracking):

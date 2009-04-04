@@ -10,41 +10,11 @@ import tracks
 import sptmath
 
 
-class Group(object):
+class RailContainer:
     """
-    Rail tracking group.
-
-    It is like a container of other rail trackings elements such tracks or
-    rail switches and some other groups. Rail tracking group is also a
-    rail tracking so it can be connected with another tracking elements.
-    However rail tracking connections between the rail tracking outside
-    group aren't propagated to the outline trackings inside group. So for
-    example if the caller invoke {@link #toTracking(Point3d)} method on
-    some outline tracking, he won't get the same result as in calling
-    {@link #toTracking(Point3d)} method on group level.
-
-    Beware that in in group there is an <em>outline tracking</em> concept
-    which stays for the child tracking that has at least one unbound
-    connection to next rail tracking. The <em>outline point</em> is a such
-    geometry point of an outline tracking that has no connection bound. 
-         
-    Be also aware that changing geometry by not invoking methods
-    {@link #mesh()} nor {@link #transform(Matrix4d)} may lead to some
-    inconsistences and unpredictable results in some methods of this class.
-    This is because geometry points are keys in connection mappings in group
-    class. The are mutable, so they break {@link java.util.Map} assumptions.
-
-    <h4>Logging</h4>
-         
-    Class support logging. If you want to see what happened while building
-    this group, you may enable or create following logger (Apache commons
-    logging):
-
-    <p><code>
-    pl.org.jet.track.RailTrackingGroup
-    </code></p>
+    This is a container for rail tracking elements.
     """
-
+    
     def __init__(self, name = None):
         self.children = []
         self.outline_trackings = []
@@ -54,7 +24,7 @@ class Group(object):
 
 
     def __repr__(self):
-        return "Group[" \
+        return "RailContainer[" \
             + "name=" + str(self.name) \
             + ", children=" + str(self.children) \
             + ", outlinePoints=" + str(self.connections.keys()) \
@@ -66,7 +36,7 @@ class Group(object):
             return True
         if other == None:
             return False
-        if not isinstance(Group, other):
+        if not isinstance(other, RailContainer):
             return False
         for tracking in self.children:
             if tracking not in other.children:
@@ -123,8 +93,8 @@ class Group(object):
                         + "geometry point " + str(child))
 
                     v_tracking_normal = tracking.getNormalVector(gpoint)
-                    v_child_normal = tracking.getNormalVector(gpoint)
-
+                    v_child_normal = child.getNormalVector(gpoint)
+                    
                     # Check if normal vectors may plug together
                     if sptmath.isNegativeVector(v_tracking_normal, \
                         v_child_normal):
@@ -148,7 +118,7 @@ class Group(object):
 
                         # Remove rail tracking from outline if necessary
                         if child in self.outline_trackings \
-                            and not isOutlineNow(child):
+                            and not self.isOutlineNow(child):
                             _logger.debug("Child found in outline " \
                                 + "collections however it is inline now so " \
                                 + "removing it form outlines")
@@ -250,10 +220,62 @@ class Group(object):
         _logger.debug("Tracking " + str(tracking) + " was removed from group")
 
 
-    def isOutlineNow(tracking):
+    def isOutlineNow(self, tracking):
         geometry = tracking.getGeometry()
         for p in geometry:
             if tracking.point2tracking(p) == None:
                 return True
         return False
+
+
+
+
+class RailGroup(RailContainer):
+    """
+    Rail tracking group.
+
+    It is like a container of other rail trackings elements such tracks or
+    rail switches and some other groups. Rail tracking group is also a
+    rail tracking so it can be connected with another tracking elements.
+    However rail tracking connections between the rail tracking outside
+    group aren't propagated to the outline trackings inside group. So, for
+    example, if the caller invoke {@link #toTracking(Point3d)} method on
+    some outline tracking, he won't get the same result as in calling
+    {@link #toTracking(Point3d)} method on group level.
+
+    Beware that in in group there is an <em>outline tracking</em> concept
+    which stays for the child tracking that has at least one unbound
+    connection to next rail tracking. The <em>outline point</em> is a such
+    geometry point of an outline tracking that has no connection bound. 
+         
+    Be also aware that changing geometry by not invoking methods
+    {@link #mesh()} nor {@link #transform(Matrix4d)} may lead to some
+    inconsistences and unpredictable results in some methods of this class.
+    This is because geometry points are keys in connection mappings in group
+    class. The are mutable, so they break {@link java.util.Map} assumptions.
+
+    <h4>Logging</h4>
+         
+    Class support logging. If you want to see what happened while building
+    this group, you may enable or create following logger (Apache commons
+    logging):
+
+    <p><code>
+    pl.org.jet.track.RailTrackingGroup
+    </code></p>
+    """
+
+    def __init__(self, name = None):
+        RailContainer.__init__(self, name)
+
+
+    def __repr__(self):
+        return "RailGroup[" \
+            + "name=" + str(self.name) \
+            + ", children=" + str(self.children) \
+            + ", outlinePoints=" + str(self.connections.keys()) \
+            + "]";
+
+
+
 

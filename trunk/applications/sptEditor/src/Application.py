@@ -7,9 +7,11 @@ Created on 2009-03-01
 """
 
 import logging
+import logging.config
 import wx
 import yaml
 import os.path
+import sys
 
 import model.tracks
 import model.groups
@@ -224,6 +226,7 @@ class MainWindow(wx.Frame):
                 self.path = path
                 self.UpdateTitle()
             except Exception, inst:
+                logging.exception("Error while reading scenery file:")
                 wx.MessageBox("Error while reading scenery file:\n" \
                     + str(inst), \
                     "Open file error", wx.OK | wx.ICON_ERROR, self)
@@ -260,6 +263,7 @@ class MainWindow(wx.Frame):
 
             return True
         except Exception, inst:
+            logging.exception("Error while writing scenery into file:")
             wx.MessageBox("Error while writing scenery into file:\n" \
                 + str(inst), \
                 "Save file error", wx.OK | wx.ICON_ERROR, self)
@@ -387,6 +391,10 @@ class MainWindow(wx.Frame):
 
 
 if __name__ == "__main__":
+    if sys.argv == 2:
+        # Optional path to logging configuration file
+        logging.config.fileConfig(sys.args[1])
+    
     app = Application()
     frame = MainWindow(None, wx.ID_ANY)
     app.MainLoop()

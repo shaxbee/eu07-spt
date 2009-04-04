@@ -233,7 +233,7 @@ class Track(RailTracking):
                         self.p1[1] - self.p2[1], \
                         self.p1[2] - self.p2[2])
             else:
-                return (-x for x in self.v1)
+                return tuple(-x for x in self.v1)
         elif point == self.p2:
             if self.v2[0] == 0 and self.v2[1] == 0 and self.v2[2] == 0:
                 return (self.p2[0] - self.p1[0], \
@@ -401,14 +401,14 @@ class Switch(RailTracking):
                         self.pc[1] - self.p1[1], \
                         self.pc[2] - self.p1[2])
             else:
-                return (-x for x in self.vc1)
+                return tuple(-x for x in self.vc1)
         elif point == self.p1:
             if self.v1[0] == 0 and self.v1[1] == 0 and self.v1[2] == 0:
                 return (self.p1[0] - self.pc[0], \
                         self.p1[1] - self.pc[1], \
                         self.p2[2] - self.pc[2])
             else:
-                return (-x for x in self.v1)
+                return tuple(-x for x in self.v1)
         elif point == self.p2:
             if self.v2[0] == 0 and self.v2[1] == 0 and self.v2[2] == 0:
                 return (self.p2[0] - self.pc[0], \
