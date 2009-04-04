@@ -1,16 +1,16 @@
-'''
+"""
 Created on 2009-03-04
 
 @author: adammo
-'''
+"""
 
 class RailTracking(object):
-    '''
+    """
     Abstract class for rail tracking.
-    '''
+    """
 
     def next(self, previous):
-        '''
+        """
         Returns next tracking element in scope of this tracking
         element for given previous tracking element.
 
@@ -23,19 +23,19 @@ class RailTracking(object):
         @type  previous RailTracking
         @return Next rail tracking or None.
         @rtype RailTracking
-        '''
+        """
         pass # Implement it in subclasses
 
 
     def nextPoint(self, point):
-        '''
+        """
         Returns next geometry point for this rail tracking element.
-        '''
+        """
         pass # Implement it in subclasses
 
 
     def point2tracking(self, point):
-        '''
+        """
         Gets the connected tracking element for given geometry point
         of this track element. If geometry point doesn't fit to this
         track geometry, method should throw ValueError.
@@ -45,12 +45,12 @@ class RailTracking(object):
           tracking element is not bound on this end to any tracking
           element.
         @rtype RailTracking
-        '''
+        """
         pass # Implement it in subclasses
 
     
     def tracking2point(self, tracking):
-        '''
+        """
         Sets at specified geoemtry point next rail tracking.
          
         Method may throw some {@link IllegalArgumentException} if for
@@ -64,20 +64,20 @@ class RailTracking(object):
           rail tracking. Point cannot be null and must be geometry point.
         @param next Next rail tracking to set up. It may be null to
           disconnect this rail tracking from the next one.
-        '''
+        """
         pass # Implement it in subclass
 
 
     def containsPoint(self, point):
-        '''
+        """
         Returns true if this rail tracking element has given geometry
         point.
-        '''
+        """
         pass # Implement it in subclasses
 
 
     def setTracking(self, point, next):
-        '''
+        """
         Sets at specified geoemtry point next rail tracking.
          
         Method may throw some ValueError if for
@@ -92,29 +92,29 @@ class RailTracking(object):
           point.
         @param next Next rail tracking to set up. It may be null to
           disconnect this rail tracking from the next one.
-        '''
+        """
         pass # Implement it in subclasses
 
 
     def getGeometry(self):
-        '''
+        """
         Gets the geometry of the rail tracking expressed as end points.
-        '''
+        """
         pass # Implement it in subclasses
 
 
 
 
 class Track(RailTracking):
-    '''
+    """
     This is a track. Can be a straight track, an arc.
-    '''
+    """
 
     def __init__(self, p1=(0.0, 0.0, 0.0), v1=(0.0, 0.0, 0.0), \
         v2=(0.0, 0.0, 0.0), p2=(0.0, 0.0, 0.0)):
-        '''
+        """
         Constructor
-        '''
+        """
         self.p1 = p1
         self.v1 = v1
         self.v2 = v2
@@ -125,9 +125,9 @@ class Track(RailTracking):
         
 
     def __repr__(self):
-        '''
+        """
         Gives a detailed information about this object.
-        '''
+        """
         return "Track[" \
             + "p1=" + coord2str(self.p1) \
             + ", v1=" + coord2str(self.v1) \
@@ -137,9 +137,9 @@ class Track(RailTracking):
 
             
     def __eq__(self,other):
-        '''
+        """
         Compares this Track with another
-        '''
+        """
         if self is other:
             return True
         if not isinstance(other, Track):
@@ -151,9 +151,9 @@ class Track(RailTracking):
             
         
     def next(self, previous):
-        '''
+        """
         Returns the next bound rail tracking.
-        '''
+        """
         if previous == None:
             if self.n1 != None and self.n2 != None:
                 raise ValueError, "Previous RailTracking was null"
@@ -224,9 +224,9 @@ class Track(RailTracking):
 
 
     def getNormalVector(self, point):
-        '''
+        """
         Gets a normal vector for given point
-        '''
+        """
         if point == self.p1:
             if self.v1[0] == 0 and self.v1[1] == 0 and self.v1[2] == 0:
                 return (self.p1[0] - self.p2[0], \
@@ -240,7 +240,7 @@ class Track(RailTracking):
                         self.p2[1] - self.p1[1], \
                         self.p2[2] - self.p1[2])
             else:
-                return (-x for x in self.v2)
+                return tuple(-x for x in self.v2)
         else:
             return None
 
@@ -248,9 +248,9 @@ class Track(RailTracking):
 
 
 class Switch(RailTracking):
-    '''
+    """
     Rail switch class.
-    '''
+    """
 
     def __init__(self, pc=(0.0, 0.0, 0.0), \
                        p1=(0.0, 0.0, 0.0), \
@@ -259,9 +259,9 @@ class Switch(RailTracking):
                        vc2=(0.0, 0.0, 0.0), \
                        v1=(0.0, 0.0, 0.0), \
                        v2=(0.0, 0.0, 0.0)):
-        '''
+        """
         Creates a switch.
-        '''
+        """
 
         self.pc = pc
         self.p1 = p1
@@ -277,9 +277,9 @@ class Switch(RailTracking):
 
 
     def __repr__(self):
-        '''
+        """
         Gives a detailed information about this object.
-        '''
+        """
         return "Switch[" \
             + "pc=" + coord2str(self.pc) \
             + ", p1=" + coord2str(self.p1) \
@@ -292,9 +292,9 @@ class Switch(RailTracking):
 
 
     def __eq__(self, other):
-        '''
+        """
         Compares this Switch with another
-        '''
+        """
         if self is other:
             return True
         if not isinstance(other, Switch):
@@ -366,7 +366,7 @@ class Switch(RailTracking):
             return self.nc
         elif point == self.p1:
             return self.n1
-        elif point == sekf.p2:
+        elif point == self.p2:
             return self.n2
         else:
             raise ValueError, "Point not found"
@@ -415,7 +415,7 @@ class Switch(RailTracking):
                         self.p2[1] - self.pc[1], \
                         self.p2[2] - self.p2[2])
             else:
-                return (-x for x in self.v2)
+                return tuple(-x for x in self.v2)
         else:
             return None
 
@@ -423,9 +423,9 @@ class Switch(RailTracking):
 
 
 class UndeterminedTrackingException(Exception):
-    '''
+    """
     Exception indicating problem with determining next track.
-    '''
+    """
 
     def __init__(self, message = None):
         self.message = message
@@ -438,20 +438,20 @@ class UndeterminedTrackingException(Exception):
 
 
 def coord2str(coord):
-    '''
+    """
     Formats tuple (coordinate) into string.
-    '''
+    """
     return "(%(x).3f,%(y).3f,%(z).3f)" % \
         {'x': coord[0], 'y': coord[1], 'z': coord[2]}
 
 
 def isDisconnected(tracking):
-    '''
+    """
     Checks if given rail tracking element is disconnected.
 
     Disconnected track means such rail tracking element
     that isn't connected to any other rail trackings.
-    '''
+    """
     geometry = tracking.getGeometry()
     for p in geometry:
         if tracking.point2tracking(p) != None:

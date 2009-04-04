@@ -1,22 +1,28 @@
-'''
+"""
+Module containing main UI classes of scenery editor control.
+
 @author adammo
-'''
+"""
 
 import datetime
 import logging
 
 import wx
 
+import model.tracks
+import ui.views
+
 SCALE_FACTOR = 1000.0
 
+
 class SceneryEditor(wx.Panel):
-    '''
+    """
     Scenery editor control.
-    '''
+    """
 
     def __init__(self, parent, id = wx.ID_ANY):
         wx.Panel.__init__(self, parent, id, style = wx.BORDER_SUNKEN)
-
+        
         sizer = wx.FlexGridSizer(2, 2, 1, 1)
 
         corner = wx.Panel(self, name = "Corner")
@@ -25,23 +31,32 @@ class SceneryEditor(wx.Panel):
             name = "Left ruler")
         self.topRuler = Ruler(self, orientation = wx.HORIZONTAL, \
             name = "Top ruler")
-        self.part = PlanePart(self)
+        self.parts = [PlanePart(self)]
 
         sizer.Add(corner)
         sizer.Add(self.topRuler, flag = wx.LEFT | wx.EXPAND)
         sizer.Add(self.leftRuler, flag = wx.TOP | wx.EXPAND)
-        sizer.Add(self.part, 1, wx.EXPAND | wx.ALL)
+        sizer.Add(self.parts[0], 1, wx.EXPAND | wx.ALL)
         sizer.AddGrowableCol(1, 1)
         sizer.AddGrowableRow(1, 1)
-
+        
         self.SetSizer(sizer)
+
+
+    def SetScenery(self, scenery):
+        """
+        Sets the scenery. Notify also active parts.
+        """
+        self.scenery = scenery
+        for part in self.parts:
+            part.SetScenery(scenery)
 
 
 
 class PlanePart(wx.ScrolledWindow):
-    '''
+    """
     Editor Part displaying XZ view of scenery.
-    '''
+    """
 
     def __init__(self, parent, id = wx.ID_ANY):
         wx.ScrolledWindow.__init__(self, parent, id, \
@@ -64,23 +79,57 @@ class PlanePart(wx.ScrolledWindow):
 
         self.extentX = 0
         self.extentY = 0
-
+        
+        self.trackCache = []
+        self.switchCache = []
+        
         size = self.ComputePreferredSize() 
         self.SetVirtualSize(size)
         self.SetupScrolling()
+        
+        
+    def SetScenery(self, scenery):
+        self.trackCache = []
+        self.switchCache = []
+        for element in scenery.RailTrackingIterator():
+            self.__AddView(element)
+            
+        self.ComputeMinMax(True)
+        self.Refresh()
 
+
+    def __AddView(self, element):
+        if isinstance(element, model.tracks.Track):
+            self.trackCache.append(ui.views.TrackView(element))
+        elif isinstance(element, model.tracks.Switch):
+            self.switchCache.append(ui.views.RailSwitchView(element))
+        else:
+            raise ValueError("Unsupported element: " + str(type(element)))
+        
 
     def ComputeMinMax(self, doScaling = False):
-        '''
+        """
         Computes bounds of scenery expressed in scenery coordinates.
-        '''
+        """
         nMinX = -1000.0
         nMinZ = 1000.0
         nMaxX = -1000.0
         nMaxZ = 1000.0
 
         # tracks
+        for v in self.trackCache:
+            (vMinX, vMaxX, vMinZ, vMaxZ) = v.GetMinMax()
+            nMinX = min(vMinX, nMinX)
+            nMaxX = max(vMaxX, nMaxX)
+            nMinZ = min(vMinZ, nMinZ)
+            nMaxZ = max(vMaxZ, nMaxZ)
         # switches
+        for v in self.switchCache:
+            (vMinX, vMaxX, vMinZ, vMaxZ) = v.GetMinMax()
+            nMinX = min(vMinX, nMinX)
+            nMaxX = max(vMaxX, nMaxX)
+            nMinZ = min(vMinZ, nMinZ)
+            nMaxZ = max(vMaxZ, nMaxZ)
         # base point
 
         # Changes
@@ -91,7 +140,7 @@ class PlanePart(wx.ScrolledWindow):
             self.maxX = max(self.maxX, nMaxX)
             self.maxZ = max(self.maxZ, nMaxZ)
 
-            # ScaleAll()
+            self.__ScaleAll(self.scale)
 
             return True
         else:
@@ -105,40 +154,45 @@ class PlanePart(wx.ScrolledWindow):
     def SetScale(self, scale):
         self.scale = scale
         self.SetVirtualSize(self.ComputePreferredSize())
-#        ScaleAll(scale)
+        self.__ScaleAll(scale)
         self.Update()
         self.Refresh()
         self.GetParent().topRuler.Refresh()
         self.GetParent().leftRuler.Refresh()
+        
+        
+    def __ScaleAll(self, scale):
+        for v in self.trackCache:
+            v.Scale(scale, self.minX, self.maxX, self.minZ, self.maxZ)
+        for v in self.switchCache:
+            v.Scale(scale, self.minX, self.maxX, self.minZ, self.maxZ)
 
 
     def ViewToModel(self, point):
-        '''
+        """
         Converts 2D point of UI editor coordinates into 3D point
         of scenery coordinates.
-        '''
+        """
         p3d = (float((point[0]-100)/self.scale * SCALE_FACTOR + self.minX), \
             0.0,
             -float((point[1]-100)/self.scale * SCALE_FACTOR + self.minZ))
-        #print "point2=" + str(point) + " point3=" + str(p3d)
         return p3d
 
 
     def ModelToView(self, point):
-        '''
+        """
         Converts 3D point of scenery coordiante into 2D point of
         UI editor coordinates.
-        '''        
+        """        
         p2d = (int((point[0] - self.minX) * self.scale / SCALE_FACTOR + 100), \
             int((-point[2] - self.minZ) * self.scale / SCALE_FACTOR + 100))
-        #print "point3=" + str(point) + " point2=" + str(p2d)
         return p2d
 
 
     def CenterViewAt(self, x, y):
-        '''
+        """
         Centers the view on following component point.
-        '''
+        """
         (pw, ph) = self.GetVirtualSize()
         (vw, vh) = self.GetSize()
         (ux, uy) = self.GetScrollPixelsPerUnit()
@@ -169,9 +223,9 @@ class PlanePart(wx.ScrolledWindow):
 
 
     def SetupScrolling(self):
-        '''
+        """
         Sets up scrolling of the window.
-        '''
+        """
         self.SetScrollRate(20, 20)
         
 
@@ -196,24 +250,24 @@ class PlanePart(wx.ScrolledWindow):
 
 
     def PaintBackground(self, dc, clip):
-        '''
+        """
         Paints part background.
-        '''
+        """
         self.PaintGrid(dc, clip)
 
 
     def PaintGrid(self, dc, clip):
-        '''
+        """
         Paints grid.
-        '''
+        """
         self.PaintAuxiliaryGrid(dc, clip)
         self.PaintMinMaxBounds(dc, clip)
 
 
     def PaintAuxiliaryGrid(self, dc, clip):
-        '''
+        """
         Paints a grid.
-        '''
+        """
         center2D = self.ModelToView((0.0, 0.0, 0.0))
 
         xoffset = clip.x + clip.width
@@ -251,9 +305,9 @@ class PlanePart(wx.ScrolledWindow):
 
 
     def PaintMinMaxBounds(self, dc, clip):
-        '''
+        """
         Paints the borders around min/max.
-        '''
+        """
         x = int((self.maxX - self.minX) * self.scale / SCALE_FACTOR) + 100
         y = int((self.maxZ - self.minZ) * self.scale / SCALE_FACTOR) + 100
 
@@ -272,16 +326,44 @@ class PlanePart(wx.ScrolledWindow):
 
 
     def PaintForeground(self, dc, clip):
-        '''
+        """
         Paints foreground
-        '''
+        """
+        self.PaintTracks(dc, clip)
+        self.PaintSwitches(dc, clip)
         self.PaintScale(dc, clip)
+        
+        
+    def PaintTracks(self, dc, clip):
+        """
+        Paint rail tracks.
+        """
+        oldPen = dc.GetPen()
+        try:
+            dc.SetPen(wx.Pen((34, 139, 34), 3))
+            for v in self.trackCache:
+                v.Draw(dc, clip)
+        finally:
+            dc.SetPen(oldPen)
+            
+            
+    def PaintSwitches(self, dc, clip):
+        """
+        Paints rail switches.
+        """
+        oldPen = dc.GetPen()
+        try:
+            dc.SetPen(wx.Pen((255, 153, 153), 3))
+            for v in self.switchCache:
+                v.Draw(dc, clip)
+        finally:
+            dc.SetPen(oldPen)
 
 
     def PaintScale(self, dc, clip):
-        '''
+        """
         Paints a scale.
-        '''
+        """
 
         # TODO: Draw scale in upper, right corner
 
@@ -289,9 +371,9 @@ class PlanePart(wx.ScrolledWindow):
 
 
     def OnMoveUpdateStatusBar(self, event):
-        '''
+        """
         Updates 3D coordinates in case of mouse movement on frame status bar.
-        '''
+        """
         opoint = event.GetPosition()
         point = self.CalcUnscrolledPosition(event.GetPosition())
         (a, b, c) = self.ViewToModel(point)
@@ -306,9 +388,9 @@ class PlanePart(wx.ScrolledWindow):
 
 
 class Ruler(wx.Control):
-    '''
+    """
     A ruler for scenery editor.
-    '''
+    """
 
     def __init__(self, parent, orientation, id = wx.ID_ANY, name = None):
         wx.Window.__init__(self, parent, id = id, name = name)
@@ -324,17 +406,17 @@ class Ruler(wx.Control):
         self.pick = None
 
 
-    def OnSize(self, event):
-        '''
+    def OnSize(self, event):        
+        """
         Refresh.
-        '''
+        """
         self.Refresh()
 
 
     def OnPaint(self, event):
-        '''
+        """
         Paints a control.
-        '''
+        """
         dc = wx.PaintDC(self)
         clip = self.GetUpdateRegion().GetBox()
 
@@ -343,9 +425,9 @@ class Ruler(wx.Control):
 
 
     def PaintScale(self, dc, clip):
-        '''
+        """
         Paints scale.
-        '''
+        """
         oldPen = dc.GetPen()
         oldTextFg = dc.GetTextForeground()
         oldFont = dc.GetFont()
@@ -355,7 +437,7 @@ class Ruler(wx.Control):
             dc.SetFont(wx.Font(8, wx.SWISS, wx.FONTSTYLE_NORMAL, \
                 wx.FONTWEIGHT_NORMAL))
 
-            part = self.GetParent().part
+            part = self.GetParent().parts[0]
             (unitX, unitZ) = part.GetScrollPixelsPerUnit()
             (vx, vz) = part.GetViewStart()
             (w, h) = self.GetSize()
@@ -398,9 +480,9 @@ class Ruler(wx.Control):
     
 
     def PaintMousePointer(self, dc, clip):
-        '''
+        """
         Draws mouse pointer on ruler.
-        '''
+        """
         oldPen = dc.GetPen()
         try:
             dc.SetPen(wx.Pen('BLACK'))
@@ -413,18 +495,18 @@ class Ruler(wx.Control):
 
 
     def HandleOnScroll(self, event):
-        '''
+        """
         Handles scrolled window events.
-        '''
+        """
         if event.GetOrientation() == self.orientation:
             self.Refresh()
         event.Skip()
 
 
     def UpdateMousePointer(self, point):
-        '''
+        """
         Updates mouse pointers and requests repaint events.
-        '''
+        """
         if self.orientation == wx.HORIZONTAL:
             if self.pick == None:
                 self.pick = point.x

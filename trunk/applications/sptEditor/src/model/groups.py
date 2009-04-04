@@ -1,6 +1,8 @@
-'''
+"""
+Module containing definition of rails tracking elements' group. 
+
 @author adammo
-'''
+"""
 
 import logging
 
@@ -9,7 +11,7 @@ import sptmath
 
 
 class Group(object):
-    '''
+    """
     Rail tracking group.
 
     It is like a container of other rail trackings elements such tracks or
@@ -41,7 +43,7 @@ class Group(object):
     <p><code>
     pl.org.jet.track.RailTrackingGroup
     </code></p>
-    '''
+    """
 
     def __init__(self, name = None):
         self.children = []
@@ -73,30 +75,30 @@ class Group(object):
 
     
     def size(self):
-        '''
+        """
         Returns a number of rail trackings in group.
-        '''
+        """
         return len(self.children)
 
 
     def contains(self, tracking):
-        '''
+        """
         Checks if a group contains given rail tracking
-        '''
+        """
         return tracking in self.children
 
 
     def containsPoint(self, point):
-        '''
+        """
         Checks if specified point belongs to outline points.
-        '''
+        """
         return point in self.connections
 
 
     def insert(self, tracking):
-        '''
+        """
         Inserts given rail tracking into group.
-        '''
+        """
         _logger = logging.getLogger("Group")
         _logger.debug("Trying to insert " + str(tracking))
 
@@ -187,9 +189,9 @@ class Group(object):
 
 
     def remove(self, tracking):
-        '''
+        """
         Removes rail tracking from group.
-        '''
+        """
         _logger = logging.getLogger("Group")
         _logger.debug("About to remove rail tracking " + str(tracking))
 

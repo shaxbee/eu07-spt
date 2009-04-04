@@ -1,4 +1,6 @@
 '''
+This module contains all dialogs defined in editor application.
+
 @author adammo
 '''
 
@@ -70,8 +72,8 @@ class CenterAtDialog(wx.Dialog):
             pz = float(self.z.GetValue())
 
             editor = self.GetParent().editor
-            (vx, vy) = editor.part.ModelToView((px, py, pz))
-            editor.part.CenterViewAt(vx, vy)
+            (vx, vy) = editor.parts[0].ModelToView((px, py, pz))
+            editor.parts[0].CenterViewAt(vx, vy)
 
             self.Destroy()
         except ValueError: 
