@@ -12,6 +12,7 @@ import wx
 import yaml
 import os.path
 import sys
+import optparse
 
 import model.tracks
 import model.groups
@@ -21,6 +22,7 @@ import ui.dialog
 
 # Stock items
 ID_CENTER_AT = wx.ID_HIGHEST + 1
+ID_BASEPOINT_EDIT = wx.ID_HIGHEST + 2
 
 
 class Application(wx.App):
@@ -29,10 +31,12 @@ class Application(wx.App):
     """
     
     def __init__(self):
-        wx.App.__init__(self)
+        wx.App.__init__(self)        
 
     
     def OnInit(self):
+        wx.Image.AddHandler(wx.PNGHandler())
+        
         self.SetVendorName("SPT-Team")
         self.SetAppName("EI07")
         
@@ -105,12 +109,18 @@ class MainWindow(wx.Frame):
 
         # Create view menu
         viewMenu = wx.Menu()
-        viewMenu.Append(ID_CENTER_AT, "Center &at")
+        viewMenu.Append(ID_CENTER_AT, "Center &at\tCtrl+G")
         viewMenu.AppendSeparator()
         viewMenu.Append(wx.ID_ZOOM_IN, "Zoom &in")
         viewMenu.Append(wx.ID_ZOOM_OUT, "Zoom &out")
 
         mainMenu.Append(viewMenu, "&View")
+        
+        # Create edit menu
+        editMenu = wx.Menu()
+        editMenu.Append(ID_BASEPOINT_EDIT, "&Basepoint\tCtrl+B")
+        
+        mainMenu.Append(editMenu, "&Edit")
 
         # Create help menu
         helpMenu = wx.Menu()
@@ -128,6 +138,7 @@ class MainWindow(wx.Frame):
         wx.EVT_MENU(self, ID_CENTER_AT, self.OnCenterAt)
         wx.EVT_MENU(self, wx.ID_ZOOM_IN, self.OnZoomIn)
         wx.EVT_MENU(self, wx.ID_ZOOM_OUT, self.OnZoomOut)
+        wx.EVT_MENU(self, ID_BASEPOINT_EDIT, self.OnBasePointEdit)
         wx.EVT_MENU(self, wx.ID_ABOUT, self.OnAbout)
 
 
@@ -218,18 +229,22 @@ class MainWindow(wx.Frame):
             path = openDialog.GetPath()
 
             try:
-                scenery = yaml.load(file(path, "r"))
-                if not isinstance(scenery, model.scenery.Scenery):
-                    raise Exception("Input file is not scenery")
-                self.editor.SetScenery(scenery)
-                self.modified = False
-                self.path = path
-                self.UpdateTitle()
+                wx.BeginBusyCursor()
+                try:
+                    scenery = yaml.load(file(path, "r"))
+                    if not isinstance(scenery, model.scenery.Scenery):
+                        raise Exception("Input file is not scenery")
+                    self.editor.SetScenery(scenery)
+                    self.modified = False
+                    self.path = path
+                    self.UpdateTitle()
+                finally:
+                    wx.EndBusyCursor()
             except Exception, inst:
                 logging.exception("Error while reading scenery file:")
                 wx.MessageBox("Error while reading scenery file:\n" \
                     + str(inst), \
-                    "Open file error", wx.OK | wx.ICON_ERROR, self)
+                    "Open file error", wx.OK | wx.ICON_ERROR, self)            
 
         self.workingDirectory = openDialog.GetDirectory()
 
@@ -254,12 +269,16 @@ class MainWindow(wx.Frame):
         Saves physically scenery into file.
         """
         try:
-            scenery_file = open(path, "w")
-            scenery_file.write(yaml.dump(self.editor.scenery))
-            scenery_file.close()
-            self.path = path
-            self.modified = False
-            self.UpdateTitle()
+            wx.BeginBusyCursor()
+            try:
+                scenery_file = open(path, "w")
+                scenery_file.write(yaml.dump(self.editor.scenery))
+                scenery_file.close()
+                self.path = path
+                self.modified = False
+                self.UpdateTitle()
+            finally:
+                wx.EndBusyCursor()            
 
             return True
         except Exception, inst:
@@ -371,6 +390,11 @@ class MainWindow(wx.Frame):
         """
         dialog = ui.dialog.CenterAtDialog(self)
         dialog.Show(True)
+        
+        
+    def OnBasePointEdit(self, event):
+        dialog = ui.dialog.BasePointDialog(self)
+        dialog.Show(True)
 
 
     def OnZoomIn(self, event):
@@ -391,9 +415,14 @@ class MainWindow(wx.Frame):
 
 
 if __name__ == "__main__":
-    if sys.argv == 2:
-        # Optional path to logging configuration file
-        logging.config.fileConfig(sys.args[1])
+    usage = "Usage: %prog [options]"
+    parser = optparse.OptionParser(usage=usage)
+    parser.add_option("-l", "--logging", action="store", type="string", \
+        dest="logging", help="Specfies configuration file of logging")
+    (options, leftover) = parser.parse_args(sys.argv)
+    
+    if options.logging != None:
+        logging.config.fileConfig(options.logging)
     
     app = Application()
     frame = MainWindow(None, wx.ID_ANY)

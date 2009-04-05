@@ -41,6 +41,8 @@ class SceneryEditor(wx.Panel):
         sizer.AddGrowableRow(1, 1)
         
         self.SetSizer(sizer)
+        
+        self.SetBasePoint(BasePoint((0.0, 0.0, 0.0), 0.0, 0.0))
 
 
     def SetScenery(self, scenery):
@@ -50,6 +52,15 @@ class SceneryEditor(wx.Panel):
         self.scenery = scenery
         for part in self.parts:
             part.SetScenery(scenery)
+            
+            
+    def SetBasePoint(self, basePoint):
+        """
+        Sets the basepoint. Notify also active editor parts.
+        """
+        self.basePoint = basePoint
+        for part in self.parts:
+            part.SetBasePoint(basePoint)
 
 
 
@@ -82,10 +93,11 @@ class PlanePart(wx.ScrolledWindow):
         
         self.trackCache = []
         self.switchCache = []
+        self.basePointView = None
         
         size = self.ComputePreferredSize() 
         self.SetVirtualSize(size)
-        self.SetupScrolling()
+        self.SetupScrolling()       
         
         
     def SetScenery(self, scenery):
@@ -94,6 +106,12 @@ class PlanePart(wx.ScrolledWindow):
         for element in scenery.RailTrackingIterator():
             self.__AddView(element)
             
+        self.ComputeMinMax(True)
+        self.Refresh()
+        
+        
+    def SetBasePoint(self, basePoint):
+        self.basePointView = ui.views.BasePointView(basePoint)
         self.ComputeMinMax(True)
         self.Refresh()
 
@@ -131,6 +149,11 @@ class PlanePart(wx.ScrolledWindow):
             nMinY = min(vMinY, nMinY)
             nMaxY = max(vMaxY, nMaxY)
         # base point
+        (vMinX, vMaxX, vMinY, vMaxY) = self.basePointView.GetMinMax()
+        nMinX = min(vMinX, nMinX)
+        nMaxX = max(vMaxX, nMaxX)
+        nMinY = min(vMinY, nMinY)
+        nMaxY = max(vMaxY, nMaxY)
 
         # Changes
         if doScaling or nMinX < self.minX or nMinY < self.minY \
@@ -166,6 +189,8 @@ class PlanePart(wx.ScrolledWindow):
             v.Scale(scale, self.minX, self.maxX, self.minY, self.maxY)
         for v in self.switchCache:
             v.Scale(scale, self.minX, self.maxX, self.minY, self.maxY)
+        self.basePointView.Scale(scale, self.minX, self.maxX, self.minY, \
+                                 self.maxY)
 
 
     def ViewToModel(self, point):
@@ -209,7 +234,6 @@ class PlanePart(wx.ScrolledWindow):
 
 
     def OnSize(self, event):
-
         self.Refresh()
 
 
@@ -226,8 +250,7 @@ class PlanePart(wx.ScrolledWindow):
         """
         Sets up scrolling of the window.
         """
-        self.SetScrollRate(20, 20)
-        
+        self.SetScrollRate(20, 20)        
 
 
     def OnPaint(self, event):
@@ -332,6 +355,7 @@ class PlanePart(wx.ScrolledWindow):
         self.PaintTracks(dc, clip)
         self.PaintSwitches(dc, clip)
         self.PaintScale(dc, clip)
+        self.PaintBasePoint(dc, clip)
         
         
     def PaintTracks(self, dc, clip):
@@ -358,6 +382,10 @@ class PlanePart(wx.ScrolledWindow):
                 v.Draw(dc, clip)
         finally:
             dc.SetPen(oldPen)
+            
+            
+    def PaintBasePoint(self, dc, clip):
+        self.basePointView.Draw(dc, clip)
 
 
     def PaintScale(self, dc, clip):
@@ -528,3 +556,32 @@ class Ruler(wx.Control):
                     abs(self.pick - oldPick)+1))
 
         
+
+
+class BasePoint:
+    """
+    Base point.
+    Defines a vector attached in some 3D world point that allows
+    additions to the scenery.    
+    """
+    
+    def __init__(self, p=(0.0, 0.0, 0.0), alpha = 0, beta = 0):
+        self.point = p
+        self.alpha = alpha
+        self.beta = beta
+        
+    
+    def __repr__(self):
+        return "BasePoint[point=(%.3f, %.3f, %.3f),alpha=%.2f,beta=%.2f]" % \
+           (self.point[0], self.point[1], self.point[2], \
+            self.alpha, self.beta)
+    
+    
+    def __eq__(self, other):
+        if self is other:
+            return True
+        if not isinstance(other, BasePoint):
+            return False
+        return self.point == other.point and self.alpha == other.alpha and \
+            self.beta == other.beta
+

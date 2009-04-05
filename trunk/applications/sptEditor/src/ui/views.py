@@ -4,10 +4,32 @@ Module containing views of scenery elements.
 @author adammo
 """
 
+import math
 import wx
 
 import model.tracks
 import ui.editor
+
+
+def loadImages(file, tiles):
+    """
+    Creates an array of images loaded from given PNG file.
+    """
+    array = []
+    image = wx.Image(file, wx.BITMAP_TYPE_PNG)
+    
+    width = image.GetWidth() / tiles
+    height = image.GetHeight()
+    
+    for i in xrange(tiles):
+        array.append(image.GetSubImage(wx.Rect(i*width, 0, width, height)))
+        
+    return array
+
+
+BASEPOINT_IMAGES = loadImages("basepoint.png", 72)
+
+
 
 
 class View:
@@ -33,7 +55,7 @@ class View:
         """
         Gets the tuple of min max information.
         
-        Returing tuple has following values (minX, maxX, minZ, maxZ). 
+        Returing tuple has following values (minX, maxX, minY, maxY). 
         """
         pass # Implement it
     
@@ -199,3 +221,51 @@ class RailSwitchView(View):
         t = min(yspan)
         b = max(yspan)
         return wx.Rect(l, t, r-l, b-t)
+
+
+
+
+class BasePointView(View):
+    """
+    A view for base point.
+    """
+    
+    def __init__(self, basePoint):
+        self.basePoint = basePoint
+        self.point = wx.Point()
+
+    
+    def GetElement(self):
+        return self.basePoint
+    
+    
+    def GetMinMax(self):
+        return (self.basePoint.point[0], self.basePoint.point[0], \
+                self.basePoint.point[1], self.basePoint.point[1])
+    
+    
+    def Scale(self, scale, oMinX, oMaxX, oMinY, oMaxY):
+        factor = float(scale / ui.editor.SCALE_FACTOR)
+        
+        self.point.x = int((self.basePoint.point[0] - oMinX) * factor) + 100
+        self.point.y = int((-self.basePoint.point[1] - oMinY) * factor) + 100
+
+
+    def Draw(self, dc, clip):
+        index = self.__GetAngleIndex()        
+        dc.DrawBitmap(wx.BitmapFromImage(BASEPOINT_IMAGES[index]), \
+                      self.point.x - BASEPOINT_IMAGES[index].GetWidth() / 2, \
+                      self.point.y - BASEPOINT_IMAGES[index].GetHeight() / 2)
+        
+        
+    def __GetAngleIndex(self):
+        d = math.radians(self.basePoint.alpha) + math.radians(2.5)
+        if d < 0.0:
+            d += 2 * math.pi
+        d /= 2 * math.pi
+        return int(d * 72)
+    
+    
+    def GetRepaintBounds(self):
+        return wx.Rect(self.point.x - 10, self.point.y - 10, 20, 20)
+        

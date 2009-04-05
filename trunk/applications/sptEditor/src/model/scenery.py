@@ -67,7 +67,7 @@ class SceneryListener:
         """
         Implementators should override this method.
         """
-        print event
+        pass
 
 
 
