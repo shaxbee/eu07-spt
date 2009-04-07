@@ -268,4 +268,13 @@ class BasePointView(View):
     
     def GetRepaintBounds(self):
         return wx.Rect(self.point.x - 10, self.point.y - 10, 20, 20)
-        
+    
+    
+    def IsSelectionPossible(self, point):
+        """
+        Checks if selection of this view is possible from given point.
+        """
+        x = self.point.x - point.x
+        y = self.point.y - point.y
+        return (x*x + y*y) <= 25
+

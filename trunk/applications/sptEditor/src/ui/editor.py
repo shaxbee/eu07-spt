@@ -8,6 +8,7 @@ import datetime
 import logging
 
 import wx
+from wx.lib.evtmgr import eventManager
 
 import model.tracks
 import ui.views
@@ -73,11 +74,18 @@ class PlanePart(wx.ScrolledWindow):
         wx.ScrolledWindow.__init__(self, parent, id, \
             style = wx.VSCROLL | wx.HSCROLL)
 
+        basePointMover = BasePointMover(self)
+
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_SIZE, self.OnSize)
-        self.Bind(wx.EVT_MOTION, self.OnMoveUpdateStatusBar)
         self.Bind(wx.EVT_SCROLLWIN, parent.topRuler.HandleOnScroll)
         self.Bind(wx.EVT_SCROLLWIN, parent.leftRuler.HandleOnScroll)
+        eventManager.Register(self.OnMoveUpdateStatusBar, wx.EVT_MOTION, self)
+        eventManager.Register(basePointMover.OnMouseDrag, wx.EVT_MOTION, self)
+        eventManager.Register(basePointMover.OnMousePress, wx.EVT_LEFT_DOWN,
+                              self)
+        eventManager.Register(basePointMover.OnMouseRelease, wx.EVT_LEFT_UP,
+                              self)
 
         self.logger = logging.getLogger('Paint')
 
@@ -111,9 +119,12 @@ class PlanePart(wx.ScrolledWindow):
         
         
     def SetBasePoint(self, basePoint):
+        oldView = self.basePointView
         self.basePointView = ui.views.BasePointView(basePoint)
+        if oldView != None:
+            self.RefreshRect(oldView.GetRepaintBounds(), False)
         self.ComputeMinMax(True)
-        self.Refresh()
+        self.RefreshRect(self.basePointView.GetRepaintBounds(), False)
 
 
     def __AddView(self, element):
@@ -585,3 +596,45 @@ class BasePoint:
         return self.point == other.point and self.alpha == other.alpha and \
             self.beta == other.beta
 
+
+
+
+class BasePointMover:
+    """
+    Helper class that moves a basepoint respectively to the mouse drags.
+    """
+    
+    def __init__(self, editorPart):
+        self.editorPart = editorPart
+        self.enabled = True
+        self.pressed = False
+        
+        
+    def OnMousePress(self, event):
+        if not self.enabled:
+            return
+        
+        point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
+        
+        if self.editorPart.basePointView.IsSelectionPossible(point):
+            self.pressed = True
+    
+    
+    def OnMouseRelease(self, event):
+        if not self.enabled:
+            return
+        
+        point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
+        
+        if self.pressed:
+            p3d = self.editorPart.ViewToModel(point)
+            oldRect = self.editorPart.basePointView.GetRepaintBounds()
+            self.editorPart.GetParent().basePoint.point = p3d
+            self.editorPart.GetParent().SetBasePoint( \
+                self.editorPart.GetParent().basePoint)
+            
+        self.pressed = False
+    
+    
+    def OnMouseDrag(self, event):
+        pass # Implement it - snapping
