@@ -119,12 +119,21 @@ class PlanePart(wx.ScrolledWindow):
         
         
     def SetBasePoint(self, basePoint):
+        (vx, vy) = self.GetViewStart()
+        (ux, uy) = self.GetScrollPixelsPerUnit()
+        
         oldView = self.basePointView
         self.basePointView = ui.views.BasePointView(basePoint)
         if oldView != None:
-            self.RefreshRect(oldView.GetRepaintBounds(), False)
+            oldRect = oldView.GetRepaintBounds()
+            oldRect.x -= vx * ux 
+            oldRect.y -= vy * uy 
+            self.RefreshRect(oldRect, False)
         self.ComputeMinMax(True)
-        self.RefreshRect(self.basePointView.GetRepaintBounds(), False)
+        newRect = self.basePointView.GetRepaintBounds()
+        newRect.x -= vx * ux
+        newRect.y -= vy * uy
+        self.RefreshRect(newRect, False)
 
 
     def __AddView(self, element):
@@ -628,7 +637,6 @@ class BasePointMover:
         
         if self.pressed:
             p3d = self.editorPart.ViewToModel(point)
-            oldRect = self.editorPart.basePointView.GetRepaintBounds()
             self.editorPart.GetParent().basePoint.point = p3d
             self.editorPart.GetParent().SetBasePoint( \
                 self.editorPart.GetParent().basePoint)
