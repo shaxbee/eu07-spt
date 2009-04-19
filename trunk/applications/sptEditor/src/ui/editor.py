@@ -129,11 +129,19 @@ class PlanePart(wx.ScrolledWindow):
             oldRect.x -= vx * ux 
             oldRect.y -= vy * uy 
             self.RefreshRect(oldRect, False)
-        self.ComputeMinMax(True)
-        newRect = self.basePointView.GetRepaintBounds()
-        newRect.x -= vx * ux
-        newRect.y -= vy * uy
-        self.RefreshRect(newRect, False)
+        needed = self.ComputeMinMax(False)        
+        if needed:            
+            size = self.ComputePreferredSize()
+            self.SetVirtualSize(size)            
+            self.Refresh()
+        else:
+            # Scale base point view
+            self.basePointView.Scale(self.scale, self.minX, self.maxX, \
+                                     self.minY, self.maxY)
+            newRect = self.basePointView.GetRepaintBounds()
+            newRect.x -= vx * ux
+            newRect.y -= vy * uy
+            self.RefreshRect(newRect, False)
 
 
     def __AddView(self, element):
@@ -150,8 +158,8 @@ class PlanePart(wx.ScrolledWindow):
         Computes bounds of scenery expressed in scenery coordinates.
         """
         nMinX = -1000.0
-        nMinY = 1000.0
-        nMaxX = -1000.0
+        nMinY = -1000.0
+        nMaxX = 1000.0
         nMaxY = 1000.0
 
         # tracks
@@ -182,7 +190,7 @@ class PlanePart(wx.ScrolledWindow):
             self.minY = min(self.minY, nMinY)
             self.maxX = max(self.maxX, nMaxX)
             self.maxY = max(self.maxY, nMaxY)
-
+            
             self.__ScaleAll(self.scale)
 
             return True
@@ -219,7 +227,7 @@ class PlanePart(wx.ScrolledWindow):
         of scenery coordinates.
         """
         p3d = (float((point[0]-100)/self.scale * SCALE_FACTOR + self.minX), \
-            -float((point[1]-100)/self.scale * SCALE_FACTOR + self.minY), \
+            -float((point[1]-100)/self.scale * SCALE_FACTOR - self.maxY), \
             0.0)
         return p3d
 
@@ -230,7 +238,7 @@ class PlanePart(wx.ScrolledWindow):
         UI editor coordinates.
         """        
         p2d = (int((point[0] - self.minX) * self.scale / SCALE_FACTOR + 100), \
-            int((-point[2] - self.minY) * self.scale / SCALE_FACTOR + 100))
+            int((-point[1] + self.maxY) * self.scale / SCALE_FACTOR + 100))
         return p2d
 
 
@@ -381,10 +389,11 @@ class PlanePart(wx.ScrolledWindow):
     def PaintTracks(self, dc, clip):
         """
         Paint rail tracks.
-        """
+        """        
         oldPen = dc.GetPen()
         try:
-            dc.SetPen(wx.Pen((34, 139, 34), 3))
+            dc.SetPen(wx.Pen((34, 139, 34), \
+                3 if self.scale >= 1000.0 else 1))
             for v in self.trackCache:
                 v.Draw(dc, clip)
         finally:
@@ -397,7 +406,8 @@ class PlanePart(wx.ScrolledWindow):
         """
         oldPen = dc.GetPen()
         try:
-            dc.SetPen(wx.Pen((255, 153, 153), 3))
+            dc.SetPen(wx.Pen((255, 153, 153), \
+                3 if self.scale >= 1000.0 else 1))
             for v in self.switchCache:
                 v.Draw(dc, clip)
         finally:
@@ -517,7 +527,7 @@ class Ruler(wx.Control):
                     label = "%d" % p3x                    
                     (tw, th) = dc.GetTextExtent(label)
                     if x >= clip.x-tw/2-1 and x <= clip.x+clip.width+tw/2+1:
-                        dc.DrawText(label, x-tw/2, 15-th)
+                        dc.DrawText(label, x - tw/2, 15 - th)
                         dc.DrawLine(x, 16, x, clip.height)
                     x += 100
 

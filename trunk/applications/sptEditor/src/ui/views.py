@@ -105,17 +105,17 @@ class TrackView(View):
         factor = float(scale / ui.editor.SCALE_FACTOR)
         
         self.curve[0].x = (self.track.p1[0] - oMinX) * factor + 100
-        self.curve[0].y = (-self.track.p1[1] - oMinY) * factor + 100
+        self.curve[0].y = (-self.track.p1[1] + oMaxY) * factor + 100
         self.curve[3].x = (self.track.p2[0] - oMinX) * factor + 100
-        self.curve[3].y = (-self.track.p2[1] - oMinY) * factor + 100
+        self.curve[3].y = (-self.track.p2[1] + oMaxY) * factor + 100
         
         self.curve[1].x = (self.track.p1[0] + self.track.v1[0] - oMinX) \
             * factor + 100;
-        self.curve[1].y = (-self.track.p1[1] - self.track.v1[1] - oMinY) \
+        self.curve[1].y = (-self.track.p1[1] - self.track.v1[1] + oMaxY) \
             * factor + 100;
         self.curve[2].x = (self.track.p2[0] + self.track.v2[0] - oMinX) \
             * factor + 100;
-        self.curve[2].y = (-self.track.p2[1] - self.track.v2[1] - oMinY) \
+        self.curve[2].y = (-self.track.p2[1] - self.track.v2[1] + oMaxY) \
             * factor + 100;        
         
     
@@ -174,31 +174,31 @@ class RailSwitchView(View):
         factor = float(scale / ui.editor.SCALE_FACTOR);
       
         self.straight[0].x = (self.switch.pc[0] - oMinX) * factor + 100;
-        self.straight[0].y = (-self.switch.pc[1] - oMinY) * factor + 100;
+        self.straight[0].y = (-self.switch.pc[1] + oMaxY) * factor + 100;
         self.straight[3].x = (self.switch.p1[0] - oMinX) * factor + 100;
-        self.straight[3].y = (-self.switch.p1[1] - oMinY) * factor + 100;
+        self.straight[3].y = (-self.switch.p1[1] + oMaxY) * factor + 100;
       
         self.straight[1].x = (self.switch.pc[0] + self.switch.vc1[0]-oMinX) \
             * factor + 100;
-        self.straight[1].y = (-self.switch.pc[1] - self.switch.vc1[1]-oMinY) \
+        self.straight[1].y = (-self.switch.pc[1] - self.switch.vc1[1]+oMaxY) \
             * factor + 100;
         self.straight[2].x = (self.switch.p1[0] + self.switch.v1[0]-oMinX) \
             * factor + 100;
-        self.straight[2].y = (-self.switch.p1[1] - self.switch.v1[1]-oMinY) \
+        self.straight[2].y = (-self.switch.p1[1] - self.switch.v1[1]+oMaxY) \
             * factor + 100;
       
         self.diverging[0].x = (self.switch.pc[0] - oMinX) * factor + 100;
-        self.diverging[0].y = (-self.switch.pc[1] - oMinY) * factor + 100;
+        self.diverging[0].y = (-self.switch.pc[1] + oMaxY) * factor + 100;
         self.diverging[3].x = (self.switch.p2[0] - oMinX) * factor + 100;
-        self.diverging[3].y = (-self.switch.p2[1] - oMinY) * factor + 100;
+        self.diverging[3].y = (-self.switch.p2[1] + oMaxY) * factor + 100;
       
         self.diverging[1].x = (self.switch.pc[0] + self.switch.vc2[0]-oMinX) \
             * factor + 100;
-        self.diverging[1].y = (-self.switch.pc[1] - self.switch.vc2[1]-oMinY) \
+        self.diverging[1].y = (-self.switch.pc[1] - self.switch.vc2[1]+oMaxY) \
             * factor + 100;
         self.diverging[2].x = (self.switch.p2[0] + self.switch.v2[0]-oMinX) \
             * factor + 100;
-        self.diverging[2].y = (-self.switch.p2[1] - self.switch.v2[1]-oMinY) \
+        self.diverging[2].y = (-self.switch.p2[1] - self.switch.v2[1]+oMaxY) \
             * factor + 100;
     
     
@@ -248,7 +248,7 @@ class BasePointView(View):
         factor = float(scale / ui.editor.SCALE_FACTOR)
         
         self.point.x = int((self.basePoint.point[0] - oMinX) * factor) + 100
-        self.point.y = int((-self.basePoint.point[1] - oMinY) * factor) + 100
+        self.point.y = int((-self.basePoint.point[1] + oMaxY) * factor) + 100
 
 
     def Draw(self, dc, clip):
