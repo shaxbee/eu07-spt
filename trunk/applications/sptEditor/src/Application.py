@@ -240,6 +240,15 @@ class MainWindow(wx.Frame):
                     self.UpdateTitle()
                 finally:
                     wx.EndBusyCursor()
+            except yaml.YAMLError, inst:
+                logging.warning("Error while parsing scenery file:")
+                mark_str = ""
+                if hasattr(inst, "problem_mark"):
+                    mark = inst.problem_mark
+                    mark_str = "Line: %d, Column: %d" % (mark.line+1, mark.column+1)
+                wx.MessageBox("Error while parsing scenery file:\n" \
+                    + inst.problem + "\n" + mark_str, \
+                    "Parsing error", wx.OK | wx.ICON_ERROR, self)
             except Exception, inst:
                 logging.exception("Error while reading scenery file:")
                 wx.MessageBox("Error while reading scenery file:\n" \
@@ -282,7 +291,8 @@ class MainWindow(wx.Frame):
 
             return True
         except Exception, inst:
-            logging.exception("Error while writing scenery into file:")
+            logging.exception("Error while writing scenery into file:" \
+                + path)
             wx.MessageBox("Error while writing scenery into file:\n" \
                 + str(inst), \
                 "Save file error", wx.OK | wx.ICON_ERROR, self)
