@@ -76,21 +76,7 @@ public:
         TS_ASSERT_THROWS(_switch.getPath(osg::Vec3f(0.0f, 0.0f, 1.0f)), RailTracking::UnknownEntryException);
        
     };
-    
-    void testReverse()
-    {
-        
-        _switch.setPosition(Switch::STRAIGHT);        
-        
-        // _begin, _straight -> _straight, _begin
-        TS_ASSERT_EQUALS(_switch.getPath(_begin), _switch.reverse(_switch.getPath(_straight)));
-        // _begin, _straight != _begin -> _straight
-        TS_ASSERT_DIFFERS(_switch.getPath(_begin), _switch.reverse(_switch.getPath(_begin)));
-        // _diverted, _begin != _straight -> _begin
-        TS_ASSERT_DIFFERS(_switch.getPath(_diverted), _switch.reverse(_switch.getPath(_begin)));
-        
-    };
-
+   
 private:
     osg::Vec3 _begin;
     osg::Vec3 _straight;

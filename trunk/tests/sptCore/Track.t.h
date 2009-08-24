@@ -33,13 +33,13 @@ public:
         
     };
     
-    void testReverse()
-    {
-        
-        TS_ASSERT_EQUALS(_track.getPath(_begin), _track.reverse(_track.getPath(_end)));
-        TS_ASSERT_DIFFERS(_track.getPath(_begin), _track.reverse(_track.getPath(_begin)));
-        
-    };
+//    void testReverse()
+//    {
+//        
+//        TS_ASSERT_EQUALS(_track.getPath(_begin), _track.reverse(_track.getPath(_end)));
+//        TS_ASSERT_DIFFERS(_track.getPath(_begin), _track.reverse(_track.getPath(_begin)));
+//        
+//    };
 
 private:
     osg::Vec3 _begin;

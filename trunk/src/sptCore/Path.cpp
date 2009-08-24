@@ -18,8 +18,11 @@ Path* Path::reverse() const
 }; // Path::reverse
 
 Path::Path(osg::Vec3 front, osg::Vec3 back):
-    _frontCP(back - front), _backCP(front - back)
+    _frontDir(back - front), _backDir(_frontDir), _length(_frontDir.length()), _frontRoll(0), _backRoll(0)
 {
+
+    _frontDir.normalize();
+    _backDir.normalize();
 
     reserve(2);
 
@@ -29,11 +32,16 @@ Path::Path(osg::Vec3 front, osg::Vec3 back):
 }; // Path::Path(front, back)
 
 Path::Path(osg::Vec3 front, osg::Vec3 frontCP, osg::Vec3 back, osg::Vec3 backCP, int steps, float frontRoll, float backRoll):
-    _frontCP(frontCP), _backCP(backCP), _frontRoll(frontRoll), _backRoll(backRoll)
+    _frontDir(frontCP - front), _backDir(-backCP + back), _length(0), _frontRoll(frontRoll), _backRoll(backRoll)
 {
-    
+
+    _frontDir.normalize();
+    _backDir.normalize();
+
     float delta = (float) 1 / (float) steps;
     reserve(steps);
+
+    osg::Vec3 previous(front);
 
     for(unsigned int i = 0; i <= steps; i++)
     {
@@ -49,22 +57,26 @@ Path::Path(osg::Vec3 front, osg::Vec3 frontCP, osg::Vec3 back, osg::Vec3 backCP,
             back    * (t * t * t)
         );
 
-    };    
+        const osg::Vec3 delta = this->back() - previous;
+        _length += delta.length();
+        previous = this->back();
+
+    };
     
 }; // Path::Path(front, frontCP, back, backCP, steps)
 
 Path::Pair Path::straight(osg::Vec3 front, osg::Vec3 back)
 {
 
-    osg::ref_ptr<Path> path = new Path(front, back);
-    return Pair(path, osg::ref_ptr<Path>(path->reverse()));
+    Path* path = new Path(front, back);
+    return Pair(path, path->reverse());
 
 }; // Path::straight
 
 Path::Pair Path::bezier(osg::Vec3 front, osg::Vec3 frontCP, osg::Vec3 back, osg::Vec3 backCP, int steps)
 {
 
-    osg::ref_ptr<Path> path = new Path(front, frontCP, back, backCP, steps);
-    return Pair(path, osg::ref_ptr<Path>(path->reverse()));
+    Path* path = new Path(front, frontCP, back, backCP, steps);
+    return Pair(path, path->reverse());
 
 }; // Path::bezier

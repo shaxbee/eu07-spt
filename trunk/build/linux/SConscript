@@ -1,7 +1,8 @@
+import os
+
 Import('env')
 
-variant = GetOption('variant')
-
-#SConscript(os.path.join(variant, 'SConscript'))
+#variant = GetOption('variant')
+#env = SConscript(os.path.join(variant, 'SConscript'), exports=['env'])
 
 Return('env')

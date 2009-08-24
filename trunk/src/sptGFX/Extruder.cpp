@@ -1,63 +1,102 @@
 #include "sptGFX/Extruder.h"
 
+#include <iostream>
+#include <osgUtil/SmoothingVisitor>
+
 using namespace sptGFX;
 
-osg::Geometry* Extruder::createGeometry(sptCore::Path* path, const osg::Vec3& offset)
+void Extruder::setGeometry(osg::Geometry* geometry)
 {
 
-    osg::Geometry* geometry = new osg::Geometry;
+    _geometry = geometry;
 
-    osg::Vec3Array* vertices = new osg::Vec3Array;
-    geometry->setVertexArray(vertices);
+    _vertices = static_cast<osg::Vec3Array*>(geometry->getVertexArray());
+    _texCoords = static_cast<osg::Vec2Array*>(geometry->getTexCoordArray(0));
 
-    int numProfileVerts = _profile->getNumElements();
-    vertices->reserve(numProfileVerts * path->size());
+};
 
-    osg::Vec3Array::iterator iter = path->begin();
-    osg::Vec3 prev = *iter;
+void Extruder::extrude(sptCore::Path& path, const osg::Vec3& position, const osg::Vec3& offset, double texCoordOffset)
+{
 
-    for(iter; iter != path->end(); iter++)
+    size_t numProfileVerts = _profile->getVertexArray()->getNumElements();
+    size_t numPathVerts = path.getNumElements();
+
+    // resize vertices and texture coordinate arrays
     {
 
-        osg::Vec3 dir = *iter - prev;
-        transformProfile(dir, prev + offset, vertices); 
+        size_t numVerts = numProfileVerts * numPathVerts;
 
-        prev = *iter;
+        _vertices->reserve(_vertices->size() + numVerts);
+        _texCoords->reserve(_texCoords->size() + numVerts);
+
+    }
+
+    double texCoordY = texCoordOffset;
+
+    // first profile
+    transformProfile(path.front(), offset, path.frontDir(), texCoordY);
+
+    osg::Vec3 prev = path.front();
+
+    // profiles from second
+    for(size_t row = 1; row < numPathVerts - 1; row++)
+    {
+
+        osg::Vec3 point = path[row]; 
+        osg::Vec3 direction = point - prev;
+        texCoordY += direction.length();
+
+        transformProfile(point, offset, direction, texCoordY);
+
+        prev = point;
 
     };
 
+    // last profile
+    texCoordY += (path.back() - prev).length(); 
+    transformProfile(path.back(), offset, path.backDir(), texCoordY);
 
-    for(int index=0; index <= path->getNumElements(); index++)
+    // create faces index arrays
+    for(size_t face = 0; face < numProfileVerts - _ignoredFaces - 1; face++)
     {
 
-        geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINE_LOOP, index * numProfileVerts, numProfileVerts));
+        osg::DrawElementsUInt* primitiveSet = new osg::DrawElementsUInt(GL_TRIANGLE_STRIP, numPathVerts * 2);
+            
+        for(size_t row=0; row < numPathVerts; row++)
+        {
+            size_t index = row * (numProfileVerts - _ignoredFaces) + face;
+
+            std::cout << index << " " << index + 1 << std::endl;
+
+            primitiveSet->push_back(index);
+            primitiveSet->push_back(index + 1);
+        };
+
+        _geometry->addPrimitiveSet(primitiveSet);
 
     };
 
-    // set the colors as before, plus using the above
-    osg::Vec4Array* colors = new osg::Vec4Array;
-    colors->push_back(osg::Vec4(1.0f,1.0f,0.0f,1.0f));
-    geometry->setColorArray(colors);
-    geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
-                     
-    // set the normal in the same way color.
-    osg::Vec3Array* normals = new osg::Vec3Array;
-    normals->push_back(osg::Vec3(0.0f,-1.0f,0.0f));
-    geometry->setNormalArray(normals);
-    geometry->setNormalBinding(osg::Geometry::BIND_OVERALL); 
-
-    return geometry;
+    std::cout << numProfileVerts << " " << _vertices->getNumElements() << " " << (numProfileVerts - _ignoredFaces) * numPathVerts << std::endl;
 
 }; // Extruder::createPrimitiveSet
 
-void Extruder::transformProfile(osg::Vec3 dir, const osg::Vec3& offset, osg::Vec3Array* output)
+void Extruder::transformProfile(const osg::Vec3& position, const osg::Vec3& offset, osg::Vec3 direction, double texCoordY)
 {
 
-    dir.normalize();
+    osg::Vec3Array& profileVertices = static_cast<osg::Vec3Array&>(*(_profile->getVertexArray()));
+    osg::Vec2Array& profileTexCoords = static_cast<osg::Vec2Array&>(*(_profile->getTexCoordArray(0)));
 
-    osg::Matrix transform = osg::Matrix::rotate(osg::Vec3(0.0f, 0.0f, 1.0f), dir);
+    direction.normalize();
 
-    for(osg::Vec3Array::iterator iter = _profile->begin(); iter != _profile->end(); iter++)
-        output->push_back(*iter * transform + offset);
+    osg::Quat transform;
+    transform.makeRotate(osg::X_AXIS, direction);
+
+    for(size_t index = 0; index < profileVertices.getNumElements() - _ignoredFaces; index++)
+    {
+
+        _vertices->push_back(transform * (profileVertices[index] + offset) + position);
+        _texCoords->push_back(profileTexCoords[index] + osg::Vec2(0, texCoordY));
+
+    };
 
 };

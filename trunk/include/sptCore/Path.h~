@@ -34,7 +34,7 @@ public:
     static Pair bezier(osg::Vec3 front, osg::Vec3 frontCP, osg::Vec3 back, osg::Vec3 backCP, int steps);
 
 private:
-    Path() : osg::Vec3Array() { }
+    Path() { } : osg::Vec3Array() { }
 
     osg::Vec3 _frontDir;
     osg::Vec3 _backDir;

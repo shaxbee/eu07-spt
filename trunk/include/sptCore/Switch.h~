@@ -27,8 +27,8 @@ public:
     virtual osg::Vec3 getExit(const osg::Vec3& entry) const;
     virtual Path* getPath(const osg::Vec3& entry) const;
 
-    virtual void enter(Follower* follower, const osg::Vec3& entry) { };
-    virtual void leave(Follower* follower, const osg::Vec3& entry) { };
+    virtual void enter(Follower* follower) { };
+    virtual void leave(Follower* follower) { };
 
     Position getPosition() const { return _position; }
     void setPosition(Position position) { _position = position; }
