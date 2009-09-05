@@ -6,12 +6,14 @@ Module containing main UI classes of scenery editor control.
 
 import datetime
 import logging
+from decimal import Decimal
 
 import wx
 from wx.lib.evtmgr import eventManager
 
 import model.tracks
 import ui.views
+from sptmath import Vec3
 
 SCALE_FACTOR = 1000.0
 
@@ -43,7 +45,7 @@ class SceneryEditor(wx.Panel):
         
         self.SetSizer(sizer)
         
-        self.SetBasePoint(BasePoint((0.0, 0.0, 0.0), 0.0, 0.0))
+        self.SetBasePoint(BasePoint(Vec3(), 0.0, 0.0))
 
 
     def SetScenery(self, scenery):
@@ -226,9 +228,9 @@ class PlanePart(wx.ScrolledWindow):
         Converts 2D point of UI editor coordinates into 3D point
         of scenery coordinates.
         """
-        p3d = (float((point[0]-100)/self.scale * SCALE_FACTOR + self.minX), \
-            -float((point[1]-100)/self.scale * SCALE_FACTOR - self.maxY), \
-            0.0)
+        p3d = Vec3(Decimal(str((point[0]-100)/self.scale * SCALE_FACTOR + self.minX)), \
+            Decimal(str(-((point[1]-100)/self.scale * SCALE_FACTOR - self.maxY))), \
+            Decimal(0))
         return p3d
 
 
@@ -237,8 +239,8 @@ class PlanePart(wx.ScrolledWindow):
         Converts 3D point of scenery coordiante into 2D point of
         UI editor coordinates.
         """        
-        p2d = (int((point[0] - self.minX) * self.scale / SCALE_FACTOR + 100), \
-            int((-point[1] + self.maxY) * self.scale / SCALE_FACTOR + 100))
+        p2d = (int((float(point.x) - self.minX) * self.scale / SCALE_FACTOR + 100), \
+            int((-float(point.y) + self.maxY) * self.scale / SCALE_FACTOR + 100))
         return p2d
 
 
@@ -319,7 +321,7 @@ class PlanePart(wx.ScrolledWindow):
         """
         Paints a grid.
         """
-        center2D = self.ModelToView((0.0, 0.0, 0.0))
+        center2D = self.ModelToView(Vec3())
 
         xoffset = clip.x + clip.width
         yoffset = clip.y + clip.height
@@ -434,10 +436,10 @@ class PlanePart(wx.ScrolledWindow):
         """
         opoint = event.GetPosition()
         point = self.CalcUnscrolledPosition(event.GetPosition())
-        (a, b, c) = self.ViewToModel(point)
+        p3d = self.ViewToModel(point)
 
         bar = self.GetParent().GetParent().GetStatusBar()
-        bar.SetStatusText("%.3f, %.3f, %.3f" % (a, b, c))
+        bar.SetStatusText("%.3f, %.3f, %.3f" % (p3d.x, p3d.y, p3d.z))
 
         self.GetParent().topRuler.UpdateMousePointer(opoint)
         self.GetParent().leftRuler.UpdateMousePointer(opoint)
@@ -509,9 +511,9 @@ class Ruler(wx.Control):
 
                 y = -(self.offset * unitY % 100)
                 while y < h:
-                    (p3x, p3y, p3z) = part.ViewToModel((p2x, \
+                    p3d = part.ViewToModel((p2x, \
                         y + self.offset * unitY))
-                    label = "%d" % p3y
+                    label = "%d" % p3d.y
                     (tw, th) = dc.GetTextExtent(label)
                     if y >= clip.y-tw/2-1 and y <= clip.y+clip.height+tw/2+1:
                         dc.DrawRotatedText(label, 15-th, y + tw/2, 90)
@@ -522,9 +524,9 @@ class Ruler(wx.Control):
 
                 x = -(self.offset * unitX % 100)
                 while x < w:
-                    (p3x, p3y, p3z) = part.ViewToModel( \
+                    p3d = part.ViewToModel( \
                          (x + self.offset*unitX, p2y))
-                    label = "%d" % p3x                    
+                    label = "%d" % p3d.x
                     (tw, th) = dc.GetTextExtent(label)
                     if x >= clip.x-tw/2-1 and x <= clip.x+clip.width+tw/2+1:
                         dc.DrawText(label, x - tw/2, 15 - th)
@@ -595,7 +597,7 @@ class BasePoint:
     additions to the scenery.    
     """
     
-    def __init__(self, p=(0.0, 0.0, 0.0), alpha = 0, beta = 0):
+    def __init__(self, p=Vec3(), alpha = 0, beta = 0):
         self.point = p
         self.alpha = alpha
         self.beta = beta
@@ -603,7 +605,7 @@ class BasePoint:
     
     def __repr__(self):
         return "BasePoint[point=(%.3f, %.3f, %.3f),alpha=%.2f,beta=%.2f]" % \
-           (self.point[0], self.point[1], self.point[2], \
+           (self.point.x, self.point.y, self.point.z, \
             self.alpha, self.beta)
     
     
@@ -656,3 +658,24 @@ class BasePointMover:
     
     def OnMouseDrag(self, event):
         pass # Implement it - snapping
+
+
+
+
+class SnapData:
+    """
+    Data object containing snap information.
+    """
+    
+    def __init__(self):
+        self.alpha = 0.0
+        self.beta = 0.0
+        self.p2d = (0, 0)
+        self.p3d = Vec3()
+        
+    
+    def __repr__(self):
+        return "SnapData[p2d=(%d,%d),p3d=(%.3f,%.3f,%.3f)," \
+            + "alpha=%.2f,beta=%.2f]" % (self.p2d[0], self.p2d[1], \
+            self.p3d.x. self.p3d.y, self.p3d.z, self.alpha, self.beta)
+

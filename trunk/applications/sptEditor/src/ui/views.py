@@ -6,6 +6,7 @@ Module containing views of scenery elements.
 
 import math
 import wx
+from decimal import Decimal
 
 import model.tracks
 import ui.editor
@@ -29,6 +30,7 @@ def loadImages(file, tiles):
 
 BASEPOINT_IMAGES = loadImages("basepoint.png", 72)
 
+SNAP_DISTANCE = 25
 
 
 
@@ -72,11 +74,26 @@ class View:
         Returns the bounds (rectangle) that this view occupies.
         """
         pass # Implement it
+
+
+
+
+class Snapable:
+    """
+    An instarface telling that view is snappable.
+    """
     
+    def GetSnapData(self, point):
+        """
+        For given editor point returns snap data object if snap is possible
+        for the point or not.
+        """
+        pass # Implement it
+
+
+
     
-    
-    
-class TrackView(View):
+class TrackView(View, Snapable):
     """
     View implementation for track.
     """
@@ -92,30 +109,30 @@ class TrackView(View):
     
     
     def GetMinMax(self):
-        xspan = [self.track.p1[0], self.track.p2[0], \
-                     self.track.p1[0] + self.track.v1[0], \
-                     self.track.p2[0] + self.track.v2[0]]
-        yspan = [self.track.p1[1], self.track.p2[1], \
-                     self.track.p1[1] + self.track.v1[1], \
-                     self.track.p2[1] + self.track.v2[1]]
-        return (min(xspan), max(xspan), min(yspan), max(yspan)) 
+        xspan = [self.track.p1.x, self.track.p2.x, \
+                     self.track.p1.x + self.track.v1.x, \
+                     self.track.p2.x + self.track.v2.x]
+        yspan = [self.track.p1.y, self.track.p2.y, \
+                     self.track.p1.y + self.track.v1.y, \
+                     self.track.p2.y + self.track.v2.y]
+        return (min(float(xspan)), max(float(xspan)), min(float(yspan)), max(float(yspan))) 
     
     
     def Scale(self, scale, oMinX, oMaxX, oMinY, oMaxY):
         factor = float(scale / ui.editor.SCALE_FACTOR)
         
-        self.curve[0].x = (self.track.p1[0] - oMinX) * factor + 100
-        self.curve[0].y = (-self.track.p1[1] + oMaxY) * factor + 100
-        self.curve[3].x = (self.track.p2[0] - oMinX) * factor + 100
-        self.curve[3].y = (-self.track.p2[1] + oMaxY) * factor + 100
+        self.curve[0].x = (float(self.track.p1.x) - oMinX) * factor + 100
+        self.curve[0].y = (-float(self.track.p1.y) + oMaxY) * factor + 100
+        self.curve[3].x = (float(self.track.p2.x) - oMinX) * factor + 100
+        self.curve[3].y = (-float(self.track.p2.y) + oMaxY) * factor + 100
         
-        self.curve[1].x = (self.track.p1[0] + self.track.v1[0] - oMinX) \
+        self.curve[1].x = (float(self.track.p1.x) + float(self.track.v1.x) - oMinX) \
             * factor + 100;
-        self.curve[1].y = (-self.track.p1[1] - self.track.v1[1] + oMaxY) \
+        self.curve[1].y = (-float(self.track.p1.y) - float(self.track.v1.y) + oMaxY) \
             * factor + 100;
-        self.curve[2].x = (self.track.p2[0] + self.track.v2[0] - oMinX) \
+        self.curve[2].x = (float(self.track.p2.x) + float(self.track.v2.x) - oMinX) \
             * factor + 100;
-        self.curve[2].y = (-self.track.p2[1] - self.track.v2[1] + oMaxY) \
+        self.curve[2].y = (-float(self.track.p2.y) - float(self.track.v2.y) + oMaxY) \
             * factor + 100;        
         
     
@@ -133,6 +150,23 @@ class TrackView(View):
         t = min(yspan)
         b = max(yspan)
         return wx.Rect(l, t, r-l, b-t)
+
+
+    def GetSnapData(self, point):
+        p1x = self.curve[0].x - point.x
+        p1y = self.curve[0].y - point.y
+        p2x = self.curve[3].x - point.x
+        p2y = self.curve[3].y - point.y
+        if p1x * p1x + p1y * p1y <= SNAP_DISTANCE:
+            data = ui.editor.SnapData()
+            data.p2d = self.curve[0]
+            data.p3d = self.track.p1
+        elif p2x * p2x + p2y * p2y <= SNAP_DISTANCE:
+            data = ui.editor.SnapData()
+            data.p2d = self.curve[3]
+            data.p3d = self.track.p2
+        else:
+            return None
 
 
 
@@ -155,50 +189,50 @@ class RailSwitchView(View):
     
     
     def GetMinMax(self):
-        xspan = [self.switch.p1[0], self.switch.p2[0], \
-                     self.switch.p1[0] + self.switch.v1[0], \
-                     self.switch.p2[0] + self.switch.v2[0], \
-                     self.switch.pc[0], \
-                     self.switch.pc[0] + self.switch.vc1[0], \
-                     self.switch.pc[0] + self.switch.vc2[0]]
-        yspan = [self.switch.p1[1], self.switch.p2[1], \
-                     self.switch.p1[1] + self.switch.v1[1], \
-                     self.switch.p2[1] + self.switch.v2[1], \
-                     self.switch.pc[1], \
-                     self.switch.pc[1] + self.switch.vc1[1], \
-                     self.switch.pc[1] + self.switch.vc2[1]]
-        return (min(xspan), max(xspan), min(yspan), max(yspan))
+        xspan = [self.switch.p1.x, self.switch.p2.x, \
+                     self.switch.p1.x + self.switch.v1.x, \
+                     self.switch.p2.x + self.switch.v2.x, \
+                     self.switch.pc.x, \
+                     self.switch.pc.x + self.switch.vc1.x, \
+                     self.switch.pc.x + self.switch.vc2.x]
+        yspan = [self.switch.p1.y, self.switch.p2.y, \
+                     self.switch.p1.y + self.switch.v1.y, \
+                     self.switch.p2.y + self.switch.v2.y, \
+                     self.switch.pc.y, \
+                     self.switch.pc.y + self.switch.vc1.y, \
+                     self.switch.pc.y + self.switch.vc2.y]
+        return (min(float(xspan)), max(float(xspan)), min(float(yspan)), max(float(yspan)))
     
     
     def Scale(self, scale, oMinX, oMaxX, oMinY, oMaxY):
         factor = float(scale / ui.editor.SCALE_FACTOR);
       
-        self.straight[0].x = (self.switch.pc[0] - oMinX) * factor + 100;
-        self.straight[0].y = (-self.switch.pc[1] + oMaxY) * factor + 100;
-        self.straight[3].x = (self.switch.p1[0] - oMinX) * factor + 100;
-        self.straight[3].y = (-self.switch.p1[1] + oMaxY) * factor + 100;
+        self.straight[0].x = (float(self.switch.pc.x) - oMinX) * factor + 100;
+        self.straight[0].y = (-float(self.switch.pc.y) + oMaxY) * factor + 100;
+        self.straight[3].x = (float(self.switch.p1.x) - oMinX) * factor + 100;
+        self.straight[3].y = (-float(self.switch.p1.y) + oMaxY) * factor + 100;
       
-        self.straight[1].x = (self.switch.pc[0] + self.switch.vc1[0]-oMinX) \
+        self.straight[1].x = (float(self.switch.pc.x) + float(self.switch.vc1.x)-oMinX) \
             * factor + 100;
-        self.straight[1].y = (-self.switch.pc[1] - self.switch.vc1[1]+oMaxY) \
+        self.straight[1].y = (-float(self.switch.pc.y) - float(self.switch.vc1.y)+oMaxY) \
             * factor + 100;
-        self.straight[2].x = (self.switch.p1[0] + self.switch.v1[0]-oMinX) \
+        self.straight[2].x = (float(self.switch.p1.x) + float(self.switch.v1.x)-oMinX) \
             * factor + 100;
-        self.straight[2].y = (-self.switch.p1[1] - self.switch.v1[1]+oMaxY) \
+        self.straight[2].y = (-float(self.switch.p1.y) - float(self.switch.v1.y)+oMaxY) \
             * factor + 100;
       
-        self.diverging[0].x = (self.switch.pc[0] - oMinX) * factor + 100;
-        self.diverging[0].y = (-self.switch.pc[1] + oMaxY) * factor + 100;
-        self.diverging[3].x = (self.switch.p2[0] - oMinX) * factor + 100;
-        self.diverging[3].y = (-self.switch.p2[1] + oMaxY) * factor + 100;
+        self.diverging[0].x = (float(self.switch.pc.x) - oMinX) * factor + 100;
+        self.diverging[0].y = (-float(self.switch.pc.y) + oMaxY) * factor + 100;
+        self.diverging[3].x = (float(self.switch.p2.x) - oMinX) * factor + 100;
+        self.diverging[3].y = (-float(self.switch.p2.y) + oMaxY) * factor + 100;
       
-        self.diverging[1].x = (self.switch.pc[0] + self.switch.vc2[0]-oMinX) \
+        self.diverging[1].x = (float(self.switch.pc.x) + float(self.switch.vc2.x)-oMinX) \
             * factor + 100;
-        self.diverging[1].y = (-self.switch.pc[1] - self.switch.vc2[1]+oMaxY) \
+        self.diverging[1].y = (-float(self.switch.pc.y) - float(self.switch.vc2.y)+oMaxY) \
             * factor + 100;
-        self.diverging[2].x = (self.switch.p2[0] + self.switch.v2[0]-oMinX) \
+        self.diverging[2].x = (float(self.switch.p2.x) + float(self.switch.v2.x)-oMinX) \
             * factor + 100;
-        self.diverging[2].y = (-self.switch.p2[1] - self.switch.v2[1]+oMaxY) \
+        self.diverging[2].y = (-float(self.switch.p2.y) - float(self.switch.v2.y)+oMaxY) \
             * factor + 100;
     
     
@@ -240,15 +274,15 @@ class BasePointView(View):
     
     
     def GetMinMax(self):
-        return (self.basePoint.point[0], self.basePoint.point[0], \
-                self.basePoint.point[1], self.basePoint.point[1])
-    
+        x = float(self.basePoint.point.x)
+        y = float(self.basePoint.point.y)
+   	return (x, x, y, y) 
     
     def Scale(self, scale, oMinX, oMaxX, oMinY, oMaxY):
         factor = float(scale / ui.editor.SCALE_FACTOR)
         
-        self.point.x = int((self.basePoint.point[0] - oMinX) * factor) + 100
-        self.point.y = int((-self.basePoint.point[1] + oMaxY) * factor) + 100
+        self.point.x = int(((float(self.basePoint.point.x) - oMinX) * factor) + 100)
+        self.point.y = int(((-float(self.basePoint.point.y) + oMaxY) * factor) + 100)
 
 
     def Draw(self, dc, clip):
@@ -276,5 +310,5 @@ class BasePointView(View):
         """
         x = self.point.x - point.x
         y = self.point.y - point.y
-        return (x*x + y*y) <= 25
+        return (x*x + y*y) <= SNAP_DISTANCE
 

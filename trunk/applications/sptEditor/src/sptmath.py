@@ -5,6 +5,53 @@ Module containing dedicated math operations.
 '''
 
 import math
+from decimal import Decimal
+
+THREE_POINTS = Decimal('1.000')
+
+
+class Vec3:
+    """
+    A vector in 3D world.
+    It uses fixed decimal point coordinates. It stores three decimal places.
+    """
+
+    def __init__(self, x = Decimal(0), y = Decimal(0), z = Decimal(0)):
+        self.x = x
+        self.y = y
+        self.z = z
+
+    def __repr__(self):
+        return "(%.3f,%.3f,%.3f)" % (self.x, self.y, self.z)
+
+    def __eq__(self, other):
+        if other == self:
+            return True
+        if other == None:
+            return False
+        if not isinstance(other, Vec3):
+            return False
+        return self.x == other.x and self.y == other.y and self.z == other.z
+
+    def __setattr__(self, name, arg):
+        """
+        Setting x,y,z causes to quantize the value
+        """
+        if arg is None:
+           raise ValueError()
+        self.__dict__[name] = arg.quantize(THREE_POINTS)
+
+    def length(self):
+        """
+        The length of the vector.
+        """
+        return math.sqrt(self.x*self.x + self.y*self.y + self.z*self.z)
+
+    def dotProduct(self, other):
+        """
+        Dot product of this vector and another.
+        """
+        return self.x*other.x + self.y*other.y + self.z*other.z
 
 
 def dotProduct(a, b):

@@ -4,6 +4,8 @@ Created on 2009-03-04
 @author: adammo
 """
 
+from sptmath import Vec3
+
 class RailTracking(object):
     """
     Abstract class for rail tracking.
@@ -110,8 +112,7 @@ class Track(RailTracking):
     This is a track. Can be a straight track, an arc.
     """
 
-    def __init__(self, p1=(0.0, 0.0, 0.0), v1=(0.0, 0.0, 0.0), \
-        v2=(0.0, 0.0, 0.0), p2=(0.0, 0.0, 0.0)):
+    def __init__(self, p1=Vec3(), v1=Vec3(), v2=Vec3(), p2=Vec3()):
         """
         Constructor
         """
@@ -228,19 +229,19 @@ class Track(RailTracking):
         Gets a normal vector for given point
         """
         if point == self.p1:
-            if self.v1[0] == 0 and self.v1[1] == 0 and self.v1[2] == 0:
-                return (self.p1[0] - self.p2[0], \
-                        self.p1[1] - self.p2[1], \
-                        self.p1[2] - self.p2[2])
+            if self.v1.x == 0 and self.v1.y == 0 and self.v1.z == 0:
+                return Vec3(self.p1.x - self.p2.x, \
+                        self.p1.y - self.p2.y, \
+                        self.p1.z - self.p2.z)
             else:
-                return tuple(-x for x in self.v1)
+                return Vec3(-self.v1.x, -self.v1.y, -self.v1.z)
         elif point == self.p2:
-            if self.v2[0] == 0 and self.v2[1] == 0 and self.v2[2] == 0:
-                return (self.p2[0] - self.p1[0], \
-                        self.p2[1] - self.p1[1], \
-                        self.p2[2] - self.p1[2])
+            if self.v2.x == 0 and self.v2.y == 0 and self.v2.z == 0:
+                return Vec3(self.p2.x - self.p1.x, \
+                        self.p2.y - self.p1.y, \
+                        self.p2.z - self.p1.z)
             else:
-                return tuple(-x for x in self.v2)
+                return Vec3(-self.v2.x, -self.v2.y, -self.v2.z)
         else:
             return None
 
@@ -252,13 +253,13 @@ class Switch(RailTracking):
     Rail switch class.
     """
 
-    def __init__(self, pc=(0.0, 0.0, 0.0), \
-                       p1=(0.0, 0.0, 0.0), \
-                       p2=(0.0, 0.0, 0.0), \
-                       vc1=(0.0, 0.0, 0.0), \
-                       vc2=(0.0, 0.0, 0.0), \
-                       v1=(0.0, 0.0, 0.0), \
-                       v2=(0.0, 0.0, 0.0)):
+    def __init__(self, pc=Vec3(), \
+                       p1=Vec3(), \
+                       p2=Vec3(), \
+                       vc1=Vec3(), \
+                       vc2=Vec3(), \
+                       v1=Vec3(), \
+                       v2=Vec3()):
         """
         Creates a switch.
         """
@@ -396,24 +397,24 @@ class Switch(RailTracking):
 
     def getNormalVector(self, point):
         if point == self.pc:
-            if self.vc1[0] == 0 and self.vc1[1] == 0 and self.vc1[2] == 0:
-                return (self.pc[0] - self.p1[0], \
-                        self.pc[1] - self.p1[1], \
-                        self.pc[2] - self.p1[2])
+            if self.vc1.x == 0 and self.vc1.y == 0 and self.vc1.z == 0:
+                return (self.pc.x - self.p1.x, \
+                        self.pc.y - self.p1.y, \
+                        self.pc.z - self.p1.z)
             else:
                 return tuple(-x for x in self.vc1)
         elif point == self.p1:
-            if self.v1[0] == 0 and self.v1[1] == 0 and self.v1[2] == 0:
-                return (self.p1[0] - self.pc[0], \
-                        self.p1[1] - self.pc[1], \
-                        self.p2[2] - self.pc[2])
+            if self.v1.x == 0 and self.v1.y == 0 and self.v1.z == 0:
+                return (self.p1.x - self.pc.x, \
+                        self.p1.y - self.pc.y, \
+                        self.p2.z - self.pc.z)
             else:
                 return tuple(-x for x in self.v1)
         elif point == self.p2:
-            if self.v2[0] == 0 and self.v2[1] == 0 and self.v2[2] == 0:
-                return (self.p2[0] - self.pc[0], \
-                        self.p2[1] - self.pc[1], \
-                        self.p2[2] - self.p2[2])
+            if self.v2.x == 0 and self.v2.y == 0 and self.v2.z == 0:
+                return (self.p2.x - self.pc.x, \
+                        self.p2.y - self.pc.y, \
+                        self.p2.z - self.p2.z)
             else:
                 return tuple(-x for x in self.v2)
         else:
@@ -442,7 +443,7 @@ def coord2str(coord):
     Formats tuple (coordinate) into string.
     """
     return "(%(x).3f,%(y).3f,%(z).3f)" % \
-        {'x': coord[0], 'y': coord[1], 'z': coord[2]}
+        {'x': coord.x, 'y': coord.y, 'z': coord.z}
 
 
 def isDisconnected(tracking):

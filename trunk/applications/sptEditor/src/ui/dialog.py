@@ -6,8 +6,10 @@ This module contains all dialogs defined in editor application.
 
 import math
 import wx
+from decimal import Decimal
 
 import ui.editor
+from sptmath import Vec3
 
 
 class CenterAtDialog(wx.Dialog):
@@ -135,11 +137,11 @@ class BasePointDialog(wx.Dialog):
 
         sizer = wx.FlexGridSizer(5, 2, 5, 5)
        
-        self.x = wx.TextCtrl(panel, wx.ID_ANY, "%.3f" % basePoint.point[0], \
+        self.x = wx.TextCtrl(panel, wx.ID_ANY, "%.3f" % basePoint.point.x, \
                              style = wx.TE_RIGHT, name = "x")
-        self.y = wx.TextCtrl(panel, wx.ID_ANY, "%.3f" % basePoint.point[1], \
+        self.y = wx.TextCtrl(panel, wx.ID_ANY, "%.3f" % basePoint.point.y, \
                              style = wx.TE_RIGHT, name = "y")
-        self.z = wx.TextCtrl(panel, wx.ID_ANY, "%.3f" % basePoint.point[2], \
+        self.z = wx.TextCtrl(panel, wx.ID_ANY, "%.3f" % basePoint.point.z, \
                              style = wx.TE_RIGHT, name = "z")
         self.alpha = wx.TextCtrl(panel, wx.ID_ANY, "%.2f" % basePoint.alpha, \
                              style = wx.TE_RIGHT, name = "alpha")
@@ -168,14 +170,14 @@ class BasePointDialog(wx.Dialog):
         Sets the scroll to the editor part.
         '''
         try: 
-            px = float(self.x.GetValue())
-            py = float(self.y.GetValue())
-            pz = float(self.z.GetValue())
+            px = Decimal(self.x.GetValue())
+            py = Decimal(self.y.GetValue())
+            pz = Decimal(self.z.GetValue())
             alpha = float(self.alpha.GetValue())
             beta = float(self.beta.GetValue())
 
             editor = self.GetParent().editor
-            editor.SetBasePoint(ui.editor.BasePoint((px, py, pz), alpha, beta))
+            editor.SetBasePoint(ui.editor.BasePoint(Vec3(px, py, pz), alpha, beta))
             #(vx, vy) = editor.parts[0].ModelToView((px, py, pz))
             #editor.parts[0].CenterViewAt(vx, vy)
 

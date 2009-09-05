@@ -13,7 +13,7 @@ class Scenery:
     """ 
     Scenery defines world begin simulated.
     """
-
+    
     def __init__(self):
         self.listeners = []
         self.tracks = groups.RailContainer()
@@ -77,7 +77,7 @@ CHANGE_REMOVE = 2
 
 class SceneryEvent:
     """
-    This object encapsulate single modification of scenery.
+    This object encapsulates single modification of scenery.
 
     Note that class contract may be extended for example to several
     changes at once.
