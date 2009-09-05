@@ -7,4 +7,5 @@ applications = ['spt', 'sptEditor', 'sptServer']
 for application in applications:
     SConscript(
         os.path.join(application, 'SConscript'),
-        build_dir = os.path.join(buildDir, application))
+        build_dir = os.path.join(buildDir, application),
+        exports = ['env'])

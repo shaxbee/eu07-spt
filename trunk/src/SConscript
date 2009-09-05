@@ -12,7 +12,7 @@ libraries = ['sptCore', 'sptGFX']
 for library in libraries:
     SConscript(
         os.path.join(library, 'SConscript'), 
-        build_dir=os.path.join(os.path.join('#', buildDir), library),
+        build_dir=os.path.join('#', buildDir, library),
         exports=['env'])
 
 env.Alias('install', '#/lib')

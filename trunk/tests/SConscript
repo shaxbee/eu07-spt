@@ -3,6 +3,7 @@ import os.path
 Import('env buildDir')
 
 env = env.Clone(toolpath=['#/build/cxxtest'], tools=['default', 'cxxtest'])
+env.Append(CXXTEST='#/build/cxxtest')
 env.Append(CPPPATH=['#/build/cxxtest'])
 
 for library in ['sptCore']:

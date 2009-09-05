@@ -23,11 +23,12 @@ public:
 
     virtual Path* getDefaultPath() const { return NULL; };
 
-    virtual void enter(Follower* follower, const osg::Vec3& entry) { };
-    virtual void leave(Follower* follower, const osg::Vec3& entry) { };
+//    virtual void enter(Follower* follower, const osg::Vec3& entry) { };
+//    virtual void leave(Follower* follower, const osg::Vec3& entry) { };
 
 private:
-    Path::Pair _path;
+    Path* _forward;
+    Path* _backward;
 
 };
 

@@ -64,19 +64,3 @@ Path::Path(osg::Vec3 front, osg::Vec3 frontCP, osg::Vec3 back, osg::Vec3 backCP,
     };
     
 }; // Path::Path(front, frontCP, back, backCP, steps)
-
-Path::Pair Path::straight(osg::Vec3 front, osg::Vec3 back)
-{
-
-    Path* path = new Path(front, back);
-    return Pair(path, path->reverse());
-
-}; // Path::straight
-
-Path::Pair Path::bezier(osg::Vec3 front, osg::Vec3 frontCP, osg::Vec3 back, osg::Vec3 backCP, int steps)
-{
-
-    Path* path = new Path(front, frontCP, back, backCP, steps);
-    return Pair(path, path->reverse());
-
-}; // Path::bezier

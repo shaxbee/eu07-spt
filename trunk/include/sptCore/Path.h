@@ -28,11 +28,6 @@ public:
     float frontRoll() const { return _frontRoll; }
     float backRoll() const { return _backRoll; }
 
-    typedef std::pair<Path*, Path*> Pair;
-
-    static Pair straight(osg::Vec3 front, osg::Vec3 back);
-    static Pair bezier(osg::Vec3 front, osg::Vec3 frontCP, osg::Vec3 back, osg::Vec3 backCP, int steps);
-
 private:
     Path() : osg::Vec3Array() { }
 

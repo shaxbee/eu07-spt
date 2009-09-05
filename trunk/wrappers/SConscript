@@ -1,0 +1,16 @@
+import os.path
+
+Import('env buildDir')
+
+env = env.Clone(SHLIBPREFIX='', toolpath=['#/build/pypp'], tools=['default', 'pypp'])
+env.Append(CPPPATH = ['/usr/include/python2.5'])
+env.Append(LIBPATH = ['#/lib'])
+env.Append(CXXFLAGS=['-DBOOST_PYTHON_DYNAMIC_LIB'])
+
+libraries = ['sptCore']
+
+for library in libraries:
+    SConscript(
+        os.path.join(library, 'SConscript'),
+        build_dir = os.path.join('#', buildDir, 'python', library),
+        exports = ['env'])

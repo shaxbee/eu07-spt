@@ -38,5 +38,4 @@ SConscript('applications/SConscript')
 # unit tests
 SConscript('tests/SConscript')
 
-# documentation
-SConscript('doc/SConscript')
+SConscript('wrappers/SConscript')
