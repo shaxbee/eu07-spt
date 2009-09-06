@@ -115,7 +115,7 @@ class TrackView(View, Snapable):
         yspan = [self.track.p1.y, self.track.p2.y, \
                      self.track.p1.y + self.track.v1.y, \
                      self.track.p2.y + self.track.v2.y]
-        return (min(float(xspan)), max(float(xspan)), min(float(yspan)), max(float(yspan))) 
+        return (float(min(xspan)), float(max(xspan)), float(min(yspan)), float(max(yspan))) 
     
     
     def Scale(self, scale, oMinX, oMaxX, oMinY, oMaxY):
@@ -201,7 +201,7 @@ class RailSwitchView(View):
                      self.switch.pc.y, \
                      self.switch.pc.y + self.switch.vc1.y, \
                      self.switch.pc.y + self.switch.vc2.y]
-        return (min(float(xspan)), max(float(xspan)), min(float(yspan)), max(float(yspan)))
+        return (float(min(xspan)), float(max(xspan)), float(min(yspan)), float(max(yspan)))
     
     
     def Scale(self, scale, oMinX, oMaxX, oMinY, oMaxY):

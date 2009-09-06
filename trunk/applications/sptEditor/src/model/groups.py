@@ -96,8 +96,7 @@ class RailContainer:
                     v_child_normal = child.getNormalVector(gpoint)
                     
                     # Check if normal vectors may plug together
-                    if sptmath.isNegativeVector(v_tracking_normal, \
-                        v_child_normal):
+                    if sptmath.isNegativeVector(v_tracking_normal, v_child_normal):
 
                         # Check if connection to next rail tracking is empty
                         connInside = child.point2tracking(gpoint)

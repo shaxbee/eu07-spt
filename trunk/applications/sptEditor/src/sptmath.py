@@ -25,13 +25,14 @@ class Vec3:
         return "(%.3f,%.3f,%.3f)" % (self.x, self.y, self.z)
 
     def __eq__(self, other):
-        if other == self:
-            return True
         if other == None:
             return False
         if not isinstance(other, Vec3):
             return False
         return self.x == other.x and self.y == other.y and self.z == other.z
+
+    def __hash__(self):
+        return 37 + hash(self.x)*7 + hash(self.y)*11 + hash(self.z)*3
 
     def __setattr__(self, name, arg):
         """
@@ -51,28 +52,21 @@ class Vec3:
         """
         Dot product of this vector and another.
         """
-        return self.x*other.x + self.y*other.y + self.z*other.z
+        return float(self.x*other.x + self.y*other.y + self.z*other.z)
 
 
 def dotProduct(a, b):
     """
     Dot product of two vectors.
     """
-    return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]
-
-
-def length(a):
-    """
-    The length of the vector.
-    """
-    return math.sqrt(a[0]**2 + a[1]**2 + a[2]**2)
+    return float(a.x*b.x + a.y*b.y + a.z*b.z)
 
 
 def isNegativeVector(a, b):
     """
     Checks if a spin of vector a is negative to spin of vector b.
     """
-    cosinus = dotProduct(a, b) / (length(a) * length(b))
+    cosinus = dotProduct(a, b) / (a.length() * b.length())
     if cosinus < -1:
         cosinus = -1
     elif cosinus > 1:

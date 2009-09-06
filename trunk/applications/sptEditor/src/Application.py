@@ -19,6 +19,7 @@ import model.groups
 import model.scenery
 import ui.editor
 import ui.dialog
+import sptyaml
 
 # Stock items
 ID_CENTER_AT = wx.ID_HIGHEST + 1
@@ -31,7 +32,8 @@ class Application(wx.App):
     """
     
     def __init__(self):
-        wx.App.__init__(self)        
+        wx.App.__init__(self) 
+        sptyaml.configureYaml()
 
     
     def OnInit(self):
@@ -241,7 +243,7 @@ class MainWindow(wx.Frame):
                 finally:
                     wx.EndBusyCursor()
             except yaml.YAMLError, inst:
-                logging.warning("Error while parsing scenery file:")
+                logging.warning("Error while parsing scenery file: ", exc_info=inst)
                 mark_str = ""
                 if hasattr(inst, "problem_mark"):
                     mark = inst.problem_mark
@@ -428,7 +430,7 @@ if __name__ == "__main__":
     usage = "Usage: %prog [options]"
     parser = optparse.OptionParser(usage=usage)
     parser.add_option("-l", "--logging", action="store", type="string", \
-        dest="logging", help="Specfies configuration file of logging")
+        dest="logging", help="Specifies configuration file for logging subsystem")
     (options, leftover) = parser.parse_args(sys.argv)
     
     if options.logging != None:

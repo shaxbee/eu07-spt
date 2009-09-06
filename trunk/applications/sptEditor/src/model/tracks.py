@@ -398,25 +398,25 @@ class Switch(RailTracking):
     def getNormalVector(self, point):
         if point == self.pc:
             if self.vc1.x == 0 and self.vc1.y == 0 and self.vc1.z == 0:
-                return (self.pc.x - self.p1.x, \
+                return Vec3(self.pc.x - self.p1.x, \
                         self.pc.y - self.p1.y, \
                         self.pc.z - self.p1.z)
             else:
-                return tuple(-x for x in self.vc1)
+                return Vec3(-self.vc1.x, -self.vc1.y, -self.vc1.z)
         elif point == self.p1:
             if self.v1.x == 0 and self.v1.y == 0 and self.v1.z == 0:
-                return (self.p1.x - self.pc.x, \
+                return Vec3(self.p1.x - self.pc.x, \
                         self.p1.y - self.pc.y, \
                         self.p2.z - self.pc.z)
             else:
-                return tuple(-x for x in self.v1)
+                return Vec3(-self.v1.x, -self.v1.y, -self.v1.z)
         elif point == self.p2:
             if self.v2.x == 0 and self.v2.y == 0 and self.v2.z == 0:
-                return (self.p2.x - self.pc.x, \
+                return Vec3(self.p2.x - self.pc.x, \
                         self.p2.y - self.pc.y, \
                         self.p2.z - self.p2.z)
             else:
-                return tuple(-x for x in self.v2)
+                return Vec3(-self.v2.x, -self.v2.y, -self.v2.z)
         else:
             return None
 
