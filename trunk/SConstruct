@@ -35,7 +35,11 @@ SConscript('src/SConscript')
 # applications
 SConscript('applications/SConscript')
 
+# python wrappers
+# SConscript('wrappers/SConscript')
+
 # unit tests
 SConscript('tests/SConscript')
 
-SConscript('wrappers/SConscript')
+# documentation
+SConscript('doc/SConscript')

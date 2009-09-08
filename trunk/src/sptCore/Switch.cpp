@@ -3,11 +3,12 @@
 using namespace sptCore;
 
 Switch::Switch(osg::Vec3 p1, osg::Vec3 cp1, osg::Vec3 p2, osg::Vec3 cp2, osg::Vec3 p3, osg::Vec3 cp3, Switch::Position position):
-    _straight(Path::bezier(p1, cp1, p2, cp2, 32)),
-    _diverted(Path::bezier(p1, cp1, p3, cp3, 32)),
     _position(position)
 {
-
+    _straight.first = new Path(p1, cp1, p2, cp2, 32);
+    _straight.second = _straight.first->reverse();
+    _diverted.first = new Path(p1, cp1, p3, cp3, 32);
+    _diverted.second = _diverted.first->reverse();
 }; // Switch::Switch(p1, cp1, p2, cp2, p3, cp3)
 
 osg::Vec3 Switch::getExit(const osg::Vec3& entry) const

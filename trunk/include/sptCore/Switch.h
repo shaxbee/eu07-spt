@@ -39,8 +39,10 @@ public:
 protected:
     Position _position;
 
-    Path::Pair _straight;
-    Path::Pair _diverted;
+    typedef std::pair<Path*, Path*> PathPair;
+
+    PathPair _straight;
+    PathPair _diverted;
 
 }; // class Switch
 
