@@ -1,18 +1,15 @@
 #ifndef SPTCORE_SWITCH_H
 #define SPTCORE_SWITCH_H 1
 
-#include "sptCore/RailTracking.h"
-#include "sptCore/Path.h"
+#include <sptCore/SwitchableTracking.h>
 
 namespace sptCore
 {
 
-class Switch: public RailTracking
+class Switch: public SwitchableTracking
 {
 
 public:
-    typedef enum { STRAIGHT, DIVERTED } Position;
-
     //! Construct switch described by bezier path
     //! \param p1 common point
     //! \param cp1 common control vector
@@ -21,25 +18,22 @@ public:
     //! \param p3 end of diverted path
     //! \param cp3 diverted path control vector
     //! \param position initial position
-    Switch(osg::Vec3 p1, osg::Vec3 cp1, osg::Vec3 p2, osg::Vec3 cp2, osg::Vec3 p3, osg::Vec3 cp3, Position position = STRAIGHT); 
+    Switch(const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2, const osg::Vec3& p3, const osg::Vec3& cp3, const std::string& position = "STRAIGHT"); 
     virtual ~Switch() { };
 
     virtual osg::Vec3 getExit(const osg::Vec3& entry) const;
     virtual Path* getPath(const osg::Vec3& entry) const;
 
-//    virtual void enter(Follower* follower, const osg::Vec3& entry) { };
-//    virtual void leave(Follower* follower, const osg::Vec3& entry) { };
+    virtual void setPosition(const std::string& position);
+    virtual const ValidPositions getValidPositions() const { return _positions; }
 
-    Position getPosition() const { return _position; }
-    void setPosition(Position position) { _position = position; }
-
-    Path* getStraightPath() const { return _straight.first; }
-    Path* getDivertedPath() const { return _diverted.first; }
+    Path* getStraightPath() const { return _straight.first.get(); }
+    Path* getDivertedPath() const { return _diverted.first.get(); }
 
 protected:
-    Position _position;
+    static Positions _positions;
 
-    typedef std::pair<Path*, Path*> PathPair;
+    typedef std::pair<boost::shared_ptr<Path>, boost::shared_ptr<Path> > PathPair;
 
     PathPair _straight;
     PathPair _diverted;

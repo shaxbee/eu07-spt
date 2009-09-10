@@ -33,10 +33,10 @@ Path* Track::getPath(const osg::Vec3& entry) const
 {
 
     if(entry == _forward->front())
-        return _forward;
+        return _forward.get();
 
     if(entry == _backward->front())
-        return _backward;
+        return _backward.get();
 
     throw UnknownEntryException() << PositionInfo(entry);
 

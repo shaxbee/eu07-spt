@@ -3,6 +3,8 @@
 
 #include <sptCore/RailTracking.h>
 
+#include <boost/shared_ptr.hpp>
+
 namespace sptCore
 {
 
@@ -21,14 +23,12 @@ public:
     virtual osg::Vec3 getExit(const osg::Vec3& entry) const;
     virtual Path* getPath(const osg::Vec3& entry) const;
 
-    virtual Path* getDefaultPath() const { return NULL; };
-
-//    virtual void enter(Follower* follower, const osg::Vec3& entry) { };
-//    virtual void leave(Follower* follower, const osg::Vec3& entry) { };
-
+    //! \brief Get default (forward) path
+    virtual Path* getPath() const { return _forward.get(); }
+    
 private:
-    Path* _forward;
-    Path* _backward;
+    boost::shared_ptr<Path> _forward;
+    boost::shared_ptr<Path> _backward;
 
 };
 
