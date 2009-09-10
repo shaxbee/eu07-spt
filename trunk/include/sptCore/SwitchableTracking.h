@@ -15,7 +15,9 @@ class SwitchableTracking: public RailTracking
 {
 
 public:
-    std::string getPosition() const { return _position; }
+    virtual ~SwitchableTracking() { };
+
+    std::string getPosition() const { return _position; };
     
     //! \throw InvalidPositionException if position is not in vector of valid positions
     virtual void setPosition(const std::string& position);
@@ -23,7 +25,7 @@ public:
     typedef std::vector<std::string> ValidPositions;
     virtual const ValidPositions getValidPositions() const = 0;
     
-    boost::error_info<struct tag_name, std::string> PositionInfo;
+    typedef boost::error_info<struct tag_name, std::string> NameInfo;
     class InvalidPositionException: public boost::exception { };
 
 protected:

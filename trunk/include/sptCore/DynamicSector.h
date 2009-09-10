@@ -13,6 +13,7 @@ class DynamicSector: public Sector
 
 public:
     DynamicSector(osg::Vec3 position): Sector(position) { };
+    virtual ~DynamicSector() { };
 
     virtual RailTracking* getNextTrack(const osg::Vec3& position, RailTracking* from) const;
     virtual Connection getConnection(const osg::Vec3& position) const;

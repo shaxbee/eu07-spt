@@ -9,7 +9,7 @@ void SwitchableTracking::setPosition(const std::string& position)
 	
 	ValidPositions::const_iterator iter = std::find(positions.begin(), positions.end(), position);
 	if(iter == positions.end())
-		throw InvalidPositionException() << PositionInfo(position);
+		throw InvalidPositionException() << NameInfo(position);
 	
 	_position = position;
 	

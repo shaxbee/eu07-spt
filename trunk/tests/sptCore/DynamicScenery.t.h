@@ -1,26 +1,27 @@
 #include <cxxtest/TestSuite.h>
 #include <sptCore/DynamicScenery.h>
 
+#include <sptCore/Sector.h>
+#include <sptCore/Track.h>
+#include <sptCore/Switch.h>
+
 using namespace sptCore;
 
 class DynamicSceneryTestSuite: public CxxTest::TestSuite
 {
 public:
-	void setUp()
-	{
-		_scenery = DynamicScenery();
-	};
-	
+    DynamicSceneryTestSuite(): _scenery(new DynamicScenery()) { };
+
 	void testTrack()
 	{
 		
-		osg::Vec3 dummy(0, 0, 0)
+		osg::Vec3 dummy(0, 0, 0);
 		boost::shared_ptr<Track> testTrack(new Track(dummy, dummy));
 		
-		scenery.addTrack("track1", testTrack.get());
+		_scenery->addTrack("track1", testTrack.get());
 		
-		TS_ASSERT_EQUALS(_scenery.getTrack("track1"), testTrack.get());
-		TS_ASSERT_THROWS(_scenery.getTrack("track2"), UnknownRailTrackingException);
+		TS_ASSERT_EQUALS(_scenery->getTrack("track1"), testTrack.get());
+		TS_ASSERT_THROWS(_scenery->getTrack("track2"), Scenery::UnknownRailTrackingException);
 		
 	};
 
@@ -30,10 +31,10 @@ public:
 		osg::Vec3 dummy(0, 0, 0);
 		boost::shared_ptr<Switch> testSwitch(new Switch(dummy, dummy, dummy, dummy, dummy, dummy));
 		
-		scenery.addSwitch("switch1", testSwitch.get());
+		_scenery->addSwitch("switch1", testSwitch.get());
 		
-		TS_ASSERT_EQUALS(_scenery.getSwitch("switch1"), testSwitch.get());
-		TS_ASSERT_THROWS(_scenery.getSwitch("switch2"), UnknownRailTrackingException);
+		TS_ASSERT_EQUALS(_scenery->getSwitch("switch1"), testSwitch.get());
+		TS_ASSERT_THROWS(_scenery->getSwitch("switch2"), Scenery::UnknownRailTrackingException);
 		
 	};
 	
@@ -43,6 +44,6 @@ public:
 //	};
 	
 private:
-	DynamicScenery _scenery;
+    boost::shared_ptr<DynamicScenery> _scenery;
 	
 }; // class DynamicSceneryTestSuite

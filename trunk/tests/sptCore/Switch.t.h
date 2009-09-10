@@ -17,14 +17,21 @@ public:
     void setUp()
     {
         
-        _switch.setPosition(Switch::STRAIGHT);
+        _switch.setPosition("STRAIGHT");
         
+    };
+
+    void testSharedPtr()
+    {
+
+        boost::shared_ptr<Switch>(new Switch(_begin, _begin, _straight, _straight, _diverted, _diverted));
+
     };
         
     void testGetExit()
     {
         
-        _switch.setPosition(Switch::STRAIGHT);        
+        _switch.setPosition("STRAIGHT");        
         
         TS_ASSERT_EQUALS(_switch.getExit(_begin), _straight);
         TS_ASSERT_EQUALS(_switch.getExit(_straight), _begin);
@@ -33,7 +40,7 @@ public:
         
         TS_ASSERT_THROWS(_switch.getExit(osg::Vec3f(0.0f, 0.0f, 1.0f)), RailTracking::UnknownEntryException);        
         
-        _switch.setPosition(Switch::DIVERTED);
+        _switch.setPosition("DIVERTED");
         
         TS_ASSERT_EQUALS(_switch.getExit(_begin), _diverted);
         TS_ASSERT_EQUALS(_switch.getExit(_straight), _begin);
@@ -47,7 +54,7 @@ public:
     void testGetPath()
     {
         
-        _switch.setPosition(Switch::STRAIGHT);
+        _switch.setPosition("STRAIGHT");
 
         // _begin -> _straight        
         TS_ASSERT_EQUALS(_switch.getPath(_begin)->back(), _straight);
@@ -61,7 +68,7 @@ public:
         // incorrect entry point
         TS_ASSERT_THROWS(_switch.getPath(osg::Vec3f(0.0f, 0.0f, 1.0f)), RailTracking::UnknownEntryException);
         
-        _switch.setPosition(Switch::DIVERTED);        
+        _switch.setPosition("DIVERTED");        
         
         // _begin -> _diverted
         TS_ASSERT_EQUALS(_switch.getPath(_begin)->back(), _diverted);

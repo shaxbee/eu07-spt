@@ -4,15 +4,14 @@
 #include <sptCore/Scenery.h>
 
 #include <map>
-#include <boost/shared_ptr.hpp>
 
 namespace sptCore
 {
 
 class Sector;
+
 class Track;
 class Switch;
-class EventedTrack;
 
 class DynamicScenery: public Scenery
 {
@@ -52,11 +51,11 @@ public:
 	const Statistics& getStatistics() const;
 	
 protected:
-	typedef std::map<osg::Vec3, boost::shared_ptr<Sector> > Sectors;	
+	typedef std::map<osg::Vec3, Sector*> Sectors;	
 
-	typedef std::map<std::string, boost::shared_ptr<Track> > Tracks;
-//s	typedef std::map<std::string, boost::shared_ptr<EventedTrack> > EventedTracks;
-	typedef std::map<std::string, boost::shared_ptr<Switch> > Switches;
+	typedef std::map<std::string, Track*> Tracks;
+//	typedef std::map<std::string, boost::shared_ptr<EventedTrack> > EventedTracks;
+	typedef std::map<std::string, Switch*> Switches;
 
 	Sectors _sectors;
 
@@ -64,7 +63,7 @@ protected:
 //	EventedTracks _eventedTracks;
 	Switches _switches;
 
-	Stastics _statistics;
+	Statistics _statistics;
 		
 }; // class sptCore::DynamicScenery
 

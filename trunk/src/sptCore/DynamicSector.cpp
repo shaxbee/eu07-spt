@@ -34,7 +34,7 @@ void DynamicSector::addTrack(RailTracking* track, const osg::Vec3& position)
     if(iter == _connections.end())
     {
         // create new connection with only one track connected
-        _connections.insert(std::make_pair(position, Connection(track, NULL)));
+        _connections.insert(std::make_pair(position, std::make_pair(track, (RailTracking*) NULL)));
     }
     else
     {
@@ -51,10 +51,9 @@ void DynamicSector::addTrack(RailTracking* track, const osg::Vec3& position)
 void DynamicSector::addConnection(RailTracking* left, RailTracking* right, const osg::Vec3& position)
 {
 
-    Connections::iterator iter = _connections.find(position);
-    if(iter != _connections.end())
-        throw InvalidConnectionException() << PositionInfo(position);
+    std::pair<Connections::iterator, bool> ret = _connections.insert(std::make_pair(position, std::make_pair(left, right)));
 
-    _connections.insert(std::make_pair(position, Connection(left, right)));
+    if(!ret.second)
+        throw InvalidConnectionException() << PositionInfo(position);
 
 }; // DynamicSector::addConnection

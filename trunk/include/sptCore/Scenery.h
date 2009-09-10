@@ -21,13 +21,13 @@ public:
 
 	virtual Sector* getSector(const osg::Vec3& position) const = 0;
 
-	\\! \throw UnknownRailTracking if tracking was not found
+	//! \throw UnknownRailTracking if tracking was not found
 	virtual Track* getTrack(const std::string& name) const = 0;
 	
-	\\! \throw UnknownRailTracking if tracking was not found	
+	//! \throw UnknownRailTracking if tracking was not found	
 	virtual Switch* getSwitch(const std::string& name) const = 0;
 	
-	\\! \throw UnknownRailTracking if tracking was not found	
+	//! \throw UnknownRailTracking if tracking was not found	
 //	virtual EventedTrack* getEventedTrack(const std::string& name) const = 0;
 	
 	typedef boost::error_info<struct tag_name, std::string> NameInfo;

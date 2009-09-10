@@ -24,14 +24,13 @@ public:
     virtual osg::Vec3 getExit(const osg::Vec3& entry) const;
     virtual Path* getPath(const osg::Vec3& entry) const;
 
-    virtual void setPosition(const std::string& position);
-    virtual const ValidPositions getValidPositions() const { return _positions; }
+    virtual const ValidPositions getValidPositions() const;
 
     Path* getStraightPath() const { return _straight.first.get(); }
     Path* getDivertedPath() const { return _diverted.first.get(); }
 
 protected:
-    static Positions _positions;
+    static ValidPositions _positions;
 
     typedef std::pair<boost::shared_ptr<Path>, boost::shared_ptr<Path> > PathPair;
 

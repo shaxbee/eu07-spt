@@ -8,16 +8,17 @@
 #include <osg/Vec3>
 #include <osg/ref_ptr>
 
+#include <sptCore/RailTracking.h>
+
 namespace sptCore
 {
-
-class RailTracking;
 
 class Sector
 {
 
 public:
     Sector(osg::Vec3 position): _position(position) { };
+    virtual ~Sector() { };
 
     osg::Vec3 getPosition() const { return _position; };
 

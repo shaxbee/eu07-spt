@@ -1,45 +1,32 @@
 #include <sptCore/DynamicScenery.h>
 
 #include <sptCore/Sector.h>
+#include <sptCore/Track.h>
+#include <sptCore/Switch.h>
 
 using namespace sptCore;
 
-template <typename MapT, typename ExceptionT, typename ErrorInfoT>
-typename inline MapT::value_type::element_type getValueFromMap(MapT map, typename MapT::key_type key)
-{
-		
-	typename MapT::iterator iter = map.find(key);
-	
-	if(iter == map.end())
-		throw ExceptionT() << ErrorInfoT(key);
-			
-	return iter->second.get();
-			
-}; // template getValueFromMap
-
-template <typename MapT, typename ExceptionT, typename ErrorInfoT>
-typename inline void insertValueToMap(MapT map, typename MapT::key_type key, typename MapT::value_type value)
-{
-	
-	std::pair<typename MapT::iterator, bool> ret;
-	ret = map.insert(typename MapT::value_type(key, value));
-	
-	if(!ret.second)
-		throw ExceptionT() << ErrorInfoT(key);
-	
-};
-
 Sector* DynamicScenery::getSector(const osg::Vec3& position) const
 {
-	
-	return getValueFromMap<Sectors, UnknownSectorException, PositionInfo>(_sectors, position);
+
+    Sectors::const_iterator iter = _sectors.find(position);
+
+    if(iter == _sectors.end())
+        throw UnknownSectorException() << PositionInfo(position);
+
+    return iter->second;
 	
 }; // DynamicScenery::getSector
 		
 Track* DynamicScenery::getTrack(const std::string& name) const
 {
-	
-	return getValueFromMap<Tracks, UnknownRailTrackingException, NameInfo>(_tracks, name);
+
+    Tracks::const_iterator iter = _tracks.find(name);
+    
+    if(iter == _tracks.end())
+        throw UnknownRailTrackingException() << NameInfo(name);
+
+    return iter->second;    
 	
 }; // DynamicScenery::getTrack
 
@@ -52,24 +39,41 @@ Track* DynamicScenery::getTrack(const std::string& name) const
 
 Switch* DynamicScenery::getSwitch(const std::string& name) const
 {
-	
-	return getValueFromMap<Switches, UnknownRailTrackingException, NameInfo>(_switches, name);
+
+    Switches::const_iterator iter = _switches.find(name);
+
+    if(iter == _switches.end())
+        throw UnknownRailTrackingException() << NameInfo(name);    
+
+    return iter->second;
 	
 }; // DynamicScenery::getSwitch
 
 void DynamicScenery::addSector(Sector* sector)
 {
 	
-	insertValueToMap<Sectors, SectorExistsException, PositionInfo>(_sectors, sector->getPosition(), sector);
+	std::pair<Sectors::iterator, bool> ret;
+	ret = _sectors.insert(std::make_pair(sector->getPosition(), sector));
+
+    // if sector already existed
+	if(!ret.second)
+		throw SectorExistsException() << PositionInfo(sector->getPosition());
+
+    // update statistics
 	_statistics.sectors++;
-	_statistics.totalTracks += sector->getTotalTracks();
+//	_statistics.totalTracks += sector->getTotalTracks();
 	
 }; // DynamicScenery::addSector
 
 void DynamicScenery::addTrack(const std::string& name, Track* track)
 {
 	
-	insertValueToMap<Tracks, RailTrackingExistsException, NameInfo>(_tracks, name, track);
+	std::pair<Tracks::iterator, bool> ret;
+	ret = _tracks.insert(std::make_pair(name, track));
+	
+	if(!ret.second)
+		throw RailTrackingExistsException() << NameInfo(name);
+
 	_statistics.tracks++;
 	
 }; // DynamicScenery::addTrack
@@ -85,7 +89,12 @@ void DynamicScenery::addTrack(const std::string& name, Track* track)
 void DynamicScenery::addSwitch(const std::string& name, Switch* track)
 {
 	
-	insertValueToMap<Switches, RailTrackingExistsException, NameInfo>(_switches, name, track);
+	std::pair<Switches::iterator, bool> ret;
+	ret = _switches.insert(std::make_pair(name, track));
+	
+	if(!ret.second)
+		throw RailTrackingExistsException() << NameInfo(name);
+
 	_statistics.switches++;
 	
 }; // DynamicScenery::addSwitch
