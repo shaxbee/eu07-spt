@@ -3,6 +3,7 @@
 
 #include <map>
 
+#include <boost/weak_ptr.hpp>
 #include <boost/exception.hpp>
 
 #include <osg/Vec3>
@@ -13,31 +14,39 @@
 namespace sptCore
 {
 
+class Scenery;
+
 class Sector
 {
 
 public:
-    Sector(osg::Vec3 position): _position(position) { };
+    Sector(Scenery* scenery, osg::Vec3 position): _scenery(scenery), _position(position) { };
     virtual ~Sector() { };
 
-    osg::Vec3 getPosition() const { return _position; };
+    static float SIZE;
+
+    Scenery& getScenery() const { return *_scenery; };
+    const osg::Vec3& getPosition() const { return _position; };
 
     //! \brief Get other track connected at given position
     //! \return Track pointer if found, NULL otherwise
     //! \throw UnknownConnectionException if there is no connection at given position
-    virtual RailTracking* getNextTrack(const osg::Vec3& position, RailTracking* from) const = 0;
+    virtual RailTracking& getNextTrack(const osg::Vec3& position, RailTracking* from) const = 0;
+
+    virtual size_t getTotalTracks() const = 0;
 
     typedef std::pair<RailTracking*, RailTracking*> Connection;
 
     //! \brief Get tracks connected at given position
     //! \warning If there is only one track at given position second entry will be NULL
     //! \throw UnknownConnectionException if there is no connection at given position
-    virtual Connection getConnection(const osg::Vec3& position) const = 0;
+    virtual const Connection& getConnection(const osg::Vec3& position) const = 0;
 
     typedef boost::error_info<struct tag_position, osg::Vec3f> PositionInfo;
     class UnknownConnectionException: public boost::exception { };
 
 private:
+    Scenery* _scenery;
     osg::Vec3 _position;
 
 }; // class sptCore::Sector

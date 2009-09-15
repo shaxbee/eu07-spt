@@ -2,18 +2,27 @@
 
 using namespace sptCore;
 
-RailTracking* DynamicSector::getNextTrack(const osg::Vec3& position, RailTracking* from) const
+DynamicSector::~DynamicSector()
+{
+
+    // delete track instances registered in sector
+    for(Tracks::iterator iter = _tracks.begin(); iter != _tracks.end(); iter++)
+        delete *iter;
+
+}; // DynamicSector::~DynamicSector
+
+RailTracking& DynamicSector::getNextTrack(const osg::Vec3& position, RailTracking* from) const
 {
 
     Connections::const_iterator iter = _connections.find(position);
     if(iter == _connections.end() || (from != iter->second.first && from != iter->second.second))
         throw UnknownConnectionException() << PositionInfo(position);
 
-    return (iter->second.first == from ? iter->second.second : iter->second.first);
+    return *(iter->second.first == from ? iter->second.second : iter->second.first);
 
 }; // DynamicSector::getNextTrack
 
-Sector::Connection DynamicSector::getConnection(const osg::Vec3& position) const
+const Sector::Connection& DynamicSector::getConnection(const osg::Vec3& position) const
 {
 
     Connections::const_iterator iter = _connections.find(position);
@@ -24,8 +33,7 @@ Sector::Connection DynamicSector::getConnection(const osg::Vec3& position) const
 
 }; // DynamicSector::getConnection
 
-
-void DynamicSector::addTrack(RailTracking* track, const osg::Vec3& position)
+void DynamicSector::addConnection(const osg::Vec3& position, RailTracking* track)
 {
 
     Connections::iterator iter = _connections.find(position);
@@ -46,9 +54,9 @@ void DynamicSector::addTrack(RailTracking* track, const osg::Vec3& position)
         iter->second.second = track;
     };
 
-}; // DynamicSector::addTrack
+}; // DynamicSector::addConnection
 
-void DynamicSector::addConnection(RailTracking* left, RailTracking* right, const osg::Vec3& position)
+void DynamicSector::addConnection(const osg::Vec3& position, RailTracking* left, RailTracking* right)
 {
 
     std::pair<Connections::iterator, bool> ret = _connections.insert(std::make_pair(position, std::make_pair(left, right)));

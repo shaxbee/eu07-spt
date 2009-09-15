@@ -21,13 +21,19 @@ public:
         
     };
 
-    void testSharedPtr()
+    void testSetPosition()
     {
 
-        boost::shared_ptr<Switch>(new Switch(_begin, _begin, _straight, _straight, _diverted, _diverted));
+        _switch.setPosition("STRAIGHT");
+        TS_ASSERT_EQUALS(_switch.getPosition(), "STRAIGHT");
+
+        _switch.setPosition("DIVERTED");
+        TS_ASSERT_EQUALS(_switch.getPosition(), "DIVERTED");
+
+        TS_ASSERT_THROWS(_switch.setPosition("INVALID"), Switch::InvalidPositionException);
 
     };
-        
+
     void testGetExit()
     {
         

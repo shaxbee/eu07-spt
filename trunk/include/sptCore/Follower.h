@@ -4,11 +4,14 @@
 #include <boost/exception.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include <sptCore/RailTracking.h>
+#include <sptCore/Sector.h>
+
 namespace sptCore
 {
-	
-class RailTracking;
-class Sector;
+
+class Path;    
+class Track;
 
 class Follower
 {
@@ -16,9 +19,9 @@ class Follower
 public:
     Follower(Sector* sector, Track* track, float distance = 0.0f);
 
-    Sector* getSector() const { return _sector.get(); }    
-    RailTracking* getTrack() const { return _track.get(); }
-    Path* getPath() const { return _path.get(); }
+    const Sector& getSector() const { return *_sector; }    
+    const RailTracking& getTrack() const { return *_track; }
+    const Path& getPath() const { return *_path; }
 
     //! \brief Get distance from begin of current Path
     float getDistance() const { return _distance; }
@@ -30,14 +33,14 @@ public:
     class NullTrackException: public boost::exception { };
     
 protected:
-    virtual void setSector(Sector* sector) { _sector(sector); }
+    virtual void setSector(Sector* sector) { _sector = sector; }
 
 private:
-	boost::shared_ptr<Sector> _sector;
-	boost::shared_ptr<RailTracking> _track;
+	Sector* _sector;
+	RailTracking* _track;
+    Path* _path;
 
     float _distance;
-    boost::shared_ptr<Path> _path;
 
 }; // class sptCore::Follower
 

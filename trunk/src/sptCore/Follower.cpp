@@ -1,8 +1,11 @@
 #include <sptCore/Follower.h>
 
+#include <sptCore/Track.h>
+#include <sptCore/Scenery.h>
+
 using namespace sptCore;
 
-Follower::Follower(Sector* sector, Track* track, float distance = 0.0f):
+Follower::Follower(Sector* sector, Track* track, float distance):
 	_sector(sector), _track(track), _distance(distance)
 {
 	
@@ -25,17 +28,18 @@ void Follower::move(float distance)
 		
 		if(offset != osg::Vec3())
 		{
-			setSector(Scenery::getInstance().getSector(_sector->getPosition() + offset));
-			_next -= offset * SECTOR::SIZE;
+            osg::Vec3 sectorPosition = _sector->getPosition() +  offset * Sector::SIZE;
+			setSector(&(_sector->getScenery().getSector(sectorPosition)));
+			next -= offset * Sector::SIZE;
 		};
 				
 		_track->leave(this, _path->back());
-		_track = _sector->getNextTrack(_next, _track);
+		_track = &(_sector->getNextTrack(next, _track));
 		
 		if(_track == NULL)
 			throw NullTrackException();
-		
-		_path = _track->getPath(_next);		
+
+		_path = _track->getPath(next);
 		_track->enter(this, _path->front());
 		
 	};

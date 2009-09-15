@@ -19,13 +19,13 @@ class Scenery
 public:
 	virtual ~Scenery() { };
 
-	virtual Sector* getSector(const osg::Vec3& position) const = 0;
+	virtual Sector& getSector(const osg::Vec3& position) const = 0;
 
 	//! \throw UnknownRailTracking if tracking was not found
-	virtual Track* getTrack(const std::string& name) const = 0;
+	virtual Track& getTrack(const std::string& name) const = 0;
 	
 	//! \throw UnknownRailTracking if tracking was not found	
-	virtual Switch* getSwitch(const std::string& name) const = 0;
+	virtual Switch& getSwitch(const std::string& name) const = 0;
 	
 	//! \throw UnknownRailTracking if tracking was not found	
 //	virtual EventedTrack* getEventedTrack(const std::string& name) const = 0;
@@ -35,6 +35,18 @@ public:
 	
 	typedef boost::error_info<struct tag_position, osg::Vec3> PositionInfo;
 	class UnknownSectorException: public boost::exception { };
+
+	struct Statistics
+	{
+		size_t sectors;
+		size_t railTrackings;
+		size_t tracks;
+		size_t eventedTracks;
+		size_t switches;
+        size_t totalTracks;
+	}; // struct sptCore::DynamicScenery::Statistics
+	
+	virtual const Statistics& getStatistics() const = 0;
 	
 }; // class sptCore::Scenery
 

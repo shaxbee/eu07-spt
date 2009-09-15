@@ -2,6 +2,8 @@ import os
 
 Import('env')
 
+env.Append(CXXFLAGS='-g')
+
 #variant = GetOption('variant')
 #env = SConscript(os.path.join(variant, 'SConscript'), exports=['env'])
 

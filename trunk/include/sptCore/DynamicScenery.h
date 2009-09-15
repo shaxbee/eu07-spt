@@ -16,21 +16,24 @@ class Switch;
 class DynamicScenery: public Scenery
 {
 public:
-	virtual ~DynamicScenery() { };
+	virtual ~DynamicScenery();
 
-	virtual Sector* getSector(const osg::Vec3& position) const;
+	virtual Sector& getSector(const osg::Vec3& position) const;
 
-	virtual Track* getTrack(const std::string& name) const;
+	virtual Track& getTrack(const std::string& name) const;
 //	virtual EventedTrack* getEventedTrack(const std::string& name) const;	
-	virtual Switch* getSwitch(const std::string& name) const;
+	virtual Switch& getSwitch(const std::string& name) const;
 	
+	virtual const Statistics& getStatistics() const { return _statistics; };
+
+    //! Add sector to scenery and manage lifetime
 	//! \throw SectorExistsException if Sector with same name exists	
 	void addSector(Sector* sector);
 	
 	//! \throw RailTrackingExistsException if Track with same name exists
 	void addTrack(const std::string& name, Track* track);
 	
-	//! \throw RailTrackingExistsException if EventedTrack with same name exists	
+//	//! \throw RailTrackingExistsException if EventedTrack with same name exists	
 //	void addEventedTrack(const std::string& name, EventedTrack* track);
 	
 	//! \throw RailTrackingExistsException if Switch with same name exists	
@@ -38,17 +41,6 @@ public:
 
 	class SectorExistsException: public boost::exception { };
 	class RailTrackingExistsException: public boost::exception { };
-	
-	struct Statistics
-	{
-		size_t sectors;
-		size_t railTrackings;
-		size_t tracks;
-		size_t eventedTracks;
-		size_t switches;
-	}; // struct sptCore::DynamicScenery::Stastics
-	
-	const Statistics& getStatistics() const;
 	
 protected:
 	typedef std::map<osg::Vec3, Sector*> Sectors;	

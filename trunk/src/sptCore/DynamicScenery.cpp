@@ -6,7 +6,15 @@
 
 using namespace sptCore;
 
-Sector* DynamicScenery::getSector(const osg::Vec3& position) const
+DynamicScenery::~DynamicScenery()
+{
+
+    for(Sectors::iterator iter = _sectors.begin(); iter != _sectors.end(); iter++)
+        delete iter->second;
+
+}; // DynamicScenery::~DynamicScenery()
+
+Sector& DynamicScenery::getSector(const osg::Vec3& position) const
 {
 
     Sectors::const_iterator iter = _sectors.find(position);
@@ -14,11 +22,11 @@ Sector* DynamicScenery::getSector(const osg::Vec3& position) const
     if(iter == _sectors.end())
         throw UnknownSectorException() << PositionInfo(position);
 
-    return iter->second;
+    return *(iter->second);
 	
 }; // DynamicScenery::getSector
 		
-Track* DynamicScenery::getTrack(const std::string& name) const
+Track& DynamicScenery::getTrack(const std::string& name) const
 {
 
     Tracks::const_iterator iter = _tracks.find(name);
@@ -26,7 +34,7 @@ Track* DynamicScenery::getTrack(const std::string& name) const
     if(iter == _tracks.end())
         throw UnknownRailTrackingException() << NameInfo(name);
 
-    return iter->second;    
+    return *(iter->second);
 	
 }; // DynamicScenery::getTrack
 
@@ -37,7 +45,7 @@ Track* DynamicScenery::getTrack(const std::string& name) const
 //	
 //}; // DynamicScenery::getEventedTrack
 
-Switch* DynamicScenery::getSwitch(const std::string& name) const
+Switch& DynamicScenery::getSwitch(const std::string& name) const
 {
 
     Switches::const_iterator iter = _switches.find(name);
@@ -45,13 +53,13 @@ Switch* DynamicScenery::getSwitch(const std::string& name) const
     if(iter == _switches.end())
         throw UnknownRailTrackingException() << NameInfo(name);    
 
-    return iter->second;
+    return *(iter->second);
 	
 }; // DynamicScenery::getSwitch
 
 void DynamicScenery::addSector(Sector* sector)
 {
-	
+
 	std::pair<Sectors::iterator, bool> ret;
 	ret = _sectors.insert(std::make_pair(sector->getPosition(), sector));
 
@@ -61,7 +69,7 @@ void DynamicScenery::addSector(Sector* sector)
 
     // update statistics
 	_statistics.sectors++;
-//	_statistics.totalTracks += sector->getTotalTracks();
+	_statistics.totalTracks += sector->getTotalTracks();
 	
 }; // DynamicScenery::addSector
 
