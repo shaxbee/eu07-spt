@@ -6,8 +6,9 @@
 namespace sptCore
 {
 
-//! \brief Representation of connection between two 3d points
-//! \author ShaXbee
+//! \brief Path between two 3D points
+//! Path is vector of osg::Vec3 points that could form straight line or bezier curve
+//! \author Zbyszek "ShaXbee" Mandziejewicz
 class Path : public osg::Vec3Array
 {
 

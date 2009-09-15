@@ -13,6 +13,8 @@ namespace sptCore
 class Path;    
 class Track;
 
+//! \brief Follower tied and moving on RailTracking in Scenery
+//! \author Zbyszek "ShaXbee" Mandziejewicz
 class Follower
 {
 
@@ -29,7 +31,8 @@ public:
     //! \brief Move follower by given distance
     //! \throw NullTrackException if there isn't next track
     void move(float distance);
-    
+   
+    //! \brief Indicator of Follower exiting tracks 
     class NullTrackException: public boost::exception { };
     
 protected:

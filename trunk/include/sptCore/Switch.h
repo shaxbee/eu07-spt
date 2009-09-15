@@ -6,6 +6,8 @@
 namespace sptCore
 {
 
+//! \brief Railway 2-way switch
+//! \author Zbyszek "ShaXbee" Mandziejewicz
 class Switch: public SwitchableTracking
 {
 

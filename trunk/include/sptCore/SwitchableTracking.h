@@ -11,6 +11,8 @@
 namespace sptCore
 {
 
+//! \brief Base class for tracking with switchable connections
+//! \author Zbyszek "ShaXbee" Mandziejewicz
 class SwitchableTracking: public RailTracking
 {
 

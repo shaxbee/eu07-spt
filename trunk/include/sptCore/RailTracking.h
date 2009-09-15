@@ -11,7 +11,7 @@ namespace sptCore
 
 class Follower;
 
-//! \brief Abstract representation of Tracking in Scenery
+//! \brief Abstract representation of railway tracking
 //! \author Zbyszek "ShaXbee" Mandziejewicz
 class RailTracking
 {

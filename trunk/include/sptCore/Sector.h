@@ -16,6 +16,9 @@ namespace sptCore
 
 class Scenery;
 
+//! \brief Bounded region of Scenery
+//! Sector manages RailTracking instances and connections between them. 
+//! \author Zbyszek "ShaXbee" Mandziejewicz
 class Sector
 {
 
