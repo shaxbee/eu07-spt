@@ -1,4 +1,12 @@
 Import('env')
 
-env = env.Clone(toolpath=['#/build/doxygen'], tools=['default', 'doxygen'])
+vars = Variables()
+vars.Add(EnumVariable('DOXYSEARCH', 'Enable doxygen search engine', 'NO', allowed_values=('YES', 'NO')))
+vars.Add('DOXYHEADER', 'Doxygen header template', '')
+vars.Add('DOXYFOOTER', 'Doxygen footer template', '')
+
+env = env.Clone(toolpath=['#/build/doxygen'], tools=['default', 'doxygen'], variables=vars)
+
+env.Append(DOXYSEARCH = '$DOXYSEARCH', DOXYHEADER = '$DOXYHEADER', DOXYFOOTER = '$DOXYFOOTER')
+
 env.Doxygen('Doxyfile');

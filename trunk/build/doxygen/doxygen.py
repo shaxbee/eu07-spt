@@ -21,8 +21,9 @@ import os
 import os.path
 import glob
 from fnmatch import fnmatch
+import subprocess
 
-def DoxyfileParse(file_contents):
+def DoxyfileParse(file_contents, file_dir, env):
    """
    Parse a Doxygen source file and return a dictionary of all the values.
    Values will be strings and lists of strings.
@@ -31,19 +32,32 @@ def DoxyfileParse(file_contents):
 
    import shlex
    lex = shlex.shlex(instream = file_contents, posix = True)
-   lex.wordchars += "*+./-:"
+   lex.wordchars += "*+./-:@$()"
    lex.whitespace = lex.whitespace.replace("\n", "")
-   lex.escape = ""
-
+   lex.escape = ""  
+      
    lineno = lex.lineno
    token = lex.get_token()
    key = token   # the first token should be a key
    last_token = ""
-   key_token = False
-   next_key = False
+   key_token = True
    new_data = True
 
    def append_data(data, key, new_data, token):
+      if token[:2] == "$(":
+         try:
+            token = env[token[2:-1]]
+         except KeyError:
+            print "ERROR: Variable %s used in Doxygen file is not in environment!" % token
+            token = ""
+         # Convert space-separated list to actual list
+         token = token.split()
+         if len(token):
+            append_data(data, key, new_data, token[0])
+            for i in token[1:]:
+               append_data(data, key, True, i)
+         return
+         
       if new_data or len(data[key]) == 0:
          data[key].append(token)
       else:
@@ -68,6 +82,13 @@ def DoxyfileParse(file_contents):
                new_data=False
             else:
                data[key] = list()
+         elif key == "@INCLUDE":
+         
+            filename = token
+            if not os.path.isabs(filename):
+               filename = os.path.join(file_dir, filename)
+
+            lex.push_source(open(filename), filename)         
          else:
             append_data( data, key, new_data, token )
             new_data = True
@@ -111,7 +132,9 @@ def DoxySourceScan(node, env, path):
 
    sources = []
 
-   data = DoxyfileParse(node.get_contents())
+   conf_dir = os.path.dirname(str(node))
+
+   data = DoxyfileParse(node.get_contents(), conf_dir, env)
 
    if data.get("RECURSIVE", "NO") == "YES":
       recursive = True
@@ -186,7 +209,7 @@ def DoxyEmitter(source, target, env):
       "XML": ("NO", "xml"),
    }
 
-   data = DoxyfileParse(source[0].get_contents())
+   data = DoxyfileParse(source[0].get_contents(), os.path.dirname(str(source[0])), env)
 
    targets = []
    out_dir = data.get("OUTPUT_DIRECTORY", ".")
