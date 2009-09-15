@@ -9,6 +9,8 @@
 namespace sptCore
 {
 
+//! \brief Modifiable Sector
+//! \author Zbyszek "ShaXbee" Mandziejewicz
 class DynamicSector: public Sector
 {
 
