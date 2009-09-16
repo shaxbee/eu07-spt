@@ -11,7 +11,7 @@ namespace sptCore
 
 class Sector;
 class Track;
-class Switch;
+class SwitchableTracking;
 class EventedTrack;
 
 class Scenery
@@ -25,7 +25,7 @@ public:
 	virtual Track& getTrack(const std::string& name) const = 0;
 	
 	//! \throw UnknownRailTracking if tracking was not found	
-	virtual Switch& getSwitch(const std::string& name) const = 0;
+	virtual SwitchableTracking& getSwitch(const std::string& name) const = 0;
 	
 	//! \throw UnknownRailTracking if tracking was not found	
 //	virtual EventedTrack* getEventedTrack(const std::string& name) const = 0;

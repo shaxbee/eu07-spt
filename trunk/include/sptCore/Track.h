@@ -3,7 +3,7 @@
 
 #include <sptCore/RailTracking.h>
 
-#include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 
 namespace sptCore
 {
@@ -13,22 +13,22 @@ class Track: public RailTracking
 
 public:
     //! Construct straight track
-    Track(osg::Vec3 p1, osg::Vec3 p2);
+    Track(Sector& sector, osg::Vec3 p1, osg::Vec3 p2);
 
     //! Construct bezier track
-    Track(osg::Vec3 p1, osg::Vec3 cp1, osg::Vec3 p2, osg::Vec3 cp2);
+    Track(Sector& sector, osg::Vec3 p1, osg::Vec3 cp1, osg::Vec3 p2, osg::Vec3 cp2);
 
     virtual ~Track() { };
 
-    virtual osg::Vec3 getExit(const osg::Vec3& entry) const;
-    virtual Path* getPath(const osg::Vec3& entry) const;
+    virtual const osg::Vec3& getExit(const osg::Vec3& entry) const;
+    virtual const Path& getPath(const osg::Vec3& entry) const;
 
     //! \brief Get default (forward) path
-    virtual Path* getPath() const { return _forward.get(); }
+    virtual Path& getDefaultPath() const { return *_forward; }
     
 private:
-    boost::shared_ptr<Path> _forward;
-    boost::shared_ptr<Path> _backward;
+    boost::scoped_ptr<Path> _forward;
+    boost::scoped_ptr<Path> _backward;
 
 };
 

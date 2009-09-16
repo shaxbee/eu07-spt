@@ -4,14 +4,12 @@
 #include <boost/exception.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <sptCore/RailTracking.h>
+#include <sptCore/Track.h>
 #include <sptCore/Sector.h>
+#include <sptCore/Scenery.h>
 
 namespace sptCore
 {
-
-class Path;    
-class Track;
 
 //! \brief Follower tied and moving on RailTracking in Scenery
 //! \author Zbyszek "ShaXbee" Mandziejewicz
@@ -19,8 +17,9 @@ class Follower
 {
 
 public:
-    Follower(Sector* sector, Track* track, float distance = 0.0f);
+    Follower(Track& track, float distance = 0.0f);
 
+    const Scenery& getScenery() const { return _sector->getScenery(); }
     const Sector& getSector() const { return *_sector; }    
     const RailTracking& getTrack() const { return *_track; }
     const Path& getPath() const { return *_path; }
@@ -39,9 +38,11 @@ protected:
     virtual void setSector(Sector* sector) { _sector = sector; }
 
 private:
-	Sector* _sector;
+    void changeTrack(osg::Vec3 position);
+
 	RailTracking* _track;
-    Path* _path;
+	const Sector* _sector;
+    const Path* _path;
 
     float _distance;
 

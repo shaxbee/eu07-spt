@@ -17,6 +17,7 @@ class SwitchableTracking: public RailTracking
 {
 
 public:
+    SwitchableTracking(Sector& sector): RailTracking(sector) { };
     virtual ~SwitchableTracking() { };
 
     std::string getPosition() const { return _position; };

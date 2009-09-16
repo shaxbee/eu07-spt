@@ -3,9 +3,9 @@
 
 #include <boost/scoped_ptr.hpp>
 
-#include <sptCore/Sector.h>
 #include <sptCore/Track.h>
 #include <sptCore/Switch.h>
+#include <sptCore/DynamicSector.h>
 
 using namespace sptCore;
 
@@ -17,7 +17,10 @@ public:
     void setUp()
     {
 
-        _scenery = DynamicScenery();
+        _scenery.reset(new DynamicScenery());
+        _sector = new DynamicSector(*_scenery, osg::Vec3());
+
+        _scenery->addSector(_sector);
 
     };
 
@@ -25,12 +28,13 @@ public:
 	{
 		
 		osg::Vec3 dummy(0, 0, 0);
-        boost::scoped_ptr<Track> testTrack(new Track(dummy, dummy));
+        Track* testTrack = new Track(*_sector, dummy, dummy);
+	
+        _sector->addTrack(testTrack);    
+		_scenery->addTrack("track1", testTrack);
 		
-		_scenery.addTrack("track1", testTrack.get());
-		
-		TS_ASSERT_EQUALS(&_scenery.getTrack("track1"), testTrack.get());
-		TS_ASSERT_THROWS(&_scenery.getTrack("track2"), Scenery::UnknownRailTrackingException);
+		TS_ASSERT_EQUALS(&_scenery->getTrack("track1"), testTrack);
+		TS_ASSERT_THROWS(&_scenery->getTrack("track2"), Scenery::UnknownRailTrackingException);
 		
 	};
 
@@ -38,16 +42,18 @@ public:
 	{
 		
 		osg::Vec3 dummy(0, 0, 0);
-		boost::scoped_ptr<Switch> testSwitch(new Switch(dummy, dummy, dummy, dummy, dummy, dummy));
+		Switch* testSwitch = new Switch(*_sector, dummy, dummy, dummy, dummy, dummy, dummy);
+	
+        _sector->addTrack(testSwitch);    
+		_scenery->addSwitch("switch1", testSwitch);
 		
-		_scenery.addSwitch("switch1", testSwitch.get());
-		
-		TS_ASSERT_EQUALS(&_scenery.getSwitch("switch1"), testSwitch.get());
-		TS_ASSERT_THROWS(&_scenery.getSwitch("switch2"), Scenery::UnknownRailTrackingException);
+		TS_ASSERT_EQUALS(&_scenery->getSwitch("switch1"), testSwitch);
+		TS_ASSERT_THROWS(&_scenery->getSwitch("switch2"), Scenery::UnknownRailTrackingException);
 		
 	};
 	
 private:
-    DynamicScenery _scenery;
+    boost::scoped_ptr<DynamicScenery> _scenery;
+    DynamicSector* _sector;
 	
 }; // class DynamicSceneryTestSuite

@@ -22,7 +22,7 @@ public:
 
 	virtual Track& getTrack(const std::string& name) const;
 //	virtual EventedTrack& getEventedTrack(const std::string& name) const;	
-	virtual Switch& getSwitch(const std::string& name) const;
+	virtual SwitchableTracking& getSwitch(const std::string& name) const;
 	
 	virtual const Statistics& getStatistics() const { return _statistics; };
 
@@ -41,9 +41,9 @@ public:
 //	//! \throw RailTrackingExistsException if EventedTrack with same name exists	
 //	void addEventedTrack(const std::string& name, EventedTrack* track);
 
-    //! Add name Switch    
-	//! \throw RailTrackingExistsException if Switch with same name exists	
-	void addSwitch(const std::string& name, Switch* track);
+    //! Add named SwitchableTracking
+	//! \throw RailTrackingExistsException if tracking with same name exists	
+	void addSwitch(const std::string& name, SwitchableTracking* track);
 
 	class SectorExistsException: public boost::exception { };
 	class RailTrackingExistsException: public boost::exception { };
@@ -53,7 +53,7 @@ protected:
 
 	typedef std::map<std::string, Track*> Tracks;
 //	typedef std::map<std::string, boost::shared_ptr<EventedTrack> > EventedTracks;
-	typedef std::map<std::string, Switch*> Switches;
+	typedef std::map<std::string, SwitchableTracking*> Switches;
 
 	Sectors _sectors;
 

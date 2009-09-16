@@ -23,12 +23,12 @@ class Sector
 {
 
 public:
-    Sector(Scenery* scenery, osg::Vec3 position): _scenery(scenery), _position(position) { };
+    Sector(Scenery& scenery, osg::Vec3 position): _scenery(scenery), _position(position) { };
     virtual ~Sector() { };
 
     static float SIZE;
 
-    Scenery& getScenery() const { return *_scenery; };
+    Scenery& getScenery() const { return _scenery; };
     const osg::Vec3& getPosition() const { return _position; };
 
     //! \brief Get other track connected at given position
@@ -49,7 +49,7 @@ public:
     class UnknownConnectionException: public boost::exception { };
 
 private:
-    Scenery* _scenery;
+    Scenery& _scenery;
     osg::Vec3 _position;
 
 }; // class sptCore::Sector

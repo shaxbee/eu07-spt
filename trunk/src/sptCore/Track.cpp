@@ -2,19 +2,21 @@
 
 using namespace sptCore;
 
-Track::Track(osg::Vec3 p1, osg::Vec3 p2):
+Track::Track(Sector& sector, osg::Vec3 p1, osg::Vec3 p2):
+    RailTracking(sector),
     _forward(new Path(p1, p2))
 {
     _backward.reset(_forward->reverse());
 }; // Track::Track(p1, p2)
 
-Track::Track(osg::Vec3 p1, osg::Vec3 cp1, osg::Vec3 p2, osg::Vec3 cp2):
+Track::Track(Sector& sector, osg::Vec3 p1, osg::Vec3 cp1, osg::Vec3 p2, osg::Vec3 cp2):
+    RailTracking(sector),
     _forward(new Path(p1, cp1, p2, cp2, 32))
 {
     _backward.reset(_forward->reverse());
 }; // Track::Track(p1, p2, cp1, cp2)
 
-osg::Vec3 Track::getExit(const osg::Vec3& entry) const
+const osg::Vec3& Track::getExit(const osg::Vec3& entry) const
 {
 
     // if entrance == track begin
@@ -27,17 +29,17 @@ osg::Vec3 Track::getExit(const osg::Vec3& entry) const
 
     throw UnknownEntryException() << PositionInfo(entry);
 
-}; // RailTracking::getNext
+}; // Track::getNext
 
-Path* Track::getPath(const osg::Vec3& entry) const
+const Path& Track::getPath(const osg::Vec3& entry) const
 {
 
     if(entry == _forward->front())
-        return _forward.get();
+        return *_forward;
 
     if(entry == _backward->front())
-        return _backward.get();
+        return *_backward;
 
     throw UnknownEntryException() << PositionInfo(entry);
 
-}; // RailTracking::getPath
+}; // Track::getPath

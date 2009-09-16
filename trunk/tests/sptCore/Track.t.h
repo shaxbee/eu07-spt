@@ -1,6 +1,9 @@
 #include <cxxtest/TestSuite.h>
 
-#include "sptCore/Track.h"
+#include <sptCore/Track.h>
+
+#include <sptCore/DynamicScenery.h>
+#include <sptCore/DynamicSector.h>
 
 using namespace sptCore;
 
@@ -9,7 +12,11 @@ class TrackTestSuite: public CxxTest::TestSuite
     
 public:
     TrackTestSuite():
-        _begin(0.0f, 0.0f, 0.0f), _end(10.0f, 10.0f, 10.0f), _track(_begin, _end) { };
+        _begin(0.0f, 0.0f, 0.0f), 
+        _end(10.0f, 10.0f, 10.0f), 
+        _scenery(),
+        _sector(new DynamicSector(_scenery, osg::Vec3())),
+        _track(*_sector, _begin, _end) { };
 
     void testGetExit()
     {
@@ -24,8 +31,8 @@ public:
     void testGetPath()
     {
         
-        TS_ASSERT_EQUALS(_track.getPath(_begin)->back(), _end);
-        TS_ASSERT_EQUALS(_track.getPath(_end)->back(), _begin);
+        TS_ASSERT_EQUALS(_track.getPath(_begin).back(), _end);
+        TS_ASSERT_EQUALS(_track.getPath(_end).back(), _begin);
        
         TS_ASSERT_DIFFERS(_track.getPath(_begin), _track.getPath(_end));
         
@@ -44,6 +51,10 @@ public:
 private:
     osg::Vec3 _begin;
     osg::Vec3 _end;
+
+    DynamicScenery _scenery;
+    DynamicSector* _sector;
+
     Track _track;
     
 }; // TrackTestSuite

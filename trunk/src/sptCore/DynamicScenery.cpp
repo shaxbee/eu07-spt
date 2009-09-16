@@ -45,7 +45,7 @@ Track& DynamicScenery::getTrack(const std::string& name) const
 //	
 //}; // DynamicScenery::getEventedTrack
 
-Switch& DynamicScenery::getSwitch(const std::string& name) const
+SwitchableTracking& DynamicScenery::getSwitch(const std::string& name) const
 {
 
     Switches::const_iterator iter = _switches.find(name);
@@ -94,7 +94,7 @@ void DynamicScenery::addTrack(const std::string& name, Track* track)
 //	
 //}; // DynamicScenery::addEventedTrack
 
-void DynamicScenery::addSwitch(const std::string& name, Switch* track)
+void DynamicScenery::addSwitch(const std::string& name, SwitchableTracking* track)
 {
 	
 	std::pair<Switches::iterator, bool> ret;

@@ -1,6 +1,9 @@
 #include <cxxtest/TestSuite.h>
 
-#include "sptCore/Switch.h"
+#include <sptCore/Switch.h>
+
+#include <sptCore/DynamicScenery.h>
+#include <sptCore/DynamicSector.h>
 
 using namespace sptCore;
 
@@ -12,11 +15,18 @@ public:
         _begin(0.0f, 0.0f, 0.0f), 
         _straight(10.0f, 0.0f, 0.0f), 
         _diverted(10.0f, 10.0f, 0.0f), 
-        _switch(_begin, _begin, _straight, _straight, _diverted, _diverted) { };
+        _scenery(),
+        _sector(new DynamicSector(_scenery, osg::Vec3())),
+        _switch(*_sector, _begin, _begin, _straight, _straight, _diverted, _diverted) 
+    { 
+
+        _scenery.addSector(_sector);
+    
+    };
     
     void setUp()
     {
-        
+       
         _switch.setPosition("STRAIGHT");
         
     };
@@ -63,13 +73,13 @@ public:
         _switch.setPosition("STRAIGHT");
 
         // _begin -> _straight        
-        TS_ASSERT_EQUALS(_switch.getPath(_begin)->back(), _straight);
+        TS_ASSERT_EQUALS(_switch.getPath(_begin).back(), _straight);
         // _diverted -> _begin
-        TS_ASSERT_EQUALS(_switch.getPath(_diverted)->back(), _begin);
+        TS_ASSERT_EQUALS(_switch.getPath(_diverted).back(), _begin);
         // _straight -> _begin
-        TS_ASSERT_EQUALS(_switch.getPath(_straight)->back(), _begin);
+        TS_ASSERT_EQUALS(_switch.getPath(_straight).back(), _begin);
         // _diverted != _straight        
-        TS_ASSERT_DIFFERS(_switch.getPath(_diverted)->front(), _switch.getPath(_straight)->front());
+        TS_ASSERT_DIFFERS(_switch.getPath(_diverted).front(), _switch.getPath(_straight).front());
 
         // incorrect entry point
         TS_ASSERT_THROWS(_switch.getPath(osg::Vec3f(0.0f, 0.0f, 1.0f)), RailTracking::UnknownEntryException);
@@ -77,13 +87,13 @@ public:
         _switch.setPosition("DIVERTED");        
         
         // _begin -> _diverted
-        TS_ASSERT_EQUALS(_switch.getPath(_begin)->back(), _diverted);
+        TS_ASSERT_EQUALS(_switch.getPath(_begin).back(), _diverted);
         // _diverted -> _begin
-        TS_ASSERT_EQUALS(_switch.getPath(_diverted)->back(), _begin);
+        TS_ASSERT_EQUALS(_switch.getPath(_diverted).back(), _begin);
         // _straight -> _begin
-        TS_ASSERT_EQUALS(_switch.getPath(_straight)->back(), _begin);
+        TS_ASSERT_EQUALS(_switch.getPath(_straight).back(), _begin);
         // _diverted != _straight
-        TS_ASSERT_DIFFERS(_switch.getPath(_diverted)->front(), _switch.getPath(_straight)->front());
+        TS_ASSERT_DIFFERS(_switch.getPath(_diverted).front(), _switch.getPath(_straight).front());
                 
         // incorrect entry point
         TS_ASSERT_THROWS(_switch.getPath(osg::Vec3f(0.0f, 0.0f, 1.0f)), RailTracking::UnknownEntryException);
@@ -91,6 +101,9 @@ public:
     };
    
 private:
+    DynamicScenery _scenery;
+    DynamicSector* _sector;
+
     osg::Vec3 _begin;
     osg::Vec3 _straight;
     osg::Vec3 _diverted;

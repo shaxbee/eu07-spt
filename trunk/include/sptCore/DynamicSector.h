@@ -15,7 +15,7 @@ class DynamicSector: public Sector
 {
 
 public:
-    DynamicSector(Scenery* scenery, osg::Vec3 position): Sector(scenery, position) { };
+    DynamicSector(Scenery& scenery, osg::Vec3 position): Sector(scenery, position) { };
     virtual ~DynamicSector();
 
     virtual RailTracking& getNextTrack(const osg::Vec3& position, RailTracking* from) const;

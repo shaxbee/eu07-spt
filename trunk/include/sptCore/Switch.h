@@ -13,6 +13,7 @@ class Switch: public SwitchableTracking
 
 public:
     //! Construct switch described by bezier path
+    //! \param sector owner
     //! \param p1 common point
     //! \param cp1 common control vector
     //! \param p2 end of straight path
@@ -20,21 +21,23 @@ public:
     //! \param p3 end of diverted path
     //! \param cp3 diverted path control vector
     //! \param position initial position
-    Switch(const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2, const osg::Vec3& p3, const osg::Vec3& cp3, const std::string& position = "STRAIGHT"); 
-    virtual ~Switch() { };
+    Switch(Sector& sector, const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2, const osg::Vec3& p3, const osg::Vec3& cp3, const std::string& position = "STRAIGHT"); 
+    virtual ~Switch();
 
-    virtual osg::Vec3 getExit(const osg::Vec3& entry) const;
-    virtual Path* getPath(const osg::Vec3& entry) const;
+    virtual const osg::Vec3& getExit(const osg::Vec3& entry) const;
+    virtual const Path& getPath(const osg::Vec3& entry) const;
 
     virtual const ValidPositions getValidPositions() const;
 
-    Path* getStraightPath() const { return _straight.first.get(); }
-    Path* getDivertedPath() const { return _diverted.first.get(); }
+    const Path& getStraightPath() const { return *_straight.first; }
+    const Path& getDivertedPath() const { return *_diverted.first; }
 
 protected:
-    static ValidPositions _positions;
+    typedef std::pair<Path*, Path*> PathPair;
 
-    typedef std::pair<boost::shared_ptr<Path>, boost::shared_ptr<Path> > PathPair;
+    PathPair createBezier(const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2);
+
+    static ValidPositions _positions;
 
     PathPair _straight;
     PathPair _diverted;
