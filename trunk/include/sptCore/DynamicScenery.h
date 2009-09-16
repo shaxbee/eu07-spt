@@ -19,6 +19,7 @@ public:
 	virtual ~DynamicScenery();
 
 	virtual Sector& getSector(const osg::Vec3& position) const;
+    virtual bool hasSector(const osg::Vec3& position) const;
 
 	virtual Track& getTrack(const std::string& name) const;
 //	virtual EventedTrack& getEventedTrack(const std::string& name) const;
@@ -44,10 +45,6 @@ public:
     //! \brief Add named SwitchableTracking
 	//! \throw RailTrackingExistsException if tracking with same name exists
 	void addSwitch(const std::string& name, SwitchableTracking* track);
-
-	//! \brief Removed orphaned connections
-	//! Search for connections with only one Track and remove them
-	void cleanup();
 
 	class SectorExistsException: public boost::exception { };
 	class RailTrackingExistsException: public boost::exception { };

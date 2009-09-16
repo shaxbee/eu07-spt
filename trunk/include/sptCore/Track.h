@@ -24,7 +24,7 @@ public:
     virtual const Path& getPath(const osg::Vec3& entry) const;
 
     //! \brief Get default (forward) path
-    virtual Path& getDefaultPath() const { return *_forward; }
+    const Path& getDefaultPath() const { return *_forward; }
     
 private:
     boost::scoped_ptr<Path> _forward;

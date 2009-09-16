@@ -51,6 +51,13 @@ public:
 		TS_ASSERT_THROWS(&_scenery->getSwitch("switch2"), Scenery::UnknownRailTrackingException);
 		
 	};
+
+    void testSector()
+    {
+
+        TS_ASSERT(_scenery->hasSector(osg::Vec3()));
+
+    };
 	
 private:
     boost::scoped_ptr<DynamicScenery> _scenery;

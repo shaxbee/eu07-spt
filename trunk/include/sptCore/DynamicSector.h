@@ -26,19 +26,39 @@ public:
     //! Track instance will be managed by Sector
     void addTrack(RailTracking* track) { _tracks.insert(track); };
 
-    //! \brief Add track at given position
+    //! \brief Unregister track from sector
+    void removeTrack(RailTracking* track) { _tracks.erase(track); };
+
+    //! \brief Add track to connection
     //! \throw InvalidConnectionException if complementary connection exists at given position 
     void addConnection(const osg::Vec3& position, RailTracking* track);
 
-    //! \brief Add pair of tracks at given position
+    //! \brief Add connection of tracks pair
     //! \throw InvalidConnectionException if complementary connection exists at given position 
     void addConnection(const osg::Vec3& position, RailTracking* left, RailTracking* right);
+
+    //! \brief Remove connection
+    void removeConnection(const osg::Vec3& position) { _connections.erase(position); };
+
+	//! \brief Removed orphaned connections
+	//! Search for connections with one or both NULL trackings
+	void cleanup();
+
+    typedef std::map<osg::Vec3, Connection> Connections;
+    typedef std::set<RailTracking*> Tracks;
+
+    const Connections& getConnections() { return _connections; };
+    const Tracks& getTracks() { return _tracks; };
 
     class InvalidConnectionException: public boost::exception { };
 
 private:
-    typedef std::map<osg::Vec3, Connection> Connections;
-    typedef std::set<RailTracking*> Tracks;
+    struct IsOrphaned
+    {
+
+        bool operator()(Connections::value_type entry) { return !entry.second.first || !entry.second.second; }
+
+    }; // struct IsOrphaned
 
     Connections _connections;
     Tracks _tracks;

@@ -26,6 +26,14 @@ Sector& DynamicScenery::getSector(const osg::Vec3& position) const
 	
 }; // DynamicScenery::getSector
 		
+bool DynamicScenery::hasSector(const osg::Vec3& position) const
+{
+
+    Sectors::const_iterator iter = _sectors.find(position);
+    return (iter != _sectors.end());
+
+}; // DynamicScenery::hasSector
+
 Track& DynamicScenery::getTrack(const std::string& name) const
 {
 

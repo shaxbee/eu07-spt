@@ -1,5 +1,7 @@
 #include <sptCore/Follower.h>
 
+#include <assert.h>
+
 #include <sptCore/Track.h>
 #include <sptCore/Scenery.h>
 
@@ -45,30 +47,36 @@ void Follower::changeTrack(osg::Vec3 position)
         {
 
             offset *= Sector::SIZE;
-            _sector = &getScenery().getSector(getSector().getPosition() + offset);
+            _sector = &(getScenery().getSector(getSector().getPosition() + offset));
             position -= offset;
 
         };
 
 		_track->leave(*this, position);
-		_track = &(_sector->getNextTrack(position, _track));
+
+        try
+        {
+		    _track = &(_sector->getNextTrack(position, _track));
+        }
+        catch(Sector::UnknownConnectionException exc)
+        {
+            throw NullTrackException();
+        };
 		
-		if(_track == NULL)
-			throw NullTrackException();
+		assert(_track != NULL);
 
         if(_sector != &_track->getSector())
         {
 
             osg::Vec3 oldSector = _sector->getPosition();
-            _sector = &_track->getSector();
-
-    		_path = &_track->getPath(position + (oldSector - _sector->getPosition()));
+            _sector = &(_track->getSector());
+    		_path = &(_track->getPath(position + (oldSector - _sector->getPosition())));
 
         } 
         else 
         {
 
-            _path = &_track->getPath(position);
+            _path = &(_track->getPath(position));
 
         };
 

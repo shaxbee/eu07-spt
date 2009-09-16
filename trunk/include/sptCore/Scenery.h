@@ -20,6 +20,7 @@ public:
 	virtual ~Scenery() { };
 
 	virtual Sector& getSector(const osg::Vec3& position) const = 0;
+    virtual bool hasSector(const osg::Vec3& position) const = 0;
 
 	//! \throw UnknownRailTracking if tracking was not found
 	virtual Track& getTrack(const std::string& name) const = 0;

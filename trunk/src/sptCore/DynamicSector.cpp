@@ -65,3 +65,12 @@ void DynamicSector::addConnection(const osg::Vec3& position, RailTracking* left,
         throw InvalidConnectionException() << PositionInfo(position);
 
 }; // DynamicSector::addConnection
+
+void DynamicSector::cleanup()
+{
+
+    Connections result;
+    std::remove_copy_if(_connections.begin(), _connections.end(), std::inserter(result, result.end()), IsOrphaned());
+    _connections.swap(result);
+
+}; // DynamicSector::cleanup()
