@@ -17,7 +17,7 @@ namespace sptCore
 class Scenery;
 
 //! \brief Bounded region of Scenery
-//! Sector manages RailTracking instances and connections between them. 
+//! Sector manages RailTracking instances and connections between them.
 //! \author Zbyszek "ShaXbee" Mandziejewicz
 class Sector
 {
@@ -32,7 +32,6 @@ public:
     const osg::Vec3& getPosition() const { return _position; };
 
     //! \brief Get other track connected at given position
-    //! \return Track pointer if found, NULL otherwise
     //! \throw UnknownConnectionException if there is no connection at given position
     virtual RailTracking& getNextTrack(const osg::Vec3& position, RailTracking* from) const = 0;
 
@@ -41,7 +40,6 @@ public:
     typedef std::pair<RailTracking*, RailTracking*> Connection;
 
     //! \brief Get tracks connected at given position
-    //! \warning If there is only one track at given position second entry will be NULL
     //! \throw UnknownConnectionException if there is no connection at given position
     virtual const Connection& getConnection(const osg::Vec3& position) const = 0;
 
