@@ -16,6 +16,10 @@ class Switch;
 class DynamicScenery;
 class DynamicSector;
 
+//! \brief Scenery construction Helper
+//! Utility class that reduces complexity of creating working Scenery instance
+//! \author Zbyszek "ShaXbee" Mandziejewicz
+//! \date 16.09.2009
 class SceneryBuilder
 {
 

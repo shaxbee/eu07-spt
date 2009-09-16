@@ -38,6 +38,8 @@ public:
         _builder->setCurrentSector(osg::Vec3(Sector::SIZE, 0, Sector::SIZE));
         _builder->createTrack("track3", _point1, _point4);
 
+        _builder->cleanup();
+
         _scenery = &_builder->getScenery();
 
 //      // Old implementation:

@@ -81,6 +81,22 @@ void DynamicScenery::addSector(Sector* sector)
 	
 }; // DynamicScenery::addSector
 
+void DynamicScenery::removeSector(const osg::Vec3& position)
+{
+
+    Sectors::iterator iter = _sectors.find(position);
+
+    if(iter != _sectors.end())
+    {
+        _statistics.totalTracks -= iter->second->getTotalTracks();
+        _statistics.sectors--;
+
+        delete iter->second;
+        _sectors.erase(iter);
+    };
+
+}; // DynamicScenery::removeSector
+
 void DynamicScenery::addTrack(const std::string& name, Track* track)
 {
 	
@@ -93,6 +109,20 @@ void DynamicScenery::addTrack(const std::string& name, Track* track)
 	_statistics.tracks++;
 	
 }; // DynamicScenery::addTrack
+
+void DynamicScenery::removeTrack(const std::string& name)
+{
+
+    Tracks::iterator iter = _tracks.find(name);
+
+    if(iter != _tracks.end())
+    {
+        _statistics.tracks--;
+        _tracks.erase(iter);
+    };
+
+}; // DynamicScenery::removeTrack
+
 
 //void DynamicScenery::addEventedTrack(const std::string& name, EventedTrack* track)
 //{
@@ -114,3 +144,16 @@ void DynamicScenery::addSwitch(const std::string& name, SwitchableTracking* trac
 	_statistics.switches++;
 	
 }; // DynamicScenery::addSwitch
+
+void DynamicScenery::removeSwitch(const std::string& name)
+{
+
+    Switches::iterator iter = _switches.find(name);
+
+    if(iter != _switches.end())
+    {
+        _statistics.switches--;
+        _switches.erase(iter);
+    };
+
+}; // DynamicScenery::removeSwitch

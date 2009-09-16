@@ -25,15 +25,25 @@ public:
 //	virtual EventedTrack& getEventedTrack(const std::string& name) const;
 	virtual SwitchableTracking& getSwitch(const std::string& name) const;
 
+	typedef std::map<osg::Vec3, Sector*> Sectors;
+	typedef std::map<std::string, Track*> Tracks;
+	typedef std::map<std::string, SwitchableTracking*> Switches;
+
+    const Sectors& getSectors() const { return _sectors; }
+    const Tracks& getTracks() const { return _tracks; }
+    const Switches& getSwitches() const { return _switches; }
+
 	virtual const Statistics& getStatistics() const { return _statistics; };
 
     //! \brief Add sector to scenery and manage its lifetime
 	//! \throw SectorExistsException if Sector with same name exists
 	void addSector(Sector* sector);
+    void removeSector(const osg::Vec3& position);
 
     //! \brief Add named Track
 	//! \throw RailTrackingExistsException if Track with same name exists
 	void addTrack(const std::string& name, Track* track);
+    void removeTrack(const std::string& name);
 
     //! \brief Remove named Track
     //! \throw UnknownRailTrackingException when no Track with specified name is found
@@ -45,21 +55,17 @@ public:
     //! \brief Add named SwitchableTracking
 	//! \throw RailTrackingExistsException if tracking with same name exists
 	void addSwitch(const std::string& name, SwitchableTracking* track);
+    void removeSwitch(const std::string& name);
 
 	class SectorExistsException: public boost::exception { };
 	class RailTrackingExistsException: public boost::exception { };
 
 protected:
-	typedef std::map<osg::Vec3, Sector*> Sectors;
-
-	typedef std::map<std::string, Track*> Tracks;
 //	typedef std::map<std::string, boost::shared_ptr<EventedTrack> > EventedTracks;
-	typedef std::map<std::string, SwitchableTracking*> Switches;
+//	EventedTracks _eventedTracks;
 
 	Sectors _sectors;
-
 	Tracks _tracks;
-//	EventedTracks _eventedTracks;
 	Switches _switches;
 
 	Statistics _statistics;
