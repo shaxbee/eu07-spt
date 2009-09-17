@@ -1,6 +1,0 @@
-Import('env')
-
-objects = env.Object(Split('Extruder.cpp'))
-library = env.StaticLibrary('sptGFX', source=objects)
-
-env.Install('#/lib', library)
