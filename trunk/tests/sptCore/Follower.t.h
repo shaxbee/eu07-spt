@@ -39,7 +39,7 @@ public:
         _builder->createTrack("track3", _point1, _point4);
 
         _builder->cleanup();
-
+        
         _scenery = &_builder->getScenery();
 
 //      // Old implementation:
@@ -71,29 +71,63 @@ public:
 	void testMoveForward()
 	{
 
-        boost::scoped_ptr<Follower> follower(new Follower(_scenery->getTrack("startTrack"), 0.1f));
+        Follower follower(_scenery->getTrack("startTrack"), 0.1f);
 
-        float length = _scenery->getTrack("startTrack").getDefaultPath().length();
+        follower.move(follower.getPath().length());
+        TS_ASSERT_EQUALS(&follower.getSector(), &_scenery->getSector(osg::Vec3(Sector::SIZE, 0, 0)));
+        TS_ASSERT_EQUALS(&follower.getTrack(), &_scenery->getTrack("track2"));
 
-        follower->move(length);
-        TS_ASSERT_EQUALS(&follower->getSector(), &_scenery->getSector(osg::Vec3(Sector::SIZE, 0, 0)));
-        TS_ASSERT_EQUALS(&follower->getTrack(), &_scenery->getTrack("track2"));
+        follower.move(follower.getPath().length());
+        TS_ASSERT_EQUALS(&follower.getSector(), &_scenery->getSector(osg::Vec3(Sector::SIZE, 0, Sector::SIZE)));
+        TS_ASSERT_EQUALS(&follower.getTrack(), &_scenery->getTrack("track3"));
+
+        follower.move(follower.getPath().length());
+        TS_ASSERT_EQUALS(&follower.getSector(), &_scenery->getSector(osg::Vec3(0, 0, 0)));
+        TS_ASSERT_EQUALS(&follower.getTrack(), &_scenery->getTrack("startTrack"));
 		
 	};
 
     void testMoveBackward()
     {
 
-        boost::scoped_ptr<Follower> follower(new Follower(_scenery->getTrack("startTrack"), 0.1f));
+        Follower follower(_scenery->getTrack("startTrack"), 0.1f);
 
-        float length = _scenery->getTrack("startTrack").getDefaultPath().length();
+        follower.move(-follower.getPath().length());
+        TS_ASSERT_EQUALS(&follower.getSector(), &_scenery->getSector(osg::Vec3(Sector::SIZE, 0, Sector::SIZE)));
+        TS_ASSERT_EQUALS(&follower.getTrack(), &_scenery->getTrack("track3"));
 
-        follower->move(-length);
-        TS_ASSERT_DIFFERS(&follower->getSector(), &_scenery->getSector(osg::Vec3()));
-        TS_ASSERT_EQUALS(&follower->getSector(), &_scenery->getSector(osg::Vec3(Sector::SIZE, 0, Sector::SIZE)));
-        TS_ASSERT_EQUALS(&follower->getTrack(), &_scenery->getTrack("track3"));
+        follower.move(-follower.getPath().length());
+        TS_ASSERT_EQUALS(&follower.getSector(), &_scenery->getSector(osg::Vec3(Sector::SIZE, 0, 0)));
+        TS_ASSERT_EQUALS(&follower.getTrack(), &_scenery->getTrack("track2"));
+
+        follower.move(-follower.getPath().length());
+        TS_ASSERT_EQUALS(&follower.getSector(), &_scenery->getSector(osg::Vec3(0, 0, 0)));
+        TS_ASSERT_EQUALS(&follower.getTrack(), &_scenery->getTrack("startTrack"));
 
     };
+
+    void testGetPosition()
+    {
+
+        const Path& path = _scenery->getTrack("startTrack").getDefaultPath();
+        Follower follower(_scenery->getTrack("startTrack")); 
+
+        // Begining of track
+        TS_ASSERT_EQUALS(follower.getPosition(), path.front());
+
+        // 1/2 of track
+        follower.move(path.length() * 0.5);
+        TS_ASSERT_EQUALS(follower.getPosition(), path.front() * 0.5 + path.back() * 0.5);
+
+        // 3/4 of track
+        follower.move(path.length() * 0.25);
+        TS_ASSERT_EQUALS(follower.getPosition(), path.front() * 0.25 + path.back() * 0.75);
+
+        // End of track
+        follower.move(path.length() * 0.25);
+        TS_ASSERT_EQUALS(follower.getPosition(), path.back());
+
+    }; 
 
 private:
     boost::scoped_ptr<SceneryBuilder> _builder;

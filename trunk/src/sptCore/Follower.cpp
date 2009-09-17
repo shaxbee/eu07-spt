@@ -8,7 +8,7 @@
 using namespace sptCore;
 
 Follower::Follower(Track& track, float distance):
-    _track(&track), _distance(distance), _sector(&track.getSector())
+    _track(&track), _distance(distance)
 {
 	
 	_path = &track.getDefaultPath();
@@ -38,48 +38,109 @@ void Follower::move(float distance)
 	
 }; // Follower::move
 
+float segmentLength(Path::const_iterator& iter)
+{
+    return (*iter - *(iter - 1)).length();
+};
+
+std::pair<Path::const_iterator, float> Follower::findPosition() const
+{
+
+    Path::const_iterator iter = _path->begin() + 1;
+    float distance = segmentLength(iter); 
+
+    // find point location on path matching distance
+    for(iter; distance < _distance && iter != _path->end(); iter++)
+        distance += segmentLength(iter);
+
+    // if we didn't found segment it means that _distance is wrong
+    assert(iter != _path->end());
+
+    // ratio = position in segment / segment length
+    float ratio = (distance - _distance) / segmentLength(iter);
+
+    return std::make_pair(iter, ratio);
+
+}; // Follower::findPosition
+
+osg::Vec3 Follower::getPosition() const
+{
+
+    Path::const_iterator iter;
+    float ratio;
+
+    boost::tie(iter, ratio) = findPosition();
+
+    return (*(iter - 1) * ratio) + (*iter * (1 - ratio));
+
+}; // Follower::getPosition
+
+osg::Matrix Follower::getMatrix() const
+{
+
+    Path::const_iterator iter;
+    float ratio;
+
+    // find current segment and position in it expressed in (0, 1) range
+    boost::tie(iter, ratio) = findPosition();
+
+    osg::Vec3 begin(*(iter-1));
+    osg::Vec3 end(*iter);
+
+    // for first segment direction is equal to begin control vector
+    osg::Quat rotBegin;
+    rotBegin.makeRotate(osg::X_AXIS, (iter == _path->begin() + 1 ? _path->frontDir() : (end - begin)));
+
+    // for last segment direction is equal to end control vector
+    osg::Quat rotEnd;
+    rotEnd.makeRotate(osg::X_AXIS, (iter == _path->end() - 1 ? _path->backDir() : (*(iter + 1) - end)));
+
+    // smooth interpolation of rotation
+    osg::Quat rotation;
+    rotation.slerp(ratio, rotBegin, rotEnd);
+
+    osg::Matrix transform(rotation);
+    transform.makeTranslate((begin * ratio) + (end * (1 - ratio)));
+
+    return transform;
+
+}; // Follower::getMatrix
+
 void Follower::changeTrack(osg::Vec3 position)
 {
 
-        osg::Vec3 offset(floor(position.x() / Sector::SIZE), 0, floor(position.z() / Sector::SIZE));
+    Sector* sector = &(_track->getSector());
+    osg::Vec3 offset(floor(position.x() / Sector::SIZE), 0, floor(position.z() / Sector::SIZE));
 
-        if(offset != osg::Vec3())
-        {
+    // if position is outside current sector
+    if(offset != osg::Vec3())
+    {
 
-            offset *= Sector::SIZE;
-            _sector = &(getScenery().getSector(getSector().getPosition() + offset));
-            position -= offset;
+        offset *= Sector::SIZE;
+        sector = &(getScenery().getSector(sector->getPosition() + offset));
+        position -= offset;
 
-        };
+    };
 
-		_track->leave(*this, position);
+    // register leaving previous track
+    _track->leave(*this, position);
 
-        try
-        {
-		    _track = &(_sector->getNextTrack(position, _track));
-        }
-        catch(Sector::UnknownConnectionException exc)
-        {
-            throw NullTrackException();
-        };
-		
-		assert(_track != NULL);
+    try
+    {
+        _track = &(sector->getNextTrack(position, _track));
+    }
+    catch(Sector::UnknownConnectionException exc)
+    {
+        throw NullTrackException();
+    };
 
-        if(_sector != &_track->getSector())
-        {
+    // if connection contained null track then sector is corrupt
+    assert(_track != NULL);
 
-            osg::Vec3 oldSector = _sector->getPosition();
-            _sector = &(_track->getSector());
-    		_path = &(_track->getPath(position + (oldSector - _sector->getPosition())));
+    // update path
+    _path = &(_track->getPath(position));
 
-        } 
-        else 
-        {
-
-            _path = &(_track->getPath(position));
-
-        };
-
-		_track->enter(*this, _path->front());
+    // register entering track
+    _track->enter(*this, _path->front());
 
 }; // Follower::moveToNextTrack
