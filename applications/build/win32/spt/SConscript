@@ -1,0 +1,20 @@
+import os.path
+
+Import('env')
+
+# construct buildDir and set include path
+applicationDir = 'applications/spt/'
+env.Append(CPPPATH = [os.path.join('#', applicationDir, 'include'), '#/include'])
+env.Append(LIBPATH = ['#/lib'])
+
+# build
+objects = SConscript('src/SConscript', exports=Split('env'))
+
+# link application
+program = env.Program(
+    'spt', 
+    objects, 
+    LIBS=['osg', 'osgViewer', 'sptCore', 'sptGFX'])
+
+# install it
+env.Install('#/bin', program)

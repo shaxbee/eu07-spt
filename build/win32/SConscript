@@ -1,0 +1,23 @@
+import os.path
+
+# import user environment configuration
+import build_config
+
+Import('env')
+
+# configure additional include and library paths according to user environment config
+paths = ['OPENSCENEGRAPH', 'OPENSCENEGRAPH_DEP']
+
+for path in paths:
+    path = getattr(build_config, path + '_PATH')
+    env.Append(CPPPATH = [os.path.join(path, 'include')])
+    env.Append(LIBPATH = [os.path.join(path, 'lib')])
+    env.Append(ENV = os.environ)
+
+# add WIN32 define and exception handling flags
+env.Append(CXXFLAGS = ['/GR', '/DWIN32', '/EHsc'])
+
+# TODO: add debug / release flags
+
+# return modified environment
+Return('env')

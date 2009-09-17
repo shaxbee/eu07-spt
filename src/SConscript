@@ -1,0 +1,18 @@
+import os.path
+
+# import build environment and build directory
+Import('env buildDir')
+
+env = env.Clone()
+env.Append(CPPPATH = '#/include')
+
+# build libraries
+libraries = ['sptCore', 'sptGFX']
+
+for library in libraries:
+    SConscript(
+        os.path.join(library, 'SConscript'), 
+        build_dir=os.path.join('#', buildDir, library),
+        exports=['env'])
+
+env.Alias('install', '#/lib')
