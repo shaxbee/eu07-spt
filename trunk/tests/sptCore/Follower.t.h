@@ -16,10 +16,10 @@ class FollowerTestSuite: public CxxTest::TestSuite
 
 public:
     FollowerTestSuite():
-        _point1(Sector::SIZE / 2, 0, Sector::SIZE /2),
-        _point2(Sector::SIZE * 1.5, 0, Sector::SIZE / 2),
-        _point3(Sector::SIZE / 2, 0, Sector::SIZE * 1.5),
-        _point4(-Sector::SIZE / 2, 0, -Sector::SIZE / 2)
+        _point1(Sector::SIZE / 2, Sector::SIZE /2, 0),
+        _point2(Sector::SIZE * 1.5, Sector::SIZE / 2, 0),
+        _point3(Sector::SIZE / 2, Sector::SIZE * 1.5, 0),
+        _point4(-Sector::SIZE / 2, -Sector::SIZE / 2, 0)
     {
 
     };
@@ -35,7 +35,7 @@ public:
         _builder->setCurrentSector(osg::Vec3(Sector::SIZE, 0, 0));
         _builder->createTrack("track2", _point1, _point3);
 
-        _builder->setCurrentSector(osg::Vec3(Sector::SIZE, 0, Sector::SIZE));
+        _builder->setCurrentSector(osg::Vec3(Sector::SIZE, Sector::SIZE, 0));
         _builder->createTrack("track3", _point1, _point4);
 
         _builder->cleanup();
@@ -78,7 +78,7 @@ public:
         TS_ASSERT_EQUALS(&follower.getTrack(), &_scenery->getTrack("track2"));
 
         follower.move(follower.getPath().length());
-        TS_ASSERT_EQUALS(&follower.getSector(), &_scenery->getSector(osg::Vec3(Sector::SIZE, 0, Sector::SIZE)));
+        TS_ASSERT_EQUALS(&follower.getSector(), &_scenery->getSector(osg::Vec3(Sector::SIZE, Sector::SIZE, 0)));
         TS_ASSERT_EQUALS(&follower.getTrack(), &_scenery->getTrack("track3"));
 
         follower.move(follower.getPath().length());
@@ -93,7 +93,7 @@ public:
         Follower follower(_scenery->getTrack("startTrack"), 0.1f);
 
         follower.move(-follower.getPath().length());
-        TS_ASSERT_EQUALS(&follower.getSector(), &_scenery->getSector(osg::Vec3(Sector::SIZE, 0, Sector::SIZE)));
+        TS_ASSERT_EQUALS(&follower.getSector(), &_scenery->getSector(osg::Vec3(Sector::SIZE, Sector::SIZE, 0)));
         TS_ASSERT_EQUALS(&follower.getTrack(), &_scenery->getTrack("track3"));
 
         follower.move(-follower.getPath().length());

@@ -57,7 +57,7 @@ DynamicSector& SceneryBuilder::setCurrentSector(const osg::Vec3& position)
 void SceneryBuilder::addConnection(const osg::Vec3& position, RailTracking* track)
 {
 
-    osg::Vec3 offset(floor(position.x() / Sector::SIZE), 0, floor(position.z() / Sector::SIZE));
+    osg::Vec3 offset(floor(position.x() / Sector::SIZE), floor(position.y() / Sector::SIZE), 0);
 
     if(offset != osg::Vec3())
     {

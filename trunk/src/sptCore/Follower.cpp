@@ -2,6 +2,7 @@
 
 #include <assert.h>
 
+#include <sptCore/Math.h>
 #include <sptCore/Track.h>
 #include <sptCore/Scenery.h>
 
@@ -88,19 +89,14 @@ osg::Matrix Follower::getMatrix() const
     osg::Vec3 end(*iter);
 
     // for first segment direction is equal to begin control vector
-    osg::Quat rotBegin;
-    rotBegin.makeRotate(osg::X_AXIS, (iter == _path->begin() + 1 ? _path->frontDir() : (end - begin)));
+    osg::Vec3 dirBegin = (iter == _path->begin() + 1 ? _path->frontDir() : (end - begin));
 
     // for last segment direction is equal to end control vector
-    osg::Quat rotEnd;
-    rotEnd.makeRotate(osg::X_AXIS, (iter == _path->end() - 1 ? _path->backDir() : (*(iter + 1) - end)));
+    osg::Vec3 dirEnd = (iter == _path->end() - 1 ? _path->backDir() : (*(iter + 1) - end));
 
-    // smooth interpolation of rotation
-    osg::Quat rotation;
-    rotation.slerp(ratio, rotBegin, rotEnd);
-
-    osg::Matrix transform(rotation);
-    transform.makeTranslate((begin * ratio) + (end * (1 - ratio)));
+    // create rotation matrix for given direction vector
+    osg::Matrix transform(rotationMatrix(mix(dirBegin, dirEnd, ratio)));
+    transform.makeTranslate(mix(begin, end, ratio));
 
     return transform;
 
@@ -110,7 +106,7 @@ void Follower::changeTrack(osg::Vec3 position)
 {
 
     Sector* sector = &(_track->getSector());
-    osg::Vec3 offset(floor(position.x() / Sector::SIZE), 0, floor(position.z() / Sector::SIZE));
+    osg::Vec3 offset(floor(position.x() / Sector::SIZE), floor(position.y() / Sector::SIZE), 0);
 
     // if position is outside current sector
     if(offset != osg::Vec3())
