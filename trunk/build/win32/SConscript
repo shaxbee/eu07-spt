@@ -13,6 +13,9 @@ for path in paths:
     env.Append(CPPPATH = [os.path.join(path, 'include')])
     env.Append(LIBPATH = [os.path.join(path, 'lib')])
     env.Append(ENV = os.environ)
+    
+env.Append(CPPPATH = [build_config.BOOST_PATH])
+env.Append(LIBPATH = [os.path.join(build_config.BOOST_PATH, 'lib')])
 
 # add WIN32 define and exception handling flags
 env.Append(CXXFLAGS = ['/GR', '/DWIN32', '/EHsc'])

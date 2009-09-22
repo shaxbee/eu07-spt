@@ -14,7 +14,7 @@ objects = SConscript('src/SConscript', exports=Split('env'))
 program = env.Program(
     'spt', 
     objects, 
-    LIBS=['osg', 'osgViewer', 'sptCore', 'sptGFX'])
+    LIBS=['osg', 'osgUtil', 'osgViewer', 'sptCore', 'sptGFX'])
 
 # install it
 env.Install('#/bin', program)

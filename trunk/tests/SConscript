@@ -2,11 +2,14 @@ import os.path
 
 Import('env buildDir')
 
-env = env.Clone(CXXTEST='#/build/cxxtest', toolpath=['#/build/cxxtest'], tools=['default', 'cxxtest'])
+cxxflags = env['CXXFLAGS']
+
+env = env.Clone(CXXTEST='#/build/cxxtest/cxxtestgen.py', toolpath=['#/build/cxxtest'], tools=['default', 'cxxtest'])
 env.Append(CPPPATH=['#/build/cxxtest'])
+env.Append(CXXFLAGS=cxxflags)
 
 for library in ['sptCore']:
-    SConscript(
+    env.SConscript(
         os.path.join(library, 'SConscript'),
         exports = ['env'],
         build_dir = os.path.join('#', buildDir, 'tests'))

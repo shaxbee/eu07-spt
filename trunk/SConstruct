@@ -23,11 +23,11 @@ AddOption('--variant')
 # construct build environment
 env = Environment()
 
+# configure environment and check dependencies platform-wise
+env = SConscript(os.path.join(buildDir, 'SConscript'), exports=['env', 'buildDir'])
+
 # export environment and build dir for other scripts    
 Export('env buildDir')
-
-# configure environment and check dependencies platform-wise
-env = SConscript(os.path.join(buildDir, 'SConscript'))
 
 # common library
 SConscript('src/SConscript')
@@ -42,4 +42,4 @@ SConscript('applications/SConscript')
 SConscript('tests/SConscript')
 
 # documentation
-SConscript('doc/SConscript')
+# SConscript('doc/SConscript')
