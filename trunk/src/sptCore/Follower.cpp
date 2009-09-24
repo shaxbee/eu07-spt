@@ -2,7 +2,8 @@
 
 #include <assert.h>
 
-#include <sptCore/Math.h>
+#include <sptUtil/Math.h>
+
 #include <sptCore/Track.h>
 #include <sptCore/Scenery.h>
 
@@ -72,7 +73,7 @@ osg::Vec3 Follower::getPosition() const
 
     boost::tie(iter, ratio) = findPosition();
 
-    return (*(iter - 1) * ratio) + (*iter * (1 - ratio));
+	return sptUtil::mix(*(iter - 1), *iter, ratio);
 
 }; // Follower::getPosition
 
@@ -95,8 +96,8 @@ osg::Matrix Follower::getMatrix() const
     osg::Vec3 dirEnd = (iter == _path->end() - 1 ? _path->backDir() : (*(iter + 1) - end));
 
     // create rotation matrix for given direction vector
-    osg::Matrix transform(rotationMatrix(mix(dirBegin, dirEnd, ratio)));
-    transform.makeTranslate(mix(begin, end, ratio));
+	osg::Matrix transform(sptUtil::rotationMatrix(sptUtil::mix(dirBegin, dirEnd, ratio)));
+	transform.makeTranslate(sptUtil::mix(begin, end, ratio));
 
     return transform;
 

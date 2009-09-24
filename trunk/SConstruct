@@ -16,30 +16,44 @@ buildDir = os.path.join('build', platform);
 if not os.path.exists(os.path.join(buildDir, 'SConscript')):
     raise UserError("Platform %s is not supported" % platform)
 
-AddOption('--variant')
+vars = Variables()
+vars.Add(BoolVariable('DEBUG', 'Set to build for debug', 1))
     
 # DefaultEnvironment(toolpath='#/build/site_tools')
 
 # construct build environment
-env = Environment()
+env = Environment(variables = vars)
+
+# add command line options description
+Help(vars.GenerateHelpText(env))
 
 # configure environment and check dependencies platform-wise
 env = SConscript(os.path.join(buildDir, 'SConscript'), exports=['env', 'buildDir'])
+
+# setup defines and paths depending on DEBUG flag
+if env['DEBUG']:
+	defines = ['DEBUG']
+	buildDir = os.path.join(buildDir, 'debug')
+else:
+	defines = ['NDEBUG']
+	buildDir = os.path.join(buildDir, 'release')
+
+env.Append(CPPDEFINES = defines)
 
 # export environment and build dir for other scripts    
 Export('env buildDir')
 
 # common library
-SConscript('src/SConscript')
+SConscript('src/SConscript', duplicate=0)
 
 # applications
-SConscript('applications/SConscript')
+SConscript('applications/SConscript', duplicate=0)
 
 # python wrappers
 # SConscript('wrappers/SConscript')
 
 # unit tests
-SConscript('tests/SConscript')
+SConscript('tests/SConscript', duplicate=0)
 
 # documentation
 # SConscript('doc/SConscript')

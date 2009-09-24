@@ -3,7 +3,7 @@
 #include <iostream>
 #include <osgUtil/SmoothingVisitor>
 
-#include <sptCore/Math.h>
+#include <sptUtil/Math.h>
 
 using namespace sptGFX;
 
@@ -68,7 +68,7 @@ void Extruder::extrude(sptCore::Path& path, const osg::Vec3& position, const osg
 
     // last profile
     texCoordV += (path.back() - prev).length(); 
-    transformProfile(path.back(), offset, path.backDir(), texCoordV);
+    transformProfile(path.back(), offset, -path.backDir(), texCoordV);
 
     std::cout << path.back().x() << " " << path.back().y() << std::endl;
     std::cout << _vertices->getNumElements() << std::endl;
@@ -99,7 +99,7 @@ void Extruder::transformProfile(const osg::Vec3& position, const osg::Vec3& offs
     osg::Vec3Array& profileVertices = static_cast<osg::Vec3Array&>(*(_profile->getVertexArray()));
     osg::Vec2Array& profileTexCoords = static_cast<osg::Vec2Array&>(*(_profile->getTexCoordArray(0)));
 
-    osg::Matrix transform(sptCore::rotationMatrix(direction));
+    osg::Matrix transform(sptUtil::rotationMatrix(direction));
 
     for(size_t index = _settings.vertex.from; index < _settings.vertex.to; index++)
     {

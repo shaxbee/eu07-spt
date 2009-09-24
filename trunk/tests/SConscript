@@ -8,8 +8,10 @@ env = env.Clone(CXXTEST='#/build/cxxtest/cxxtestgen.py', toolpath=['#/build/cxxt
 env.Append(CPPPATH=['#/build/cxxtest'])
 env.Append(CXXFLAGS=cxxflags)
 
+env.AppendENVPath('PATH', '#/bin')
+
 for library in ['sptCore']:
     env.SConscript(
         os.path.join(library, 'SConscript'),
         exports = ['env'],
-        build_dir = os.path.join('#', buildDir, 'tests'))
+        build_dir = os.path.join('#', buildDir, 'tests', library))

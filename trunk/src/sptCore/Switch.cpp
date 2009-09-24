@@ -33,7 +33,7 @@ const osg::Vec3& Switch::getExit(const osg::Vec3& entry) const
     
     // entry == begin
     if(entry == _straight.first->front())
-        if(_position == "STRAIGHT")
+        if(getPosition() == "STRAIGHT")
             return _straight.first->back();
         else
             return _diverted.first->back();
@@ -55,7 +55,7 @@ const Path& Switch::getPath(const osg::Vec3& entry) const
 {
 
     if(entry == _straight.first->front())
-        if(_position == "STRAIGHT")
+        if(getPosition() == "STRAIGHT")
             return *_straight.first;
         else
             return *_diverted.first;

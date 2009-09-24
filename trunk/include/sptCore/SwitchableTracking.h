@@ -31,7 +31,7 @@ public:
     typedef boost::error_info<struct tag_name, std::string> NameInfo;
     class InvalidPositionException: public boost::exception { };
 
-protected:
+private:
     std::string _position;
 
 }; // class SwitchableTracking

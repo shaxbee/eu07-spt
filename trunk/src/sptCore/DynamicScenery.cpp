@@ -6,14 +6,6 @@
 
 using namespace sptCore;
 
-DynamicScenery::~DynamicScenery()
-{
-
-    for(Sectors::iterator iter = _sectors.begin(); iter != _sectors.end(); iter++)
-        delete iter->second;
-
-}; // DynamicScenery::~DynamicScenery()
-
 Sector& DynamicScenery::getSector(const osg::Vec3& position) const
 {
 

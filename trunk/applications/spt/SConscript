@@ -12,9 +12,9 @@ objects = SConscript('src/SConscript', exports=Split('env'))
 
 # link application
 program = env.Program(
-    'spt', 
+    'spt' if not env['DEBUG'] else 'sptd', 
     objects, 
-    LIBS=['osg', 'osgUtil', 'osgViewer', 'sptCore', 'sptGFX'])
+    LIBS=['osg', 'osgUtil', 'osgViewer', 'OpenThreads', 'sptCore', 'sptGFX'])
 
 # install it
 env.Install('#/bin', program)

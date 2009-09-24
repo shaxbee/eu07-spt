@@ -1,13 +1,13 @@
-#ifndef SPTCORE_MATH_H
-#define SPTCORE_MATH_H 1
+#ifndef SPTUTIL_MATH_H
+#define SPTUTIL_MATH_H 1
 
 #include <osg/Vec3>
 #include <osg/Matrix>
 
-namespace sptCore
+namespace sptUtil
 {
 
-osg::Matrix rotationMatrix(osg::Vec3 dir, float roll = 0.0f)
+inline osg::Matrix rotationMatrix(osg::Vec3 dir, float roll = 0.0f)
 {
 
     osg::Matrix result;

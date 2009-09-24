@@ -18,9 +18,16 @@ env.Append(CPPPATH = [build_config.BOOST_PATH])
 env.Append(LIBPATH = [os.path.join(build_config.BOOST_PATH, 'lib')])
 
 # add WIN32 define and exception handling flags
-env.Append(CXXFLAGS = ['/GR', '/DWIN32', '/EHsc'])
+env.Append(CXXFLAGS = ['/GR', '/EHsc'])
+env.Append(CPPDEFINES = ['WIN32'])
 
-# TODO: add debug / release flags
-
+# debug / release flags
+if env['DEBUG']:
+	env.Append(CXXFLAGS = ['/Zi'])
+	env.Append(LINKFLAGS = ['/DEBUG'])
+	env['LIBSUFFIX'] = 'd' + env['LIBSUFFIX']
+else:
+	env.Append(CXXFLAGS = ['/O2'])
+	
 # return modified environment
 Return('env')

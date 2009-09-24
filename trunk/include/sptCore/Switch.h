@@ -32,7 +32,7 @@ public:
     const Path& getStraightPath() const { return *_straight.first; }
     const Path& getDivertedPath() const { return *_diverted.first; }
 
-protected:
+private:
     typedef std::pair<Path*, Path*> PathPair;
 
     PathPair createBezier(const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2);

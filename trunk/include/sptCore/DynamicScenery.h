@@ -3,7 +3,7 @@
 
 #include <sptCore/Scenery.h>
 
-#include <map>
+#include <sptUtil/ManagingMap.h>
 
 namespace sptCore
 {
@@ -16,7 +16,7 @@ class Switch;
 class DynamicScenery: public Scenery
 {
 public:
-	virtual ~DynamicScenery();
+	virtual ~DynamicScenery() { };
 
 	virtual Sector& getSector(const osg::Vec3& position) const;
     virtual bool hasSector(const osg::Vec3& position) const;
@@ -25,9 +25,9 @@ public:
 //	virtual EventedTrack& getEventedTrack(const std::string& name) const;
 	virtual SwitchableTracking& getSwitch(const std::string& name) const;
 
-	typedef std::map<osg::Vec3, Sector*> Sectors;
-	typedef std::map<std::string, Track*> Tracks;
-	typedef std::map<std::string, SwitchableTracking*> Switches;
+	typedef sptUtil::ManagingMap<osg::Vec3, Sector*> Sectors;
+	typedef sptUtil::ManagingMap<std::string, Track*> Tracks;
+	typedef sptUtil::ManagingMap<std::string, SwitchableTracking*> Switches;
 
     const Sectors& getSectors() const { return _sectors; }
     const Tracks& getTracks() const { return _tracks; }
@@ -60,7 +60,7 @@ public:
 	class SectorExistsException: public boost::exception { };
 	class RailTrackingExistsException: public boost::exception { };
 
-protected:
+private:
 //	typedef std::map<std::string, boost::shared_ptr<EventedTrack> > EventedTracks;
 //	EventedTracks _eventedTracks;
 
