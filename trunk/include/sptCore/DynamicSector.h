@@ -6,6 +6,8 @@
 #include <map>
 #include <set>
 
+#include <sptUtil/AutoSet.h>
+
 namespace sptCore
 {
 
@@ -16,7 +18,7 @@ class DynamicSector: public Sector
 
 public:
     DynamicSector(Scenery& scenery, osg::Vec3 position): Sector(scenery, position) { };
-    virtual ~DynamicSector();
+	virtual ~DynamicSector() { };
 
     virtual RailTracking& getNextTrack(const osg::Vec3& position, RailTracking* from) const;
     virtual const Connection& getConnection(const osg::Vec3& position) const;
@@ -24,10 +26,10 @@ public:
 
     //! \brief Register track at sector
     //! Track instance will be managed by Sector
-    void addTrack(RailTracking* track) { _tracks.insert(track); };
+	void addTrack(std::auto_ptr<RailTracking> track) { _tracks.insert(track); };
 
     //! \brief Unregister track from sector
-    void removeTrack(RailTracking* track) { _tracks.erase(track); };
+    void removeTrack(RailTracking& track) { _tracks.erase(&track); };
 
     //! \brief Add track to connection
     //! \throw InvalidConnectionException if complementary connection exists at given position 
@@ -44,8 +46,8 @@ public:
 	//! Search for connections with one or both NULL trackings
 	void cleanup();
 
-    typedef std::map<osg::Vec3, Connection> Connections;
-    typedef std::set<RailTracking*> Tracks;
+	typedef std::map<osg::Vec3, Connection> Connections;
+	typedef sptUtil::AutoSet<RailTracking*> Tracks;
 
     const Connections& getConnections() { return _connections; };
     const Tracks& getTracks() { return _tracks; };

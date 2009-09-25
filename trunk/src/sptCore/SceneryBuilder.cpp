@@ -15,7 +15,7 @@ SceneryBuilder::SceneryBuilder():
     _scenery(new DynamicScenery())
 {
 
-    _sector = createSector(osg::Vec3());
+    _sector = &createSector(osg::Vec3());
 
 };
 
@@ -23,15 +23,18 @@ SceneryBuilder::SceneryBuilder(DynamicScenery* scenery):
     _scenery(scenery)
 {
 
-    _sector = createSector(osg::Vec3());
+    _sector = &getOrCreateSector(osg::Vec3());
 
 };
 
-DynamicSector* SceneryBuilder::createSector(const osg::Vec3& position)
+DynamicSector& SceneryBuilder::createSector(const osg::Vec3& position)
 {
 
-    DynamicSector* result = new DynamicSector(*_scenery, position);
-    _scenery->addSector(result);
+	std::auto_ptr<DynamicSector> sector(new DynamicSector(*_scenery, position));
+	DynamicSector& result = *sector;
+	
+	_scenery->addSector(std::auto_ptr<Sector>(sector));
+
     return result;
 
 };
@@ -40,9 +43,9 @@ DynamicSector& SceneryBuilder::getOrCreateSector(const osg::Vec3& position)
 {
 
     if(_scenery->hasSector(position))
-        return *(boost::polymorphic_cast<DynamicSector*>(&_scenery->getSector(position)));
+        return dynamic_cast<DynamicSector&>(_scenery->getSector(position));
 
-    return *createSector(position);
+    return createSector(position);
 
 }; // SceneryBuilder::getOrCreateSector
 
@@ -74,44 +77,47 @@ void SceneryBuilder::addConnection(const osg::Vec3& position, RailTracking* trac
 Track& SceneryBuilder::createTrack(const osg::Vec3& p1, const osg::Vec3& p2)
 {
 
-    Track* track = new Track(getCurrentSector(), p1, p2);
+	std::auto_ptr<Track> track(new Track(getCurrentSector(), p1, p2));
+	Track* trackPtr = track.get();
 
-    _sector->addTrack(track);
-    addConnection(p1, track);
-    addConnection(p2, track);
+	_sector->addTrack(std::auto_ptr<RailTracking>(track));
 
-    return *track;
+    addConnection(p1, trackPtr);
+    addConnection(p2, trackPtr);
+
+    return *trackPtr;
 
 };
 
 Track& SceneryBuilder::createTrack(const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2)
 {
 
-    Track* track = new Track(getCurrentSector(), p1, cp1, p2, cp2);
+    std::auto_ptr<Track> track(new Track(getCurrentSector(), p1, cp1, p2, cp2));
+	Track* trackPtr = track.get();
 
-    _sector->addTrack(track);
-    addConnection(p1, track);
-    addConnection(p2, track);
+	_sector->addTrack(std::auto_ptr<RailTracking>(track));
+    addConnection(p1, trackPtr);
+    addConnection(p2, trackPtr);
 
-    return *track;
+    return *trackPtr;
 
 };
 
 Track& SceneryBuilder::createTrack(const std::string& name, const osg::Vec3& p1, const osg::Vec3& p2)
 {
 
-    Track* track = &(createTrack(p1, p2));
+    Track& track = createTrack(p1, p2);
     _scenery->addTrack(name, track);
-    return *track;
+    return track;
 
 };
 
 Track& SceneryBuilder::createTrack(const std::string& name, const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2)
 {
 
-    Track* track = &(createTrack(p1, cp1, p2, cp2));
+    Track& track = createTrack(p1, cp1, p2, cp2);
     _scenery->addTrack(name, track);
-    return *track;
+    return track;
 
 };
 
@@ -124,7 +130,7 @@ void SceneryBuilder::removeTrack(Track& track)
     sector.removeConnection(path.front());
     sector.removeConnection(path.back());
 
-    sector.removeTrack(&track);
+    sector.removeTrack(track);
 
 }; // SceneryBuilder::removeTrack(track)
 
@@ -139,23 +145,24 @@ void SceneryBuilder::removeTrack(const std::string& name)
 Switch& SceneryBuilder::createSwitch(const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2, const osg::Vec3& p3, const osg::Vec3& cp3)
 {
 
-    Switch* result = new Switch(getCurrentSector(), p1, cp1, p2, cp2, p3, cp3);
+	std::auto_ptr<Switch> result(new Switch(getCurrentSector(), p1, cp1, p2, cp2, p3, cp3));
+	Switch* resultPtr = result.get();
 
-    _sector->addTrack(result);
-    addConnection(p1, result);
-    addConnection(p2, result);
-    addConnection(p3, result);
+	_sector->addTrack(std::auto_ptr<RailTracking>(result));
+    addConnection(p1, resultPtr);
+    addConnection(p2, resultPtr);
+    addConnection(p3, resultPtr);
 
-    return *result;
+    return *resultPtr;
 
 };
 
 Switch& SceneryBuilder::createSwitch(const std::string& name, const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2, const osg::Vec3& p3, const osg::Vec3& cp3)
 {
 
-    Switch* result = &(createSwitch(p1, cp1, p2, cp2, p3, cp3));
+    Switch& result = createSwitch(p1, cp1, p2, cp2, p3, cp3);
     _scenery->addSwitch(name, result);
-    return *result;
+    return result;
 
 };
 
@@ -170,7 +177,7 @@ void SceneryBuilder::removeSwitch(Switch& tracking)
     sector.removeConnection(straight.back());
     sector.removeConnection(diverted.back());
 
-    sector.removeTrack(&tracking);
+    sector.removeTrack(tracking);
 
 };
 

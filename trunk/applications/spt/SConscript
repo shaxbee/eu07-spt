@@ -1,6 +1,6 @@
 import os.path
 
-Import('env')
+Import('env buildDir')
 
 # construct buildDir and set include path
 applicationDir = 'applications/spt/'
@@ -8,7 +8,7 @@ env.Append(CPPPATH = [os.path.join('#', applicationDir, 'include'), '#/include']
 env.Append(LIBPATH = ['#/lib'])
 
 # build
-objects = SConscript('src/SConscript', exports=Split('env'))
+objects = SConscript('src/SConscript', variant_dir = os.path.join(buildDir, 'applications/spt'), duplicate=0)
 
 # link application
 program = env.Program(

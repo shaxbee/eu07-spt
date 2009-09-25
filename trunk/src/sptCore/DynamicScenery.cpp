@@ -57,11 +57,13 @@ SwitchableTracking& DynamicScenery::getSwitch(const std::string& name) const
 	
 }; // DynamicScenery::getSwitch
 
-void DynamicScenery::addSector(Sector* sector)
+void DynamicScenery::addSector(std::auto_ptr<Sector> sector)
 {
 
+	size_t totalTracks = sector->getTotalTracks();
+
 	std::pair<Sectors::iterator, bool> ret;
-	ret = _sectors.insert(std::make_pair(sector->getPosition(), sector));
+	ret = _sectors.insert(std::make_pair(sector->getPosition(), std::auto_ptr_ref<Sector>(sector)));
 
     // if sector already existed
 	if(!ret.second)
@@ -69,7 +71,7 @@ void DynamicScenery::addSector(Sector* sector)
 
     // update statistics
 	_statistics.sectors++;
-	_statistics.totalTracks += sector->getTotalTracks();
+	_statistics.totalTracks += totalTracks;
 	
 }; // DynamicScenery::addSector
 
@@ -83,17 +85,16 @@ void DynamicScenery::removeSector(const osg::Vec3& position)
         _statistics.totalTracks -= iter->second->getTotalTracks();
         _statistics.sectors--;
 
-        delete iter->second;
         _sectors.erase(iter);
     };
 
 }; // DynamicScenery::removeSector
 
-void DynamicScenery::addTrack(const std::string& name, Track* track)
+void DynamicScenery::addTrack(const std::string& name, Track& track)
 {
 	
 	std::pair<Tracks::iterator, bool> ret;
-	ret = _tracks.insert(std::make_pair(name, track));
+	ret = _tracks.insert(std::make_pair(name, &track));
 	
 	if(!ret.second)
 		throw RailTrackingExistsException() << NameInfo(name);
@@ -124,11 +125,11 @@ void DynamicScenery::removeTrack(const std::string& name)
 //	
 //}; // DynamicScenery::addEventedTrack
 
-void DynamicScenery::addSwitch(const std::string& name, SwitchableTracking* track)
+void DynamicScenery::addSwitch(const std::string& name, SwitchableTracking& track)
 {
 	
 	std::pair<Switches::iterator, bool> ret;
-	ret = _switches.insert(std::make_pair(name, track));
+	ret = _switches.insert(std::make_pair(name, &track));
 	
 	if(!ret.second)
 		throw RailTrackingExistsException() << NameInfo(name);

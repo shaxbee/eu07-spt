@@ -2,9 +2,8 @@
 
 #include <boost/scoped_ptr.hpp>
 
-#include <sptCore/DynamicSector.h>
-
 #include <sptCore/DynamicScenery.h>
+#include <sptCore/DynamicSector.h>
 #include <sptCore/Track.h>
 
 using namespace sptCore;
@@ -24,16 +23,16 @@ public:
     void setUp()
     {
 
-        _scenery.reset(new DynamicScenery());
+		_sector.reset(new DynamicSector(_scenery, osg::Vec3(0, 0, 0)));
+		
+		std::auto_ptr<Track> trackA(new Track(*_sector, _pointA, _pointB));
+        std::auto_ptr<Track> trackB(new Track(*_sector, _pointB, _pointC));
 
-        _sector = new DynamicSector(*_scenery, osg::Vec3(0, 0, 0));
-        _scenery->addSector(_sector);
+		_trackA = trackA.get();
+		_trackB = trackB.get();
 
-        _trackA = new Track(*_sector, _pointA, _pointB);
-        _trackB = new Track(*_sector, _pointB, _pointC);
-
-        _sector->addTrack(_trackA);
-        _sector->addTrack(_trackB);
+		_sector->addTrack(std::auto_ptr<RailTracking>(trackA));
+		_sector->addTrack(std::auto_ptr<RailTracking>(trackB));
 
         _sector->addConnection(_pointA, _trackA);
         _sector->addConnection(_pointB, _trackA, _trackB);
@@ -63,8 +62,8 @@ public:
     };
 
 private:
-    boost::scoped_ptr<DynamicScenery> _scenery;
-    DynamicSector* _sector;
+	DynamicScenery _scenery;
+	std::auto_ptr<DynamicSector> _sector;
 
     osg::Vec3 _pointA;
     osg::Vec3 _pointB;

@@ -6,12 +6,7 @@
 #include <osgViewer/Viewer>
 
 #include <sptCore/Path.h>
-#include <sptCore/Track.h>
-
-#include <sptCore/DynamicScenery.h>
-#include <sptCore/DynamicSector.h>
-
-#include "sptGFX/Extruder.h"
+#include <sptGFX/Extruder.h>
 
 using namespace sptCore;
 using namespace sptGFX;
@@ -82,13 +77,6 @@ int main()
         root->addDrawable(geometry);
 
     };
-
-    DynamicScenery scenery;
-    DynamicSector* sector = new DynamicSector(scenery, osg::Vec3());
-    Track* track = new Track(*sector, osg::Vec3(0, 0, 0), osg::Vec3(100, 0, 0));
-
-    sector->addTrack(track);
-    scenery.addSector(sector);
 
     osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
     geometry->setVertexArray(new osg::Vec3Array);

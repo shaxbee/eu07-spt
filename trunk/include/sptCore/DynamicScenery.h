@@ -3,7 +3,7 @@
 
 #include <sptCore/Scenery.h>
 
-#include <sptUtil/ManagingMap.h>
+#include <sptUtil/AutoMap.h>
 
 namespace sptCore
 {
@@ -25,9 +25,9 @@ public:
 //	virtual EventedTrack& getEventedTrack(const std::string& name) const;
 	virtual SwitchableTracking& getSwitch(const std::string& name) const;
 
-	typedef sptUtil::ManagingMap<osg::Vec3, Sector*> Sectors;
-	typedef sptUtil::ManagingMap<std::string, Track*> Tracks;
-	typedef sptUtil::ManagingMap<std::string, SwitchableTracking*> Switches;
+	typedef sptUtil::AutoMap<osg::Vec3, Sector*> Sectors;
+	typedef std::map<std::string, Track*> Tracks;
+	typedef std::map<std::string, SwitchableTracking*> Switches;
 
     const Sectors& getSectors() const { return _sectors; }
     const Tracks& getTracks() const { return _tracks; }
@@ -37,12 +37,12 @@ public:
 
     //! \brief Add sector to scenery and manage its lifetime
 	//! \throw SectorExistsException if Sector with same name exists
-	void addSector(Sector* sector);
+	void addSector(std::auto_ptr<Sector> sector);
     void removeSector(const osg::Vec3& position);
 
     //! \brief Add named Track
 	//! \throw RailTrackingExistsException if Track with same name exists
-	void addTrack(const std::string& name, Track* track);
+	void addTrack(const std::string& name, Track& track);
     void removeTrack(const std::string& name);
 
     //! \brief Remove named Track
@@ -54,7 +54,7 @@ public:
 
     //! \brief Add named SwitchableTracking
 	//! \throw RailTrackingExistsException if tracking with same name exists
-	void addSwitch(const std::string& name, SwitchableTracking* track);
+	void addSwitch(const std::string& name, SwitchableTracking& track);
     void removeSwitch(const std::string& name);
 
 	class SectorExistsException: public boost::exception { };

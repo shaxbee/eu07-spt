@@ -1,22 +1,27 @@
-#ifndef SPTUTIL_MANAGINGMAP_H
-#define SPTUTIL_MANAGINGMAP_H 1
+#ifndef SPTUTIL_AUTOMAP_H
+#define SPTUTIL_AUTOMAP_H 1
 
 #include <map>
 #include <memory>
 
 #include  <boost/type_traits/remove_pointer.hpp>
 
-namespace sptUtil
+namespace 
 {
 
 template <typename PairT>
 struct DeletePointedValue
 {
 	void operator()(PairT& pair) { delete pair.second; }
-}; // struct ::DeleteValue
+}; // struct ::DeletePointedValue
+
+}; // anonymous namespace
+
+namespace sptUtil
+{
 
 template <typename KeyT, typename ValueT>
-class ManagingMap
+class AutoMap
 {
 
 public:
@@ -28,16 +33,18 @@ public:
 
 	typedef std::pair<typename KeyT, std::auto_ptr<typename raw_data_type> > value_type;
 
-	~ManagingMap() { clear(); };
+	~AutoMap() { clear(); };
 
-	iterator begin() { return _map.begin(); }
-	const_iterator begin() const { return _map.begin(); }
+	size_type size() const { return _map.size(); };
 
-	iterator end() { return _map.end(); }
-	const_iterator end() const { return _map.end(); }
+	iterator begin() { return _map.begin(); };
+	const_iterator begin() const { return _map.begin(); };
 
-	iterator find(const typename KeyT& key) { return _map.find(key); };
-	const_iterator find(const typename KeyT& key) const { return _map.find(key); };
+	iterator end() { return _map.end(); };
+	const_iterator end() const { return _map.end(); };
+
+	iterator find(const KeyT& key) { return _map.find(key); };
+	const_iterator find(const KeyT& key) const { return _map.find(key); };
 
 	std::pair<iterator,bool> insert(value_type pair)
 	{
@@ -51,8 +58,6 @@ public:
 		erase(begin(), end());
 	};
 
-
-
     void erase(iterator pos)
 	{
 		delete pos->second;
@@ -65,24 +70,16 @@ public:
 		_map.erase(start, end);
 	};
 
-    size_type erase(const KeyT& key)
+    value_type erase(const KeyT& key)
 	{
 		iterator iter = _map.find(key);
-		if(iter != end())
-		{
-			delete iter->second;
-			return 1;
-		}
-		else
-		{
-			return 0;
-		};
+		return iter != end() ? value_type(iter->second) : NULL;
 	};
 
 private:
 	typename InternalMapT _map;
 
-}; // class sptUtil::ManagingMap
+}; // class sptUtil::AutoMap
 
 }; // namespace sptUtil
 

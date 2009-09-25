@@ -8,7 +8,7 @@ env.Append(CXXTEST_OPTS = "--include=tests/OsgTypeTraits.h")
 # for each *.t.h file
 for node in Glob('*.t.h'):
     # extract tested class name
-    name = str(node)
+    name = os.path.basename(str(node))
     name = name[:name.find('.')]
     # compose test suite name and build it
     env.CxxTest('test_sptCore_' + name, node, LIBS=['osg', 'sptCore'])

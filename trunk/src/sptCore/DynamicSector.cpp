@@ -2,15 +2,6 @@
 
 using namespace sptCore;
 
-DynamicSector::~DynamicSector()
-{
-
-    // delete track instances registered in sector
-    for(Tracks::iterator iter = _tracks.begin(); iter != _tracks.end(); iter++)
-        delete *iter;
-
-}; // DynamicSector::~DynamicSector
-
 RailTracking& DynamicSector::getNextTrack(const osg::Vec3& position, RailTracking* from) const
 {
 

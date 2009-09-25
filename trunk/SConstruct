@@ -44,16 +44,16 @@ env.Append(CPPDEFINES = defines)
 Export('env buildDir')
 
 # common library
-SConscript('src/SConscript', duplicate=0)
+SConscript('src/SConscript', variant_dir = buildDir, duplicate = 0)
 
 # applications
-SConscript('applications/SConscript', duplicate=0)
+SConscript('applications/SConscript', variant_dir = os.path.join(buildDir, 'applications'), duplicate = 0)
 
 # python wrappers
 # SConscript('wrappers/SConscript')
 
 # unit tests
-SConscript('tests/SConscript', duplicate=0)
+SConscript('tests/SConscript', variant_dir = os.path.join(buildDir, 'tests'), duplicate = 0)
 
 # documentation
 # SConscript('doc/SConscript')

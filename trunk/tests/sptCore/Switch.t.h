@@ -16,12 +16,10 @@ public:
         _straight(10.0f, 0.0f, 0.0f), 
         _diverted(10.0f, 10.0f, 0.0f), 
         _scenery(),
-        _sector(new DynamicSector(_scenery, osg::Vec3())),
-        _switch(*_sector, _begin, _begin, _straight, _straight, _diverted, _diverted) 
+        _sector(_scenery, osg::Vec3()),
+        _switch(_sector, _begin, _begin, _straight, _straight, _diverted, _diverted) 
     { 
 
-        _scenery.addSector(_sector);
-    
     };
     
     void setUp()
@@ -102,7 +100,7 @@ public:
    
 private:
     DynamicScenery _scenery;
-    DynamicSector* _sector;
+    DynamicSector _sector;
 
     osg::Vec3 _begin;
     osg::Vec3 _straight;

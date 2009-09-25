@@ -11,7 +11,4 @@ env.Append(CXXFLAGS=cxxflags)
 env.AppendENVPath('PATH', '#/bin')
 
 for library in ['sptCore']:
-    env.SConscript(
-        os.path.join(library, 'SConscript'),
-        exports = ['env'],
-        build_dir = os.path.join('#', buildDir, 'tests', library))
+    env.SConscript(os.path.join(library, 'SConscript'), exports = ['env'], duplicate = 0)
