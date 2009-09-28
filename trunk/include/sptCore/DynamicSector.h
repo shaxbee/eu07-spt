@@ -20,8 +20,8 @@ public:
     DynamicSector(Scenery& scenery, osg::Vec3 position): Sector(scenery, position) { };
 	virtual ~DynamicSector() { };
 
-    virtual RailTracking& getNextTrack(const osg::Vec3& position, RailTracking* from) const;
-    virtual const Connection& getConnection(const osg::Vec3& position) const;
+    virtual RailTracking& getNextTrack(const osg::Vec3& position, RailTracking* from);
+    virtual const Connection& getConnection(const osg::Vec3& position);
     virtual size_t getTotalTracks() const { return _tracks.size(); };
 
     //! \brief Register track at sector

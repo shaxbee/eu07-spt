@@ -18,6 +18,7 @@ if not os.path.exists(os.path.join(buildDir, 'SConscript')):
 
 vars = Variables()
 vars.Add(BoolVariable('DEBUG', 'Set to build for debug', 1))
+vars.Add(EnumVariable('TEST_PRINTER', 'Unit tests error printer', 'Paren', ('Xml', 'Error', 'Paren', 'Stdio', 'XUnit')))
     
 # DefaultEnvironment(toolpath='#/build/site_tools')
 
@@ -56,4 +57,5 @@ SConscript('applications/SConscript', variant_dir = os.path.join(buildDir, 'appl
 SConscript('tests/SConscript', variant_dir = os.path.join(buildDir, 'tests'), duplicate = 0)
 
 # documentation
-# SConscript('doc/SConscript')
+if 'doc' in COMMAND_LINE_TARGETS:
+    SConscript('doc/SConscript')

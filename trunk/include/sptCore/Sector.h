@@ -28,12 +28,12 @@ public:
 
     static float SIZE;
 
-    Scenery& getScenery() const { return _scenery; };
+    Scenery& getScenery() { return _scenery; };
     const osg::Vec3& getPosition() const { return _position; };
 
     //! \brief Get other track connected at given position
     //! \throw UnknownConnectionException if there is no connection at given position
-    virtual RailTracking& getNextTrack(const osg::Vec3& position, RailTracking* from) const = 0;
+    virtual RailTracking& getNextTrack(const osg::Vec3& position, RailTracking* from) = 0;
 
     virtual size_t getTotalTracks() const = 0;
 
@@ -41,7 +41,7 @@ public:
 
     //! \brief Get tracks connected at given position
     //! \throw UnknownConnectionException if there is no connection at given position
-    virtual const Connection& getConnection(const osg::Vec3& position) const = 0;
+    virtual const Connection& getConnection(const osg::Vec3& position) = 0;
 
     typedef boost::error_info<struct tag_position, osg::Vec3f> PositionInfo;
     class UnknownConnectionException: public boost::exception { };

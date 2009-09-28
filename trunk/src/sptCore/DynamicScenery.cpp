@@ -63,7 +63,7 @@ void DynamicScenery::addSector(std::auto_ptr<Sector> sector)
 	size_t totalTracks = sector->getTotalTracks();
 
 	std::pair<Sectors::iterator, bool> ret;
-	ret = _sectors.insert(std::make_pair(sector->getPosition(), std::auto_ptr_ref<Sector>(sector)));
+	ret = _sectors.insert(sector->getPosition(), sector);
 
     // if sector already existed
 	if(!ret.second)
@@ -75,18 +75,18 @@ void DynamicScenery::addSector(std::auto_ptr<Sector> sector)
 	
 }; // DynamicScenery::addSector
 
-void DynamicScenery::removeSector(const osg::Vec3& position)
+std::auto_ptr<Sector> DynamicScenery::removeSector(const osg::Vec3& position)
 {
 
     Sectors::iterator iter = _sectors.find(position);
 
-    if(iter != _sectors.end())
-    {
-        _statistics.totalTracks -= iter->second->getTotalTracks();
-        _statistics.sectors--;
+    if(iter == _sectors.end())
+        throw SectorNotFoundException() << PositionInfo(position);
 
-        _sectors.erase(iter);
-    };
+    _statistics.totalTracks -= iter->second->getTotalTracks();
+    _statistics.sectors--;
+
+    return _sectors.erase(iter);
 
 }; // DynamicScenery::removeSector
 

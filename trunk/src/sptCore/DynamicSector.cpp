@@ -2,18 +2,28 @@
 
 using namespace sptCore;
 
-RailTracking& DynamicSector::getNextTrack(const osg::Vec3& position, RailTracking* from) const
+RailTracking& DynamicSector::getNextTrack(const osg::Vec3& position, RailTracking* from)
 {
 
     Connections::const_iterator iter = _connections.find(position);
-    if(iter == _connections.end() || (from != iter->second.first && from != iter->second.second))
+
+    // if there was no connection at given position throw exception
+    if(iter == _connections.end())
         throw UnknownConnectionException() << PositionInfo(position);
 
-    return *(iter->second.first == from ? iter->second.second : iter->second.first);
+    assert(from == iter->second.first || from == iter->second.second);
+
+    RailTracking* next = (iter->second.first == from ? iter->second.second : iter->second.first);
+
+    // if connection doesn't have next tracking throw exception
+    if(!next)
+        throw  UnknownConnectionException() << PositionInfo(position);
+
+    return *next;
 
 }; // DynamicSector::getNextTrack
 
-const Sector::Connection& DynamicSector::getConnection(const osg::Vec3& position) const
+const Sector::Connection& DynamicSector::getConnection(const osg::Vec3& position)
 {
 
     Connections::const_iterator iter = _connections.find(position);

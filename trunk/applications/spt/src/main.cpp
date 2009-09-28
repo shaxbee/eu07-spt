@@ -55,7 +55,7 @@ int main()
         cpBegin,
         end,
         cpEnd,
-        20);
+        40);
 
     {
         osg::Geometry* geometry = new osg::Geometry;

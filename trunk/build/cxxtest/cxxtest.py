@@ -325,9 +325,9 @@ def generate(env, **kwargs):
                 # the 1st source specified is the test
                 deps.append(env.CxxTestCpp(linkins.pop(0), **kwargs))
         else:
-            deps.append(env.CxxTestCpp(headers.pop(0), **kwargs))
+            deps.append(env.CxxTestCpp(headers.pop(0), CXXTEST_ROOT_PART = '--root', **kwargs))
             deps.extend(
-                [env.CxxTestCpp(header, CXXTEST_RUNNER = 'none', 
+                [env.CxxTestCpp(header, CXXTEST_RUNNER = None, 
                     CXXTEST_ROOT_PART = '--part', **kwargs)
                     for header in headers]
                 )

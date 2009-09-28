@@ -25,14 +25,13 @@ class AutoMap
 {
 
 public:
-	typedef std::map<typename KeyT, typename ValueT> InternalMapT;
+	typedef std::map<KeyT, ValueT> InternalMapT;
 	typedef typename InternalMapT::size_type size_type;
 	typedef typename InternalMapT::iterator iterator;
 	typedef typename InternalMapT::const_iterator const_iterator;
-	typedef typename boost::remove_pointer<typename ValueT>::type raw_data_type;
+    typedef std::auto_ptr<typename boost::remove_pointer<ValueT>::type> data_type;
 
-	typedef std::pair<typename KeyT, std::auto_ptr<typename raw_data_type> > value_type;
-
+    AutoMap(): _map() { };
 	~AutoMap() { clear(); };
 
 	size_type size() const { return _map.size(); };
@@ -46,10 +45,14 @@ public:
 	iterator find(const KeyT& key) { return _map.find(key); };
 	const_iterator find(const KeyT& key) const { return _map.find(key); };
 
-	std::pair<iterator,bool> insert(value_type pair)
+	std::pair<iterator,bool> insert(const KeyT& key, data_type& value)
 	{
-		std::pair<iterator,bool> result = _map.insert(std::make_pair(pair.first, pair.second.get()));
-		pair.second.release();
+        value.get();
+		std::pair<iterator,bool> result = _map.insert(std::make_pair(key, value.get()));
+
+        if(result.second)
+		    value.release();
+
 		return result;
 	};
 
@@ -58,10 +61,12 @@ public:
 		erase(begin(), end());
 	};
 
-    void erase(iterator pos)
+    data_type erase(iterator iter)
 	{
-		delete pos->second;
-		_map.erase(pos);
+        data_type result(iter->second);
+		_map.erase(iter);
+
+        return result;
 	};
 
     void erase(iterator start, iterator end)
@@ -70,14 +75,14 @@ public:
 		_map.erase(start, end);
 	};
 
-    value_type erase(const KeyT& key)
+    data_type erase(const KeyT& key)
 	{
 		iterator iter = _map.find(key);
-		return iter != end() ? value_type(iter->second) : NULL;
+		return iter != end() ? data_type(iter->second) : NULL;
 	};
 
 private:
-	typename InternalMapT _map;
+	InternalMapT _map;
 
 }; // class sptUtil::AutoMap
 

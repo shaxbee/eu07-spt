@@ -19,12 +19,10 @@ public:
     struct Settings;
     //! \brief Set up extruder
     //! \param profile geometry representing profile 
-    //! \param primitiveSet index of primitive set in profile
-    //! \param ignoredFaces number of faces ignored backwards (from last vertex)
+    //! \param settings vertex and texture settings 
     //! \warning PrimitiveSet used for extrusion must be osg::DrawElements instance in POLYGON mode 
     Extruder(osg::Geometry* profile, const Settings& settings);
     
-    //!
     const Settings& getSettings() const { return _settings; }
 
     //! \brief Extrude profile along path
@@ -35,7 +33,7 @@ public:
     //! \param texCoordOffset initial offset for texture coordinates
     void extrude(sptCore::Path& path, const osg::Vec3& position = osg::Vec3(), const osg::Vec3& offset = osg::Vec3(), double texCoordOffset = 0.0f);
 
-    //! Set output geometry
+    //! \brief Set output geometry
     void setGeometry(osg::Geometry* geometry);
     
     //! \brief Extruding settings

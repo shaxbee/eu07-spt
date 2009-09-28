@@ -3,7 +3,7 @@ import os.path
 Import('env')
 
 # include osg types output for cxxtest
-env.Append(CXXTEST_OPTS = "--include=tests/OsgTypeTraits.h")
+env.Prepend(CXXTEST_OPTS = "--include=tests/OsgTypeTraits.h")
 
 # for each *.t.h file
 for node in Glob('*.t.h'):
@@ -11,4 +11,7 @@ for node in Glob('*.t.h'):
     name = os.path.basename(str(node))
     name = name[:name.find('.')]
     # compose test suite name and build it
-    env.CxxTest('test_sptCore_' + name, node, LIBS=['osg', 'sptCore'])
+    #
+    #
+nodes = ['DynamicSector.t.h', 'DynamicScenery.t.h', 'Follower.t.h']
+env.CxxTest(Glob('*.t.h'), LIBS=['osg', 'sptCore'])

@@ -38,16 +38,18 @@ public:
     //! \brief Add sector to scenery and manage its lifetime
 	//! \throw SectorExistsException if Sector with same name exists
 	void addSector(std::auto_ptr<Sector> sector);
-    void removeSector(const osg::Vec3& position);
+
+    //! \brief Remove sector from scenery and return ownership 
+	//! \throw SectorNotFoundException if Sector with same name exists
+    std::auto_ptr<Sector> removeSector(const osg::Vec3& position);
 
     //! \brief Add named Track
 	//! \throw RailTrackingExistsException if Track with same name exists
 	void addTrack(const std::string& name, Track& track);
-    void removeTrack(const std::string& name);
 
     //! \brief Remove named Track
-    //! \throw UnknownRailTrackingException when no Track with specified name is found
-//    void removeTrack(const std::string& name);
+    //! \throw RailTrackingNotFoundException when no Track with specified name is found
+    void removeTrack(const std::string& name);
 
 //	//! \throw RailTrackingExistsException if EventedTrack with same name exists
 //	void addEventedTrack(const std::string& name, EventedTrack* track);
@@ -55,15 +57,20 @@ public:
     //! \brief Add named SwitchableTracking
 	//! \throw RailTrackingExistsException if tracking with same name exists
 	void addSwitch(const std::string& name, SwitchableTracking& track);
+
+    //! \brief Remove named SwitchableTracking
+    //! \throw RailTrackingNotFoundException when no SwitchableTracking with specified name is found
     void removeSwitch(const std::string& name);
 
 	class SectorExistsException: public boost::exception { };
+    class SectorNotFoundException: public boost::exception { };
+
 	class RailTrackingExistsException: public boost::exception { };
+    class RailTrackingNotFoundException: public boost::exception { };
 
 private:
 //	typedef std::map<std::string, boost::shared_ptr<EventedTrack> > EventedTracks;
 //	EventedTracks _eventedTracks;
-
 	Sectors _sectors;
 	Tracks _tracks;
 	Switches _switches;

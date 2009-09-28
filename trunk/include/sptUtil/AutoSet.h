@@ -13,7 +13,7 @@ template <typename ValueT>
 struct DeleteValue
 {
 
-	void operator()(ValueT& value) { delete value; };
+	void operator()(const ValueT& value) { delete value; };
 
 }; // struct ::DeleteValue
 
@@ -28,9 +28,7 @@ class AutoSet
 
 public:
 	typedef std::set<ValueT> InternalSetT;
-
-	typedef typename boost::remove_pointer<ValueT>::type raw_value_type;
-	typedef typename std::auto_ptr<raw_value_type> value_type;
+	typedef std::auto_ptr<typename boost::remove_pointer<ValueT>::type> value_type;
 
 	typedef typename InternalSetT::size_type size_type;
 
@@ -47,13 +45,16 @@ public:
 	iterator end() { return _set.end(); };
 	const_iterator end() const { return _set.end(); };
 
-	iterator find(const ValueT* key) { return _set.find(key); };
-	const_iterator find(const ValueT* key) const { return _set.find(key); };
+	iterator find(const ValueT key) { return _set.find(key); };
+	const_iterator find(const ValueT key) const { return _set.find(key); };
 
-	std::pair<iterator,bool> insert(value_type value)
+	std::pair<iterator,bool> insert(value_type& value)
 	{
 		std::pair<iterator,bool> result = _set.insert(value.get());
-		value.release();
+
+        if(result.second)
+		    value.release();
+
 		return result;
 	};
 
@@ -62,15 +63,17 @@ public:
 		erase(begin(), end());
 	};
 
-    void erase(iterator pos)
+    value_type erase(iterator iter)
 	{
-		delete *pos;
-		_set.erase(pos);
+        value_type result(*iter);
+		_set.erase(iter);
+
+        return result;
 	};
 
     void erase(iterator start, iterator end)
 	{
-		std::for_each(start, end, DeleteValue<typename ValueT>());
+		std::for_each(start, end, DeleteValue<ValueT>());
 		_set.erase(start, end);
 	};
 

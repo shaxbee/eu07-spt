@@ -5,8 +5,9 @@ Import('env buildDir')
 cxxflags = env['CXXFLAGS']
 
 env = env.Clone(CXXTEST='#/build/cxxtest/cxxtestgen.py', toolpath=['#/build/cxxtest'], tools=['default', 'cxxtest'])
-env.Append(CPPPATH=['#/build/cxxtest'])
+env.Append(CXXTEST_CPPPATH=['#/build/cxxtest'])
 env.Append(CXXFLAGS=cxxflags)
+env.Replace(CXXTEST_RUNNER='${TEST_PRINTER}Printer')
 
 env.AppendENVPath('PATH', '#/bin')
 
