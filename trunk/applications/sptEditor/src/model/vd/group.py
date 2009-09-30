@@ -3,50 +3,48 @@ Created on 2009-08-07
 
 @author: gfirlejczyk
 '''
-import model.tracks
-import model.vd.element
 
 class Group(object):
     '''
-    Virtual Dispatcher Container for basic elements
+    Virtual Dispatcher Group for handling different types of SRK devices
     '''
 
-    def __init__(selfparams, name = None):
-        self.childrens = []
-        self.connections = dict()
+    def __init__(self, name = None):
+        self.__axleCounters = []
+        self.__connections = dict()
         
         self.name = name
         
     def __repr__(self):
         return 'Group(name="%s", children=%s, outlinePoints=%s)' %(
             self.name,
-            repr(self.__children),
+            repr(self.__axleCounters),
             repr(self.__connections.keys())
             )
     
     def size(self):
-        """
-        Returns number of elements containing in group
-        """
-        return len(self.__childrens)
+        '''
+        Returns number of axle counters containing in group
+        '''
+        return len(self.__axleCounters)
     
-    def contains(self, element):
-        """
-        Returns if vd_element is in children list
-        """
-        return element in self.__childrens
+    def contains(self, axleCounter):
+        '''
+        Returns if axle counter is in list
+        '''
+        return axleCounter in self.__axleCounters
     
-    def append(self, element):
-        """
-        Insert new VDElement in children list
-        """
-        self.__childrens.append(element)
+    def append(self, axleCounter):
+        '''
+        Insert new axle counter in list
+        '''
+        self.__axleCounters.append(axleCounter)
 
-    def remove(self, element):
-        """
-        Remove VDElement from this group
-        """
-        if not self.contains(element):
-            raise ValueError("Group doesn't contain element %s" % str(element))
+    def remove(self, axleCounter):
+        '''
+        Remove axle counter from list
+        '''
+        if not self.contains(axleCounter):
+            raise ValueError("Group doesn't contain element %s" % str(axleCounter))
 
-        self.__childrens.remove(element)
+        self.__axleCounters.remove(axleCounter)
