@@ -22,25 +22,19 @@ class Group(object):
             repr(self.__connections.keys())
             )
     
-    def size(self):
-        '''
-        Returns number of axle counters containing in group
-        '''
-        return len(self.__axleCounters)
-    
-    def contains(self, axleCounter):
+    def containsAxleCounter(self, axleCounter):
         '''
         Returns if axle counter is in list
         '''
         return axleCounter in self.__axleCounters
     
-    def append(self, axleCounter):
+    def appendAxleCounter(self, axleCounter):
         '''
         Insert new axle counter in list
         '''
         self.__axleCounters.append(axleCounter)
 
-    def remove(self, axleCounter):
+    def removeAxleCounter(self, axleCounter):
         '''
         Remove axle counter from list
         '''

@@ -10,6 +10,7 @@ import yaml
 
 import model.tracks
 import sptmath
+import model.vd.axleCounter
 
 def configureYaml():
     # Loader
@@ -19,6 +20,7 @@ def configureYaml():
     yaml.add_constructor("Switch", loader.construct_Switch)
     yaml.add_constructor("RailContainer", loader.construct_RailContainer)
     yaml.add_constructor("Scenery", loader.construct_Scenery)
+    yaml.add_constructor("AxleCounter", loader.construct_AxleCounter)
     
     # Dumper
     yaml.add_representer(sptmath.Vec3, represent_Vec3)
@@ -26,6 +28,7 @@ def configureYaml():
     yaml.add_representer(model.tracks.Switch, represent_Switch)
     yaml.add_representer(model.groups.RailContainer, represent_RailContainer)
     yaml.add_representer(model.scenery.Scenery, represent_Scenery)
+    yaml.add_representer(model.vd.axleCounter.AxleCounter, represent_AxleCounter)
 
 
 def represent_Track(dumper, data):
@@ -75,6 +78,12 @@ def construct_Vec3(loader, node):
     (x, y, z) = loader.construct_sequence(node)
     return sptmath.Vec3(decimal.Decimal(x), decimal.Decimal(y), decimal.Decimal(z))
 
+def represent_AxleCounter(dumper, data):
+    return dumper.represent_mapping("AxleCounter", \
+        {"id": data.getAxleCounterId(), \
+         "railtracking": data.getRailTracking(), \
+         "3dpoint": data.getGeometryPoint()})
+
 
 class SceneryLoader:
 
@@ -89,8 +98,8 @@ class SceneryLoader:
         t.v2 = map["v2"]
         t.p2 = map["p2"]
         self.parent.insert(t)
-#    t.n1 = map["n1"]
-#    t.n2 = map["n2"]
+#        t.n1 = map["n1"]
+#        t.n2 = map["n2"]
         return t
 
 
@@ -105,9 +114,9 @@ class SceneryLoader:
         s.v1 = map["v1"]
         s.v2 = map["v2"]
         self.parent.insert(s)
- #   s.nc = map["nc"]
- #   s.n1 = map["n1"]
- #   s.n2 = map["n2"]
+#        s.nc = map["nc"]
+#        s.n1 = map["n1"]
+#        s.n2 = map["n2"]
         return s
 
 
@@ -125,10 +134,20 @@ class SceneryLoader:
 
 
     def construct_Scenery(self, loader, node):
-       map = loader.construct_mapping(node)
-       s = model.scenery.Scenery()
-       s.tracks = map["tracks"]
-       self.parent = s.tracks
-       return s
+        map = loader.construct_mapping(node)
+        s = model.scenery.Scenery()
+        s.tracks = map["tracks"]
+        self.parent = s.tracks
+        return s
+    
+    def construct_AxleCounter(self, loader, node):
+        map = loader.contruct_mapping(node, deep=False)
+        a = model.vd.axleCounter.AxleCounter()
+        a.__init__(map["id"])
+        a.setGeometryPoint(map["3dpoint"])
+        a.setRailTracking(map["railtracking"])
+#        self.parent.insert(a)
+        return a
+        
 
 
