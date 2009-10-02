@@ -1,17 +1,5 @@
-import os.path
-
 Import('env')
 
 # include osg types output for cxxtest
 env.Prepend(CXXTEST_OPTS = "--include=tests/OsgTypeTraits.h")
-
-# for each *.t.h file
-for node in Glob('*.t.h'):
-    # extract tested class name
-    name = os.path.basename(str(node))
-    name = name[:name.find('.')]
-    # compose test suite name and build it
-    #
-    #
-nodes = ['DynamicSector.t.h', 'DynamicScenery.t.h', 'Follower.t.h']
-env.CxxTest(Glob('*.t.h'), LIBS=['osg', 'sptCore'])
+env.CxxTest('sptCore', Glob('*.t.h'), LIBS=['osg', 'sptCore'])

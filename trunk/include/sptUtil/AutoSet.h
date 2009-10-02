@@ -3,8 +3,9 @@
 
 #include <set>
 #include <memory>
+#include <algorithm>
 
-#include  <boost/type_traits/remove_pointer.hpp>
+#include <boost/type_traits/remove_pointer.hpp>
 
 namespace
 {
@@ -48,7 +49,8 @@ public:
 	iterator find(const ValueT key) { return _set.find(key); };
 	const_iterator find(const ValueT key) const { return _set.find(key); };
 
-	std::pair<iterator,bool> insert(value_type& value)
+    template <typename ValueParamT>
+	std::pair<iterator,bool> insert(ValueParamT& value)
 	{
 		std::pair<iterator,bool> result = _set.insert(value.get());
 
@@ -80,7 +82,14 @@ public:
     value_type erase(const ValueT& key)
 	{
 		iterator iter = _set.find(key);
-		return iter != end() ? value_type(*iter) : value_type(NULL);
+
+        if(iter != end())
+        {
+            _set.erase(iter);
+            return value_type(*iter);
+        }
+
+		return value_type(NULL);
 	};
 
 private:

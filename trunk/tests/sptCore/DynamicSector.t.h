@@ -43,10 +43,10 @@ public:
     void testGetNextTrack()
     {
 
-        TS_ASSERT_EQUALS(&_sector->getNextTrack(_pointA, _trackA), (Track*) NULL);
+        TS_ASSERT_THROWS(&_sector->getNextTrack(_pointA, _trackA), Sector::UnknownConnectionException);
         TS_ASSERT_EQUALS(&_sector->getNextTrack(_pointB, _trackA), _trackB);
         TS_ASSERT_EQUALS(&_sector->getNextTrack(_pointB, _trackB), _trackA);
-        TS_ASSERT_EQUALS(&_sector->getNextTrack(_pointC, _trackB), (Track*) NULL);
+        TS_ASSERT_THROWS(&_sector->getNextTrack(_pointC, _trackB), Sector::UnknownConnectionException);
         TS_ASSERT_THROWS(_sector->getNextTrack(osg::Vec3(17, 17, 17), _trackA), Sector::UnknownConnectionException);
 
     };

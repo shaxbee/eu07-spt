@@ -3,8 +3,9 @@
 
 #include <map>
 #include <memory>
+#include <algorithm>
 
-#include  <boost/type_traits/remove_pointer.hpp>
+#include <boost/type_traits/remove_pointer.hpp>
 
 namespace 
 {
@@ -45,9 +46,9 @@ public:
 	iterator find(const KeyT& key) { return _map.find(key); };
 	const_iterator find(const KeyT& key) const { return _map.find(key); };
 
+    /*
 	std::pair<iterator,bool> insert(const KeyT& key, data_type& value)
 	{
-        value.get();
 		std::pair<iterator,bool> result = _map.insert(std::make_pair(key, value.get()));
 
         if(result.second)
@@ -55,6 +56,18 @@ public:
 
 		return result;
 	};
+    */
+
+    template <typename ValueParamT>
+    std::pair<iterator,bool> insert(const KeyT& key, ValueParamT& value)
+    {
+        std::pair<iterator,bool> result = _map.insert(std::make_pair(key, value.get()));
+
+        if(result.second)
+            value.release();
+
+        return result;
+    };
 
 	void clear()
 	{
@@ -78,7 +91,14 @@ public:
     data_type erase(const KeyT& key)
 	{
 		iterator iter = _map.find(key);
-		return iter != end() ? data_type(iter->second) : NULL;
+
+		if(iter != end())
+        {
+            _map.erase(key);
+            return data_type(iter->second);
+        }
+       
+        return data_type(NULL);
 	};
 
 private:

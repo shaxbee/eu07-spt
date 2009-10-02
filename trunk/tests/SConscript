@@ -11,5 +11,5 @@ env.Replace(CXXTEST_RUNNER='${TEST_PRINTER}Printer')
 
 env.AppendENVPath('PATH', '#/bin')
 
-for library in ['sptCore']:
+for library in ['sptCore', 'sptUtil']:
     env.SConscript(os.path.join(library, 'SConscript'), exports = ['env'], duplicate = 0)

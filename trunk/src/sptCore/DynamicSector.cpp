@@ -17,7 +17,7 @@ RailTracking& DynamicSector::getNextTrack(const osg::Vec3& position, RailTrackin
 
     // if connection doesn't have next tracking throw exception
     if(!next)
-        throw  UnknownConnectionException() << PositionInfo(position);
+        throw UnknownConnectionException() << PositionInfo(position);
 
     return *next;
 

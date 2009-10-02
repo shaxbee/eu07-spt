@@ -42,30 +42,6 @@ public:
         
         _scenery = &_builder->getScenery();
 
-//      // Old implementation:
-//        _sectorA = new DynamicSector(*_scenery, osg::Vec3(0, 0, 0));
-//        _sectorB = new DynamicSector(*_scenery, osg::Vec3(Sector::SIZE, 0, 0));
-//        _sectorC = new DynamicSector(*_scenery, osg::Vec3(Sector::SIZE, 0, Sector::SIZE));
-//
-//        _scenery->addSector(_sectorA);
-//        _scenery->addSector(_sectorB);
-//        _scenery->addSector(_sectorC);
-//
-//
-//        _trackA = new Track(*_sectorA, point1, point2);
-//        _trackB = new Track(*_sectorB, point1, point3);
-//        _trackC = new Track(*_sectorC, point1, point4);
-//
-//        _sectorA->addTrack(_trackA);
-//        _sectorB->addTrack(_trackB);
-//        _sectorC->addTrack(_trackC);
-//
-//        _sectorB->addConnection(point1, _trackA, _trackB);
-//        _sectorC->addConnection(point1, _trackB, _trackC);
-//        _sectorA->addConnection(point1, _trackC, _trackA);
-//
-//        _scenery->addTrack("startTrack", _trackA);
-
     };
 
 	void testMoveForward()

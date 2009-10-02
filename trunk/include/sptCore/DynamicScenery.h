@@ -2,7 +2,6 @@
 #define SPTCORE_DYNAMICSCENERY_H 1
 
 #include <sptCore/Scenery.h>
-
 #include <sptUtil/AutoMap.h>
 
 namespace sptCore
