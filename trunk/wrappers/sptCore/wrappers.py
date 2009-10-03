@@ -7,13 +7,21 @@ classes = ['Path', 'RailTracking', 'Track']
 def wrap(mb):
     opaque = {
         'Path': ['reverse'],
-        'RailTracking': ['getPath'],
-        'Track': ['getPath', 'getDefaultPath']
+        'RailTracking': ['getPath', 'getSector'] #,
+#        'Track': ['getPath', 'getDefaultPath']
     }
 
     mb.class_('Path').include();
-    mb.class_('RailTracking').include();
-    mb.class_('Track').include();
+
+    RailTracking = mb.class_('RailTracking')
+    RailTracking.include();
+    RailTracking.include_files.extend(['sptCore/Sector.h', 'sptCore/Follower.h'])
+
+    Track = mb.class_('Track')
+    Track.include();
+    Track.include_files.extend(['sptCore/Sector.h', 'sptCore/Follower.h'])
+
+#    mb.class_('Path').member_function('reverse').call_policies = call_policies.return_value_policy(call_policies.reference_existing_object);
 
     for className, methods in opaque.items():
         cls = mb.class_(className);

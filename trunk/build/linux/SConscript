@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 Import('env')
 
@@ -6,5 +7,10 @@ env.Append(CXXFLAGS='-g')
 
 #variant = GetOption('variant')
 #env = SConscript(os.path.join(variant, 'SConscript'), exports=['env'])
+
+# get number of available cores
+p = subprocess.Popen("grep \"core id\" /proc/cpuinfo | wc -l", shell=True, stdout=subprocess.PIPE)
+SetOption('num_jobs', int(p.stdout.read()[:-1]) * 2);
+print "Running with", GetOption('num_jobs'), "jobs"
 
 Return('env')

@@ -5,17 +5,17 @@
 
 using namespace sptCore;
 
-Path* Path::reverse(const Path* source)
+Path* Path::reverse() const
 {
     
     Path* reversed = new Path;
-    reversed->resize(source->size());
+    reversed->resize(size());
 
-    std::reverse_copy(source->begin(), source->end(), reversed->begin());
+    std::reverse_copy(begin(), end(), reversed->begin());
     
     return reversed;
     
-}; // static Path::reverse
+}; // Path::reverse
 
 Path::Path(osg::Vec3 front, osg::Vec3 back):
     _frontDir(back - front), _backDir(_frontDir), _length(_frontDir.length()), _frontRoll(0), _backRoll(0)

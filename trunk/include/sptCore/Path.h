@@ -16,10 +16,10 @@ public:
     Path(osg::Vec3 front, osg::Vec3 back);
     Path(osg::Vec3 front, osg::Vec3 frontCP, osg::Vec3 back, osg::Vec3 backCP, int steps, float frontRoll = 0.0f, float backRoll = 0.0f);
 
-    static Path* reverse(const Path* source);
+//    static Path* reverse(const Path* source);
 
     //! Return reversed path
-    Path* reverse() const { return Path::reverse(this); };
+    Path* reverse() const;
 
     float length() const { return _length; }
 
