@@ -140,6 +140,7 @@ class SceneryLoader:
         self.parent = s.tracks
         return s
     
+    
     def construct_AxleCounter(self, loader, node):
         map = loader.contruct_mapping(node, deep=False)
         a = model.vd.axleCounter.AxleCounter()

@@ -12,6 +12,7 @@ class Group(object):
     def __init__(self, name = None):
         self.__axleCounters = []
         self.__connections = dict()
+        self.__srkDevices = dict()
         
         self.name = name
         
@@ -42,3 +43,25 @@ class Group(object):
             raise ValueError("Group doesn't contain element %s" % str(axleCounter))
 
         self.__axleCounters.remove(axleCounter)
+
+    def containsSRKDevice(self, device):
+        '''
+        Check if given device is already connected to this group
+        '''
+        return device in self.__srkDevices
+    
+    def appendSRKDevice(self, device):
+        '''
+        Connect new device with the group
+        '''
+        self.__srkDevices[device.__id] = device
+        
+    def removeSRKDevice(self, device):
+        '''
+        Remove connection betwen group and srk device
+        '''
+        if not self.__srkDevices.__contains__(device.__id):
+            raise ValueError("Group haven't connection to this device")
+        
+        del self.__srkDevices.device.__id
+        
