@@ -19,8 +19,12 @@ class Follower
 public:
     Follower(Track& track, float distance = 0.0f);
 
+    Scenery& getScenery() { return _track->getSector().getScenery(); }
     const Scenery& getScenery() const { return _track->getSector().getScenery(); }
-    const Sector& getSector() const { return _track->getSector(); }    
+
+    Sector& getSector() { return _track->getSector(); } 
+    const Sector& getSector() const { return _track->getSector(); } 
+
     const RailTracking& getTrack() const { return *_track; }
     const Path& getPath() const { return *_path; }
 

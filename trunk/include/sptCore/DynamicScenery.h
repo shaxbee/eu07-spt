@@ -17,12 +17,12 @@ class DynamicScenery: public Scenery
 public:
 	virtual ~DynamicScenery() { };
 
-	virtual Sector& getSector(const osg::Vec3& position) const;
+	virtual Sector& getSector(const osg::Vec3& position);
     virtual bool hasSector(const osg::Vec3& position) const;
 
-	virtual Track& getTrack(const std::string& name) const;
+	virtual Track& getTrack(const std::string& name);
 //	virtual EventedTrack& getEventedTrack(const std::string& name) const;
-	virtual SwitchableTracking& getSwitch(const std::string& name) const;
+	virtual SwitchableTracking& getSwitch(const std::string& name);
 
 	typedef sptUtil::AutoMap<osg::Vec3, Sector*> Sectors;
 	typedef std::map<std::string, Track*> Tracks;
@@ -62,10 +62,7 @@ public:
     void removeSwitch(const std::string& name);
 
 	class SectorExistsException: public boost::exception { };
-    class SectorNotFoundException: public boost::exception { };
-
 	class RailTrackingExistsException: public boost::exception { };
-    class RailTrackingNotFoundException: public boost::exception { };
 
 private:
 //	typedef std::map<std::string, boost::shared_ptr<EventedTrack> > EventedTracks;

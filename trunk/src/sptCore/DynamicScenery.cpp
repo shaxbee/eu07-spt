@@ -6,13 +6,13 @@
 
 using namespace sptCore;
 
-Sector& DynamicScenery::getSector(const osg::Vec3& position) const
+Sector& DynamicScenery::getSector(const osg::Vec3& position)
 {
 
     Sectors::const_iterator iter = _sectors.find(position);
 
     if(iter == _sectors.end())
-        throw UnknownSectorException() << PositionInfo(position);
+        throw SectorNotFoundException() << PositionInfo(position);
 
     return *(iter->second);
 	
@@ -26,13 +26,13 @@ bool DynamicScenery::hasSector(const osg::Vec3& position) const
 
 }; // DynamicScenery::hasSector
 
-Track& DynamicScenery::getTrack(const std::string& name) const
+Track& DynamicScenery::getTrack(const std::string& name)
 {
 
     Tracks::const_iterator iter = _tracks.find(name);
     
     if(iter == _tracks.end())
-        throw UnknownRailTrackingException() << NameInfo(name);
+        throw RailTrackingNotFoundException() << NameInfo(name);
 
     return *(iter->second);
 	
@@ -45,13 +45,13 @@ Track& DynamicScenery::getTrack(const std::string& name) const
 //	
 //}; // DynamicScenery::getEventedTrack
 
-SwitchableTracking& DynamicScenery::getSwitch(const std::string& name) const
+SwitchableTracking& DynamicScenery::getSwitch(const std::string& name)
 {
 
     Switches::const_iterator iter = _switches.find(name);
 
     if(iter == _switches.end())
-        throw UnknownRailTrackingException() << NameInfo(name);    
+        throw RailTrackingNotFoundException() << NameInfo(name);    
 
     return *(iter->second);
 	
