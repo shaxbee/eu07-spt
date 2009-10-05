@@ -30,9 +30,9 @@ public:
 	typedef typename InternalMapT::size_type size_type;
 	typedef typename InternalMapT::iterator iterator;
 	typedef typename InternalMapT::const_iterator const_iterator;
-    typedef std::auto_ptr<typename boost::remove_pointer<ValueT>::type> data_type;
+	typedef std::auto_ptr<typename boost::remove_pointer<ValueT>::type> data_type;
 
-    AutoMap(): _map() { };
+	AutoMap(): _map() { };
 	~AutoMap() { clear(); };
 
 	size_type size() const { return _map.size(); };
@@ -46,59 +46,47 @@ public:
 	iterator find(const KeyT& key) { return _map.find(key); };
 	const_iterator find(const KeyT& key) const { return _map.find(key); };
 
-    /*
-	std::pair<iterator,bool> insert(const KeyT& key, data_type& value)
+	template <typename ValueParamT>
+	std::pair<iterator,bool> insert(const KeyT& key, ValueParamT& value)
 	{
 		std::pair<iterator,bool> result = _map.insert(std::make_pair(key, value.get()));
 
-        if(result.second)
-		    value.release();
+		if(result.second)
+			value.release();
 
 		return result;
 	};
-    */
-
-    template <typename ValueParamT>
-    std::pair<iterator,bool> insert(const KeyT& key, ValueParamT& value)
-    {
-        std::pair<iterator,bool> result = _map.insert(std::make_pair(key, value.get()));
-
-        if(result.second)
-            value.release();
-
-        return result;
-    };
 
 	void clear()
 	{
 		erase(begin(), end());
 	};
 
-    data_type erase(iterator iter)
+	data_type erase(iterator iter)
 	{
-        data_type result(iter->second);
+		data_type result(iter->second);
 		_map.erase(iter);
 
-        return result;
+		return result;
 	};
 
-    void erase(iterator start, iterator end)
+	void erase(iterator start, iterator end)
 	{
 		std::for_each(start, end, DeletePointedValue<typename InternalMapT::value_type>());
 		_map.erase(start, end);
 	};
 
-    data_type erase(const KeyT& key)
+	data_type erase(const KeyT& key)
 	{
 		iterator iter = _map.find(key);
 
 		if(iter != end())
-        {
-            _map.erase(key);
-            return data_type(iter->second);
-        }
-       
-        return data_type(NULL);
+		{
+			_map.erase(key);
+			return data_type(iter->second);
+		}
+	   
+		return data_type(NULL);
 	};
 
 private:

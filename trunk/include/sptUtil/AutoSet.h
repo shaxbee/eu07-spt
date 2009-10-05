@@ -49,13 +49,13 @@ public:
 	iterator find(const ValueT key) { return _set.find(key); };
 	const_iterator find(const ValueT key) const { return _set.find(key); };
 
-    template <typename ValueParamT>
+	template <typename ValueParamT>
 	std::pair<iterator,bool> insert(ValueParamT& value)
 	{
 		std::pair<iterator,bool> result = _set.insert(value.get());
 
-        if(result.second)
-		    value.release();
+		if(result.second)
+			value.release();
 
 		return result;
 	};
@@ -65,29 +65,29 @@ public:
 		erase(begin(), end());
 	};
 
-    value_type erase(iterator iter)
+	value_type erase(iterator iter)
 	{
-        value_type result(*iter);
+		value_type result(*iter);
 		_set.erase(iter);
 
-        return result;
+		return result;
 	};
 
-    void erase(iterator start, iterator end)
+	void erase(iterator start, iterator end)
 	{
 		std::for_each(start, end, DeleteValue<ValueT>());
 		_set.erase(start, end);
 	};
 
-    value_type erase(const ValueT& key)
+	value_type erase(const ValueT& key)
 	{
 		iterator iter = _set.find(key);
 
-        if(iter != end())
-        {
-            _set.erase(iter);
-            return value_type(*iter);
-        }
+		if(iter != end())
+		{
+			_set.erase(iter);
+			return value_type(*iter);
+		}
 
 		return value_type(NULL);
 	};
