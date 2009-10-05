@@ -53,7 +53,7 @@ public:
             //! \brief Index of last profile vertex
             unsigned int to;
         };
-    	
+        
         struct Texture
         {
             Texture(): unit(0), offset(), scale(1.0f, 1.0f) { };
@@ -65,8 +65,8 @@ public:
             //! \brief UV coordinates scale
             osg::Vec2d scale;
         };
-    		
-    	Vertex vertex;
+            
+        Vertex vertex;
         Texture texture;
         
     }; // sptGFX::Extruder::Settings

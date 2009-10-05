@@ -1,0 +1,4 @@
+#ifndef SPTDB_SCENERYWRITER_H
+#define SPTDB_SCENERYWRITER_H
+
+#endif

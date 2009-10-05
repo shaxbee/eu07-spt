@@ -12,15 +12,15 @@ using namespace sptCore;
 Follower::Follower(Track& track, float distance):
     _track(&track), _distance(distance)
 {
-	
-	_path = &track.getDefaultPath();
+    
+    _path = &track.getDefaultPath();
 
 };
 
 void Follower::move(float distance)
 {
-	
-	_distance += distance;	
+    
+    _distance += distance;    
 
     while(_distance < 0)
     {
@@ -29,15 +29,15 @@ void Follower::move(float distance)
         _distance += _path->length();
 
     };
-	
-	while(_distance > _path->length())
-	{
-	    
-		_distance -= _path->length();
+    
+    while(_distance > _path->length())
+    {
+        
+        _distance -= _path->length();
         changeTrack(_path->back());
-				
-	};
-	
+                
+    };
+    
 }; // Follower::move
 
 float segmentLength(Path::const_iterator& iter)
@@ -73,7 +73,7 @@ osg::Vec3 Follower::getPosition() const
 
     boost::tie(iter, ratio) = findPosition();
 
-	return sptUtil::mix(*(iter - 1), *iter, ratio);
+    return sptUtil::mix(*(iter - 1), *iter, ratio);
 
 }; // Follower::getPosition
 
@@ -96,8 +96,8 @@ osg::Matrix Follower::getMatrix() const
     osg::Vec3 dirEnd = (iter == _path->end() - 1 ? _path->backDir() : (*(iter + 1) - end));
 
     // create rotation matrix for given direction vector
-	osg::Matrix transform(sptUtil::rotationMatrix(sptUtil::mix(dirBegin, dirEnd, ratio)));
-	transform.makeTranslate(sptUtil::mix(begin, end, ratio));
+    osg::Matrix transform(sptUtil::rotationMatrix(sptUtil::mix(dirBegin, dirEnd, ratio)));
+    transform.makeTranslate(sptUtil::mix(begin, end, ratio));
 
     return transform;
 

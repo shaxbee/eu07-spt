@@ -28,7 +28,7 @@ public:
     SceneryBuilder(DynamicScenery* scenery);
 
     DynamicScenery& getScenery() { return *_scenery; }
-	std::auto_ptr<DynamicScenery> releaseScenery() { return _scenery; }
+    std::auto_ptr<DynamicScenery> releaseScenery() { return _scenery; }
 
     DynamicSector& getOrCreateSector(const osg::Vec3& position);
 
@@ -56,7 +56,7 @@ private:
     DynamicSector* _sector;
 
     void addConnection(const osg::Vec3& position, RailTracking* track);
-	DynamicSector& createSector(const osg::Vec3& position);
+    DynamicSector& createSector(const osg::Vec3& position);
 
 }; // class sptCore::SceneryBuilder
 

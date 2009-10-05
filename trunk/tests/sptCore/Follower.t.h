@@ -44,8 +44,8 @@ public:
 
     };
 
-	void testMoveForward()
-	{
+    void testMoveForward()
+    {
 
         Follower follower(_scenery->getTrack("startTrack"), 0.1f);
 
@@ -60,8 +60,8 @@ public:
         follower.move(follower.getPath().length());
         TS_ASSERT_EQUALS(&follower.getSector(), &_scenery->getSector(osg::Vec3(0, 0, 0)));
         TS_ASSERT_EQUALS(&follower.getTrack(), &_scenery->getTrack("startTrack"));
-		
-	};
+        
+    };
 
     void testMoveBackward()
     {

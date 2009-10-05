@@ -23,16 +23,16 @@ public:
     void setUp()
     {
 
-		_sector.reset(new DynamicSector(_scenery, osg::Vec3(0, 0, 0)));
-		
-		std::auto_ptr<Track> trackA(new Track(*_sector, _pointA, _pointB));
+        _sector.reset(new DynamicSector(_scenery, osg::Vec3(0, 0, 0)));
+        
+        std::auto_ptr<Track> trackA(new Track(*_sector, _pointA, _pointB));
         std::auto_ptr<Track> trackB(new Track(*_sector, _pointB, _pointC));
 
-		_trackA = trackA.get();
-		_trackB = trackB.get();
+        _trackA = trackA.get();
+        _trackB = trackB.get();
 
-		_sector->addTrack(std::auto_ptr<RailTracking>(trackA));
-		_sector->addTrack(std::auto_ptr<RailTracking>(trackB));
+        _sector->addTrack(std::auto_ptr<RailTracking>(trackA));
+        _sector->addTrack(std::auto_ptr<RailTracking>(trackB));
 
         _sector->addConnection(_pointA, _trackA);
         _sector->addConnection(_pointB, _trackA, _trackB);
@@ -62,8 +62,8 @@ public:
     };
 
 private:
-	DynamicScenery _scenery;
-	std::auto_ptr<DynamicSector> _sector;
+    DynamicScenery _scenery;
+    std::auto_ptr<DynamicSector> _sector;
 
     osg::Vec3 _pointA;
     osg::Vec3 _pointB;

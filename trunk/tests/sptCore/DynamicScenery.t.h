@@ -18,41 +18,41 @@ public:
     {
 
         _scenery.reset(new DynamicScenery());
-		_scenery->addSector(std::auto_ptr<Sector>(new DynamicSector(*_scenery, osg::Vec3())));
+        _scenery->addSector(std::auto_ptr<Sector>(new DynamicSector(*_scenery, osg::Vec3())));
 
     };
 
-	void testTrack()
-	{
+    void testTrack()
+    {
 
-		DynamicSector& sector = dynamic_cast<DynamicSector&>(_scenery->getSector(osg::Vec3()));
-		
-		osg::Vec3 dummy(0, 0, 0);
+        DynamicSector& sector = dynamic_cast<DynamicSector&>(_scenery->getSector(osg::Vec3()));
+        
+        osg::Vec3 dummy(0, 0, 0);
         Track* testTrack = new Track(sector, dummy, dummy);
-	
-		_scenery->addTrack("track1", *testTrack);
-		sector.addTrack(std::auto_ptr<RailTracking>(testTrack));
-		
-		TS_ASSERT_EQUALS(&_scenery->getTrack("track1"), testTrack);
-		TS_ASSERT_THROWS(&_scenery->getTrack("track2"), Scenery::UnknownRailTrackingException);
-		
-	};
+    
+        _scenery->addTrack("track1", *testTrack);
+        sector.addTrack(std::auto_ptr<RailTracking>(testTrack));
+        
+        TS_ASSERT_EQUALS(&_scenery->getTrack("track1"), testTrack);
+        TS_ASSERT_THROWS(&_scenery->getTrack("track2"), Scenery::UnknownRailTrackingException);
+        
+    };
 
-	void testSwitch()
-	{
+    void testSwitch()
+    {
 
-		DynamicSector& sector = dynamic_cast<DynamicSector&>(_scenery->getSector(osg::Vec3()));
-		
-		osg::Vec3 dummy(0, 0, 0);
-		Switch* testSwitch = new Switch(sector, dummy, dummy, dummy, dummy, dummy, dummy);
+        DynamicSector& sector = dynamic_cast<DynamicSector&>(_scenery->getSector(osg::Vec3()));
+        
+        osg::Vec3 dummy(0, 0, 0);
+        Switch* testSwitch = new Switch(sector, dummy, dummy, dummy, dummy, dummy, dummy);
 
-		_scenery->addSwitch("switch1", *testSwitch);
-		sector.addTrack(std::auto_ptr<RailTracking>(testSwitch));
-		
-		TS_ASSERT_EQUALS(&_scenery->getSwitch("switch1"), testSwitch);
-		TS_ASSERT_THROWS(&_scenery->getSwitch("switch2"), Scenery::UnknownRailTrackingException);
-		
-	};
+        _scenery->addSwitch("switch1", *testSwitch);
+        sector.addTrack(std::auto_ptr<RailTracking>(testSwitch));
+        
+        TS_ASSERT_EQUALS(&_scenery->getSwitch("switch1"), testSwitch);
+        TS_ASSERT_THROWS(&_scenery->getSwitch("switch2"), Scenery::UnknownRailTrackingException);
+        
+    };
 
     void testSector()
     {
@@ -60,9 +60,9 @@ public:
         TS_ASSERT(_scenery->hasSector(osg::Vec3()));
 
     };
-	
+    
 private:
     boost::scoped_ptr<DynamicScenery> _scenery;
     DynamicSector* _sector;
-	
+    
 }; // class DynamicSceneryTestSuite

@@ -30,10 +30,10 @@ SceneryBuilder::SceneryBuilder(DynamicScenery* scenery):
 DynamicSector& SceneryBuilder::createSector(const osg::Vec3& position)
 {
 
-	std::auto_ptr<DynamicSector> sector(new DynamicSector(*_scenery, position));
-	DynamicSector& result = *sector;
-	
-	_scenery->addSector(std::auto_ptr<Sector>(sector));
+    std::auto_ptr<DynamicSector> sector(new DynamicSector(*_scenery, position));
+    DynamicSector& result = *sector;
+    
+    _scenery->addSector(std::auto_ptr<Sector>(sector));
 
     return result;
 
@@ -77,10 +77,10 @@ void SceneryBuilder::addConnection(const osg::Vec3& position, RailTracking* trac
 Track& SceneryBuilder::createTrack(const osg::Vec3& p1, const osg::Vec3& p2)
 {
 
-	std::auto_ptr<Track> track(new Track(getCurrentSector(), p1, p2));
-	Track* trackPtr = track.get();
+    std::auto_ptr<Track> track(new Track(getCurrentSector(), p1, p2));
+    Track* trackPtr = track.get();
 
-	_sector->addTrack(std::auto_ptr<RailTracking>(track));
+    _sector->addTrack(std::auto_ptr<RailTracking>(track));
 
     addConnection(p1, trackPtr);
     addConnection(p2, trackPtr);
@@ -93,9 +93,9 @@ Track& SceneryBuilder::createTrack(const osg::Vec3& p1, const osg::Vec3& cp1, co
 {
 
     std::auto_ptr<Track> track(new Track(getCurrentSector(), p1, cp1, p2, cp2));
-	Track* trackPtr = track.get();
+    Track* trackPtr = track.get();
 
-	_sector->addTrack(std::auto_ptr<RailTracking>(track));
+    _sector->addTrack(std::auto_ptr<RailTracking>(track));
     addConnection(p1, trackPtr);
     addConnection(p2, trackPtr);
 
@@ -145,10 +145,10 @@ void SceneryBuilder::removeTrack(const std::string& name)
 Switch& SceneryBuilder::createSwitch(const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2, const osg::Vec3& p3, const osg::Vec3& cp3)
 {
 
-	std::auto_ptr<Switch> result(new Switch(getCurrentSector(), p1, cp1, p2, cp2, p3, cp3));
-	Switch* resultPtr = result.get();
+    std::auto_ptr<Switch> result(new Switch(getCurrentSector(), p1, cp1, p2, cp2, p3, cp3));
+    Switch* resultPtr = result.get();
 
-	_sector->addTrack(std::auto_ptr<RailTracking>(result));
+    _sector->addTrack(std::auto_ptr<RailTracking>(result));
     addConnection(p1, resultPtr);
     addConnection(p2, resultPtr);
     addConnection(p3, resultPtr);

@@ -18,7 +18,7 @@ class DynamicSector: public Sector
 
 public:
     DynamicSector(Scenery& scenery, osg::Vec3 position): Sector(scenery, position) { };
-	virtual ~DynamicSector() { };
+    virtual ~DynamicSector() { };
 
     virtual RailTracking& getNextTrack(const osg::Vec3& position, RailTracking* from);
     virtual const Connection& getConnection(const osg::Vec3& position);
@@ -26,7 +26,7 @@ public:
 
     //! \brief Register track at sector
     //! Track instance will be managed by Sector
-	void addTrack(std::auto_ptr<RailTracking> track) { _tracks.insert(track); };
+    void addTrack(std::auto_ptr<RailTracking> track) { _tracks.insert(track); };
 
     //! \brief Unregister track from sector
     void removeTrack(RailTracking& track) { _tracks.erase(&track); };
@@ -42,12 +42,12 @@ public:
     //! \brief Remove connection
     void removeConnection(const osg::Vec3& position) { _connections.erase(position); };
 
-	//! \brief Removed orphaned connections
-	//! Search for connections with one or both NULL trackings
-	void cleanup();
+    //! \brief Removed orphaned connections
+    //! Search for connections with one or both NULL trackings
+    void cleanup();
 
-	typedef std::map<osg::Vec3, Connection> Connections;
-	typedef sptUtil::AutoSet<RailTracking*> Tracks;
+    typedef std::map<osg::Vec3, Connection> Connections;
+    typedef sptUtil::AutoSet<RailTracking*> Tracks;
 
     const Connections& getConnections() { return _connections; };
     const Tracks& getTracks() { return _tracks; };
