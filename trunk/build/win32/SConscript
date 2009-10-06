@@ -23,7 +23,7 @@ env.Append(CPPDEFINES = ['WIN32'])
 
 # debug / release flags
 if env['DEBUG']:
-	env.Append(CXXFLAGS = ['/Zi'])
+	env.Append(CXXFLAGS = ['/Zi', '/Od'])
 	env.Append(LINKFLAGS = ['/DEBUG'])
 	env['LIBSUFFIX'] = 'd' + env['LIBSUFFIX']
 else:

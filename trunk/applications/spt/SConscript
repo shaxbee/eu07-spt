@@ -1,4 +1,5 @@
 import os.path
+from build.support import GetPlatform
 
 Import('env buildDir')
 
@@ -18,3 +19,7 @@ program = env.Program(
 
 # install it
 env.Install('#/bin', program)
+
+# copy debugging symbols database
+if env['DEBUG'] and GetPlatform() == 'win32':
+	env.Install('#/bin', ['sptd.pdb', 'sptd.ilk'])

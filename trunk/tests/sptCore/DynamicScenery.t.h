@@ -34,7 +34,7 @@ public:
         sector.addTrack(std::auto_ptr<RailTracking>(testTrack));
         
         TS_ASSERT_EQUALS(&_scenery->getTrack("track1"), testTrack);
-        TS_ASSERT_THROWS(&_scenery->getTrack("track2"), Scenery::UnknownRailTrackingException);
+        TS_ASSERT_THROWS(&_scenery->getTrack("track2"), Scenery::RailTrackingNotFoundException);
         
     };
 
@@ -50,7 +50,7 @@ public:
         sector.addTrack(std::auto_ptr<RailTracking>(testSwitch));
         
         TS_ASSERT_EQUALS(&_scenery->getSwitch("switch1"), testSwitch);
-        TS_ASSERT_THROWS(&_scenery->getSwitch("switch2"), Scenery::UnknownRailTrackingException);
+        TS_ASSERT_THROWS(&_scenery->getSwitch("switch2"), Scenery::RailTrackingNotFoundException);
         
     };
 
