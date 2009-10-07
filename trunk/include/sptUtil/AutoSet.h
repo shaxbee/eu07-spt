@@ -14,7 +14,7 @@ template <typename ValueT>
 struct DeleteValue
 {
 
-	void operator()(const ValueT& value) { delete value; };
+    void operator()(const ValueT& value) { delete value; };
 
 }; // struct ::DeleteValue
 
@@ -28,72 +28,72 @@ class AutoSet
 {
 
 public:
-	typedef std::set<ValueT> InternalSetT;
-	typedef std::auto_ptr<typename boost::remove_pointer<ValueT>::type> value_type;
+    typedef std::set<ValueT> InternalSetT;
+    typedef std::auto_ptr<typename boost::remove_pointer<ValueT>::type> value_type;
 
-	typedef typename InternalSetT::size_type size_type;
+    typedef typename InternalSetT::size_type size_type;
 
-	typedef typename InternalSetT::iterator iterator;
-	typedef typename InternalSetT::const_iterator const_iterator;
+    typedef typename InternalSetT::iterator iterator;
+    typedef typename InternalSetT::const_iterator const_iterator;
 
-	~AutoSet() { clear(); };
+    ~AutoSet() { clear(); };
 
-	size_type size() const { return _set.size(); }
+    size_type size() const { return _set.size(); }
 
-	iterator begin() { return _set.begin(); };
-	const_iterator begin() const { return _set.begin(); };
+    iterator begin() { return _set.begin(); };
+    const_iterator begin() const { return _set.begin(); };
 
-	iterator end() { return _set.end(); };
-	const_iterator end() const { return _set.end(); };
+    iterator end() { return _set.end(); };
+    const_iterator end() const { return _set.end(); };
 
-	iterator find(const ValueT key) { return _set.find(key); };
-	const_iterator find(const ValueT key) const { return _set.find(key); };
+    iterator find(const ValueT key) { return _set.find(key); };
+    const_iterator find(const ValueT key) const { return _set.find(key); };
 
-	template <typename ValueParamT>
-	std::pair<iterator,bool> insert(ValueParamT& value)
-	{
-		std::pair<iterator,bool> result = _set.insert(value.get());
+    template <typename ValueParamT>
+    std::pair<iterator,bool> insert(ValueParamT& value)
+    {
+        std::pair<iterator,bool> result = _set.insert(value.get());
 
-		if(result.second)
-			value.release();
+        if(result.second)
+            value.release();
 
-		return result;
-	};
+        return result;
+    };
 
-	void clear()
-	{
-		erase(begin(), end());
-	};
+    void clear()
+    {
+        erase(begin(), end());
+    };
 
-	value_type erase(iterator iter)
-	{
-		value_type result(*iter);
-		_set.erase(iter);
+    value_type erase(iterator iter)
+    {
+        value_type result(*iter);
+        _set.erase(iter);
 
-		return result;
-	};
+        return result;
+    };
 
-	void erase(iterator start, iterator end)
-	{
-		std::for_each(start, end, DeleteValue<ValueT>());
-		_set.erase(start, end);
-	};
+    void erase(iterator start, iterator end)
+    {
+        std::for_each(start, end, DeleteValue<ValueT>());
+        _set.erase(start, end);
+    };
 
-	value_type erase(const ValueT& key)
-	{
-		iterator iter = _set.find(key);
+    value_type erase(const ValueT& key)
+    {
+        iterator iter = _set.find(key);
 
-		if(iter != end())
-		{
-			_set.erase(iter);
-			return value_type(*iter);
-		}
+        if(iter != end())
+        {
+            _set.erase(iter);
+            return value_type(*iter);
+        }
 
-		return value_type(NULL);
-	};
+        return value_type(NULL);
+    };
 
 private:
-	InternalSetT _set;
+    InternalSetT _set;
 
 }; // sptUtil::AutoSet
 
