@@ -1,6 +1,8 @@
 #ifndef SPT_TRAINSETVIEW_H
 #define SPT_TRAINSETVIEW_H 1
 
+#include <sptMover/Trainset.h>
+
 namespace spt
 {
 
@@ -8,22 +10,15 @@ class TrainsetView
 {
 
 public:
-    TrainsetView(Trainset& trainset);
+    TrainsetView(sptMover::Trainset& trainset);
 
     void update();
 //    void addVehicle(osg::Group* vehicle);
 
 private:
-    struct Geometry
-    {
-        osg::MatrixTransform* body;
-        osg::MatrixTransform* frontBoogey;
-        osg::MatrixTransform* backBoogey;
-    }; // struct spt::TrainsetView::VehicleGeometry
+    typedef std::vector<VehicleView> Geometries;
 
-    typedef std::vector<Geometry> Geometries;
-
-    Trainset& _trainset;
+    sptMover::Trainset& _trainset;
     Geometries _geometries;
 
 }; // class spt::TrainsetView
