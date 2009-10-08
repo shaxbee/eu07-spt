@@ -21,6 +21,11 @@ struct DeletePointedValue
 namespace sptUtil
 {
 
+//! \brief Map with object lifetime management
+//!
+//! Map of Key, Value* pairs with ownership of objects 
+//! transfered via auto_ptr in insert and erase methods
+//! \author Zbyszek "ShaXbee" Mandziejewicz
 template <typename KeyT, typename ValueT>
 class AutoMap
 {
@@ -46,6 +51,8 @@ public:
 	iterator find(const KeyT& key) { return _map.find(key); };
 	const_iterator find(const KeyT& key) const { return _map.find(key); };
 
+    //! \brief Insert key/value pair and take ownership
+    //! \warning Ownership is taken after succesfull insert
 	template <typename ValueParamT>
 	std::pair<iterator,bool> insert(const KeyT& key, ValueParamT& value)
 	{
@@ -62,6 +69,8 @@ public:
 		erase(begin(), end());
 	};
 
+    //! \brief Remove element at iterator position
+    //! \return auto_ptr to value
 	data_type erase(iterator iter)
 	{
 		data_type result(iter->second);
@@ -76,6 +85,8 @@ public:
 		_map.erase(start, end);
 	};
 
+    //! \brief Remove element associated with key
+    //! \return auto_ptr to value
 	data_type erase(const KeyT& key)
 	{
 		iterator iter = _map.find(key);

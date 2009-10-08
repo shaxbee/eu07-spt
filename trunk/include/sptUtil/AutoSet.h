@@ -23,6 +23,10 @@ struct DeleteValue
 namespace sptUtil
 {
 
+//! \brief Set with object lifetime management 
+//!
+//! Set of Value* with ownership transfered in insert and erase methods
+//! \author Zbyszek "ShaXbee" Mandziejewicz
 template <typename ValueT>
 class AutoSet
 {
@@ -49,6 +53,8 @@ public:
     iterator find(const ValueT key) { return _set.find(key); };
     const_iterator find(const ValueT key) const { return _set.find(key); };
 
+    //! \brief Insert value and take ownership
+    //! Ownership is taken after succesfull insert
     template <typename ValueParamT>
     std::pair<iterator,bool> insert(ValueParamT& value)
     {
@@ -65,6 +71,8 @@ public:
         erase(begin(), end());
     };
 
+    //! \brief Remove value at iterator position and return ownership
+    //! \return auto_ptr to value
     value_type erase(iterator iter)
     {
         value_type result(*iter);
@@ -79,6 +87,8 @@ public:
         _set.erase(start, end);
     };
 
+    //! \brief Remove value and return ownership 
+    //! \return auto_ptr to value
     value_type erase(const ValueT& key)
     {
         iterator iter = _set.find(key);
