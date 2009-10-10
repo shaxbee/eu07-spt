@@ -4,6 +4,9 @@ Created on 2009-08-07
 @author: gfirlejczyk
 '''
 
+import axleCounter
+import srkDevice
+
 class Group(object):
     '''
     Virtual Dispatcher Group for handling different types of SRK devices
@@ -23,19 +26,19 @@ class Group(object):
             repr(self.__connections.keys())
             )
     
-    def containsAxleCounter(self, axleCounter):
+    def containsAxleCounter(self, axleCounter = axleCounter.AxleCounter()):
         '''
         Returns if axle counter is in list
         '''
         return axleCounter in self.__axleCounters
     
-    def appendAxleCounter(self, axleCounter):
+    def appendAxleCounter(self, axleCounter = axleCounter.AxleCounter()):
         '''
         Insert new axle counter in list
         '''
         self.__axleCounters.append(axleCounter)
 
-    def removeAxleCounter(self, axleCounter):
+    def removeAxleCounter(self, axleCounter = axleCounter.AxleCounter()):
         '''
         Remove axle counter from list
         '''
@@ -44,21 +47,21 @@ class Group(object):
 
         self.__axleCounters.remove(axleCounter)
 
-    def containsSRKDevice(self, device):
+    def containsSRKDevice(self, device = srkDevice.SRKDevice()):
         '''
         Check if given device is already connected to this group
         '''
         return device in self.__srkDevices
     
-    def appendSRKDevice(self, device):
+    def appendSRKDevice(self, device = srkDevice.SRKDevice()):
         '''
         Connect new device with the group
         '''
         self.__srkDevices[device.__id] = device
         
-    def removeSRKDevice(self, device):
+    def removeSRKDevice(self, device = srkDevice.SRKDevice()):
         '''
-        Remove connection betwen group and srk device
+        Remove connection between group and srk device
         '''
         if not self.__srkDevices.__contains__(device.__id):
             raise ValueError("Group haven't connection to this device")
