@@ -40,6 +40,8 @@ class Vec3:
         """
         if arg is None:
            raise ValueError()
+        if type(arg) == str:
+           arg = Decimal(arg)
         self.__dict__[name] = arg.quantize(THREE_POINTS)
 
     def length(self):
