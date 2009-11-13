@@ -1,7 +1,7 @@
 import os.path
 from build.support import GetPlatform
 
-Import('env buildDir')
+Import('env')
 
 # construct buildDir and set include path
 applicationDir = 'applications/spt/'
@@ -9,7 +9,7 @@ env.Append(CPPPATH = [os.path.join('#', applicationDir, 'include'), '#/include']
 env.Append(LIBPATH = ['#/lib'])
 
 # build
-objects = SConscript('src/SConscript', variant_dir = os.path.join(buildDir, 'applications/spt'), duplicate=0)
+objects = SConscript('src/SConscript')
 
 # link application
 program = env.Program(

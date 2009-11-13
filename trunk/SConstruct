@@ -36,13 +36,15 @@ env.Decider('MD5-timestamp')
 
 conf = Configure(env)
 
-#if not conf.CheckLibWithHeader('osg', 'osg/Node', 'c++'):
-#	print 'OpenSceneGraph library not found'
-#	exit(1);
+if not conf.CheckLibWithHeader('osg', 'osg/Node', 'c++'):
+	print 'OpenSceneGraph library not found'
+	exit(1);
 	
-#if not conf.CheckCXXHeader('boost/exception.hpp'):
-#	print 'Boost library not found'
-#	exit(1);
+if not conf.CheckCXXHeader('boost/exception.hpp'):
+	print 'Boost library not found'
+	exit(1);
+
+env = conf.Finish();
 
 # setup defines and paths depending on DEBUG flag
 if env['DEBUG']:
@@ -55,7 +57,7 @@ else:
 env.Append(CPPDEFINES = defines)
 
 # export environment and build dir for other scripts    
-Export('env buildDir')
+Export('env')
 
 # common library
 SConscript('src/SConscript', variant_dir = buildDir, duplicate = 0)

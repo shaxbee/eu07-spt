@@ -1,4 +1,5 @@
 import os.path
+import SCons.Util
 
 # import user environment configuration
 import build_config
@@ -28,6 +29,13 @@ if env['DEBUG']:
 	env['LIBSUFFIX'] = 'd' + env['LIBSUFFIX']
 else:
 	env.Append(CXXFLAGS = ['/O2'])
+	
+if os.environ.has_key('PYTHONPATH'):
+	env.Append(PYTHON_INCLUDE = os.path.join(os.environ['PYTHONPATH'], 'include'))
+else:
+	env.Append(PYTHON_INCLUDE = os.path.join(build_config.PYTHON_PATH , 'include'))
+	
+env['GCCXML_PATH'] = build_config.GCCXML_PATH
 	
 # return modified environment
 Return('env')
