@@ -5,22 +5,21 @@ Created on 2009-08-19
 '''
 
 import wx
-
-RETURN_TRUE = lambda x: True
+import sys
 
 class Input:
-    def __init__(self, label, value = None, onChange = None):
+    def __init__(self, label, value = None):
         self.__label = label
         self.__value = value
-        self.__onChange = onChange
+        self.onChange = None
         
     def setValue(self, value):
         oldValue = self.__value
         self.__value = value
         
-        if self.__onChange:
+        if self.onChange:
             try:
-                if not self.__onChange(oldValue, value):
+                if not self.onChange(oldValue, value):
                     self.__value = oldValue
                     raise ValueError()
             except Exception, e:
@@ -36,76 +35,76 @@ class Input:
     def hide(self): self.getControl().Hide()
     def setVisible(self, value): self.getControl().Show(value)
     def isVisible(self): return self.getControl().IsShown()
-    
+
     def render(self, parent):
+	self.__labelControl = wx.StaticText(parent, -1)
+	self.__labelControl.SetLabel(self.__label)
+
+	self.__control = self.createControl(parent)
+	self.__control.Bind(wx.EVT_KILL_FOCUS, self.__handleOnChange)
+
+	sizer = parent.GetSizer()
+
+        sizer.AddSpacer(5)
+        sizer.Add(self.__labelControl, flag = wx.ALIGN_LEFT | wx.RIGHT | wx.LEFT, border = 5)
+        sizer.Add(self.__control, flag = wx.EXPAND | wx.HORIZONTAL, border = 5)
+
+    def createControl(self, parent):
         raise NotImplementedError()
 
-    def handleOnChange(self, event):
+    def __handleOnChange(self, event):
         try:
-            self.value = self.getControl().GetValue()
-        except Exception, e:
+            self.value = self.control.GetValue()
             event.Skip()
+        except Exception, e:
+            event.StopPropagation()
             raise e
    
-    def addToSizer(self, sizer, label, control):
-        sizer.AddSpacer(5)
-        sizer.Add(label, flag = wx.ALIGN_LEFT | wx.RIGHT | wx.LEFT, border = 5)
-        sizer.Add(control, flag = wx.ALIGN_RIGHT | wx.RIGHT | wx.LEFT, border = 5)
-    
     enabled = property(isEnabled, setEnabled)
     visible = property(isVisible, setVisible)
     
     label = property(lambda self: self.__label)
     value = property(lambda self: self.__value, setValue)
-    
-    onChange = property(lambda self: self.__onChange)
+   
+    control = property(lambda self: self.__control) 
 
 class TextInput(Input):
-    def __init__(self, label, value = "", onKeyPress = None, **kwargs):
-        Input.__init__(self, label, str(value), **kwargs)
-        self.__onKeyPress = onKeyPress
+    def __init__(self, label, value = ""):
+        Input.__init__(self, label, str(value))
+        self.onKeyPress = None
         
-    def handleOnKeyPress(self, event):
-        if self.__onKeyPress(event.GetKeyCode()) == False:
+    def __handleOnKeyPress(self, event):
+        if self.onKeyPress and not self.onKeyPress(event.GetKeyCode()):
+            print "nok"
+            event.StopPropagation()
+        else:
             event.Skip()
             
-    def getControl(self): return self.__control
-        
-    def render(self, parent):
+    def createControl(self, parent):
         control = wx.TextCtrl(parent, -1, style = 0)
-        
-        # attach event handlers
-        control.Bind(wx.EVT_KILL_FOCUS, self.handleOnChange)        
-        if self.__onKeyPress:
-            control.Bind(wx.EVT_CHAR, self.handleOnKeyPress)
-            
-        label = wx.StaticText(parent, -1)
-        label.SetLabel(self.label)
-
-        self.addToSizer(parent.GetSizer(), label, control)
-        self.__control = control
-    
-    onKeyPress = property(lambda self: self.__onKeyPress)
+        control.Bind(wx.EVT_CHAR, self.__handleOnKeyPress)
+        return control
     
 class IntegerInput(Input):
-    def __init__(self, label, value = 0, range = None, **kwargs):
-        Input.__init__(self, label, value, **kwargs)
-        self.__range = range
+    def __init__(self, label, value = 0):
+        Input.__init__(self, label, value)
+        self.__range = self.__defaultRange
         
-    def render(self, parent):
+    def createControl(self, parent):
         # create and configure control
-        control = wx.SpinCtrl(parent, -1,)
-        if self.__range:
-            control.SetRange(*self.__range)
+        control = wx.SpinCtrl(parent, -1)
+        control.SetRange(*self.__range)
+	return control        
+
+    def setRange(self, min, max):
+        self.__range = (min, max)
         
-        # attach event handlers
-        if self.onChange:
-            control.Bind(wx.EVT_KILL_FOCUS, self.handleOnChange)
-        
-        label = wx.StaticText(parent, -1)
-        label.SetLabel(self.label)
-        
-        self.addToSizer(parent.GetSizer(), label, control)
-        self.__control = control
-        
-    range = property(lambda self: self.__range)
+        if self.control:
+            self.control.setRange(*self.__range)
+
+    def disableRange(self):
+        self.setRange(*self.__defaultRange)
+
+    __defaultRange = (-sys.maxint - 1, sys.maxint)
+ 
+    range = property(lambda self: self.__range, setRange)
