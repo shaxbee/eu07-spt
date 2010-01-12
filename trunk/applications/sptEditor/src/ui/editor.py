@@ -439,7 +439,7 @@ class PlanePart(wx.ScrolledWindow):
         p3d = self.ViewToModel(point)
 
         bar = self.GetParent().GetParent().GetStatusBar()
-        bar.SetStatusText("%.3f, %.3f, %.3f" % (p3d.x, p3d.y, p3d.z))
+        bar.SetStatusText("%.3f, %.3f, %.3f" % (p3d.x, p3d.y, p3d.z), 1)
 
         self.GetParent().topRuler.UpdateMousePointer(opoint)
         self.GetParent().leftRuler.UpdateMousePointer(opoint)

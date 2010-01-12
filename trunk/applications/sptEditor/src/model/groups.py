@@ -129,10 +129,11 @@ class RailContainer:
                                 + "outline points " \
                                 + tracks.coord2str(gpoint))
                             del self.connections[gpoint]
+                            break # Exit from for loop
                     else:
                         _logger.debug("At specified point " \
                             + tracks.coord2str(gpoint) + " vectors aren't " \
-                            + " negative " \
+                            + "negative " \
                             + tracks.coord2str(v_tracking_normal) \
                             + ", " + tracks.coord2str(v_child_normal))
 
@@ -156,6 +157,8 @@ class RailContainer:
         _logger.debug("Rail tracking " + str(tracking) + " has successfully " \
             + "inserted into group")
 
+        _logger.debug(self)
+
 
     def remove(self, tracking):
         """
@@ -169,9 +172,9 @@ class RailContainer:
 
         geometry = tracking.getGeometry()
 
-        # Check if the poinrs don't make existing group connections
+        # Check if the points don't make existing group connections
         for gpoint in geometry:
-            if self.connections[gpoint] != None:
+            if gpoint in self.connections and self.connections[gpoint] != None:
                 raise ValueError, "Rail tracking is connected with another " \
                     " tracking on group level"
 
@@ -183,28 +186,28 @@ class RailContainer:
             previous = tracking.point2tracking(gpoint)
 
             if previous != None:
-               _logger.debug("Unbinding previous tracking " + str(prev) \
-                   + " found at point " + tracks.coord2str(gpoint))
+                _logger.debug("Unbinding previous tracking " + str(previous) \
+                    + " found at point " + tracks.coord2str(gpoint))
 
-               prev.setTracking(gpoint, None)
-               tracking.setTracking(gpoint, None)
+                previous.setTracking(gpoint, None)
+                tracking.setTracking(gpoint, None)
 
-               # Add previous tracking to outline if it becomes outline now
-               if prev not in self.outline_trackings:
-                   _logger.debug("Adding previous tracking " + str(prev) \
-                       + " to outlines")
+                # Add previous tracking to outline if it becomes outline now
+                if previous not in self.outline_trackings:
+                    _logger.debug("Adding previous tracking " + str(previous) \
+                        + " to outlines")
 
-                   self.outline_tracking.append(prev)
+                    self.outline_tracking.append(previous)
 
-               _logger.debug("Adding point " + tracks.coord2str(gpoint) \
-                   + " to outline points now")
+                _logger.debug("Adding point " + tracks.coord2str(gpoint) \
+                    + " to outline points now")
 
-               self.connections[gpoint] = None
+                self.connections[gpoint] = None
             else:
-               _logger.debug("Removing point " + tracks.coord2str(gpoint) \
-                   + " from outline points, as there is no connected tracking")
+                _logger.debug("Removing point " + tracks.coord2str(gpoint) \
+                    + " from outline points, as there is no connected tracking")
 
-               del self.connections[gpoint]
+                del self.connections[gpoint]
 
             i = i+1
 
@@ -217,6 +220,8 @@ class RailContainer:
         self.children.remove(tracking)
 
         _logger.debug("Tracking " + str(tracking) + " was removed from group")
+
+        _logger.debug(self)
 
 
     def isOutlineNow(self, tracking):
@@ -274,7 +279,6 @@ class RailGroup(RailContainer):
             + ", children=" + str(self.children) \
             + ", outlinePoints=" + str(self.connections.keys()) \
             + "]";
-
 
 
 

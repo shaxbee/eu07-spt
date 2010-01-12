@@ -56,6 +56,15 @@ class Vec3:
         """
         return float(self.x*other.x + self.y*other.y + self.z*other.z)
 
+    def normalize(self):
+        """
+        Normalizes the vector
+        """
+        _length = length()
+        self.x = self.x / _length
+        self.y = self.y / _length
+        self.z = self.z / _length
+
 
 def dotProduct(a, b):
     """
@@ -69,10 +78,10 @@ def isNegativeVector(a, b):
     Checks if a spin of vector a is negative to spin of vector b.
     """
     cosinus = dotProduct(a, b) / (a.length() * b.length())
-    if cosinus < -1:
-        cosinus = -1
-    elif cosinus > 1:
-        cosinus = 1
+    if cosinus < -1.0:
+        cosinus = -1.0
+    elif cosinus > 1.0:
+        cosinus = 1.0
     return cosinus < -0.9997
 
 

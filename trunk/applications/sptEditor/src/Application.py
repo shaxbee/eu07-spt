@@ -9,6 +9,7 @@ Created on 2009-03-01
 import logging
 import logging.config
 import wx
+import wx.xrc
 import yaml
 import os.path
 import sys
@@ -60,6 +61,9 @@ class MainWindow(wx.Frame):
         """
         wx.Frame.__init__(self, parent, id, "EI07", size=(200,100))
 
+        # Load resource file
+        self.appxrc = wx.xrc.XmlResource("Application.xrc")
+
         #self.SetIcon(wx.IconFromXPMData("w8_7.xpm"))
 
         self.modified = False
@@ -96,57 +100,28 @@ class MainWindow(wx.Frame):
         Creates application main menu.
         """
 
-        mainMenu = wx.MenuBar()
-
-        # Create file menu
-        fileMenu = wx.Menu()
-        fileMenu.Append(wx.ID_NEW, "&New")
-        fileMenu.Append(wx.ID_OPEN, "&Open")
-        fileMenu.Append(wx.ID_SAVE, "&Save")
-        fileMenu.Append(wx.ID_SAVEAS, "Save &as")
-        fileMenu.AppendSeparator()
-        fileMenu.Append(wx.ID_CLOSE, "&Quit")
-
-        mainMenu.Append(fileMenu, "&File")
-
-        # Create view menu
-        viewMenu = wx.Menu()
-        viewMenu.Append(ID_CENTER_AT, "Center &at\tCtrl+G")
-        viewMenu.AppendSeparator()
-        viewMenu.Append(wx.ID_ZOOM_IN, "Zoom &in")
-        viewMenu.Append(wx.ID_ZOOM_OUT, "Zoom &out")
-
-        mainMenu.Append(viewMenu, "&View")
-        
-        # Create edit menu
-        editMenu = wx.Menu()
-        editMenu.Append(ID_BASEPOINT_EDIT, "&Basepoint\tCtrl+B")
-        
-        mainMenu.Append(editMenu, "&Edit")
-
-        # Create help menu
-        helpMenu = wx.Menu()
-        helpMenu.Append(wx.ID_ABOUT, "&About")
-
-        mainMenu.Append(helpMenu, "&Help")
-
+        # from XRC file
+        mainMenu = self.appxrc.LoadMenuBar("MainMenu")
         self.SetMenuBar(mainMenu)
 
+        # Events
         wx.EVT_MENU(self, wx.ID_NEW, self.OnNew)
         wx.EVT_MENU(self, wx.ID_OPEN, self.OnOpen)
         wx.EVT_MENU(self, wx.ID_SAVE, self.OnSave)
         wx.EVT_MENU(self, wx.ID_SAVEAS, self.OnSaveAs)
         wx.EVT_MENU(self, wx.ID_CLOSE, self.OnExit)
-        wx.EVT_MENU(self, ID_CENTER_AT, self.OnCenterAt)
+        wx.EVT_MENU(self, wx.xrc.XRCID('ID_CENTER_AT'), self.OnCenterAt)
         wx.EVT_MENU(self, wx.ID_ZOOM_IN, self.OnZoomIn)
         wx.EVT_MENU(self, wx.ID_ZOOM_OUT, self.OnZoomOut)
-        wx.EVT_MENU(self, ID_BASEPOINT_EDIT, self.OnBasePointEdit)
+        wx.EVT_MENU(self, wx.xrc.XRCID('ID_BASEPOINT_EDIT'), self.OnBasePointEdit)
         wx.EVT_MENU(self, wx.ID_ABOUT, self.OnAbout)
 
 
     def CreateStatusBar(self):
 
         bar = wx.StatusBar(self)
+        bar.SetFieldsCount(2)
+        bar.SetStatusWidths([250, -1])
         bar.SetStatusText("Ready.")
 
         self.SetStatusBar(bar)
