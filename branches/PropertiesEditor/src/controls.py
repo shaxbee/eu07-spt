@@ -54,7 +54,7 @@ class Input:
 
     def __handleOnChange(self, event):
         try:
-            self.value = self.control.GetValue()
+            self.setValue(self.control.GetValue())
             event.Skip()
         except Exception, e:
             event.StopPropagation()
