@@ -21,6 +21,7 @@ class Scenery:
 
     def AddRailTracking(self, tracking):
         self.tracks.insert(tracking)
+        self.FireSceneryChange(SceneryEvent(self, CHANGE_ADD, tracking))
 
 
     def RemoveRailTracking(self, tracking):
@@ -28,6 +29,7 @@ class Scenery:
             return
 
         self.tracks.remove(tracking)
+        self.FireSceneryChange(SceneryEvent(self, CHANGE_REMOVE, tracking))
 
 
     def RailTrackingIterator(self):
@@ -53,7 +55,7 @@ class Scenery:
         Notifies registered listeners about the change.
         """
         for l in self.listeners:
-            listener.sceneryChanged(event)
+            l.sceneryChanged(event)
 
 
 
@@ -63,11 +65,16 @@ class SceneryListener:
     Listener interface for listening changes in scenery.
     """
 
+    def __init__(self):
+        pass
+
+
     def sceneryChanged(self, event):
         """
         Implementators should override this method.
         """
         pass
+
 
 
 

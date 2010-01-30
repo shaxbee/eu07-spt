@@ -9,6 +9,7 @@ import wx
 import wx.xrc
 from decimal import Decimal
 
+from model.tracks import Track
 import ui.editor
 from sptmath import Vec3
 
@@ -117,3 +118,56 @@ class BasePointDialog(wx.Dialog):
             # Swallow number parsing error
             pass
 
+
+
+
+class InsertStraightTrack(wx.Dialog):
+    """
+    Dialog for inserting straight track
+    """
+
+    def __init__(self, parent):
+        w = parent.xRes.LoadDialog(parent, "InsertStraightTrack")
+        self.PostCreate(w)
+
+        self.length = wx.xrc.XRCCTRL(self, "length")
+        self.name = wx.xrc.XRCCTRL(self, "name")
+
+        config = wx.FileConfig.Get()
+        defaultLength = config.Read("/InsertStraightTrack/length", "0.000")
+        self.length.SetValue(defaultLength)
+
+        self.Bind(wx.EVT_BUTTON, self.OnButton, id=wx.ID_OK)
+
+        self.Fit()
+        self.Centre()
+        self.ShowModal()
+
+        self.Destroy()
+
+
+    def OnButton(self, event):
+        try:
+            length = Decimal(self.length.GetValue())
+            name = self.name.GetValue().strip()
+
+            if length <= Decimal(0):
+                # we don't accept non-positive values
+                return
+
+            t = Track(p2 = Vec3(length, "0", "0"))
+            if len(name) > 0:
+                t.name = name
+
+            # Remember entered values
+            config = wx.FileConfig.Get()
+            config.Write("/InsertStraightTrack/length", self.length.GetValue())
+
+            editor = self.GetParent().editor
+            editor.scenery.AddRailTracking(t)
+
+            self.Destroy()
+        except ValueError:
+            # Swallow the exception
+            pass
+         

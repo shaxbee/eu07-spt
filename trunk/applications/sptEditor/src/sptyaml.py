@@ -39,6 +39,7 @@ def represent_Track(dumper, data):
          "p2": data.p2, \
 #         "n1": data.n1, \
 #         "n2": data.n2})
+         "name": data.name, \
          })
 
 
@@ -54,6 +55,7 @@ def represent_Switch(dumper, data):
 #         "nc": data.nc,
 #         "n1": data.n1,
 #         "n2": data.n2})
+         "name": data.name
 	 })
 
 
@@ -97,6 +99,7 @@ class SceneryLoader:
         t.v1 = map["v1"]
         t.v2 = map["v2"]
         t.p2 = map["p2"]
+        t.name = map["name"]
         self.parent.insert(t)
 #        t.n1 = map["n1"]
 #        t.n2 = map["n2"]
@@ -113,6 +116,7 @@ class SceneryLoader:
         s.vc2 = map["vc2"]
         s.v1 = map["v1"]
         s.v2 = map["v2"]
+        s.name = map["name"]
         self.parent.insert(s)
 #        s.nc = map["nc"]
 #        s.n1 = map["n1"]

@@ -114,6 +114,7 @@ class MainWindow(wx.Frame):
         wx.EVT_MENU(self, wx.ID_ZOOM_IN, self.OnZoomIn)
         wx.EVT_MENU(self, wx.ID_ZOOM_OUT, self.OnZoomOut)
         wx.EVT_MENU(self, wx.xrc.XRCID('ID_BASEPOINT_EDIT'), self.OnBasePointEdit)
+        wx.EVT_MENU(self, wx.xrc.XRCID('ID_INSERT_STRAIGHT_TRACK'), self.OnInsertStraightTrack)
         wx.EVT_MENU(self, wx.ID_ABOUT, self.OnAbout)
 
 
@@ -132,6 +133,7 @@ class MainWindow(wx.Frame):
         Creates main content of application.
         """
         self.editor = ui.editor.SceneryEditor(self, wx.ID_ANY)
+        self.NewScenery()
 
 
     def OnAbout(self, event):
@@ -280,7 +282,7 @@ class MainWindow(wx.Frame):
         """
         Creates new scenery.
         """
-        self.editor.scenery = model.scenery.Scenery()
+        self.editor.SetScenery(model.scenery.Scenery())
         self.modified = False
         self.path = "Unknown.txt"
         self.UpdateTitle()
@@ -381,6 +383,11 @@ class MainWindow(wx.Frame):
         
     def OnBasePointEdit(self, event):
         dialog = ui.dialog.BasePointDialog(self)
+        dialog.Show(True)
+
+
+    def OnInsertStraightTrack(self, event):
+        dialog = ui.dialog.InsertStraightTrack(self)
         dialog.Show(True)
 
 

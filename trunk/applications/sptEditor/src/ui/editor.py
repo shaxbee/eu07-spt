@@ -12,6 +12,7 @@ import wx
 from wx.lib.evtmgr import eventManager
 
 import model.tracks
+import model.scenery
 import ui.views
 from sptmath import Vec3
 
@@ -36,6 +37,9 @@ class SceneryEditor(wx.Panel):
             name = "Top ruler")
         self.parts = [PlanePart(self)]
 
+        self.scenery = None
+        self.sceneryListener = SceneryListener(self)
+
         sizer.Add(corner)
         sizer.Add(self.topRuler, flag = wx.LEFT | wx.EXPAND)
         sizer.Add(self.leftRuler, flag = wx.TOP | wx.EXPAND)
@@ -52,7 +56,10 @@ class SceneryEditor(wx.Panel):
         """
         Sets the scenery. Notify also active parts.
         """
+        if self.scenery != None:
+            self.scenery.UnregisterListener(self.sceneryListener)
         self.scenery = scenery
+        self.scenery.RegisterListener(self.sceneryListener)
         for part in self.parts:
             part.SetScenery(scenery)
             
@@ -678,4 +685,21 @@ class SnapData:
         return "SnapData[p2d=(%d,%d),p3d=(%.3f,%.3f,%.3f)," \
             + "alpha=%.2f,beta=%.2f]" % (self.p2d[0], self.p2d[1], \
             self.p3d.x. self.p3d.y, self.p3d.z, self.alpha, self.beta)
+
+
+
+
+class SceneryListener(model.scenery.SceneryListener):
+    """
+    Responds to the changs in scenery
+    """
+
+    def __init__(self, editor):
+        model.scenery.SceneryListener.__init__(self)
+        self.editor = editor
+
+
+    def sceneryChanged(self, event):
+        print event.GetElement()
+
 

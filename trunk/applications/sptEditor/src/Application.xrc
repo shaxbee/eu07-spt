@@ -37,10 +37,12 @@
       <object class="wxMenuItem" name="wxID_ZOOM_IN">
         <label>Zoom &amp;in</label>
         <help>Zooms the scenery in.</help>
+        <accel>+</accel>
       </object>
       <object class="wxMenuItem" name="wxID_ZOOM_OUT">
         <label>Zoom &amp;out</label>
         <help>Zooms the scenery out.</help>
+        <accel>-</accel>
       </object>
     </object>
     <object class="wxMenu" name="EditMenu">
@@ -49,6 +51,13 @@
         <label>&amp;Basepoint</label>
         <accel>Ctrl+B</accel>
         <help>Sets the location of basepoint.</help>
+      </object>
+      <object class="wxMenu" name="InsertSubmenu">
+        <label>&amp;Insert</label>
+        <object class="wxMenuItem" name="ID_INSERT_STRAIGHT_TRACK">
+          <label>&amp;Straight track</label>
+          <help>Inserts a straigt track at basepoint.</help>
+        </object>
       </object>
     </object>
     <object class="wxMenu" name="HelpMenu">
@@ -253,4 +262,71 @@
       </object>
     </object>
   </object>
+  <object class="wxDialog" name="InsertStraightTrack">
+    <size>200, 200</size>
+    <title>Straight track</title>
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxPanel">
+          <object class="wxFlexGridSizer">
+            <cols>2</cols>
+            <rows>2</rows>
+            <vgap>5</vgap>
+            <hgap>5</hgap>
+            <object class="sizeritem">
+              <object class="wxStaticText">
+                <label>Length:</label>
+              </object>
+              <option>0</option>
+              <flag>wxALIGN_RIGHT</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxTextCtrl" name="length">
+                <value>0.000</value>
+                <style>wxTE_RIGHT</style>
+              </object>
+              <option>1</option>
+              <flag>wxEXPAND</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxStaticText">
+                <label>Name:</label>
+              </object>
+              <option>0</option>
+              <flag>wxALIGN_RIGHT</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxTextCtrl" name="name">
+                <value></value>
+                <style>wxTE_LEFT</style>
+              </object>
+              <option>1</option>
+              <flag>wxEXPAND</flag>
+            </object>
+          </object>
+        </object>
+        <option>1</option>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <object class="wxButton" name="wxID_OK"/>
+            <option>1</option>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="wxID_CANCEL"/>
+            <option>1</option>
+            <flag>wxLEFT</flag>
+            <border>5</border>
+          </object>
+        </object>
+        <option>0</option>
+        <flag>wxALIGN_CENTRE|wxALIGN_TOP|wxALIGN_BOTTOM</flag>
+        <border>10</border>
+      </object>
+    </object>
+  </object>
 </resource>
+

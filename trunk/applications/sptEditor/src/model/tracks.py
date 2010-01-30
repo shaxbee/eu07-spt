@@ -123,6 +123,8 @@ class Track(RailTracking):
         
         self.n1 = None
         self.n2 = None
+
+        self.name = None
         
 
     def __repr__(self):
@@ -130,7 +132,8 @@ class Track(RailTracking):
         Gives a detailed information about this object.
         """
         return "Track[" \
-            + "p1=" + coord2str(self.p1) \
+            + "name=" + self.name \
+            + ", p1=" + coord2str(self.p1) \
             + ", v1=" + coord2str(self.v1) \
             + ", v2=" + coord2str(self.v2) \
             + ", p2=" + coord2str(self.p2) \
@@ -276,13 +279,16 @@ class Switch(RailTracking):
         self.n1 = None
         self.n2 = None
 
+        self.name = None
+
 
     def __repr__(self):
         """
         Gives a detailed information about this object.
         """
         return "Switch[" \
-            + "pc=" + coord2str(self.pc) \
+            + "name=" + self.name \
+            + ", pc=" + coord2str(self.pc) \
             + ", p1=" + coord2str(self.p1) \
             + ", p2=" + coord2str(self.p2) \
             + ", vc1=" + coord2str(self.vc1) \
