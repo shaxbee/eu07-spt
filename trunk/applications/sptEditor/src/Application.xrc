@@ -58,4 +58,199 @@
       </object>
     </object>
   </object>
+
+
+  <object class="wxDialog" name="CenterAtDialog">
+    <size>200, 200</size>
+    <title>Center at</title>
+    <centered>1</centered>
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxPanel">
+          <object class="wxFlexGridSizer">
+            <object class="sizeritem">
+              <object class="wxStaticText">
+                <label>X:</label>
+              </object>
+              <option>0</option>
+              <flag>wxALIGN_RIGHT</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxTextCtrl" name="x">
+                <value>0.000</value>
+                <style>wxTE_RIGHT</style>
+              </object>
+              <option>1</option>
+              <flag>wxEXPAND</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxStaticText">
+                <label>Y:</label>
+              </object>
+              <option>0</option>
+              <flag>wxALIGN_RIGHT</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxTextCtrl" name="y">
+                <value>0.000</value>
+                <style>wxTE_RIGHT</style>
+              </object>
+              <option>1</option>
+              <flag>wxEXPAND</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxStaticText">
+                <label>Z:</label>
+              </object>
+              <option>0</option>
+              <flag>wxALIGN_RIGHT</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxTextCtrl" name="z">
+                <value>0.000</value>
+                <style>wxTE_RIGHT</style>
+              </object>
+              <option>1</option>
+              <flag>wxEXPAND</flag>
+            </object>
+            <cols>2</cols>
+            <rows>3</rows>
+            <vgap>5</vgap>
+            <hgap>5</hgap>
+          </object>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <object class="wxButton" name="wxID_OK">
+              <label>Ok</label>
+            </object>
+            <option>1</option>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="wxID_CANCEL">
+              <label>Cancel</label>
+            </object>
+            <option>1</option>
+            <flag>wxLEFT</flag>
+            <border>5</border>
+          </object>
+        </object>
+      </object>
+    </object>
+  </object>
+  <object class="wxDialog" name="BasePointDialog">
+    <size>200, 200</size>
+    <title>Base point location</title>
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxPanel">
+          <object class="wxFlexGridSizer">
+            <cols>2</cols>
+            <rows>5</rows>
+            <vgap>5</vgap>
+            <hgap>5</hgap>
+            <object class="sizeritem">
+              <object class="wxStaticText">
+                <label>X:</label>
+              </object>
+              <option>0</option>
+              <flag>wxALIGN_RIGHT</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxTextCtrl" name="x">
+                <value>0.000</value>
+                <style>wxTE_RIGHT</style>
+              </object>
+              <option>1</option>
+              <flag>wxEXPAND</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxStaticText">
+                <label>Y:</label>
+              </object>
+              <option>0</option>
+              <flag>wxALIGN_RIGHT</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxTextCtrl" name="y">
+                <value>0.000</value>
+                <style>wxTE_RIGHT</style>
+              </object>
+              <option>1</option>
+              <flag>wxEXPAND</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxStaticText">
+                <label>Z:</label>
+              </object>
+              <option>0</option>
+              <flag>wxALIGN_RIGHT</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxTextCtrl" name="z">
+                <value>0.000</value>
+                <style>wxTE_RIGHT</style>
+              </object>
+              <option>1</option>
+              <flag>wxEXPAND</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxStaticText">
+                <label>Alpha:</label>
+              </object>
+              <option>0</option>
+              <flag>wxALIGN_RIGHT</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxTextCtrl" name="alpha">
+                <value>0.00</value>
+                <style>wxTE_RIGHT</style>
+              </object>
+              <option>1</option>
+              <flag>wxEXPAND</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxStaticText">
+                <label>Beta:</label>
+              </object>
+              <option>0</option>
+              <flag>wxALIGN_RIGHT</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxTextCtrl" name="beta">
+                <value>0.00</value>
+                <style>wxTE_RIGHT</style>
+              </object>
+              <option>1</option>
+              <flag>wxEXPAND</flag>
+            </object>
+          </object>
+        </object>
+        <option>1</option>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <object class="wxButton" name="wxID_OK"/>
+            <option>1</option>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="wxID_CANCEL"/>
+            <option>1</option>
+            <flag>wxLEFT</flag>
+            <border>5</border>
+          </object>
+        </object>
+        <option>0</option>
+        <flag>wxALIGN_CENTRE|wxALIGN_TOP|wxALIGN_BOTTOM</flag>
+        <border>10</border>
+      </object>
+    </object>
+  </object>
 </resource>

@@ -62,7 +62,7 @@ class MainWindow(wx.Frame):
         wx.Frame.__init__(self, parent, id, "EI07", size=(200,100))
 
         # Load resource file
-        self.appxrc = wx.xrc.XmlResource("Application.xrc")
+        self.xRes = wx.xrc.XmlResource("Application.xrc")
 
         #self.SetIcon(wx.IconFromXPMData("w8_7.xpm"))
 
@@ -101,7 +101,7 @@ class MainWindow(wx.Frame):
         """
 
         # from XRC file
-        mainMenu = self.appxrc.LoadMenuBar("MainMenu")
+        mainMenu = self.xRes.LoadMenuBar("MainMenu")
         self.SetMenuBar(mainMenu)
 
         # Events

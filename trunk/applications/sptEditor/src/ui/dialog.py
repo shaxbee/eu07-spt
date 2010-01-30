@@ -6,10 +6,13 @@ This module contains all dialogs defined in editor application.
 
 import math
 import wx
+import wx.xrc
 from decimal import Decimal
 
 import ui.editor
 from sptmath import Vec3
+
+
 
 
 class CenterAtDialog(wx.Dialog):
@@ -18,30 +21,14 @@ class CenterAtDialog(wx.Dialog):
     """
     
     def __init__(self, parent):
-        wx.Dialog.__init__(self, parent, wx.ID_ANY, "Center at")
-        self.SetMinSize(wx.Size(200, 200))
+        w = parent.xRes.LoadDialog(parent, "CenterAtDialog")
+        self.PostCreate(w)
 
-        panel = wx.Panel(self, wx.ID_ANY)
+        self.x = wx.xrc.XRCCTRL(self, "x")
+        self.y = wx.xrc.XRCCTRL(self, "y")
+        self.z = wx.xrc.XRCCTRL(self, "z")
 
-        vbox = wx.BoxSizer(wx.VERTICAL)
-        hbox = wx.BoxSizer(wx.HORIZONTAL)
-
-        self.CreateContent(panel)
-
-        okButton = wx.Button(self, wx.ID_OK, "Ok", wx.DefaultPosition, \
-            wx.DefaultSize)
-        closeButton = wx.Button(self, wx.ID_CANCEL, "Cancel", \
-            wx.DefaultPosition, wx.DefaultSize)
-
-        self.Bind(wx.EVT_BUTTON, self.OnButton, okButton)
-
-        hbox.Add(okButton, 1)
-        hbox.Add(closeButton, 1, wx.LEFT, 5)
-
-        vbox.Add(panel, 1)
-        vbox.Add(hbox, 0, wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM, 10)
-
-        self.SetSizer(vbox)
+        self.Bind(wx.EVT_BUTTON, self.OnButton, id=wx.ID_OK)
 
         self.Fit()
         self.Centre()
@@ -50,43 +37,22 @@ class CenterAtDialog(wx.Dialog):
         self.Destroy()
 
 
-    def CreateContent(self, panel):
-
-        sizer = wx.FlexGridSizer(3, 2, 5, 5)
-       
-        self.x = wx.TextCtrl(panel, wx.ID_ANY, "%.3f" % 0, \
-                             style = wx.TE_RIGHT, name = "x")
-        self.y = wx.TextCtrl(panel, wx.ID_ANY, "%.3f" % 0, \
-                             style = wx.TE_RIGHT, name = "y")
-        self.z = wx.TextCtrl(panel, wx.ID_ANY, "%.3f" % 0, \
-                             style = wx.TE_RIGHT, name = "z")
- 
-        sizer.Add( wx.StaticText(panel, wx.ID_ANY, "X:"), 0, wx.ALIGN_RIGHT )
-        sizer.Add( self.x, 1, wx.EXPAND )
-        sizer.Add( wx.StaticText(panel, wx.ID_ANY, "Y:"), 0, wx.ALIGN_RIGHT )
-        sizer.Add( self.y, 1, wx.EXPAND )
-        sizer.Add( wx.StaticText(panel, wx.ID_ANY, "Z:"), 0, wx.ALIGN_RIGHT )
-        sizer.Add( self.z, 1, wx.EXPAND )
-
-        panel.SetSizer(sizer)
-
-
     def OnButton(self, event):
         """
         Sets the scroll to the editor part.
         """       
         try: 
-            px = float(self.x.GetValue())
-            py = float(self.y.GetValue())
-            pz = float(self.z.GetValue())
+            px = Decimal(self.x.GetValue())
+            py = Decimal(self.y.GetValue())
+            pz = Decimal(self.z.GetValue())
 
             editor = self.GetParent().editor
-            (vx, vy) = editor.parts[0].ModelToView((px, py, pz))
+            (vx, vy) = editor.parts[0].ModelToView(Vec3(px, py, pz))
             editor.parts[0].CenterViewAt(vx, vy)
 
             self.Destroy()
         except ValueError: 
-            # Swallow number pasing error
+            # Swallow number parsing error
             pass
 
 
@@ -98,30 +64,12 @@ class BasePointDialog(wx.Dialog):
     """
     
     def __init__(self, parent):
-        wx.Dialog.__init__(self, parent, wx.ID_ANY, "Base point location")
-        self.SetMinSize(wx.Size(200, 200))
-        
-        panel = wx.Panel(self, wx.ID_ANY)
-        
-        vbox = wx.BoxSizer(wx.VERTICAL)
-        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        w = parent.xRes.LoadDialog(parent, "BasePointDialog")
+        self.PostCreate(w)
 
-        self.CreateContent(panel)
+        self.FillContent(parent)
 
-        okButton = wx.Button(self, wx.ID_OK, "Ok", wx.DefaultPosition, \
-            wx.DefaultSize)
-        closeButton = wx.Button(self, wx.ID_CANCEL, "Cancel", \
-            wx.DefaultPosition, wx.DefaultSize)
-
-        self.Bind(wx.EVT_BUTTON, self.OnButton, okButton)
-
-        hbox.Add(okButton, 1)
-        hbox.Add(closeButton, 1, wx.LEFT, 5)
-
-        vbox.Add(panel, 1)
-        vbox.Add(hbox, 0, wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM, 10)
-
-        self.SetSizer(vbox)
+        self.Bind(wx.EVT_BUTTON, self.OnButton, id=wx.ID_OK)
 
         self.Fit()
         self.Centre()
@@ -130,39 +78,22 @@ class BasePointDialog(wx.Dialog):
         self.Destroy()
 
 
-    def CreateContent(self, panel):
-        basePoint = self.GetParent().editor.basePoint
+    def FillContent(self, parent):
+        basePoint = parent.editor.basePoint
         if basePoint == None:
             basePoint = ui.editor.BasePoint((0.0, 0.0, 0.0), 0, 0)
 
-        sizer = wx.FlexGridSizer(5, 2, 5, 5)
-       
-        self.x = wx.TextCtrl(panel, wx.ID_ANY, "%.3f" % basePoint.point.x, \
-                             style = wx.TE_RIGHT, name = "x")
-        self.y = wx.TextCtrl(panel, wx.ID_ANY, "%.3f" % basePoint.point.y, \
-                             style = wx.TE_RIGHT, name = "y")
-        self.z = wx.TextCtrl(panel, wx.ID_ANY, "%.3f" % basePoint.point.z, \
-                             style = wx.TE_RIGHT, name = "z")
-        self.alpha = wx.TextCtrl(panel, wx.ID_ANY, "%.2f" % basePoint.alpha, \
-                             style = wx.TE_RIGHT, name = "alpha")
-        self.beta = wx.TextCtrl(panel, wx.ID_ANY, "%.2f" % basePoint.beta, \
-                             style = wx.TE_RIGHT, name = "beta")
- 
-        sizer.Add( wx.StaticText(panel, wx.ID_ANY, "X:"), 0, wx.ALIGN_RIGHT )
-        sizer.Add( self.x, 1, wx.EXPAND )
-        sizer.Add( wx.StaticText(panel, wx.ID_ANY, "Y:"), 0, wx.ALIGN_RIGHT )
-        sizer.Add( self.y, 1, wx.EXPAND )
-        sizer.Add( wx.StaticText(panel, wx.ID_ANY, "Z:"), 0, wx.ALIGN_RIGHT )
-        sizer.Add( self.z, 1, wx.EXPAND )
-        sizer.Add( wx.StaticText(panel, wx.ID_ANY, "Alpha:"), 0, \
-                   wx.ALIGN_RIGHT )
-        sizer.Add( self.alpha, 1, wx.EXPAND )
-        sizer.Add( wx.StaticText(panel, wx.ID_ANY, "Beta:"), 0, \
-                   wx.ALIGN_RIGHT )
-        sizer.Add( self.beta, 1, wx.EXPAND )
-        
+        self.x = wx.xrc.XRCCTRL(self, "x")
+        self.y = wx.xrc.XRCCTRL(self, "y")
+        self.z = wx.xrc.XRCCTRL(self, "z")
+        self.alpha = wx.xrc.XRCCTRL(self, "alpha")
+        self.beta = wx.xrc.XRCCTRL(self, "beta")
 
-        panel.SetSizer(sizer)
+        self.x.SetValue("%.3f" % basePoint.point.x)
+        self.y.SetValue("%.3f" % basePoint.point.y)
+        self.z.SetValue("%.3f" % basePoint.point.z)
+        self.alpha.SetValue("%.2f" % basePoint.alpha)
+        self.beta.SetValue("%.2f" % basePoint.beta)
 
 
     def OnButton(self, event):
@@ -183,6 +114,6 @@ class BasePointDialog(wx.Dialog):
 
             self.Destroy()
         except ValueError: 
-            # Swallow number pasing error
+            # Swallow number parsing error
             pass
 
