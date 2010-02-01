@@ -24,8 +24,8 @@ class TextProperty(Property):
         return self.__maxLength
 
 class IntegerProperty(Property):
-    def __init__(self, label = None, range = None, validatorType = None):
-        Property.__init__(self, label, validatorType)
+    def __init__(self, label = None, range = None):
+        Property.__init__(self, label)
         self.__range = range
 
     def getRange(self):
