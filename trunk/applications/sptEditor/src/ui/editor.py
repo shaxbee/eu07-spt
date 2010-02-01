@@ -153,7 +153,7 @@ class PlanePart(wx.ScrolledWindow):
             self.RefreshRect(newRect, False)
 
 
-    def __AddView(self, element):
+    def AddView(self, element):
         if isinstance(element, model.tracks.Track):
             self.trackCache.append(ui.views.TrackView(element))
         elif isinstance(element, model.tracks.Switch):
@@ -700,6 +700,25 @@ class SceneryListener(model.scenery.SceneryListener):
 
 
     def sceneryChanged(self, event):
-        print event.GetElement()
+        element = event.GetElement()
+        changeType = event.GetType()
 
+        part = self.editor.parts[0]
+
+        if changeType == model.scenery.CHANGE_ADD:
+            view = ui.views.CreateView(element)
+            part.trackCache.append(view)
+        elif changeType == model.scenery.CHANGE_REMOVE:
+            # TODO: remove support
+            pass
+
+        needPainting = part.ComputeMinMax()
+        if needPainting:
+            self.editor.Refresh()
+        else:
+            if type == model.scenery.CHANGE_ADD:
+                view.Scale(part.scale, part.minX, part.minY, part.maxX, partmaxY)
+        
+            part.RefreshRect( view.GetRepaintBounds() );
+      
 

@@ -241,7 +241,7 @@ class RailSwitchView(View):
         dc.DrawSpline(self.diverging)
         
         
-    def GetRepaingBounds(self):
+    def GetRepaintBounds(self):
         xspan = [self.straight[0].x, self.straight[1].x, \
                  self.straight[2].x, self.straight[3].x, \
                  self.diverging[0].x, self.diverging[1].x, \
@@ -311,4 +311,18 @@ class BasePointView(View):
         x = self.point.x - point.x
         y = self.point.y - point.y
         return (x*x + y*y) <= SNAP_DISTANCE
+
+
+
+
+def CreateView(element):
+    """
+    Creates view.
+    """
+    if type(element) == model.tracks.Track:
+        return TrackView(element)
+    elif type(element) == model.tracks.Switch:
+        return SwitchView(switch)
+    else:
+        raise ValueError("Unsupported element: " + str(type(element)))
 

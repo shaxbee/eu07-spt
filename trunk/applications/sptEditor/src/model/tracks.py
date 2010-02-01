@@ -132,7 +132,7 @@ class Track(RailTracking):
         Gives a detailed information about this object.
         """
         return "Track[" \
-            + "name=" + self.name \
+            + "name=" + str(self.name) \
             + ", p1=" + coord2str(self.p1) \
             + ", v1=" + coord2str(self.v1) \
             + ", v2=" + coord2str(self.v2) \
@@ -287,7 +287,7 @@ class Switch(RailTracking):
         Gives a detailed information about this object.
         """
         return "Switch[" \
-            + "name=" + self.name \
+            + "name=" + str(self.name) \
             + ", pc=" + coord2str(self.pc) \
             + ", p1=" + coord2str(self.p1) \
             + ", p2=" + coord2str(self.p2) \
