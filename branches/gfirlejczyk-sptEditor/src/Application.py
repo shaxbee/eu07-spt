@@ -296,7 +296,7 @@ class MainWindow(wx.Frame):
         if self.modified:
             answer = wx.MessageBox("There are unsaved changes in " \
                 + "scenery.\nDo you want to save them?", "Save the file", \
-                wx.YES_NO_CANCEL | wx.ICON_QUESTION, self)
+                wx.YES_NO | wx.ICON_QUESTION, self)
             if answer == wx.NO:
                 return True
             elif answer == wx.CANCEL:

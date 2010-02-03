@@ -28,7 +28,7 @@ class SceneryEditor(wx.Frame):
 #        wx.Panel.__init__(self, parent, id, style = wx.BORDER_SUNKEN)
         wx.Frame.__init__(parent,id)
         
-        width,height = self.GetClientSize()
+#        width, height = self.GetClientSize()
         self.canvas = OSGCanvas(self, wx.ID_ANY, 0, 0, 400, 600)
 
         root = osg.Node()
@@ -41,7 +41,7 @@ class SceneryEditor(wx.Frame):
 #       self.subcontroller.modelNode = model
     
         root.addChild( root )
-        root.__disown__()
+#        root.__disown__()
 #        root.addChild( telepointer, False )
         self.canvas.viewer.setSceneData( root )
         
@@ -53,8 +53,8 @@ class SceneryEditor(wx.Frame):
 class OSGCanvas(wx.glcanvas.GLCanvas):
     def __init__(self,parent,id,x,y,w,h):
 #        size = wx.wxSize(w,h)
-        style = wx.WANTS_CHARS | wx.FULL_REPAINT_ON_RESIZE
-        wx.glcanvas.GLCanvas.__init__(self,parent,id,wx.DefaultPosition,wx.DefaultSize,style)
+#        style = wx.WANTS_CHARS | wx.FULL_REPAINT_ON_RESIZE
+        wx.glcanvas.GLCanvas.__init__(parent,id)
 
         width,height = self.GetClientSize()
 
@@ -80,6 +80,7 @@ class OSGCanvas(wx.glcanvas.GLCanvas):
             self.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
             self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
 
+        return self
 
     def OnPaint(self, evt):
         wx.PaintDC(self)
