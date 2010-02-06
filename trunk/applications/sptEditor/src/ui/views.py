@@ -46,7 +46,7 @@ class View:
         pass # Implement it
     
     
-    def Scale(self, scale, minmax):
+    def Scale(self, scale, oMinX, oMaxX, oMinY, oMaxY):
         """
         Scales the view.
         """

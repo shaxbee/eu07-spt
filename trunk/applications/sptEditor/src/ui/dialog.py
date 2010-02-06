@@ -11,6 +11,7 @@ from decimal import Decimal
 
 from model.tracks import Track
 import ui.editor
+import ui.trackfc
 from sptmath import Vec3
 
 
@@ -155,7 +156,9 @@ class InsertStraightTrack(wx.Dialog):
                 # we don't accept non-positive values
                 return
 
-            t = Track(p2 = Vec3(length, "0", "0"))
+            editor = self.GetParent().editor
+            tf = ui.trackfc.TrackFactory(editor)
+            t = tf.CreateStraight(length)
             if len(name) > 0:
                 t.name = name
 

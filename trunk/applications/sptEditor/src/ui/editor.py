@@ -704,7 +704,10 @@ class SceneryListener(model.scenery.SceneryListener):
         changeType = event.GetType()
 
         part = self.editor.parts[0]
+        (vx, vy) = part.GetViewStart()
+        (ux, uy) = part.GetScrollPixelsPerUnit()
 
+        view = None
         if changeType == model.scenery.CHANGE_ADD:
             view = ui.views.CreateView(element)
             part.trackCache.append(view)
@@ -716,9 +719,12 @@ class SceneryListener(model.scenery.SceneryListener):
         if needPainting:
             self.editor.Refresh()
         else:
-            if type == model.scenery.CHANGE_ADD:
-                view.Scale(part.scale, part.minX, part.minY, part.maxX, partmaxY)
+            if changeType == model.scenery.CHANGE_ADD:
+                view.Scale(part.scale, part.minX, part.maxX, part.minY, part.maxY)
         
-            part.RefreshRect( view.GetRepaintBounds() );
+            repaintRect = view.GetRepaintBounds()
+            repaintRect.x -= vx * ux
+            repaintRect.y -= vy * uy
+            part.RefreshRect(repaintRect, False)
       
 
