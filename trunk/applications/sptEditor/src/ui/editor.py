@@ -601,19 +601,21 @@ class BasePoint:
     """
     Base point.
     Defines a vector attached in some 3D world point that allows
-    additions to the scenery.    
+    additions to the scenery.
+
+    Gradient is expressed in pro milles.
     """
     
-    def __init__(self, p=Vec3(), alpha = 0, beta = 0):
+    def __init__(self, p=Vec3(), alpha = 0, gradient = 0):
         self.point = p
         self.alpha = alpha
-        self.beta = beta
+        self.gradient = gradient
         
     
     def __repr__(self):
-        return "BasePoint[point=(%.3f, %.3f, %.3f),alpha=%.2f,beta=%.2f]" % \
+        return "BasePoint[point=(%.3f, %.3f, %.3f),alpha=%.2f,gradient=%.2f\u2030]" % \
            (self.point.x, self.point.y, self.point.z, \
-            self.alpha, self.beta)
+            self.alpha, self.gradient)
     
     
     def __eq__(self, other):
@@ -622,7 +624,7 @@ class BasePoint:
         if not isinstance(other, BasePoint):
             return False
         return self.point == other.point and self.alpha == other.alpha and \
-            self.beta == other.beta
+            self.gradient == other.gradient
 
 
 
@@ -676,15 +678,15 @@ class SnapData:
     
     def __init__(self):
         self.alpha = 0.0
-        self.beta = 0.0
+        self.gradient = 0.0
         self.p2d = (0, 0)
         self.p3d = Vec3()
         
     
     def __repr__(self):
         return "SnapData[p2d=(%d,%d),p3d=(%.3f,%.3f,%.3f)," \
-            + "alpha=%.2f,beta=%.2f]" % (self.p2d[0], self.p2d[1], \
-            self.p3d.x. self.p3d.y, self.p3d.z, self.alpha, self.beta)
+            + "alpha=%.2f,gradient=%.2f\u2030]" % (self.p2d[0], self.p2d[1], \
+            self.p3d.x. self.p3d.y, self.p3d.z, self.alpha, self.gradient)
 
 
 

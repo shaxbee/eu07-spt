@@ -5,7 +5,7 @@ on tracks within editor.
 @author Adammo
 """
 
-from math import sin, cos
+from math import sin, cos, atan, radians
 import decimal
 
 from sptmath import Vec3
@@ -23,15 +23,16 @@ class TrackFactory:
 
     def CreateStraight(self, length):
         p2 = Vec3("0", str(length), "0")
-        v1 = Vec3()
-        v2 = Vec3()
         p1 = Vec3()
 
         basePoint = self.editor.basePoint
         opoint = basePoint.point
 
-        tr = BasePointTransform(basePoint.point, basePoint.alpha)
-        tr.Transform(p1, v1, v2, p2)
+        tr = BasePointTransform(basePoint)
+        tr.Transform([p1, p2])
+
+        v1 = Vec3()
+        v2 = Vec3()
 
         npoint = Vec3()
         npoint.x = p2.x
@@ -47,7 +48,6 @@ class TrackFactory:
 
 
 
-
 class AbstractTransform:
     """
     A transform does something with the geometry of track.
@@ -57,7 +57,7 @@ class AbstractTransform:
         pass
 
 
-    def Transform(self, p1, v1, v2, p2):
+    def Transform(self, vectors):
         pass
 
 
@@ -68,26 +68,28 @@ class BasePointTransform(AbstractTransform):
     Moves and rotates the geometry of track according base point.
     """
 
-    def __init__(self, point, alpha):
+    def __init__(self, basePoint):
         AbstractTransform.__init__(self)
-        self.point = point
-        self.alpha = alpha
+        self.point = basePoint.point
+        self.alpha = -radians(basePoint.alpha)
+        self.beta = atan(basePoint.gradient / 1000.0)
 
 
-    def Transform(self, p1, v1, v2, p2):
+    def Transform(self, vectors):
         sin_a = sin(self.alpha)
         cos_a = cos(self.alpha)
+        sin_b = sin(self.beta)
+        cos_b = cos(self.beta)
 
+        # Matrices for 3D transformations 
         matrix = [ \
-            [cos_a, 0.0, sin_a, self.point.x], \
-            [0.0, 1.0, 0.0, self.point.y], \
-            [-sin_a, 0.0, cos_a, self.point.z], \
+            [cos_a, -sin_a, 0.0, self.point.x], \
+            [cos_b*sin_a, cos_a*cos_b, -sin_b, self.point.y], \
+            [sin_a*sin_b, sin_b*cos_a, cos_b, self.point.z], \
             [0.0, 0.0, 0.0, 1.0]]
 
-        transformVec3(matrix, p1)
-        transformVec3(matrix, v1)
-        transformVec3(matrix, v2)
-        transformVec3(matrix, p2)
+        for v in vectors:
+            transformVec3(matrix, v)
 
 
 

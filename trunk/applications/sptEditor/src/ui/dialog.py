@@ -89,13 +89,13 @@ class BasePointDialog(wx.Dialog):
         self.y = wx.xrc.XRCCTRL(self, "y")
         self.z = wx.xrc.XRCCTRL(self, "z")
         self.alpha = wx.xrc.XRCCTRL(self, "alpha")
-        self.beta = wx.xrc.XRCCTRL(self, "beta")
+        self.gradient = wx.xrc.XRCCTRL(self, "gradient")
 
         self.x.SetValue("%.3f" % basePoint.point.x)
         self.y.SetValue("%.3f" % basePoint.point.y)
         self.z.SetValue("%.3f" % basePoint.point.z)
         self.alpha.SetValue("%.2f" % basePoint.alpha)
-        self.beta.SetValue("%.2f" % basePoint.beta)
+        self.gradient.SetValue("%.2f" % basePoint.gradient)
 
 
     def OnButton(self, event):
@@ -107,10 +107,10 @@ class BasePointDialog(wx.Dialog):
             py = Decimal(self.y.GetValue())
             pz = Decimal(self.z.GetValue())
             alpha = float(self.alpha.GetValue())
-            beta = float(self.beta.GetValue())
+            gradient = float(self.gradient.GetValue())
 
             editor = self.GetParent().editor
-            editor.SetBasePoint(ui.editor.BasePoint(Vec3(px, py, pz), alpha, beta))
+            editor.SetBasePoint(ui.editor.BasePoint(Vec3(px, py, pz), alpha, gradient))
             #(vx, vy) = editor.parts[0].ModelToView((px, py, pz))
             #editor.parts[0].CenterViewAt(vx, vy)
 

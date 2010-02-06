@@ -151,6 +151,7 @@
       </object>
     </object>
   </object>
+
   <object class="wxDialog" name="BasePointDialog">
     <size>200, 200</size>
     <title>Base point location</title>
@@ -216,27 +217,57 @@
               <flag>wxALIGN_RIGHT</flag>
             </object>
             <object class="sizeritem">
-              <object class="wxTextCtrl" name="alpha">
-                <value>0.00</value>
-                <style>wxTE_RIGHT</style>
+              <object class="wxFlexGridSizer">
+                <cols>2</cols>
+                <rows>1</rows>
+                <vgap>0</vgap>
+                <hgap>0</hgap>
+                <object class="sizeritem">
+                  <object class="wxTextCtrl" name="alpha">
+                    <value>0.00</value>
+                    <style>wxTE_RIGHT</style>
+                  </object>
+                </object>
+                <object class="sizeritem">
+                  <object class="wxStaticText">
+                    <label>°</label>
+                  </object>
+                  <option>0</option>
+                  <flag>wxALIGN_LEFT</flag>
+                </object>
               </object>
               <option>1</option>
               <flag>wxEXPAND</flag>
             </object>
             <object class="sizeritem">
               <object class="wxStaticText">
-                <label>Beta:</label>
+                <label>Gradient:</label>
               </object>
               <option>0</option>
               <flag>wxALIGN_RIGHT</flag>
             </object>
             <object class="sizeritem">
-              <object class="wxTextCtrl" name="beta">
-                <value>0.00</value>
-                <style>wxTE_RIGHT</style>
+              <object class="wxFlexGridSizer">
+                <cols>2</cols>
+                <rows>1</rows>
+                <vgap>0</vgap>
+                <hgap>0</hgap>
+                <object class="sizeritem">
+                  <object class="wxTextCtrl" name="gradient">
+                    <value>0.00</value>
+                    <style>wxTE_RIGHT</style>
+                  </object>
+                  <option>1</option>
+                  <flag>wxEXPAND</flag>
+                </object>
+                <object class="sizeritem">
+                  <object class="wxStaticText">
+                    <label>‰</label>
+                  </object>
+                  <option>0</option>
+                  <flag>wxALIGN_LEFT</flag>
+                </object>
               </object>
-              <option>1</option>
-              <flag>wxEXPAND</flag>
             </object>
           </object>
         </object>
