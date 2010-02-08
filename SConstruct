@@ -16,30 +16,63 @@ buildDir = os.path.join('build', platform);
 if not os.path.exists(os.path.join(buildDir, 'SConscript')):
     raise UserError("Platform %s is not supported" % platform)
 
-AddOption('--variant')
+vars = Variables()
+vars.Add(BoolVariable('DEBUG', 'Set to build for debug', 1))
+vars.Add(EnumVariable('TEST_PRINTER', 'Unit tests error printer', 'Paren', ('Xml', 'Error', 'Paren', 'Stdio', 'XUnit')))
     
 # DefaultEnvironment(toolpath='#/build/site_tools')
 
 # construct build environment
-env = Environment()
+env = Environment(variables = vars)
 
-# export environment and build dir for other scripts    
-Export('env buildDir')
+# add command line options description
+Help(vars.GenerateHelpText(env))
 
 # configure environment and check dependencies platform-wise
-env = SConscript(os.path.join(buildDir, 'SConscript'))
+env = SConscript(os.path.join(buildDir, 'SConscript'), exports=['env', 'buildDir'])
+
+# performance tuning
+env.Decider('MD5-timestamp')
+
+conf = Configure(env)
+
+if not conf.CheckLibWithHeader('osg', 'osg/Node', 'c++'):
+	print 'OpenSceneGraph library not found'
+	exit(1);
+	
+if not conf.CheckCXXHeader('boost/exception.hpp'):
+	print 'Boost library not found'
+	exit(1);
+
+env = conf.Finish();
+
+# setup defines and paths depending on DEBUG flag
+if env['DEBUG']:
+    defines = ['DEBUG']
+    buildDir = os.path.join(buildDir, 'debug')
+else:
+    defines = ['NDEBUG']
+    buildDir = os.path.join(buildDir, 'release')
+
+env.Append(CPPDEFINES = defines)
+
+# export environment and build dir for other scripts    
+Export('env')
 
 # common library
-SConscript('src/SConscript')
+SConscript('src/SConscript', variant_dir = buildDir, duplicate = 0)
 
 # applications
-SConscript('applications/SConscript')
+SConscript('applications/SConscript', variant_dir = os.path.join(buildDir, 'applications'), duplicate = 0)
 
 # python wrappers
-# SConscript('wrappers/SConscript')
+if 'wrappers' in COMMAND_LINE_TARGETS:
+    SConscript('wrappers/SConscript', variant_dir = os.path.join(buildDir, 'wrappers'), duplicate = 0)
 
 # unit tests
-SConscript('tests/SConscript')
+if 'check' in COMMAND_LINE_TARGETS:
+	SConscript('tests/SConscript', variant_dir = os.path.join(buildDir, 'tests'), duplicate = 0)
 
 # documentation
-SConscript('doc/SConscript')
+if 'doc' in COMMAND_LINE_TARGETS:
+    SConscript('doc/SConscript')

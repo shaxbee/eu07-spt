@@ -5,7 +5,7 @@ clean:
 	scons -Q -c
 
 doxy:
-	scons -c doc
+	scons -Q -c doc
 	scons -Q doc
 
 check:
