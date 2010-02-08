@@ -173,4 +173,68 @@ class InsertStraightTrack(wx.Dialog):
         except ValueError:
             # Swallow the exception
             pass
+
+
+
          
+class InsertCurveTrack(wx.Dialog):
+    """
+    Dialog for inserting straight track
+    """
+
+    def __init__(self, parent):
+        w = parent.xRes.LoadDialog(parent, "InsertCurveTrack")
+        self.PostCreate(w)
+
+        self.length = wx.xrc.XRCCTRL(self, "length")
+        self.radius = wx.xrc.XRCCTRL(self, "radius")
+        self.leftOrRight = wx.xrc.XRCCTRL(self, "leftOrRight")
+        self.name = wx.xrc.XRCCTRL(self, "name")
+
+        config = wx.FileConfig.Get()
+        defaultLength = config.Read("/InsertCurveTrack/length", "0.000")
+        defaultRadius = config.Read("/InsertCurveTrack/radius", "300.000")
+        defaultLeftOrRight = config.ReadInt("/InsertCurveTrack/leftOrRight", 0)
+        self.length.SetValue(defaultLength)
+        self.radius.SetValue(defaultRadius)
+        self.leftOrRight.SetSelection(defaultLeftOrRight)
+
+        self.Bind(wx.EVT_BUTTON, self.OnButton, id=wx.ID_OK)
+
+        self.Fit()
+        self.Centre()
+        self.ShowModal()
+
+        self.Destroy()
+
+
+    def OnButton(self, event):
+        try:
+            length = float(self.length.GetValue())
+            radius = float(self.radius.GetValue())
+            leftOrRight = self.leftOrRight.GetSelection()
+            name = self.name.GetValue().strip()            
+
+            if length <= 0.0 or radius <= 0.0:
+                # we don't accept non-positive values
+                return
+
+            editor = self.GetParent().editor
+            tf = ui.trackfc.TrackFactory(editor)
+            t = tf.CreateCurve(length, radius, leftOrRight == 0)
+            if len(name) > 0:
+                t.name = name
+
+            config = wx.FileConfig.Get()
+            config.Write("/InsertCurveTrack/length", self.length.GetValue())
+            config.Write("/InsertCurveTrack/radius", self.radius.GetValue())
+            config.WriteInt("/InsertCurveTrack/leftOrRight", leftOrRight)
+
+            editor = self.GetParent().editor
+            editor.scenery.AddRailTracking(t)
+
+            self.Destroy()
+        except ValueError:
+            # Swallow the exception
+            pass
+

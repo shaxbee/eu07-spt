@@ -56,7 +56,11 @@
         <label>&amp;Insert</label>
         <object class="wxMenuItem" name="ID_INSERT_STRAIGHT_TRACK">
           <label>&amp;Straight track</label>
-          <help>Inserts a straigt track at basepoint.</help>
+          <help>Inserts a straigt track at the basepoint.</help>
+        </object>
+        <object class="wxMenuItem" name="ID_INSERT_CURVE_TRACK">
+          <label>&amp;Curve track</label>
+          <help>Inserts curved track at the basepoint.</help>
         </object>
       </object>
     </object>
@@ -67,8 +71,6 @@
       </object>
     </object>
   </object>
-
-
   <object class="wxDialog" name="CenterAtDialog">
     <size>200, 200</size>
     <title>Center at</title>
@@ -151,7 +153,6 @@
       </object>
     </object>
   </object>
-
   <object class="wxDialog" name="BasePointDialog">
     <size>200, 200</size>
     <title>Base point location</title>
@@ -329,7 +330,7 @@
             </object>
             <object class="sizeritem">
               <object class="wxTextCtrl" name="name">
-                <value></value>
+                <value/>
                 <style>wxTE_LEFT</style>
               </object>
               <option>1</option>
@@ -359,5 +360,91 @@
       </object>
     </object>
   </object>
+  <object class="wxDialog" name="InsertCurveTrack">
+    <size>200, 200</size>
+    <title>Curve track</title>
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxPanel">
+          <object class="wxGridBagSizer">
+            <vgap>5</vgap>
+            <hgap>5</hgap>
+            <object class="sizeritem">
+              <object class="wxStaticText">
+                <label>Length:</label>
+              </object>
+              <cellpos>0, 0</cellpos>
+            </object>
+            <object class="sizeritem">
+              <object class="wxTextCtrl" name="length">
+                <value>0.000</value>
+                <style>wxTE_RIGHT</style>
+              </object>
+              <cellpos>0,1</cellpos>
+            </object>
+            <object class="sizeritem">
+              <object class="wxStaticText">
+                <label>Radius:</label>
+              </object>
+              <cellpos>1,0</cellpos>
+            </object>
+            <object class="sizeritem">
+              <object class="wxTextCtrl" name="radius">
+                <value>0.000</value>
+                <style>wxTE_RIGHT</style>
+              </object>
+              <cellpos>1,1</cellpos>
+            </object>
+            <object class="sizeritem">
+              <object class="wxRadioBox" name="leftOrRight">
+                <dimension>1</dimension>
+                <content>
+                  <item>Left</item>
+                  <item>Right</item>
+                </content>
+                <dimension>1</dimension>
+                <style>wxSIMPLE_BORDER|wxRA_SPECIFY_ROWS</style>
+              </object>
+              <option>1</option>
+              <flag>wxEXPAND|wxALIGN_CENTRE</flag>
+              <cellpos>2,1</cellpos>
+              <cellspan>1,2</cellspan>
+            </object>
+            <object class="sizeritem">
+              <object class="wxStaticText">
+                <label>Name:</label>
+              </object>
+              <cellpos>3,0</cellpos>
+            </object>
+            <object class="sizeritem">
+              <object class="wxTextCtrl" name="name">
+                <style>wxTE_LEFT</style>
+              </object>
+              <cellpos>3,1</cellpos>
+            </object>
+          </object>
+        </object>
+        <option>1</option>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <object class="wxButton" name="wxID_OK"/>
+            <option>1</option>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="wxID_CANCEL"/>
+            <option>1</option>
+            <flag>wxLEFT</flag>
+            <border>5</border>
+          </object>
+        </object>
+        <option>0</option>
+        <flag>wxALIGN_CENTRE|wxALIGN_TOP|wxALIGN_BOTTOM</flag>
+        <border>10</border>
+      </object>
+    </object>
+  </object>
 </resource>
-
