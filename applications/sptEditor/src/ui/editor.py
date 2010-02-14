@@ -4,6 +4,7 @@ Module containing main UI classes of scenery editor control.
 @author adammo
 """
 
+import math
 import datetime
 import logging
 from decimal import Decimal
@@ -83,6 +84,7 @@ class PlanePart(wx.ScrolledWindow):
         wx.ScrolledWindow.__init__(self, parent, id, \
             style = wx.VSCROLL | wx.HSCROLL)
 
+        self.snapData = None
         basePointMover = BasePointMover(self)
 
         self.Bind(wx.EVT_PAINT, self.OnPaint)
@@ -392,6 +394,7 @@ class PlanePart(wx.ScrolledWindow):
         self.PaintTracks(dc, clip)
         self.PaintSwitches(dc, clip)
         self.PaintScale(dc, clip)
+        self.PaintSnapPoint(dc, clip)
         self.PaintBasePoint(dc, clip)
         
         
@@ -425,6 +428,15 @@ class PlanePart(wx.ScrolledWindow):
             
     def PaintBasePoint(self, dc, clip):
         self.basePointView.Draw(dc, clip)
+
+
+    def PaintSnapPoint(self, dc, clip):
+        if self.snapData != None:
+             index = ui.views.getImageIndexByAngle(self.snapData.alpha)
+
+             dc.DrawBitmap(wx.BitmapFromImage(ui.views.SNAP_BASEPOINT_IMAGES[index]), \
+                 self.snapData.p2d.x - ui.views.SNAP_BASEPOINT_IMAGES[index].GetWidth()/2, \
+                 self.snapData.p2d.y - ui.views.SNAP_BASEPOINT_IMAGES[index].GetHeight()/2)
 
 
     def PaintScale(self, dc, clip):
@@ -613,7 +625,7 @@ class BasePoint:
         
     
     def __repr__(self):
-        return "BasePoint[point=(%.3f, %.3f, %.3f),alpha=%.2f,gradient=%.2f\u2030]" % \
+        return u"BasePoint[point=(%.3f, %.3f, %.3f),alpha=%.2f,gradient=%.2f\u2030]" % \
            (self.point.x, self.point.y, self.point.z, \
             self.alpha, self.gradient)
     
@@ -653,20 +665,47 @@ class BasePointMover:
     def OnMouseRelease(self, event):
         if not self.enabled:
             return
-        
+       
+        snapData = self.editorPart.snapData 
         point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
         
         if self.pressed:
-            p3d = self.editorPart.ViewToModel(point)
-            self.editorPart.GetParent().basePoint.point = p3d
+            if snapData != None:
+                self.editorPart.GetParent().basePoint.point = snapData.p3d
+                self.editorPart.GetParent().basePoint.alpha = snapData.alpha
+                self.editorPart.GetParent().basePoint.gradient = snapData.gradient
+            else:
+                p3d = self.editorPart.ViewToModel(point)
+                self.editorPart.GetParent().basePoint.point = p3d
             self.editorPart.GetParent().SetBasePoint( \
                 self.editorPart.GetParent().basePoint)
             
         self.pressed = False
+        self.editorPart.snapData = None
     
     
     def OnMouseDrag(self, event):
-        pass # Implement it - snapping
+        if self.pressed:
+             oldSnapData = self.editorPart.snapData 
+             point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
+
+             foundSnapData = None
+           
+             for v in self.editorPart.trackCache + self.editorPart.switchCache:
+                 foundSnapData = v.GetSnapData(point)
+                 if foundSnapData != None:
+                     self.editorPart.snapData = foundSnapData
+ 
+             if foundSnapData == None:
+                 self.editorPart.snapData = None
+             if oldSnapData != None:
+                 self.editorPart.RefreshRect( \
+                     wx.Rect(oldSnapData.p2d.x-10, oldSnapData.p2d.y-10, 20, 20), \
+                     False)
+             if self.editorPart.snapData != None:
+                 self.editorPart.RefreshRect( \
+                     wx.Rect(self.editorPart.snapData.p2d.x-10, self.editorPart.snapData.p2d.y-10, 20, 20), \
+                     False)
 
 
 
@@ -684,10 +723,16 @@ class SnapData:
         
     
     def __repr__(self):
-        return "SnapData[p2d=(%d,%d),p3d=(%.3f,%.3f,%.3f)," \
-            + "alpha=%.2f,gradient=%.2f\u2030]" % (self.p2d[0], self.p2d[1], \
-            self.p3d.x. self.p3d.y, self.p3d.z, self.alpha, self.gradient)
+        return u"SnapData[p2d=(%d,%d),p3d=%s,alpha=%.2f,gradient=%.2f\u2030]" \
+            % (self.p2d[0], self.p2d[1], self.p3d, self.alpha, self.gradient)
 
+
+    def Complete(self, railTracking):
+        v = railTracking.getNormalVector(self.p3d)
+        x, y, z = float(v.x), float(v.y), float(v.z)
+        self.alpha = math.degrees(math.atan2(float(x), float(y)))
+        self.gradient = 1000.0*z / math.sqrt(x*x + y*y)
+        
 
 
 

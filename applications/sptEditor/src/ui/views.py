@@ -28,7 +28,16 @@ def loadImages(file, tiles):
     return array
 
 
+def getImageIndexByAngle(angle):
+    d = math.radians(angle + 2.5)
+    if d < 0.0:
+        d += 2*math.pi
+    d = d / (2*math.pi)
+    return int(d * 72)
+
+
 BASEPOINT_IMAGES = loadImages("basepoint.png", 72)
+SNAP_BASEPOINT_IMAGES = loadImages("snappoint.png", 72)
 
 SNAP_DISTANCE = 25
 
@@ -80,7 +89,7 @@ class View:
 
 class Snapable:
     """
-    An instarface telling that view is snappable.
+    An interface telling that view is snappable.
     """
     
     def GetSnapData(self, point):
@@ -161,17 +170,21 @@ class TrackView(View, Snapable):
             data = ui.editor.SnapData()
             data.p2d = self.curve[0]
             data.p3d = self.track.p1
+            data.Complete(self.track)
+            return data
         elif p2x * p2x + p2y * p2y <= SNAP_DISTANCE:
             data = ui.editor.SnapData()
             data.p2d = self.curve[3]
             data.p3d = self.track.p2
+            data.Complete(self.track)
+            return data
         else:
             return None
 
 
 
 
-class RailSwitchView(View):
+class RailSwitchView(View, Snapable):
     """
     View implementation for rail switches.
     """
@@ -257,6 +270,35 @@ class RailSwitchView(View):
         return wx.Rect(l, t, r-l, b-t)
 
 
+    def GetSnapData(self, point):
+        pcx = self.straight[0].x - point.x
+        pcy = self.straight[0].y - point.y
+        p1x = self.straight[3].x - point.x
+        p1y = self.straight[3].y - point.y
+        p2x = self.diverging[3].x - point.x
+        p2y = self.diverging[3].y - point.y
+        if pcx * pcx + pcy * pcy <= SNAP_DISTANCE:
+            data = ui.editor.SnapData()
+            data.p2d = self.straight[0]
+            data.p3d = self.switch.pc
+            data.gradient = 1000.0 * v.z / math.sqrt(v.x*v.x + v.y*v.y)
+            data.Complete(self.switch)
+            return data
+        elif p1x * p1x + p1y * p1y <= SNAP_DISTANCE:
+            data = ui.editor.SnapData()
+            data.p2d = self.straight[3]
+            data.p3d = self.switch.p1
+            data.Complete(self.switch)
+            return data
+        elif p2x * p2x + p2y * p2y <= SNAP_DISTANCE:
+            data = ui.editor.SnapData()
+            data.p2d = self.diverging[3]
+            data.p3d = self.switch.p2
+            data.Complete(self.switch)
+            return data
+        else:
+            return None
+
 
 
 class BasePointView(View):
@@ -286,20 +328,12 @@ class BasePointView(View):
 
 
     def Draw(self, dc, clip):
-        index = self.__GetAngleIndex()        
+        index = getImageIndexByAngle(self.basePoint.alpha)
         dc.DrawBitmap(wx.BitmapFromImage(BASEPOINT_IMAGES[index]), \
                       self.point.x - BASEPOINT_IMAGES[index].GetWidth() / 2, \
                       self.point.y - BASEPOINT_IMAGES[index].GetHeight() / 2)
         
         
-    def __GetAngleIndex(self):
-        d = math.radians(self.basePoint.alpha) + math.radians(2.5)
-        if d < 0.0:
-            d += 2 * math.pi
-        d /= 2 * math.pi
-        return int(d * 72)
-    
-    
     def GetRepaintBounds(self):
         return wx.Rect(self.point.x - 10, self.point.y - 10, 20, 20)
     
