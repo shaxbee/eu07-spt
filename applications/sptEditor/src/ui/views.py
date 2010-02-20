@@ -10,6 +10,7 @@ from decimal import Decimal
 
 import model.tracks
 import ui.editor
+import sptmath
 
 
 def loadImages(file, tiles):
@@ -40,6 +41,7 @@ BASEPOINT_IMAGES = loadImages("basepoint.png", 72)
 SNAP_BASEPOINT_IMAGES = loadImages("snappoint.png", 72)
 
 SNAP_DISTANCE = 25
+
 
 
 
@@ -83,6 +85,13 @@ class View:
         Returns the bounds (rectangle) that this view occupies.
         """
         pass # Implement it
+
+
+    def IsSelectionPossible(self, point):
+        """
+        Returns True if view can be selected.
+        """
+        pass # Abstract method
 
 
 
@@ -158,21 +167,24 @@ class TrackView(View, Snapable):
         r = max(xspan)
         t = min(yspan)
         b = max(yspan)
-        return wx.Rect(l, t, r-l, b-t)
+        return wx.Rect(l, t, r-l+1, b-t+1)
 
 
-    def GetSnapData(self, point):
+    def GetSnapData(self, point):        
         p1x = self.curve[0].x - point.x
         p1y = self.curve[0].y - point.y
         p2x = self.curve[3].x - point.x
         p2y = self.curve[3].y - point.y
-        if p1x * p1x + p1y * p1y <= SNAP_DISTANCE:
+        if p1x * p1x + p1y * p1y <= SNAP_DISTANCE \
+                and self.track.point2tracking(self.track.p1) == None:
+
             data = ui.editor.SnapData()
             data.p2d = self.curve[0]
             data.p3d = self.track.p1
             data.Complete(self.track)
             return data
-        elif p2x * p2x + p2y * p2y <= SNAP_DISTANCE:
+        elif p2x * p2x + p2y * p2y <= SNAP_DISTANCE \
+                and self.track.point2tracking(self.track.p2) == None:
             data = ui.editor.SnapData()
             data.p2d = self.curve[3]
             data.p3d = self.track.p2
@@ -180,6 +192,17 @@ class TrackView(View, Snapable):
             return data
         else:
             return None
+
+
+    def IsSelectionPossible(self, point):
+        lines = sptmath.toLineSegments(self.curve)
+        i = 1
+        while i < len(lines):
+            l = lines[i-1:i+1]
+            if sptmath.sqDistanceTo(l, point) < 16.0:
+                return True
+            i += 1
+        return False
 
 
 
@@ -267,7 +290,7 @@ class RailSwitchView(View, Snapable):
         r = max(xspan)
         t = min(yspan)
         b = max(yspan)
-        return wx.Rect(l, t, r-l, b-t)
+        return wx.Rect(l, t, r-l+1, b-t+1)
 
 
     def GetSnapData(self, point):
@@ -277,20 +300,22 @@ class RailSwitchView(View, Snapable):
         p1y = self.straight[3].y - point.y
         p2x = self.diverging[3].x - point.x
         p2y = self.diverging[3].y - point.y
-        if pcx * pcx + pcy * pcy <= SNAP_DISTANCE:
+        if pcx * pcx + pcy * pcy <= SNAP_DISTANCE \
+                and self.switch.point2tracking(self.switch.pc) == None:
             data = ui.editor.SnapData()
             data.p2d = self.straight[0]
             data.p3d = self.switch.pc
-            data.gradient = 1000.0 * v.z / math.sqrt(v.x*v.x + v.y*v.y)
             data.Complete(self.switch)
             return data
-        elif p1x * p1x + p1y * p1y <= SNAP_DISTANCE:
+        elif p1x * p1x + p1y * p1y <= SNAP_DISTANCE \
+                and self.switch.point2tracking(self.switch.p1) == None:
             data = ui.editor.SnapData()
             data.p2d = self.straight[3]
             data.p3d = self.switch.p1
             data.Complete(self.switch)
             return data
-        elif p2x * p2x + p2y * p2y <= SNAP_DISTANCE:
+        elif p2x * p2x + p2y * p2y <= SNAP_DISTANCE \
+                and self.switch.point2tracking(self.switch.p2) == None:
             data = ui.editor.SnapData()
             data.p2d = self.diverging[3]
             data.p3d = self.switch.p2
@@ -298,6 +323,27 @@ class RailSwitchView(View, Snapable):
             return data
         else:
             return None
+
+
+    def IsSelectionPossible(self, point):
+        lines = sptmath.toLineSegments(self.straight)
+        if self.IsSelectionPossible(point, lines):
+            return True
+        else:
+            lines = sptmath.toLineSegments(self, diverging)
+            return self.IsSelectionPossible(point, lines)
+
+
+    def IsSelectionPossible(self, point, lines):
+        i = 1
+        while i < len(lines):
+            l = lines[i-1:i+1]
+            if sptmath.sqDistanceTo(l, point) < 16.0:
+                return True
+            i += 1
+        return False
+        
+
 
 
 

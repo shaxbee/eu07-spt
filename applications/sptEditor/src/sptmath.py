@@ -6,6 +6,7 @@ Module containing dedicated math operations.
 
 import math
 from decimal import Decimal
+from wx import Point
 
 THREE_POINTS = Decimal('1.000')
 
@@ -97,3 +98,84 @@ def cardinality(value, len):
         n = n-1
     return i
 
+
+def toLineSegments(bezier, level = 4):
+    """
+    Transforms cubic bezier curve (defined as 4-element array of Points)
+    to line segments.
+    It recursively divides bezier curve level times.
+
+    Returns array of Points.
+    """
+    result = [bezier[0]]
+    recursivelyToLineSegments(bezier, level, result)
+    result += [bezier[3]]
+    return result
+    
+   
+BISECT_TOLERANCE = 5 
+ 
+def recursivelyToLineSegments(bezier, level, result):
+    if level == 0:
+        return
+
+    x12 = (bezier[0].x + bezier[1].x) / 2
+    y12 = (bezier[0].y + bezier[1].y) / 2
+    x23 = (bezier[1].x + bezier[2].x) / 2
+    y23 = (bezier[1].y + bezier[2].y) / 2
+    x34 = (bezier[2].x + bezier[3].x) / 2
+    y34 = (bezier[2].y + bezier[3].y) / 2
+    x123 = (x12 + x23) / 2
+    y123 = (y12 + y23) / 2
+    x234 = (x23 + x34) / 2
+    y234 = (y23 + y34) / 2
+    x1234 = (x123 + x234) / 2
+    y1234 = (y123 + y234) / 2
+
+    dx = bezier[3].x - bezier[0].x
+    dy = bezier[3].y - bezier[0].y
+
+    d2 = abs((bezier[1].x - bezier[3].x) * dy - (bezier[1].y - bezier[3].y) * dx)
+    d3 = abs((bezier[2].x - bezier[3].x) * dy - (bezier[2].y - bezier[3].y) * dx)
+
+    if (d2+d3)*(d2+d3) < BISECT_TOLERANCE*(dx*dx + dy*dy):
+        result += [Point(x1234, y1234)]
+    else:
+        recursivelyToLineSegments([bezier[0], Point(x12, y12), Point(x123, y123), Point(x1234, y1234)], \
+            level-1, result)
+        recursivelyToLineSegments([Point(x1234, y1234), Point(x234, y234), Point(x34, y34), bezier[3]], \
+            level-1, result)
+
+
+def sqDistanceTo(line, point):
+    """
+    Returns squared distance of line and point (defined as wx.Points)
+
+    Example
+    >>> sqDistanceTo([wx.Point(3,3), wx.Point(3,-3)], wx.Point(0, -1))
+    3.0
+    """
+    x1, y1 = line[0].x, line[0].y
+    x2, y2 = line[1].x, line[1].y
+    px, py = point.x, point.y
+    x2 -= x1
+    y2 -= y1
+    px -= x1
+    py -= y1
+    dotprod = px*x2 + py*y2
+    projLenSq = 0.0
+    if dotprod <= 0.0:
+        projLenSq = 0.0
+    else:
+        px = x2 - px
+        py = y2 - py
+        dotprod = px*x2 + py*y2
+        if dotprod <= 0.0:
+            projLenSq = 0.0
+        else:
+            projLenSq = dotprod * dotprod / (x2*x2 + y2*y2)
+    lenSq = px*px + py*py - projLenSq
+    if lenSq < 0.0:
+        lenSq = 0.0
+    return lenSq
+    

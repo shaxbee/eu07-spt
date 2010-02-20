@@ -38,8 +38,9 @@ class SceneryEditor(wx.Panel):
             name = "Top ruler")
         self.parts = [PlanePart(self)]
 
-        self.scenery = None
+        self.scenery = None        
         self.sceneryListener = SceneryListener(self)
+        self.selection = None
 
         sizer.Add(corner)
         sizer.Add(self.topRuler, flag = wx.LEFT | wx.EXPAND)
@@ -60,6 +61,7 @@ class SceneryEditor(wx.Panel):
         if self.scenery != None:
             self.scenery.UnregisterListener(self.sceneryListener)
         self.scenery = scenery
+        self.SetSelection(None)
         self.scenery.RegisterListener(self.sceneryListener)
         for part in self.parts:
             part.SetScenery(scenery)
@@ -72,6 +74,12 @@ class SceneryEditor(wx.Panel):
         self.basePoint = basePoint
         for part in self.parts:
             part.SetBasePoint(basePoint)
+
+
+    def SetSelection(self, selection):
+        self.selection = selection
+        self.parts[0].SetSelection(selection)
+
 
 
 
@@ -87,16 +95,18 @@ class PlanePart(wx.ScrolledWindow):
         self.snapData = None
         basePointMover = BasePointMover(self)
 
+        self.selectedView = None
+        highlighter = Highlighter(self)
+
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_SCROLLWIN, parent.topRuler.HandleOnScroll)
         self.Bind(wx.EVT_SCROLLWIN, parent.leftRuler.HandleOnScroll)
         eventManager.Register(self.OnMoveUpdateStatusBar, wx.EVT_MOTION, self)
         eventManager.Register(basePointMover.OnMouseDrag, wx.EVT_MOTION, self)
-        eventManager.Register(basePointMover.OnMousePress, wx.EVT_LEFT_DOWN,
-                              self)
-        eventManager.Register(basePointMover.OnMouseRelease, wx.EVT_LEFT_UP,
-                              self)
+        eventManager.Register(basePointMover.OnMousePress, wx.EVT_LEFT_DOWN, self)
+        eventManager.Register(basePointMover.OnMouseRelease, wx.EVT_LEFT_UP, self)
+        eventManager.Register(highlighter.OnMouseClick, wx.EVT_LEFT_DOWN, self)
 
         self.logger = logging.getLogger('Paint')
 
@@ -155,6 +165,29 @@ class PlanePart(wx.ScrolledWindow):
             self.RefreshRect(newRect, False)
 
 
+    def SetSelection(self, selection):
+        (vx, vy) = self.GetViewStart()
+        (ux, uy) = self.GetScrollPixelsPerUnit()
+
+        oldView = self.selectedView
+        if oldView != None:
+            oldRect = oldView.GetRepaintBounds()
+            oldRect.x -= vx * ux
+            oldRect.y -= vy * uy
+            self.RefreshRect(oldRect, False)
+        if selection != None:
+            view = self.FindView(selection)
+            if view == None:
+                raise Error, "Cannot find view in cache"
+            self.selectedView = view
+            newRect = view.GetRepaintBounds()
+            newRect.x -= vx * ux
+            newRect.y -= vy * uy           
+            self.RefreshRect(newRect, False)            
+        else:
+            self.selectedView = None
+
+
     def AddView(self, element):
         if isinstance(element, model.tracks.Track):
             self.trackCache.append(ui.views.TrackView(element))
@@ -162,6 +195,21 @@ class PlanePart(wx.ScrolledWindow):
             self.switchCache.append(ui.views.RailSwitchView(element))
         else:
             raise ValueError("Unsupported element: " + str(type(element)))
+
+
+    def FindView(self, element):
+        cache = None
+        if isinstance(element, model.tracks.Track):
+            cache = self.trackCache
+        elif isinstance(element, model.tracks.Switch):
+            cache = self.switchCache
+        else:
+            return None
+
+        for v in cache:
+            if v.GetElement() == element:
+                return v
+        return None
         
 
     def ComputeMinMax(self, doScaling = False):
@@ -393,6 +441,7 @@ class PlanePart(wx.ScrolledWindow):
         """
         self.PaintTracks(dc, clip)
         self.PaintSwitches(dc, clip)
+        self.PaintSelection(dc, clip)
         self.PaintScale(dc, clip)
         self.PaintSnapPoint(dc, clip)
         self.PaintBasePoint(dc, clip)
@@ -407,7 +456,8 @@ class PlanePart(wx.ScrolledWindow):
             dc.SetPen(wx.Pen((34, 139, 34), \
                 3 if self.scale >= 1000.0 else 1))
             for v in self.trackCache:
-                v.Draw(dc, clip)
+                if v != self.selectedView:
+                    v.Draw(dc, clip)
         finally:
             dc.SetPen(oldPen)
             
@@ -421,7 +471,23 @@ class PlanePart(wx.ScrolledWindow):
             dc.SetPen(wx.Pen((255, 153, 153), \
                 3 if self.scale >= 1000.0 else 1))
             for v in self.switchCache:
-                v.Draw(dc, clip)
+                if v != self.selectedView:
+                    v.Draw(dc, clip)
+        finally:
+            dc.SetPen(oldPen)
+
+
+    def PaintSelection(self, dc, clip):
+        """
+        Paints rail switches.
+        """
+        if self.selectedView == None:
+            return
+        oldPen = dc.GetPen()
+        try:
+            dc.SetPen(wx.Pen((255, 0, 0), \
+                3 if self.scale >= 1000.0 else 1))
+            self.selectedView.Draw(dc, clip)
         finally:
             dc.SetPen(oldPen)
             
@@ -686,26 +752,26 @@ class BasePointMover:
     
     def OnMouseDrag(self, event):
         if self.pressed:
-             oldSnapData = self.editorPart.snapData 
-             point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
+            oldSnapData = self.editorPart.snapData 
+            point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
 
-             foundSnapData = None
+            foundSnapData = None
            
-             for v in self.editorPart.trackCache + self.editorPart.switchCache:
-                 foundSnapData = v.GetSnapData(point)
-                 if foundSnapData != None:
-                     self.editorPart.snapData = foundSnapData
+            for v in self.editorPart.trackCache + self.editorPart.switchCache:
+                foundSnapData = v.GetSnapData(point)
+                if foundSnapData != None:
+                    self.editorPart.snapData = foundSnapData
  
-             if foundSnapData == None:
-                 self.editorPart.snapData = None
-             if oldSnapData != None:
-                 self.editorPart.RefreshRect( \
-                     wx.Rect(oldSnapData.p2d.x-10, oldSnapData.p2d.y-10, 20, 20), \
-                     False)
-             if self.editorPart.snapData != None:
-                 self.editorPart.RefreshRect( \
-                     wx.Rect(self.editorPart.snapData.p2d.x-10, self.editorPart.snapData.p2d.y-10, 20, 20), \
-                     False)
+            if foundSnapData == None:
+                self.editorPart.snapData = None
+            if oldSnapData != None:
+                self.editorPart.RefreshRect( \
+                    wx.Rect(oldSnapData.p2d.x-10, oldSnapData.p2d.y-10, 20, 20), \
+                    False)
+            if self.editorPart.snapData != None:
+                self.editorPart.RefreshRect( \
+                    wx.Rect(self.editorPart.snapData.p2d.x-10, self.editorPart.snapData.p2d.y-10, 20, 20), \
+                    False)
 
 
 
@@ -730,9 +796,39 @@ class SnapData:
     def Complete(self, railTracking):
         v = railTracking.getNormalVector(self.p3d)
         x, y, z = float(v.x), float(v.y), float(v.z)
-        self.alpha = math.degrees(math.atan2(float(x), float(y)))
+        self.alpha = math.degrees(math.atan2(x, y))
         self.gradient = 1000.0*z / math.sqrt(x*x + y*y)
-        
+
+
+
+
+class Highlighter:
+    """
+    Mouse listener that make selection in editor
+    """
+
+    def __init__(self, editorPart):
+        self.editorPart = editorPart
+
+
+    def OnMouseClick(self, event):        
+        point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
+
+        startTime = datetime.datetime.now()
+        try:
+            found = None
+            for v in self.editorPart.trackCache + self.editorPart.switchCache:
+                if v.IsSelectionPossible(point):
+                    found = v
+                    break
+            if found != None:
+                self.editorPart.GetParent().SetSelection(found.GetElement())
+        finally:
+            delta = datetime.datetime.now() - startTime
+            idelta = delta.days * 86400 + delta.seconds * 1000000 \
+                + delta.microseconds
+            self.editorPart.logger.debug(u"Selection lasted %d \u00b5s" % idelta)
+
 
 
 

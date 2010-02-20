@@ -166,7 +166,7 @@ class Track(RailTracking):
             elif self.n2 != None:
                 return self.n2
             else:
-                raise UndterminedTrackingException, "Undetermined RailTracking"
+                raise UndeterminedTrackingException, "Undetermined RailTracking"
         
         if previous == self.n1:
             return self.n2
@@ -204,7 +204,7 @@ class Track(RailTracking):
         elif point == self.p2:
             return self.n2
         else:
-            raise ValueError, "Point not found"
+            return None
 
 
     def contains(self, point):
@@ -376,7 +376,7 @@ class Switch(RailTracking):
         elif point == self.p2:
             return self.n2
         else:
-            raise ValueError, "Point not found"
+            return None
 
 
     def contains(self, point):
