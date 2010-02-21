@@ -63,6 +63,11 @@
           <help>Inserts curved track at the basepoint.</help>
         </object>
       </object>
+      <object class="wxMenuItem" name="wxID_DELETE">
+        <label>&amp;Delete track</label>
+        <accel>Delete</accel>
+        <help>Deletes selected scenery element.</help>
+      </object>
     </object>
     <object class="wxMenu" name="HelpMenu">
       <label>&amp;Help</label>
