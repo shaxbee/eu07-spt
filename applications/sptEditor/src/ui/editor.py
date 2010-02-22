@@ -93,7 +93,7 @@ class PlanePart(wx.ScrolledWindow):
             style = wx.VSCROLL | wx.HSCROLL)
 
         self.snapData = None
-        basePointMover = BasePointMover(self)
+        self.basePointMover = BasePointMover(self)
 
         self.selectedView = None
         highlighter = Highlighter(self)
@@ -103,9 +103,9 @@ class PlanePart(wx.ScrolledWindow):
         self.Bind(wx.EVT_SCROLLWIN, parent.topRuler.HandleOnScroll)
         self.Bind(wx.EVT_SCROLLWIN, parent.leftRuler.HandleOnScroll)
         eventManager.Register(self.OnMoveUpdateStatusBar, wx.EVT_MOTION, self)
-        eventManager.Register(basePointMover.OnMouseDrag, wx.EVT_MOTION, self)
-        eventManager.Register(basePointMover.OnMousePress, wx.EVT_LEFT_DOWN, self)
-        eventManager.Register(basePointMover.OnMouseRelease, wx.EVT_LEFT_UP, self)
+        eventManager.Register(self.basePointMover.OnMouseDrag, wx.EVT_MOTION, self)
+        eventManager.Register(self.basePointMover.OnMousePress, wx.EVT_LEFT_DOWN, self)
+        eventManager.Register(self.basePointMover.OnMouseRelease, wx.EVT_LEFT_UP, self)
         eventManager.Register(highlighter.OnMouseClick, wx.EVT_LEFT_DOWN, self)
 
         self.logger = logging.getLogger('Paint')
@@ -761,6 +761,7 @@ class BasePointMover:
                 foundSnapData = v.GetSnapData(point)
                 if foundSnapData != None:
                     self.editorPart.snapData = foundSnapData
+                    break
  
             if foundSnapData == None:
                 self.editorPart.snapData = None
@@ -768,9 +769,9 @@ class BasePointMover:
                 self.editorPart.RefreshRect( \
                     wx.Rect(oldSnapData.p2d.x-10, oldSnapData.p2d.y-10, 20, 20), \
                     False)
-            if self.editorPart.snapData != None:
+            if foundSnapData != None:
                 self.editorPart.RefreshRect( \
-                    wx.Rect(self.editorPart.snapData.p2d.x-10, self.editorPart.snapData.p2d.y-10, 20, 20), \
+                    wx.Rect(foundSnapData.p2d.x-10, foundSnapData.p2d.y-10, 20, 20), \
                     False)
 
 
@@ -811,23 +812,24 @@ class Highlighter:
         self.editorPart = editorPart
 
 
-    def OnMouseClick(self, event):        
-        point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
+    def OnMouseClick(self, event):
+        if not self.editorPart.basePointMover.pressed:
+            point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
 
-        startTime = datetime.datetime.now()
-        try:
-            found = None
-            for v in self.editorPart.trackCache + self.editorPart.switchCache:
-                if v.IsSelectionPossible(point):
-                    found = v
-                    break
-            if found != None:
-                self.editorPart.GetParent().SetSelection(found.GetElement())
-        finally:
-            delta = datetime.datetime.now() - startTime
-            idelta = delta.days * 86400 + delta.seconds * 1000000 \
-                + delta.microseconds
-            self.editorPart.logger.debug(u"Selection lasted %d \u00b5s" % idelta)
+            startTime = datetime.datetime.now()
+            try:
+                found = None
+                for v in self.editorPart.trackCache + self.editorPart.switchCache:
+                    if v.IsSelectionPossible(point):
+                        found = v
+                        break
+                if found != None:
+                    self.editorPart.GetParent().SetSelection(found.GetElement())
+            finally:
+                delta = datetime.datetime.now() - startTime
+                idelta = delta.days * 86400 + delta.seconds * 1000000 \
+                    + delta.microseconds
+                self.editorPart.logger.debug(u"Selection lasted %d \u00b5s" % idelta)
 
 
 
