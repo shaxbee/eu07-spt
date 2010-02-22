@@ -116,6 +116,7 @@ class MainWindow(wx.Frame):
         wx.EVT_MENU(self, wx.xrc.XRCID('ID_BASEPOINT_EDIT'), self.OnBasePointEdit)
         wx.EVT_MENU(self, wx.xrc.XRCID('ID_INSERT_STRAIGHT_TRACK'), self.OnInsertStraightTrack)
         wx.EVT_MENU(self, wx.xrc.XRCID('ID_INSERT_CURVE_TRACK'), self.OnInsertCurveTrack )
+        wx.EVT_MENU(self, wx.ID_DELETE, self.OnDelete)
         wx.EVT_MENU(self, wx.ID_ABOUT, self.OnAbout)
 
 
@@ -395,6 +396,13 @@ class MainWindow(wx.Frame):
     def OnInsertCurveTrack(self, event):
         dialog = ui.dialog.InsertCurveTrack(self)
         dialog.Show(True)
+
+
+    def OnDelete(self, event):
+        selection = self.editor.GetSelection()
+        if selection != None:
+            scenery = self.editor.GetScenery()
+            scenery.RemoveRailTracking(selection)
 
 
     def OnZoomIn(self, event):

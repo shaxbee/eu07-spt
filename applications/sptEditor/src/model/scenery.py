@@ -25,7 +25,7 @@ class Scenery:
 
 
     def RemoveRailTracking(self, tracking):
-        if self.tracks.contains(tracking):
+        if not self.tracks.contains(tracking):
             return
 
         self.tracks.remove(tracking)

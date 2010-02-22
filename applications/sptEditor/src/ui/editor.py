@@ -65,8 +65,12 @@ class SceneryEditor(wx.Panel):
         self.scenery.RegisterListener(self.sceneryListener)
         for part in self.parts:
             part.SetScenery(scenery)
-            
-            
+
+
+    def GetScenery(self):
+        return self.scenery
+
+
     def SetBasePoint(self, basePoint):
         """
         Sets the basepoint. Notify also active editor parts.
@@ -81,11 +85,15 @@ class SceneryEditor(wx.Panel):
         self.parts[0].SetSelection(selection)
 
 
+    def GetSelection(self):
+        return self.selection
+
+
 
 
 class PlanePart(wx.ScrolledWindow):
     """
-    Editor Part displaying XZ view of scenery.
+    Editor Part displaying XY view of scenery.
     """
 
     def __init__(self, parent, id = wx.ID_ANY):
@@ -852,13 +860,16 @@ class SceneryListener(model.scenery.SceneryListener):
         (vx, vy) = part.GetViewStart()
         (ux, uy) = part.GetScrollPixelsPerUnit()
 
+        # TODO: switches are not supported here yet
         view = None
         if changeType == model.scenery.CHANGE_ADD:
             view = ui.views.CreateView(element)
             part.trackCache.append(view)
         elif changeType == model.scenery.CHANGE_REMOVE:
-            # TODO: remove support
-            pass
+            if element == self.editor.GetSelection():
+                 self.editor.SetSelection(None)
+            view = part.FindView(element)
+            part.trackCache.remove(view)
 
         needPainting = part.ComputeMinMax()
         if needPainting:
