@@ -33,17 +33,6 @@ public:
 
     Sector& getSector() const { return _sector; }
 
-    //! Check if there are any followers on tracking
-    bool isOccupied() const { return _followersCount != 0; }
-
-    size_t getFollowersCount() const { return _followersCount; }
-
-    //! Register follower entering tracking
-    virtual void enter(Follower& follower, const osg::Vec3& entry) { _followersCount++; }
-    
-    //! Register follower leaving tracking
-    virtual void leave(Follower& follower, const osg::Vec3& entry) { _followersCount--; }
-
     typedef boost::error_info<struct tag_position, osg::Vec3f> PositionInfo;
     class UnknownEntryException: public boost::exception { };
 
@@ -51,7 +40,6 @@ public:
     
 private:
     Sector& _sector;
-    size_t _followersCount;
 
 }; // class sptCore::RailTracking
 
