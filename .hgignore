@@ -1,0 +1,17 @@
+syntax: glob
+
+*~
+*.o
+*.pyc
+.sconsign.dblite
+*.log
+
+.sconf_temp
+
+lib/*
+build/linux/debug
+build/linux/release
+
+bin/spt
+bin/sptd
+bin/sptEditor
