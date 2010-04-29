@@ -106,7 +106,7 @@ osg::Matrix Follower::getMatrix() const
 void Follower::changeTrack(osg::Vec3 position)
 {
 
-    Sector* sector = &(_track->getSector());
+    const Sector* sector = &(_track->getSector());
     osg::Vec3 offset(floor(position.x() / Sector::SIZE), floor(position.y() / Sector::SIZE), 0);
 
     // if position is outside current sector
@@ -119,12 +119,9 @@ void Follower::changeTrack(osg::Vec3 position)
 
     };
 
-    // register leaving previous track
-    _track->leave(*this, position);
-
     try
     {
-        _track = &(sector->getNextTrack(position, _track));
+        _track = &(sector->getNextTrack(position, *_track));
     }
     catch(Sector::UnknownConnectionException exc)
     {
@@ -136,8 +133,5 @@ void Follower::changeTrack(osg::Vec3 position)
 
     // update path
     _path = &(_track->getPath(position));
-
-    // register entering track
-    _track->enter(*this, _path->front());
 
 }; // Follower::moveToNextTrack
