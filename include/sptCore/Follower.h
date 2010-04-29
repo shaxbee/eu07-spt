@@ -45,7 +45,7 @@ private:
     void changeTrack(osg::Vec3 position);
     std::pair<Path::const_iterator, float> findPosition() const;
 
-    RailTracking* _track;
+    const RailTracking* _track;
     const Path* _path;
 
     float _distance;

@@ -33,15 +33,14 @@ public:
 
     //! \brief Get other track connected at given position
     //! \throw UnknownConnectionException if there is no connection at given position
-    virtual RailTracking& getNextTrack(const osg::Vec3& position, RailTracking* from) = 0;
-
+    virtual const RailTracking& getNextTrack(const osg::Vec3& position, const RailTracking& from) const = 0;
     virtual size_t getTotalTracks() const = 0;
 
-    typedef std::pair<RailTracking*, RailTracking*> Connection;
+    typedef std::pair<const RailTracking*, const RailTracking*> Connection;
 
     //! \brief Get tracks connected at given position
     //! \throw UnknownConnectionException if there is no connection at given position
-    virtual const Connection& getConnection(const osg::Vec3& position) = 0;
+    virtual const Connection& getConnection(const osg::Vec3& position) const = 0;
 
     typedef boost::error_info<struct tag_position, osg::Vec3f> PositionInfo;
     class UnknownConnectionException: public boost::exception { };

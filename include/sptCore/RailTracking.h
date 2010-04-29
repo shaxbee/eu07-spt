@@ -46,6 +46,8 @@ public:
 
     typedef boost::error_info<struct tag_position, osg::Vec3f> PositionInfo;
     class UnknownEntryException: public boost::exception { };
+
+    bool operator<(const RailTracking& other) const { return this < &other; }
     
 private:
     Sector& _sector;
