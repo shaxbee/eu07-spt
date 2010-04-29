@@ -55,7 +55,7 @@ private:
     std::auto_ptr<DynamicScenery> _scenery;
     DynamicSector* _sector;
 
-    void addConnection(const osg::Vec3& position, RailTracking* track);
+    void addConnection(const osg::Vec3& position, const RailTracking& track);
     DynamicSector& createSector(const osg::Vec3& position);
 
 }; // class sptCore::SceneryBuilder

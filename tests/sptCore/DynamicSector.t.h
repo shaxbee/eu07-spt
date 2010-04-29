@@ -34,20 +34,20 @@ public:
         _sector->addTrack(std::auto_ptr<RailTracking>(trackA));
         _sector->addTrack(std::auto_ptr<RailTracking>(trackB));
 
-        _sector->addConnection(_pointA, _trackA);
-        _sector->addConnection(_pointB, _trackA, _trackB);
-        _sector->addConnection(_pointC, _trackB);
+        _sector->addConnection(_pointA, *_trackA);
+        _sector->addConnection(_pointB, *_trackA, *_trackB);
+        _sector->addConnection(_pointC, *_trackB);
 
     }
 
     void testGetNextTrack()
     {
 
-        TS_ASSERT_THROWS(&_sector->getNextTrack(_pointA, _trackA), Sector::UnknownConnectionException);
-        TS_ASSERT_EQUALS(&_sector->getNextTrack(_pointB, _trackA), _trackB);
-        TS_ASSERT_EQUALS(&_sector->getNextTrack(_pointB, _trackB), _trackA);
-        TS_ASSERT_THROWS(&_sector->getNextTrack(_pointC, _trackB), Sector::UnknownConnectionException);
-        TS_ASSERT_THROWS(_sector->getNextTrack(osg::Vec3(17, 17, 17), _trackA), Sector::UnknownConnectionException);
+        TS_ASSERT_THROWS(&_sector->getNextTrack(_pointA, *_trackA), Sector::UnknownConnectionException);
+        TS_ASSERT_EQUALS(&_sector->getNextTrack(_pointB, *_trackA), _trackB);
+        TS_ASSERT_EQUALS(&_sector->getNextTrack(_pointB, *_trackB), _trackA);
+        TS_ASSERT_THROWS(&_sector->getNextTrack(_pointC, *_trackB), Sector::UnknownConnectionException);
+        TS_ASSERT_THROWS(_sector->getNextTrack(osg::Vec3(17, 17, 17), *_trackA), Sector::UnknownConnectionException);
 
     };
 
