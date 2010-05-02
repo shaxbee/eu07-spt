@@ -9,6 +9,46 @@
 
 using namespace sptCore;
 
+namespace 
+{
+
+class FindPosition
+{
+public:
+    FindPosition(const float& search, const osg::Vec3& front): _search(search), _position(0.0), _previous(front) { };
+
+    bool operator()(const osg::Vec3f& point)
+    {
+        _current = point;
+        _position += (_current - _previous).length();
+        return _position < _search;
+    };
+
+    float getRatio() const
+    {
+        return (_position - _search) / (_current - _previous).length();
+    };
+
+    osg::Vec3f getPosition() const
+    {
+        float ratio = getRatio();
+        return (_previous * ratio + _current * (1 - ratio));
+    };
+
+    const osg::Vec3f& getCurrent() const { return _current; };
+    const osg::Vec3f& getPrevious() const { return _previous; };
+
+private:
+    float _search;
+    float _position;
+
+    osg::Vec3 _current;
+    osg::Vec3 _previous;
+
+};
+
+}; // anonymous namespace
+
 Follower::Follower(Track& track, float distance):
     _track(&track), _distance(distance)
 {
@@ -40,64 +80,49 @@ void Follower::move(float distance)
     
 }; // Follower::move
 
-float segmentLength(Path::const_iterator& iter)
-{
-    return (*iter - *(iter - 1)).length();
-};
-
-std::pair<Path::const_iterator, float> Follower::findPosition() const
-{
-
-    Path::const_iterator iter = _path->begin() + 1;
-    float distance = segmentLength(iter); 
-
-    // find point location on path matching distance
-    for(iter; distance < _distance && iter != _path->end(); iter++)
-        distance += segmentLength(iter);
-
-    // if we didn't found segment it means that _distance is wrong
-    assert(iter != _path->end());
-
-    // ratio = position in segment / segment length
-    float ratio = (distance - _distance) / segmentLength(iter);
-
-    return std::make_pair(iter, ratio);
-
-}; // Follower::findPosition
-
 osg::Vec3 Follower::getPosition() const
 {
 
-    Path::const_iterator iter;
-    float ratio;
+    FindPosition finder(_distance, _path->front());
+    osg::Vec3Array::const_iterator iter = std::find_if(_path->points()->begin() + 1, _path->points()->end(), finder);
 
-    boost::tie(iter, ratio) = findPosition();
-
-    return sptUtil::mix(*(iter - 1), *iter, ratio);
+    return finder.getPosition();
 
 }; // Follower::getPosition
 
 osg::Matrix Follower::getMatrix() const
 {
 
-    Path::const_iterator iter;
-    float ratio;
-
-    // find current segment and position in it expressed in (0, 1) range
-    boost::tie(iter, ratio) = findPosition();
-
-    osg::Vec3 begin(*(iter-1));
-    osg::Vec3 end(*iter);
+    FindPosition finder(_distance, _path->front());
+    osg::Vec3Array::const_iterator iter = std::find_if(_path->points()->begin() + 1, _path->points()->end(), finder);
 
     // for first segment direction is equal to begin control vector
-    osg::Vec3 dirBegin = (iter == _path->begin() + 1 ? _path->frontDir() : (end - begin));
+    osg::Vec3 dirBegin;
+    if(finder.getPrevious() == _path->front())
+    {
+        dirBegin = _path->frontDir();
+    }
+    else
+    {
+        dirBegin = finder.getCurrent() - finder.getPrevious();
+        dirBegin.normalize();
+    };
 
     // for last segment direction is equal to end control vector
-    osg::Vec3 dirEnd = (iter == _path->end() - 1 ? _path->backDir() : (*(iter + 1) - end));
+    osg::Vec3 dirEnd;
+    if(finder.getCurrent() == _path->back())
+    {
+        dirEnd = _path->backDir();
+    }
+    else
+    {
+        dirEnd = *(iter + 1) - finder.getCurrent();
+        dirEnd.normalize();
+    };
 
     // create rotation matrix for given direction vector
-    osg::Matrix transform(sptUtil::rotationMatrix(sptUtil::mix(dirBegin, dirEnd, ratio)));
-    transform.makeTranslate(sptUtil::mix(begin, end, ratio));
+    osg::Matrix transform(sptUtil::rotationMatrix(sptUtil::mix(dirBegin, dirEnd, finder.getRatio())));
+    transform.makeTranslate(finder.getPosition());
 
     return transform;
 

@@ -1,6 +1,10 @@
 #ifndef SPTCORE_PATH_H
 #define SPTCORE_PATH_H 1
 
+#include <limits>
+#include <memory>
+#include <vector>
+
 #include <osg/Array>
 
 namespace sptCore
@@ -9,39 +13,73 @@ namespace sptCore
 //! \brief Path between two 3D points
 //! Path is vector of osg::Vec3 points that could form straight line or bezier curve
 //! \author Zbyszek "ShaXbee" Mandziejewicz
-class Path : public osg::Vec3Array
+class Path
 {
 
 public:
-    Path(osg::Vec3 front, osg::Vec3 back);
-    Path(osg::Vec3 front, osg::Vec3 frontCP, osg::Vec3 back, osg::Vec3 backCP, int steps, float frontRoll = 0.0f, float backRoll = 0.0f);
-
-//    static Path* reverse(const Path* source);
+    Path(const osg::Vec3f& front, const osg::Vec3f& back): _front(front), _back(back) { };
 
     //! Return reversed path
-    Path* reverse() const;
+    virtual std::auto_ptr<Path> reverse() const = 0;
 
-    float length() const { return _length; }
+    const osg::Vec3f& front() const { return _front; }
+    const osg::Vec3f& back() const { return _back; }
 
-    //! Return normalized front direction vector
-    const osg::Vec3& frontDir() const { return _frontDir; }
-    //! Return normalized back direction vector
-    const osg::Vec3& backDir() const { return _backDir; }
+    virtual osg::Vec3f frontDir() const = 0;
+    virtual osg::Vec3f backDir() const = 0;
 
-    float frontRoll() const { return _frontRoll; }
-    float backRoll() const { return _backRoll; }
+    virtual float length() const = 0;
+
+    static const float DEFAULT_SCALE = 1.0f;
+
+    virtual osg::ref_ptr<osg::Vec3Array> points(float scale = DEFAULT_SCALE) const = 0;
 
 private:
-    Path() : osg::Vec3Array() { }
-
-    osg::Vec3 _frontDir;
-    osg::Vec3 _backDir;
-
-    float _length;
-    float _frontRoll;
-    float _backRoll;
+    osg::Vec3 _front;
+    osg::Vec3 _back;
 
 }; // class sptCore::Path
+
+class StraightPath: public Path
+{
+public:
+    StraightPath(const osg::Vec3f& front, const osg::Vec3f& back): Path(front, back) { };
+
+    virtual std::auto_ptr<Path> reverse() const;
+
+    virtual osg::Vec3f frontDir() const;
+    virtual osg::Vec3f backDir() const;
+
+    virtual float length() const;
+    virtual osg::ref_ptr<osg::Vec3Array> points(float scale = DEFAULT_SCALE) const;
+
+}; // class sptCore::StraightPath
+
+class BezierPath: public Path
+{
+public:
+    BezierPath(const osg::Vec3f& front, const osg::Vec3f& frontCP, const osg::Vec3f& back, const osg::Vec3f& backCP):
+        Path(front, back), _frontCP(frontCP), _backCP(backCP), _length(std::numeric_limits<float>::quiet_NaN()) { };
+
+    virtual std::auto_ptr<Path> reverse() const;
+
+    virtual osg::Vec3f frontDir() const;
+    virtual osg::Vec3f backDir() const;
+
+    virtual float length() const;
+    virtual osg::ref_ptr<osg::Vec3Array> points(float scale = DEFAULT_SCALE) const;
+
+private:
+    osg::Vec3f _frontCP;
+    osg::Vec3f _backCP;
+    mutable float _length;
+
+    typedef std::pair<float, osg::ref_ptr<osg::Vec3Array> > Entry;
+    typedef std::vector<Entry> Entries;
+
+    mutable Entries _entries;
+
+}; // class sptCore::BezierPath
 
 } // namespace sptCore
 
