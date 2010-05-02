@@ -13,10 +13,7 @@ class Track: public RailTracking
 
 public:
     //! Construct straight track
-    Track(Sector& sector, osg::Vec3 p1, osg::Vec3 p2);
-
-    //! Construct bezier track
-    Track(Sector& sector, osg::Vec3 p1, osg::Vec3 cp1, osg::Vec3 p2, osg::Vec3 cp2);
+    Track(Sector& sector, std::auto_ptr<Path> path): RailTracking(sector), _forward(path) { };
 
     virtual ~Track() { };
 
@@ -27,8 +24,10 @@ public:
     const Path& getDefaultPath() const { return *_forward; }
     
 private:
+    const Path& getReversedPath() const { return RailTracking::getReversedPath(_forward, _backward); }
+
     boost::scoped_ptr<Path> _forward;
-    boost::scoped_ptr<Path> _backward;
+    mutable boost::scoped_ptr<Path> _backward;
 
 };
 
