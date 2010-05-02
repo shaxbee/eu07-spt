@@ -31,7 +31,9 @@ void Extruder::extrude(sptCore::Path& path, const osg::Vec3& position, const osg
 {
 
     size_t numProfileVerts = vertsCount();
-    size_t numPathVerts = path.getNumElements();
+
+    osg::ref_ptr<osg::Vec3Array> points(path.points());
+    size_t numPathVerts = points->getNumElements();
 
     std::cout << numProfileVerts << std::endl;
 
@@ -56,7 +58,7 @@ void Extruder::extrude(sptCore::Path& path, const osg::Vec3& position, const osg
     for(size_t row = 1; row < numPathVerts - 1; row++)
     {
 
-        osg::Vec3 point = path[row]; 
+        osg::Vec3 point = (*points)[row]; 
         osg::Vec3 dir = point - prev;
         texCoordV += dir.length();
 
@@ -68,7 +70,7 @@ void Extruder::extrude(sptCore::Path& path, const osg::Vec3& position, const osg
 
     // last profile
     texCoordV += (path.back() - prev).length(); 
-    transformProfile(path.back(), offset, -path.backDir(), texCoordV);
+    transformProfile(path.back(), offset, path.backDir(), texCoordV);
 
     std::cout << path.back().x() << " " << path.back().y() << std::endl;
     std::cout << _vertices->getNumElements() << std::endl;

@@ -112,16 +112,16 @@ int main()
     osg::Vec3 end    (100.0f, 100.0f, 0.0f);
     osg::Vec3 cpEnd  (100.0f,   0.0f, 0.0f);
 
-    Path* path = new Path(
+    Path* path = new StraightPath(
         begin,
-        cpBegin,
-        end,
-        cpEnd,
-        40);
+//        cpBegin,
+        end);
+  //      cpEnd,
+//        40);
 
     {
         osg::Geometry* geometry = new osg::Geometry;
-        geometry->setVertexArray(path);
+        geometry->setVertexArray(path->points());
         
         // set the colors as before, plus using the above
         osg::Vec4Array* colors = new osg::Vec4Array;
@@ -135,7 +135,7 @@ int main()
         geometry->setNormalArray(normals);
         geometry->setNormalBinding(osg::Geometry::BIND_OVERALL);
 
-        geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINE_STRIP, 0, path->getNumElements()));
+        geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINE_STRIP, 0, path->points()->getNumElements()));
         geode->addDrawable(geometry);
 
     };

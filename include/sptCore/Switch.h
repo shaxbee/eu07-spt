@@ -19,7 +19,26 @@ public:
     //! \param straight straight path
     //! \param diverted diverted path
     //! \param position initial position
-    Switch(Sector& sector, std::auto_ptr<Path> straight, std::auto_ptr<Path> diverted, const std::string& position = "STRAIGHT"); 
+    Switch(Sector& sector, std::auto_ptr<Path> straight, std::auto_ptr<Path> diverted, const std::string& position = "STRAIGHT");
+    
+    template <typename T>
+    Switch(Sector& sector, T* straight, T* diverted, const std::string& position = "STRAIGHT"): 
+        SwitchableTracking(sector), 
+        _straight(std::auto_ptr<Path>(straight)), 
+        _diverted(std::auto_ptr<Path>(diverted))
+    {
+        setPosition(position);
+    };
+
+    template <typename T>
+    Switch(Sector& sector, std::auto_ptr<T> straight, std::auto_ptr<T> diverted, const std::string& position = "STRAIGHT"): 
+        SwitchableTracking(sector),
+        _straight(std::auto_ptr<Path>(straight.release())), 
+        _diverted(std::auto_ptr<Path>(diverted.release()))
+    {
+        setPosition(position);
+    };
+
     virtual ~Switch();
 
     virtual const osg::Vec3& getExit(const osg::Vec3& entry) const;

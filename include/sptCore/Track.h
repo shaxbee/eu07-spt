@@ -13,7 +13,11 @@ class Track: public RailTracking
 
 public:
     //! Construct straight track
-    Track(Sector& sector, std::auto_ptr<Path> path): RailTracking(sector), _forward(path) { };
+    template <typename T>
+    Track(Sector& sector, T* path): RailTracking(sector), _forward(path) { };
+
+    template <typename T>
+    Track(Sector& sector, std::auto_ptr<T>& path): RailTracking(sector), _forward(path.release()) { };
 
     virtual ~Track() { };
 
