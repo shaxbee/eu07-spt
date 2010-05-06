@@ -10,7 +10,7 @@ void VehicleView::setModel(osg::Group* model)
     _model->addChild(new osg::Group(*model, osg::CopyOp::DEEP_COPY_NODES));
 
     // find and store boogey nodes
-    for(size_t boogey=1; boogey <= _vehicle.getBoogeys().boogeys; boogey++)
+    for(size_t boogey=1; boogey <= _vehicle.getTraits().boogeys; boogey++)
     {
         std::istringstream stream("boogey");
         stream << boogey;
@@ -26,5 +26,12 @@ void VehicleView::setModel(osg::Group* model)
 
         _axles.push_back(findTransform(stream.str()));
     };
+
+};
+
+void VehicleView::update()
+{
+
+
 
 };

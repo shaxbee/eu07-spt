@@ -25,8 +25,8 @@ public:
 
         _sector.reset(new DynamicSector(_scenery, osg::Vec3(0, 0, 0)));
         
-        std::auto_ptr<Track> trackA(new Track(*_sector, _pointA, _pointB));
-        std::auto_ptr<Track> trackB(new Track(*_sector, _pointB, _pointC));
+        std::auto_ptr<Track> trackA(new Track(*_sector, new StraightPath(_pointA, _pointB)));
+        std::auto_ptr<Track> trackB(new Track(*_sector, new StraightPath(_pointB, _pointC)));
 
         _trackA = trackA.get();
         _trackB = trackB.get();
