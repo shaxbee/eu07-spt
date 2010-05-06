@@ -17,10 +17,10 @@ public:
     VehicleView(const sptMover::Vehicle& vehicle, osg::Group* model): _vehicle(vehicle) { setModel(model); }
 
     osg::MatrixTransform* getNode() const { return _body.get(); }
-    virtual void update();
+    void update();
 
 private:
-    typedef std::vector<osg::MatrixTransform*> Nodes;
+    typedef std::vector<osg::ref_ptr<osg::MatrixTransform> > Nodes;
 
     //! \brief Clone model and gather transforms
     virtual void setModel(osg::Group* model);

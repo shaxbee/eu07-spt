@@ -21,8 +21,8 @@ public:
     //! \param position initial position
     Switch(Sector& sector, std::auto_ptr<Path> straight, std::auto_ptr<Path> diverted, const std::string& position = "STRAIGHT");
     
-    template <typename T>
-    Switch(Sector& sector, T* straight, T* diverted, const std::string& position = "STRAIGHT"): 
+    template <typename T1, typename T2>
+    Switch(Sector& sector, T1* straight, T2* diverted, const std::string& position = "STRAIGHT"): 
         SwitchableTracking(sector), 
         _straight(std::auto_ptr<Path>(straight)), 
         _diverted(std::auto_ptr<Path>(diverted))
@@ -30,8 +30,8 @@ public:
         setPosition(position);
     };
 
-    template <typename T>
-    Switch(Sector& sector, std::auto_ptr<T> straight, std::auto_ptr<T> diverted, const std::string& position = "STRAIGHT"): 
+    template <typename T1, typename T2>
+    Switch(Sector& sector, std::auto_ptr<T1> straight, std::auto_ptr<T2> diverted, const std::string& position = "STRAIGHT"): 
         SwitchableTracking(sector),
         _straight(std::auto_ptr<Path>(straight.release())), 
         _diverted(std::auto_ptr<Path>(diverted.release()))

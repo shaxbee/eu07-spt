@@ -16,7 +16,7 @@ public:
         _end(10.0f, 10.0f, 10.0f), 
         _scenery(),
         _sector(new DynamicSector(_scenery, osg::Vec3())),
-        _track(*_sector, _begin, _end) { };
+        _track(*_sector, new StraightPath(_begin, _end)) { };
 
     void testGetExit()
     {
@@ -34,7 +34,7 @@ public:
         TS_ASSERT_EQUALS(_track.getPath(_begin).back(), _end);
         TS_ASSERT_EQUALS(_track.getPath(_end).back(), _begin);
        
-        TS_ASSERT_DIFFERS(_track.getPath(_begin), _track.getPath(_end));
+        TS_ASSERT_DIFFERS(&_track.getPath(_begin), &_track.getPath(_end));
         
         TS_ASSERT_THROWS(_track.getPath(osg::Vec3f(0.0f, 0.0f, 1.0f)), RailTracking::UnknownEntryException);
         

@@ -21,7 +21,8 @@ public:
     {
         _current = point;
         _position += (_current - _previous).length();
-        return _position < _search;
+        
+        return _position >= _search;
     };
 
     float getRatio() const
@@ -83,8 +84,9 @@ void Follower::move(float distance)
 osg::Vec3 Follower::getPosition() const
 {
 
+    // FIXME: finder is local for find_if!
     FindPosition finder(_distance, _path->front());
-    osg::Vec3Array::const_iterator iter = std::find_if(_path->points()->begin() + 1, _path->points()->end(), finder);
+    osg::Vec3Array::iterator iter = std::find_if(_path->points()->begin(), _path->points()->end(), finder);
 
     return finder.getPosition();
 
@@ -93,8 +95,9 @@ osg::Vec3 Follower::getPosition() const
 osg::Matrix Follower::getMatrix() const
 {
 
+    // FIXME: finder is local for find_if!
     FindPosition finder(_distance, _path->front());
-    osg::Vec3Array::const_iterator iter = std::find_if(_path->points()->begin() + 1, _path->points()->end(), finder);
+    osg::Vec3Array::iterator iter = std::find_if(_path->points()->begin(), _path->points()->end(), finder);
 
     // for first segment direction is equal to begin control vector
     osg::Vec3 dirBegin;
