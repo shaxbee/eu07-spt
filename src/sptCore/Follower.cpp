@@ -9,47 +9,6 @@
 
 using namespace sptCore;
 
-namespace 
-{
-
-class FindPosition
-{
-public:
-    FindPosition(const float& search, const osg::Vec3& front): _search(search), _position(0.0), _previous(front) { };
-
-    bool operator()(const osg::Vec3f& point)
-    {
-        _current = point;
-        _position += (_current - _previous).length();
-        
-        return _position >= _search;
-    };
-
-    float getRatio() const
-    {
-        return (_position - _search) / (_current - _previous).length();
-    };
-
-    osg::Vec3f getPosition() const
-    {
-        float ratio = getRatio();
-        return (_previous * ratio + _current * (1 - ratio));
-    };
-
-    const osg::Vec3f& getCurrent() const { return _current; };
-    const osg::Vec3f& getPrevious() const { return _previous; };
-
-private:
-    float _search;
-    float _position;
-
-    osg::Vec3 _current;
-    osg::Vec3 _previous;
-
-};
-
-}; // anonymous namespace
-
 Follower::Follower(Track& track, float distance):
     _track(&track), _distance(distance)
 {
@@ -81,51 +40,64 @@ void Follower::move(float distance)
     
 }; // Follower::move
 
+float segmentLength(osg::Vec3Array::const_iterator& iter)
+{
+    return (*iter - *(iter - 1)).length();
+};
+
+void Follower::findPosition(osg::ref_ptr<osg::Vec3Array> points, osg::Vec3Array::const_iterator& iter, float& ratio) const
+{
+
+    iter = points->begin() + 1;
+    float distance = segmentLength(iter); 
+
+    // find point location on path matching distance
+    for(iter; distance < _distance && iter != points->end(); iter++)
+        distance += segmentLength(iter);
+
+    // if we didn't found segment it means that _distance is wrong
+    assert(iter != points->end());
+
+    // ratio = position in segment / segment length
+    ratio = (distance - _distance) / segmentLength(iter);
+
+}; // Follower::findPosition
+
 osg::Vec3 Follower::getPosition() const
 {
 
-    // FIXME: finder is local for find_if!
-    FindPosition finder(_distance, _path->front());
-    osg::Vec3Array::iterator iter = std::find_if(_path->points()->begin(), _path->points()->end(), finder);
+    osg::ref_ptr<osg::Vec3Array> points(_path->points());
+    osg::Vec3Array::const_iterator iter;
+    float ratio;
 
-    return finder.getPosition();
+    findPosition(points, iter, ratio);
+
+    return sptUtil::mix(*(iter - 1), *iter, ratio);
 
 }; // Follower::getPosition
 
 osg::Matrix Follower::getMatrix() const
 {
 
-    // FIXME: finder is local for find_if!
-    FindPosition finder(_distance, _path->front());
-    osg::Vec3Array::iterator iter = std::find_if(_path->points()->begin(), _path->points()->end(), finder);
+    osg::ref_ptr<osg::Vec3Array> points(_path->points());
+    osg::Vec3Array::const_iterator iter;
+    float ratio;
+
+    // find current segment and position in it expressed in (0, 1) range
+    findPosition(points, iter, ratio);
+
+    osg::Vec3 begin(*(iter-1));
+    osg::Vec3 end(*iter);
 
     // for first segment direction is equal to begin control vector
-    osg::Vec3 dirBegin;
-    if(finder.getPrevious() == _path->front())
-    {
-        dirBegin = _path->frontDir();
-    }
-    else
-    {
-        dirBegin = finder.getCurrent() - finder.getPrevious();
-        dirBegin.normalize();
-    };
+    osg::Vec3 dirBegin = (iter == points->begin() + 1 ? _path->frontDir() : (end - begin));
 
     // for last segment direction is equal to end control vector
-    osg::Vec3 dirEnd;
-    if(finder.getCurrent() == _path->back())
-    {
-        dirEnd = _path->backDir();
-    }
-    else
-    {
-        dirEnd = *(iter + 1) - finder.getCurrent();
-        dirEnd.normalize();
-    };
+    osg::Vec3 dirEnd = (iter == points->end() - 1 ? _path->backDir() : (*(iter + 1) - end));
 
     // create rotation matrix for given direction vector
-    osg::Matrix transform(sptUtil::rotationMatrix(sptUtil::mix(dirBegin, dirEnd, finder.getRatio())));
-    transform.makeTranslate(finder.getPosition());
+    osg::Matrix transform(sptUtil::rotationMatrix(sptUtil::mix(dirBegin, dirEnd, ratio)));
+    transform.makeTranslate(sptUtil::mix(begin, end, ratio));
 
     return transform;
 

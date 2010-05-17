@@ -43,7 +43,7 @@ public:
     
 private:
     void changeTrack(osg::Vec3 position);
-    // std::pair<osg::Vec3Array::const_iterator, float> findPosition() const;
+    void findPosition(osg::ref_ptr<osg::Vec3Array> points, osg::Vec3Array::const_iterator& iter, float& ratio) const;
 
     const RailTracking* _track;
     const Path* _path;
