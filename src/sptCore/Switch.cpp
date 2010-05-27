@@ -4,16 +4,6 @@ using namespace sptCore;
 
 SwitchableTracking::ValidPositions Switch::_positions;
 
-Switch::Switch(Sector& sector,  std::auto_ptr<Path> straight, std::auto_ptr<Path> diverted, const std::string& position):
-    SwitchableTracking(sector), 
-    _straight(straight.release()), 
-    _diverted(diverted.release())
-{
-
-    setPosition(position);
-
-}; // Switch::Switch(p1, cp1, p2, cp2, p3, cp3, position)
-
 Switch::~Switch()
 {
 
@@ -52,20 +42,20 @@ const Path& Switch::getPath(const osg::Vec3& entry) const
             return *_diverted;
 
     if(entry == _straight->back())
-       return getStraightReversed();
+       return *_straightReversed;
 
     if(entry == _diverted->front())
        return *_diverted;
 
     if(entry == _diverted->back())
-       return getDivertedReversed(); 
+       return *_divertedReversed; 
 
     throw UnknownEntryException() << PositionInfo(entry);
 
 }; // Switch::getPath(entry)
 
 
-const SwitchableTracking::ValidPositions Switch::getValidPositions() const
+const SwitchableTracking::ValidPositions& Switch::getValidPositions() const
 {
 
     static bool initialized = false;

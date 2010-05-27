@@ -17,7 +17,7 @@ public:
         _diverted(10.0f, 10.0f, 0.0f), 
         _scenery(),
         _sector(_scenery, osg::Vec3()),
-        _switch(_sector, new StraightPath(_begin, _straight), new BezierPath(_begin, _begin, _diverted, _diverted)) 
+        _switch(_sector, new StraightPath(_begin, _straight), new StraightPath(_begin, _diverted)) 
     { 
 
     };

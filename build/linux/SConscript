@@ -4,6 +4,11 @@ import subprocess
 Import('env')
 
 env.Append(CXXFLAGS='-g')
+#env.Append(CXXFLAGS='-fprofile-arcs')
+#env.Append(CXXFLAGS='-ftest-coverage')
+
+env.Append(LIBS=[])
+#env.Append(LIBS=['gcov'])
 
 #variant = GetOption('variant')
 #env = SConscript(os.path.join(variant, 'SConscript'), exports=['env'])

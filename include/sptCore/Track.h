@@ -14,10 +14,10 @@ class Track: public RailTracking
 public:
     //! Construct straight track
     template <typename T>
-    Track(Sector& sector, T* path): RailTracking(sector), _forward(path) { };
+    Track(Sector& sector, T* path): RailTracking(sector), _forward(path), _backward(_forward->reverse()) { };
 
     template <typename T>
-    Track(Sector& sector, std::auto_ptr<T>& path): RailTracking(sector), _forward(path.release()) { };
+    Track(Sector& sector, std::auto_ptr<T>& path): RailTracking(sector), _forward(path.release()), _backward(_forward->reverse()) { };
 
     virtual ~Track() { };
 
@@ -28,8 +28,6 @@ public:
     const Path& getDefaultPath() const { return *_forward; }
     
 private:
-    const Path& getReversedPath() const { return RailTracking::getReversedPath(_forward, _backward); }
-
     boost::scoped_ptr<Path> _forward;
     mutable boost::scoped_ptr<Path> _backward;
 

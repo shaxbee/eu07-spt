@@ -3,43 +3,70 @@
 #include <algorithm>
 #include <iterator>
 
-#include <boost/math/special_functions/fpclassify.hpp>
-
 using namespace sptCore;
 
 namespace
 {
 
-osg::ref_ptr<osg::Vec3Array> createPoints(float scale)
+static const unsigned int BEZIER_RECURSION_LIMIT = 9;
+static const double BEZIER_TOLERANCE_BASE = 0.18;
+
+double pointDistance(const osg::Vec3f& from, const osg::Vec3f& to, const osg::Vec3f& point)
 {
+
+    osg::Vec3f v = to - from;
+    osg::Vec3f w = point - from;
+
+    double c1 = w * v;
+    if(c1 <= 0)
+        return (point - from).length();
+
+    double c2 = v * v;
+    if(c2 <= c1)
+        return (point - to).length();
+
+    return (point - (from + v * (c1 / c2))).length();
 
 };
 
-class CalculateLength
+void recursiveBezier(osg::Vec3Array& dest, const osg::Vec3& p1, const osg::Vec3& p2, const osg::Vec3& p3, const osg::Vec3& p4, const float& tolerance, unsigned depth)
 {
 
-public:
-    CalculateLength(): _length(std::numeric_limits<float>::quiet_NaN()) { };
+    osg::Vec3f p12 = (p1 + p2) / 2;
+    osg::Vec3f p23 = (p2 + p3) / 2;
+    osg::Vec3f p34 = (p3 + p4) / 2;
+    osg::Vec3f p123 = (p12 + p23) / 2;
+    osg::Vec3f p234 = (p23 + p34) / 2;
+    osg::Vec3f p1234 = (p123 + p234) / 2;
 
-    void operator()(const osg::Vec3f& point)
+    osg::Vec3f delta = p4 - p1;
+
+    double dist = (pointDistance(p1, p4, p2) + pointDistance(p1, p4, p3)) / 2; 
+
+    if(dist < tolerance * delta.length())
     {
-
-        if(boost::math::isnan(_length))
-            _length = 0;
-        else
-            _length += (point - _last).length();
-
-        _last = point;
-
+        dest.push_back(p1234);
+    }
+    else if(depth < BEZIER_RECURSION_LIMIT)
+    {
+        recursiveBezier(dest, p1, p12, p123, p1234, tolerance, depth + 1);
+        recursiveBezier(dest, p1234, p234, p34, p4, tolerance, depth + 1);
     };
 
-    float length() { return _length; }
+};
 
-private:
-    float _length;
-    osg::Vec3f _last;
+osg::ref_ptr<osg::Vec3Array> createPoints(osg::Vec3 p1, osg::Vec3 cp1, osg::Vec3 p2, osg::Vec3 cp2, float scale)
+{
 
-}; // class <anonymous>::CalculateLength
+    double tolerance = BEZIER_TOLERANCE_BASE / scale;
+    tolerance *= tolerance;
+
+    osg::ref_ptr<osg::Vec3Array> result(new osg::Vec3Array);
+    recursiveBezier(*result, p1, cp1, cp2, p2, tolerance, 1);
+    return result;
+
+};
+
 
 struct FindBezierPathEntry
 {
@@ -113,7 +140,7 @@ std::auto_ptr<Path> BezierPath::reverse() const
     std::auto_ptr<BezierPath> result(new BezierPath(back(), _backCP, front(), _frontCP));
 
     // if source path was initialized
-    if(!boost::math::isnan(_length))
+    if(_length)
     {
         // initialize length to avoid overhead
         result->_length = _length;
@@ -130,14 +157,15 @@ float BezierPath::length() const
 {
 
     // lazy initialization
-    if(boost::math::isnan(_length))
+    if(!_length)
     {
-        CalculateLength calc;
-        osg::ref_ptr<osg::Vec3Array> pts(points());
+        double length = 0.0f;
 
-        std::for_each(pts->begin(), pts->end(), calc);
-
-        _length = calc.length();
+        const osg::Vec3Array& pts = *(points());
+        for(osg::Vec3Array::const_iterator iter = pts.begin(); iter != pts.end() - 1; iter++)
+            length += (*(iter + 1) - *iter).length();
+        
+        _length = length;
     };
 
     return _length;
@@ -151,7 +179,7 @@ osg::ref_ptr<osg::Vec3Array> BezierPath::points(float scale) const
 
     if(iter == _entries.end())
     {
-        result = createPoints(scale);
+        result = createPoints(front(), _frontCP, back(), _backCP, scale);
         _entries.push_back(std::make_pair(scale, result));
     }
     else
@@ -162,67 +190,3 @@ osg::ref_ptr<osg::Vec3Array> BezierPath::points(float scale) const
     return result;
 };
 
-# if 0
-Path* Path::reverse() const
-{
-    
-    Path* reversed = new Path;
-    reversed->resize(size());
-
-    std::reverse_copy(begin(), end(), reversed->begin());
-    
-    return reversed;
-    
-}; // Path::reverse
-
-
-
-Path::Path(osg::Vec3 front, osg::Vec3 back):
-    _frontDir(back - front), _backDir(_frontDir), _length(_frontDir.length()), _frontRoll(0), _backRoll(0)
-{
-
-    _frontDir.normalize();
-    _backDir.normalize();
-
-    reserve(2);
-
-    push_back(front);
-    push_back(back);
-
-}; // Path::Path(front, back)
-
-Path::Path(osg::Vec3 front, osg::Vec3 frontCP, osg::Vec3 back, osg::Vec3 backCP, int steps, float frontRoll, float backRoll):
-    _frontDir(frontCP - front), _backDir(-backCP + back), _length(0), _frontRoll(frontRoll), _backRoll(backRoll)
-{
-
-    _frontDir.normalize();
-    _backDir.normalize();
-
-    float delta = (float) 1 / (float) steps;
-    reserve(steps);
-
-    osg::Vec3 previous(front);
-
-    for(unsigned int i = 0; i <= steps; i++)
-    {
-
-        float t = i * delta; // current t along path (range from 0 .. 1)
-        float omt = 1 - t; 
-
-        // add point
-        push_back(
-            front   * (omt * omt * omt) + 
-            frontCP * (3 * omt * omt * t) + 
-            backCP  * (3 * omt * t * t) + 
-            back    * (t * t * t)
-        );
-
-        const osg::Vec3 delta = this->back() - previous;
-        _length += delta.length();
-        previous = this->back();
-
-    };
-    
-}; // Path::Path(front, frontCP, back, backCP, steps)
-
-#endif

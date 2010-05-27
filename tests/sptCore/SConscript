@@ -2,4 +2,4 @@ Import('env')
 
 # include osg types output for cxxtest
 env.Prepend(CXXTEST_OPTS = "--include=tests/OsgTypeTraits.h")
-env.CxxTest('sptCore', Glob('*.t.h'), LIBS=['osg', 'sptCore'])
+env.CxxTest('sptCore', Glob('*.t.h'), LIBS=env['LIBS'] + ['osg', 'sptCore'])

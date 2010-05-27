@@ -59,7 +59,7 @@ class BezierPath: public Path
 {
 public:
     BezierPath(const osg::Vec3f& front, const osg::Vec3f& frontCP, const osg::Vec3f& back, const osg::Vec3f& backCP):
-        Path(front, back), _frontCP(frontCP), _backCP(backCP), _length(std::numeric_limits<float>::quiet_NaN()) { };
+        Path(front, back), _frontCP(frontCP), _backCP(backCP), _length(0.0f) { };
 
     virtual std::auto_ptr<Path> reverse() const;
 
