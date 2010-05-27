@@ -38,18 +38,6 @@ public:
 
     bool operator<(const RailTracking& other) const { return this < &other; }
 
-protected:
-    template <typename PtrT>
-    const Path& getReversedPath(const PtrT& source, PtrT& dest) const
-    {
-
-        if(!dest)
-            dest.reset(source->reverse().release());
-
-        return *dest;
-
-    };
-    
 private:
     Sector& _sector;
 

@@ -33,7 +33,7 @@ public:
 
         TS_ASSERT_EQUALS(path.front(), begin);
         TS_ASSERT_EQUALS(path.back(), end);
-//        TS_ASSERT_EQUALS(path.points()->getNumElements(), 33);
+        TS_ASSERT_DELTA(path.length(), 150.0f, 0.5f);
 
     };
 

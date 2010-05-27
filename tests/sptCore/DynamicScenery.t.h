@@ -7,6 +7,8 @@
 #include <sptCore/Switch.h>
 #include <sptCore/DynamicSector.h>
 
+#include <ctime>
+
 using namespace sptCore;
 
 class DynamicSceneryTestSuite: public CxxTest::TestSuite
@@ -32,7 +34,7 @@ public:
     
         _scenery->addTrack("track1", *testTrack);
         sector.addTrack(std::auto_ptr<RailTracking>(testTrack));
-        
+
         TS_ASSERT_EQUALS(&_scenery->getTrack("track1"), testTrack);
         TS_ASSERT_THROWS(&_scenery->getTrack("track2"), Scenery::RailTrackingNotFoundException);
         
