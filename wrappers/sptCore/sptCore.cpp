@@ -27,7 +27,14 @@ struct SwitchableTrackingWrapper: SwitchableTracking, wrapper<SwitchableTracking
     virtual const osg::Vec3& getExit(const osg::Vec3& entry) const { return get_override("getExit")(entry); };
     virtual const Path& getPath(const osg::Vec3& entry) const { return get_override("getPath")(entry); };    
     virtual const ValidPositions& getValidPositions() const { return get_override("getValidPositions")(); };
-
+    virtual void setPosition(const std::string& position) 
+    { 
+        override method = get_override("getValidPositions");
+        if(method)
+            method(position);
+        else
+            SwitchableTracking::setPosition(position);
+    };
 };
 
 BOOST_PYTHON_MODULE(sptCore)
@@ -41,6 +48,9 @@ BOOST_PYTHON_MODULE(sptCore)
     class_<SwitchableTrackingWrapper, noncopyable>("SwitchableTracking", init<Sector&>())
         .def("getExit", &SwitchableTrackingWrapper::getExit, return_value_policy<return_by_value>())
         .def("getPath", &SwitchableTrackingWrapper::getPath, return_internal_reference<>())
+        .def("getPosition", &SwitchableTracking::getPosition)
+        .def("setPosition", &SwitchableTrackingWrapper::setPosition)
+        .def("isValidPosition", &SwitchableTracking::isValidPosition)
         .def("getValidPositions", &SwitchableTrackingWrapper::getValidPositions, return_value_policy<return_by_value>());
 
     class_<Track, bases<RailTracking>, noncopyable >("Track", init<Sector&, std::auto_ptr<Path>& >())
