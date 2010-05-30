@@ -121,7 +121,7 @@ osg::ref_ptr<osg::Vec3Array> StraightPath::points(float scale) const
 
 osg::Vec3f BezierPath::frontDir() const
 {
-    osg::Vec3f result(_frontCP);
+    osg::Vec3d result(_frontCP - front());
     result.normalize();
 
     return result;
@@ -129,10 +129,10 @@ osg::Vec3f BezierPath::frontDir() const
 
 osg::Vec3f BezierPath::backDir() const
 {
-    osg::Vec3f result(-_backCP);
+    osg::Vec3d result(_backCP - back());
     result.normalize();
 
-    return result;
+    return -result;
 };
 
 std::auto_ptr<Path> BezierPath::reverse() const
