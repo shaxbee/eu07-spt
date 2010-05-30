@@ -31,9 +31,9 @@ inline osg::Matrix rotationMatrix(osg::Vec3 dir, float roll = 0.0f)
     refX.normalize();
 
     result.set(
-        refX.x(), refX.y(), refX.z(), 0.0f,
-        dir.x(),  dir.y(),  dir.z(),  0.0f,
-        refZ.x(), refZ.y(), refZ.z(), 0.0f,
+        refX.x(), refX.y(), -refX.z(), 0.0f,
+        dir.x(),  dir.y(),  -dir.z(),  0.0f,
+        -refZ.x(), refZ.y(), -refZ.z(), 0.0f,
         0.0f,     0.0f,     0.0f,     1.0f
     );
 
