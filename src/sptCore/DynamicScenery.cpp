@@ -9,12 +9,14 @@ using namespace sptCore;
 Sector& DynamicScenery::getSector(const osg::Vec3& position)
 {
 
-    Sectors::const_iterator iter = _sectors.find(position);
-
-    if(iter == _sectors.end())
+    try
+    {
+        return _sectors.at(position);
+    } 
+    catch(boost::bad_ptr_container_operation) 
+    {
         throw SectorNotFoundException() << PositionInfo(position);
-
-    return *(iter->second);
+    }
     
 }; // DynamicScenery::getSector
         
@@ -63,7 +65,8 @@ void DynamicScenery::addSector(std::auto_ptr<Sector> sector)
     size_t totalTracks = sector->getTotalTracks();
 
     std::pair<Sectors::iterator, bool> ret;
-    ret = _sectors.insert(sector->getPosition(), sector);
+    osg::Vec3f position(sector->getPosition());
+    ret = _sectors.insert(position, sector);
 
     // if sector already existed
     if(!ret.second)
@@ -86,7 +89,7 @@ std::auto_ptr<Sector> DynamicScenery::removeSector(const osg::Vec3& position)
     _statistics.totalTracks -= iter->second->getTotalTracks();
     _statistics.sectors--;
 
-    return _sectors.erase(iter);
+    return std::auto_ptr<Sector>(_sectors.release(iter).release());
 
 }; // DynamicScenery::removeSector
 
