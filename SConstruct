@@ -66,8 +66,8 @@ SConscript('src/SConscript', variant_dir = buildDir, duplicate = 0)
 SConscript('applications/SConscript', variant_dir = os.path.join(buildDir, 'applications'), duplicate = 0)
 
 # python wrappers
-if 'wrappers' in COMMAND_LINE_TARGETS:
-    SConscript('wrappers/SConscript', variant_dir = os.path.join(buildDir, 'wrappers'), duplicate = 0)
+# if 'wrappers' in COMMAND_LINE_TARGETS:
+SConscript('wrappers/SConscript', variant_dir = os.path.join(buildDir, 'wrappers'), duplicate = 0)
 
 # unit tests
 if 'check' in COMMAND_LINE_TARGETS:
@@ -76,3 +76,5 @@ if 'check' in COMMAND_LINE_TARGETS:
 # documentation
 if 'doc' in COMMAND_LINE_TARGETS:
     SConscript('doc/SConscript')
+
+env.Alias('install', ['#/bin', '#/python'])

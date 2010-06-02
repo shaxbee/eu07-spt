@@ -69,6 +69,9 @@ public:
     virtual float length() const;
     virtual osg::ref_ptr<osg::Vec3Array> points(float scale = DEFAULT_SCALE) const;
 
+    const osg::Vec3f& frontCP() const { return _frontCP; }
+    const osg::Vec3f& backCP() const { return _backCP; }
+
 private:
     osg::Vec3f _frontCP;
     osg::Vec3f _backCP;
