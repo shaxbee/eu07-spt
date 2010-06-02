@@ -3,8 +3,8 @@
 
 #include <map>
 
-#include <boost/weak_ptr.hpp>
 #include <boost/exception.hpp>
+#include <boost/noncopyable.hpp>
 
 #include <osg/Vec3>
 #include <osg/ref_ptr>
@@ -19,7 +19,7 @@ class Scenery;
 //! \brief Bounded region of Scenery
 //! Sector manages RailTracking instances and connections between them.
 //! \author Zbyszek "ShaXbee" Mandziejewicz
-class Sector
+class Sector: boost::noncopyable
 {
 
 public:

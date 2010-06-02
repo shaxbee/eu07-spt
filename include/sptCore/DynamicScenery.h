@@ -2,7 +2,8 @@
 #define SPTCORE_DYNAMICSCENERY_H 1
 
 #include <sptCore/Scenery.h>
-#include <sptUtil/AutoMap.h>
+
+#include <boost/ptr_container/ptr_map.hpp>
 
 namespace sptCore
 {
@@ -24,7 +25,7 @@ public:
 //    virtual EventedTrack& getEventedTrack(const std::string& name) const;
     virtual SwitchableTracking& getSwitch(const std::string& name);
 
-    typedef sptUtil::AutoMap<osg::Vec3, Sector*> Sectors;
+    typedef boost::ptr_map<osg::Vec3f, Sector> Sectors;
     typedef std::map<std::string, Track*> Tracks;
     typedef std::map<std::string, SwitchableTracking*> Switches;
 

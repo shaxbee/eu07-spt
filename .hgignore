@@ -5,6 +5,7 @@ syntax: glob
 *.pyc
 .sconsign.dblite
 *.log
+*.orig
 
 .sconf_temp
 
@@ -15,3 +16,5 @@ build/linux/release
 bin/spt
 bin/sptd
 bin/sptEditor
+
+doc/html

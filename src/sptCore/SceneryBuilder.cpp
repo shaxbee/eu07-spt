@@ -30,10 +30,11 @@ SceneryBuilder::SceneryBuilder(DynamicScenery* scenery):
 DynamicSector& SceneryBuilder::createSector(const osg::Vec3& position)
 {
 
-    std::auto_ptr<DynamicSector> sector(new DynamicSector(*_scenery, position));
+    DynamicSector* sector = new DynamicSector(*_scenery, position);
     DynamicSector& result = *sector;
-    
-    _scenery->addSector(std::auto_ptr<Sector>(sector));
+
+    std::auto_ptr<Sector> ptr(sector);
+    _scenery->addSector(ptr);
 
     return result;
 
@@ -194,10 +195,10 @@ void SceneryBuilder::cleanup()
 
     const DynamicScenery::Sectors& sectors = _scenery->getSectors();
 
-    for(DynamicScenery::Sectors::const_iterator iter = sectors.begin(); iter != sectors.end(); iter++)
-    {
-        DynamicSector& sector = dynamic_cast<DynamicSector&>(*(iter->second));
-        sector.cleanup();
-    };
+//    for(DynamicScenery::Sectors::const_iterator iter = sectors.begin(); iter != sectors.end(); iter++)
+//    {
+//        DynamicSector& sector = dynamic_cast<DynamicSector&>(*(iter->second));
+//        sector.cleanup();
+//    };
 
 }; // SceneryBuilder::cleanup
