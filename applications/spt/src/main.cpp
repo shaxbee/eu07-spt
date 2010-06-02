@@ -13,6 +13,11 @@
 using namespace sptCore;
 using namespace sptGFX;
 
+void print_vec(const osg::Vec3& vec)
+{
+    std::cout << vec.x() << " " << vec.y() << " " << vec.z() << std::endl;
+}
+
 osg::Geometry* createProfile()
 {
 
@@ -112,12 +117,15 @@ int main()
     osg::Vec3 end    (100.0f, 100.0f, 0.0f);
     osg::Vec3 cpEnd  (100.0f,   0.0f, 0.0f);
 
-    Path* path = new StraightPath(
+    Path* path = new BezierPath(
         begin,
-//        cpBegin,
-        end);
-  //      cpEnd,
+        cpBegin,
+        end,
+        cpEnd);
 //        40);
+
+    print_vec(path->frontDir());
+    print_vec(path->backDir());
 
     {
         osg::Geometry* geometry = new osg::Geometry;
