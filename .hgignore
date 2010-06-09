@@ -1,6 +1,7 @@
 syntax: glob
 
 *~
+*.swp
 *.o
 *.pyc
 .sconsign.dblite
@@ -10,11 +11,10 @@ syntax: glob
 .sconf_temp
 
 lib/*
+bin/*
+python/*
+
 build/linux/debug
 build/linux/release
-
-bin/spt
-bin/sptd
-bin/sptEditor
 
 doc/html
