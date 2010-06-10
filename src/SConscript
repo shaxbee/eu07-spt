@@ -7,7 +7,7 @@ env = env.Clone()
 env.Append(CPPPATH = '#/include')
 
 # build libraries
-libraries = ['sptCore', 'sptGFX']
+libraries = ['sptCore', 'sptGFX', 'sptDB']
 
 for library in libraries:
     SConscript(
