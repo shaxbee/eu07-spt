@@ -1,68 +1,127 @@
 #ifndef SPTDB_SCENERYREADER_H
 #define SPTDB_SCENERYREADER_H 1
 
+#include <string>
+#include <stack>
+#include <vector>
+#include <memory>
+#include <fstream>
+
+#include "sptCore/Sector.h"
+
 namespace sptDB
 {
 
-class SceneryReader
+#ifdef DEBUG
+class ChunkWatcher
 {
 
 public:
-    SceneryReader(std::istream& stream): _input(stream) { }
+    ChunkWatcher(std::ifstream& input);
+
+    void check(size_t bytes);
+    void push(const std::string& chunk, size_t size);
+    void pop();
 
 private:
+    struct Chunk
+    {
+        const std::string& name;
+        size_t size;
+        size_t left;
+    };
+
+    typedef std::stack<Chunk> ChunkStack;
+    ChunkStack _chunkStack;
+
+    Chunk* _chunk;
+
+    std::ifstream& input;
+
+};
+#endif
+
+class BinaryReader
+{
+public:
+    BinaryReader(std::ifstream& stream): _input(stream), _watcher(stream) { }
+
     template <typename T>
     void read(T& output);
 
     template <typename T>
-    void read(std::vector<typename T>& output);
+    void read(std::vector<T>& output);
 
-    size_t readChunk(const std::string& type);
+    std::string& readChunk();
+    bool expectChunk(const std::string& type);
 
-    void readHeader();
-    void readSectorOffsets();
-    void readSectorData(unsigned int id);
+private:
+    std::ifstream& _input;
+
+#ifdef DEBUG
+    ChunkWatcher _watcher;
+#endif
+
+};
+
+class SectorsReader
+{
+
+public:
+    SectorsReader(std::ifstream& input);
+
+    void readOffsets();
+
+    void hasSector(const osg::Vec2d& position);
+    std::auto_ptr<sptCore::Sector> readSector(const osg::Vec2d& position);
+
+private:
+    std::auto_ptr<sptCore::Sector> readSectorData(size_t offset);
 
     struct Header
     {
-        unsigned int dataSize;
         unsigned int version;
     };
 
-    std::istream& _input;
+    struct SectorOffset
+    {
+        osg::Vec2d position;
+        size_t offset;
+    };
 
-#ifdef DEBUG
-    typedef std::pair<std::string, size_t> ChunkEntry;
-    typedef std::stack<ChunkEntry> ChunkStack;
-    ChunkIdStack _chunkStack;
+    std::ifstream& _input;
+    BinaryReader _reader;
 
-    void checkChunkSize(size_t bytes);
-    void pushChunk(std::string name, size_t size);
-    void popChunk();
-#endif
-
-    typedef std::vector<unsigned int> SectorOffsets;
+    typedef std::vector<SectorOffset> SectorOffsets;
     SectorOffsets _sectorOffsets;
+
+    size_t _offset;
 
 }; // class sptDB::SceneryReader
 
+#ifdef DEBUG
+    #define assert_chunk_read(bytes) _watcher.check(bytes)
+#else
+    #define assert_chunk_read(ignore) ((void)0)
+#endif
+
 template <typename T>
-SceneryReader::read(T& output)
+void BinaryReader::read(T& output)
 {
-    checkChunkSize(sizeof(T));
+    assert_chunk_read(sizeof(T));
     _input.read(reinterpret_cast<char*>(&output), sizeof(T));
 };
 
 template <typename T>
-SceneryReader::read(<std::vector<typename T>& output)
+void BinaryReader::read(std::vector<T>& output)
 {
-    unsigned int count;
+    size_t count;
     read(count);
 
     const unsigned int elementSize = sizeof(T);
 
-    checkChunkSize(elementSize * count);
-    assert(output.empty());
+    assert(output.empty() && "Trying to write to non-empty vector");
+    assert_chunk_read(elementSize * count);
 
     output.reserve(count);
 
