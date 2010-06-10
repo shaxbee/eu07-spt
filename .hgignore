@@ -13,6 +13,7 @@ syntax: glob
 lib/*
 bin/*
 python/*
+cache/*
 
 build/linux/debug
 build/linux/release
