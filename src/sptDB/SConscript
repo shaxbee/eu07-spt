@@ -1,0 +1,6 @@
+Import('env')
+
+objects = env.Object(Split('SceneryReader.cpp'))
+library = env.StaticLibrary('sptDB', objects);
+
+env.Install('#/lib', library)
