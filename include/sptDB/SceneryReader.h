@@ -54,6 +54,7 @@ public:
 
     std::string& readChunk();
     bool expectChunk(const std::string& type);
+    void endChunk(const std::string& type);
 
 private:
     std::ifstream& _input;
@@ -72,12 +73,10 @@ public:
 
     void readOffsets();
 
-    void hasSector(const osg::Vec2d& position);
+    bool hasSector(const osg::Vec2d& position);
     std::auto_ptr<sptCore::Sector> readSector(const osg::Vec2d& position);
 
 private:
-    std::auto_ptr<sptCore::Sector> readSectorData(size_t offset);
-
     struct Header
     {
         unsigned int version;
@@ -89,6 +88,9 @@ private:
         size_t offset;
     };
 
+    struct SectorOffsetGreater;
+    struct SectorOffsetLess;
+
     std::ifstream& _input;
     BinaryReader _reader;
 
@@ -96,6 +98,9 @@ private:
     SectorOffsets _sectorOffsets;
 
     size_t _offset;
+
+    SectorOffsets::const_iterator findSector(const osg::Vec2d& position);
+    std::auto_ptr<sptCore::Sector> readSectorData(size_t offset);
 
 }; // class sptDB::SceneryReader
 
