@@ -60,7 +60,7 @@ env.Append(CPPDEFINES = defines)
 Export('env')
 
 # common library
-SConscript('src/SConscript', variant_dir = buildDir, duplicate = 0)
+SConscript('src/SConscript', variant_dir = os.path.join(buildDir, 'lib'), duplicate = 0)
 
 # applications
 SConscript('applications/SConscript', variant_dir = os.path.join(buildDir, 'applications'), duplicate = 0)
