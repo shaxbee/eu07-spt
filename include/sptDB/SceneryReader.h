@@ -7,7 +7,7 @@
 #include <memory>
 #include <fstream>
 
-#include "sptCore/Sector.h"
+#include "sptCore/DynamicSector.h"
 
 namespace sptDB
 {
@@ -101,6 +101,10 @@ private:
 
     SectorOffsets::const_iterator findSector(const osg::Vec2d& position);
     std::auto_ptr<sptCore::Sector> readSectorData(size_t offset);
+
+    std::auto_ptr<sptCore::Path> readPath();
+    void readTracks(sptCore::DynamicSector& sector);
+    void readSwitches(sptCore::DynamicSector& sector);
 
 }; // class sptDB::SceneryReader
 

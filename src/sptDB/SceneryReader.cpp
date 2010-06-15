@@ -1,8 +1,20 @@
 #include "sptDB/SceneryReader.h"
+#include "sptCore/DynamicSector.h"
 
 #include <algorithm>
 
 using namespace sptDB;
+
+namespace
+{
+
+enum PathType
+{
+    STRAIGHT = 0,
+    BEZIER = 1
+};
+
+};
 
 struct SectorsReader::SectorOffsetGreater
 {
@@ -52,35 +64,78 @@ std::auto_ptr<sptCore::Sector> SectorsReader::readSector(const osg::Vec2d& posit
     _input.seekg(_offset + iter->offset);
     _reader.expectChunk("SECT");
 
-    {
-        _reader.expectChunk("TRCK");
-        size_t count;
-        _reader.read(count);
+    std::auto_ptr<sptCore::DynamicSector> sector;
 
-        while(count--)
-        {
-
-        };
-
-        _reader.endChunk("TRCK");
-    }
-
-    {
-        _reader.expectChunk("SWTH");
-        size_t count;
-        _reader.read(count);
-
-        while(count--)
-        {
-
-        };
-
-        _reader.endChunk("SWTH");
-    }
+    readTracks(*sector);
+    readSwitches(*sector);
 
     _reader.endChunk("SECT");
     _input.seekg(prevOffset);
 
     return std::auto_ptr<sptCore::Sector>(NULL);
 
+};
+
+std::auto_ptr<sptCore::Path> SectorsReader::readPath()
+{
+    char type;
+    _reader.read(type);
+    
+    if(type == STRAIGHT)
+    {
+        osg::Vec3f begin;
+        osg::Vec3f end;
+
+        _reader.read(begin);
+        _reader.read(end);
+
+        return std::auto_ptr<sptCore::Path>(new sptCore::StraightPath(begin, end));
+    };
+
+    if(type == BEZIER)
+    {
+        osg::Vec3f begin;
+        osg::Vec3f cpBegin;
+        osg::Vec3f end;
+        osg::Vec3f cpEnd;
+
+        _reader.read(begin);
+        _reader.read(cpBegin);
+        _reader.read(end);
+        _reader.read(cpEnd);
+
+        return std::auto_ptr<sptCore::Path>(new sptCore::BezierPath(begin, cpBegin, end, cpEnd));
+    };
+
+    assert(false && "Unsuported path type");
+
+};
+
+void SectorsReader::readTracks(sptCore::DynamicSector& sector)
+{
+    _reader.expectChunk("TRLS");
+
+    size_t count;
+    _reader.read(count);
+
+    while(count--)
+    {
+//        sector.addTrack(new sptCore::Track(readPath()));
+    };
+
+    _reader.endChunk("TRLS");
+}
+
+void SectorsReader::readSwitches(sptCore::DynamicSector& sector)
+{
+    _reader.expectChunk("SWLS");
+    size_t count;
+    _reader.read(count);
+
+    while(count--)
+    {
+
+    };
+
+    _reader.endChunk("SWLS");
 }
