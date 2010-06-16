@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <fstream>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 #include "sptCore/DynamicSector.h"
 
@@ -63,18 +64,45 @@ private:
     ChunkWatcher _watcher;
 #endif
 
+    template <typename T>
+    void readOsgVec(T& output);
+
 };
 
-class SectorsReader
+class SectorOffsetsReader
+{
+public:
+    SectorOffsetsReader(std::ifstream& input);
+
+    void readOffsets();
+    bool hasSector(const osg::Vec2d& position);
+    void getSectorOffset(const osg::Vec2d& position);
+
+private:
+    struct SectorOffset
+    {
+        osg::Vec2d position;
+        size_t offset;
+    };
+
+    struct OffsetGreater;
+    struct OffsetLess;
+
+    typedef std::vector<SectorOffset> Offsets;
+    Offsets _offsets;
+
+    Offsets::const_iterator findSector(const osg::Vec2d& position);
+
+    std::ifstream& _input;
+    BinaryReader _reader;
+};
+
+class SectorReader
 {
 
 public:
-    SectorsReader(std::ifstream& input);
-
-    void readOffsets();
-
-    bool hasSector(const osg::Vec2d& position);
-    std::auto_ptr<sptCore::Sector> readSector(const osg::Vec2d& position);
+    SectorReader(std::ifstream& input);
+    std::auto_ptr<sptCore::Sector> readSector();
 
 private:
     struct Header
@@ -82,29 +110,17 @@ private:
         unsigned int version;
     };
 
-    struct SectorOffset
-    {
-        osg::Vec2d position;
-        size_t offset;
-    };
-
-    struct SectorOffsetGreater;
-    struct SectorOffsetLess;
+    typedef boost::ptr_vector<sptCore::RailTracking> Tracking;
 
     std::ifstream& _input;
     BinaryReader _reader;
-
-    typedef std::vector<SectorOffset> SectorOffsets;
-    SectorOffsets _sectorOffsets;
-
-    size_t _offset;
-
-    SectorOffsets::const_iterator findSector(const osg::Vec2d& position);
-    std::auto_ptr<sptCore::Sector> readSectorData(size_t offset);
+    Tracking _tracking;
 
     std::auto_ptr<sptCore::Path> readPath();
+
     void readTracks(sptCore::DynamicSector& sector);
     void readSwitches(sptCore::DynamicSector& sector);
+    void readNames();
 
 }; // class sptDB::SceneryReader
 
@@ -140,6 +156,25 @@ void BinaryReader::read(std::vector<T>& output)
         _input.read(reinterpret_cast<char*>(&element), elementSize);
         output.push_back(element);
     };
+};
+
+template <typename T>
+void BinaryReader::readOsgVec(T& output)
+{
+    assert_chunk_read(T::num_components * sizeof(typename T::value_type));
+    _input.read(reinterpret_cast<char*>(output.ptr()), T::num_components * sizeof(typename T::value_type));
+};
+
+template <>
+void BinaryReader::read(osg::Vec3f& output)
+{
+    readOsgVec(output);
+};
+
+template <>
+void BinaryReader::read(osg::Vec3d& output)
+{
+    readOsgVec(output);
 };
 
 }; // namespace sptDB
