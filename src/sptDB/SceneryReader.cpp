@@ -1,5 +1,6 @@
 #include "sptDB/SceneryReader.h"
 #include "sptCore/DynamicSector.h"
+#include "sptCore/Track.h"
 
 #include <algorithm>
 
@@ -16,52 +17,43 @@ enum PathType
 
 };
 
-struct SectorsReader::SectorOffsetGreater
+struct SectorOffsetsReader::OffsetGreater
 {
     bool operator()(const SectorOffset& left, const SectorOffset& right) { return right.position < left.position; }
 };
 
-struct SectorsReader::SectorOffsetLess
+struct SectorOffsetsReader::OffsetLess
 {
     bool operator()(const SectorOffset& left, const SectorOffset& right) { return left.position < right.position; }
 };
 
-SectorsReader::SectorsReader(std::ifstream& input):
+SectorReader::SectorReader(std::ifstream& input):
     _input(input), _reader(input)
 {
-    _offset = input.tellg();
 };
 
-void SectorsReader::readOffsets()
+void SectorOffsetsReader::readOffsets()
 {
     assert(_reader.expectChunk("SROF"));
-    _reader.read(_sectorOffsets);
+    _reader.read(_offsets);
 
     // check if offsets are sorted
-    assert(std::adjacent_find(_sectorOffsets.begin(), _sectorOffsets.end(), SectorOffsetGreater()) == _sectorOffsets.end());
+    assert(std::adjacent_find(_offsets.begin(), _offsets.end(), OffsetGreater()) == _offsets.end());
 };
 
-SectorsReader::SectorOffsets::const_iterator SectorsReader::findSector(const osg::Vec2d& position)
+SectorOffsetsReader::Offsets::const_iterator SectorOffsetsReader::findSector(const osg::Vec2d& position)
 {
     SectorOffset search = {position, 0};
-    return std::lower_bound(_sectorOffsets.begin(), _sectorOffsets.end(), search, SectorOffsetLess());
+    return std::lower_bound(_offsets.begin(), _offsets.end(), search, OffsetLess());
 }
 
-bool SectorsReader::hasSector(const osg::Vec2d& position)
+bool SectorOffsetsReader::hasSector(const osg::Vec2d& position)
 {
-    return findSector(position) != _sectorOffsets.end();
+    return findSector(position) != _offsets.end();
 }
 
-std::auto_ptr<sptCore::Sector> SectorsReader::readSector(const osg::Vec2d& position)
+std::auto_ptr<sptCore::Sector> SectorReader::readSector()
 {
-    SectorOffsets::const_iterator iter = findSector(position);
-
-    if(iter == _sectorOffsets.end())
-        throw std::range_error("Trying to read non-existing sector");
-
-    size_t prevOffset = _input.tellg();
-
-    _input.seekg(_offset + iter->offset);
     _reader.expectChunk("SECT");
 
     std::auto_ptr<sptCore::DynamicSector> sector;
@@ -70,13 +62,76 @@ std::auto_ptr<sptCore::Sector> SectorsReader::readSector(const osg::Vec2d& posit
     readSwitches(*sector);
 
     _reader.endChunk("SECT");
-    _input.seekg(prevOffset);
 
     return std::auto_ptr<sptCore::Sector>(NULL);
 
 };
 
-std::auto_ptr<sptCore::Path> SectorsReader::readPath()
+void SectorReader::readTracks(sptCore::DynamicSector& sector)
+{
+    _reader.expectChunk("TRLS");
+
+    size_t count;
+    _reader.read(count);
+
+    while(count--)
+    {
+        std::auto_ptr<sptCore::Path> path = readPath();
+        std::auto_ptr<sptCore::RailTracking> tracking(new sptCore::Track(sector, path));
+        _tracking.push_back(tracking);
+    };
+
+    _reader.endChunk("TRLS");
+};
+
+void SectorReader::readSwitches(sptCore::DynamicSector& sector)
+{
+    _reader.expectChunk("SWLS");
+    size_t count;
+    _reader.read(count);
+
+    while(count--)
+    {
+        std::auto_ptr<sptCore::Path> path = readPath();
+        std::auto_ptr<sptCore::RailTracking> tracking(new sptCore::Track(sector, path));
+        _tracking.push_back(tracking);
+    };
+
+    _reader.endChunk("SWLS");
+};
+
+void SectorReader::readNames()
+{
+    // read named tracks
+    {
+        _reader.expectChunk("TRNM");
+        size_t count;
+        _reader.read(count);
+
+        while(count--)
+        {
+
+        };
+
+        _reader.endChunk("TRNM");
+    };
+
+    // read named switches
+    {
+        _reader.expectChunk("SWNM");
+        size_t count;
+        _reader.read(count);
+
+        while(count--)
+        {
+
+        };
+
+        _reader.endChunk("SWNM");
+    };
+};
+
+std::auto_ptr<sptCore::Path> SectorReader::readPath()
 {
     char type;
     _reader.read(type);
@@ -111,31 +166,3 @@ std::auto_ptr<sptCore::Path> SectorsReader::readPath()
 
 };
 
-void SectorsReader::readTracks(sptCore::DynamicSector& sector)
-{
-    _reader.expectChunk("TRLS");
-
-    size_t count;
-    _reader.read(count);
-
-    while(count--)
-    {
-//        sector.addTrack(new sptCore::Track(readPath()));
-    };
-
-    _reader.endChunk("TRLS");
-}
-
-void SectorsReader::readSwitches(sptCore::DynamicSector& sector)
-{
-    _reader.expectChunk("SWLS");
-    size_t count;
-    _reader.read(count);
-
-    while(count--)
-    {
-
-    };
-
-    _reader.endChunk("SWLS");
-}

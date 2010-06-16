@@ -78,7 +78,8 @@ void SceneryBuilder::addConnection(const osg::Vec3& position, const RailTracking
 Track& SceneryBuilder::createTrack(const osg::Vec3& p1, const osg::Vec3& p2)
 {
 
-    std::auto_ptr<Track> trackPtr(new Track(getCurrentSector(), new StraightPath(p1, p2)));
+    std::auto_ptr<Path> path(new StraightPath(p1, p2));
+    std::auto_ptr<Track> trackPtr(new Track(getCurrentSector(), path));
     Track& track = *trackPtr;
 
     _sector->addTrack(std::auto_ptr<RailTracking>(trackPtr));
@@ -93,7 +94,8 @@ Track& SceneryBuilder::createTrack(const osg::Vec3& p1, const osg::Vec3& p2)
 Track& SceneryBuilder::createTrack(const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2)
 {
 
-    std::auto_ptr<Track> trackPtr(new Track(getCurrentSector(), new BezierPath(p1, cp1, p2, cp2)));
+    std::auto_ptr<Path> path(new BezierPath(p1, cp1, p2, cp2));
+    std::auto_ptr<Track> trackPtr(new Track(getCurrentSector(), path));
     Track& track = *trackPtr;
 
     _sector->addTrack(std::auto_ptr<RailTracking>(trackPtr));
