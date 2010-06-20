@@ -8,14 +8,13 @@ class StaticSector: public Sector
 {
 
 public:
-    StaticSector(size_t count): _count(count) { }
+    template <typename RailTrackingContainerT, typename ConnectionContainerT>
+    StaticSector(RailTrackingContainerT& tracking, ConnectionContainerT& connections);
 
-    virtual Track* getNextTrack(const osg::Vec3& position, Track* from) const = 0;
-    virtual std::pair<Track*, Track*> getTracksAt(const osg::Vec3& position) const = 0;
+    virtual const RailTracking& getNextTrack(const osg::Vec3& position, const RailTracking& from) const;
+    virtual size_t getTotalTracks() const;
 
-    //! \brief Add track pair to sector
-    //! \warning Tracks has to be added in order by position
-    void add(const osg::Vec3& position, Track* first, Track* second);
+    virtual const Connection& getConnection(const osg::Vec3& position) const;
 
     //! \brief Check correctness of data
     //!
