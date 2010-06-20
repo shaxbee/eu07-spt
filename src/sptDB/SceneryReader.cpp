@@ -1,8 +1,10 @@
 #include "sptDB/SceneryReader.h"
 #include "sptCore/DynamicSector.h"
 #include "sptCore/Track.h"
+#include "sptCore/Switch.h"
 
 #include <algorithm>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 using namespace sptDB;
 
@@ -15,7 +17,78 @@ enum PathType
     BEZIER = 1
 };
 
-};
+typedef boost::ptr_vector<sptCore::Track> Tracks;
+typedef boost::ptr_vector<sptCore::Switch> Switches;
+
+std::auto_ptr<sptCore::Path> readPath(BinaryReader& reader)
+{
+    char type;
+    reader.read(type);
+    
+    if(type == STRAIGHT)
+    {
+        osg::Vec3f begin;
+        osg::Vec3f end;
+
+        reader.read(begin);
+        reader.read(end);
+
+        return std::auto_ptr<sptCore::Path>(new sptCore::StraightPath(begin, end));
+    };
+
+    if(type == BEZIER)
+    {
+        osg::Vec3f begin;
+        osg::Vec3f cpBegin;
+        osg::Vec3f end;
+        osg::Vec3f cpEnd;
+
+        reader.read(begin);
+        reader.read(cpBegin);
+        reader.read(end);
+        reader.read(cpEnd);
+
+        return std::auto_ptr<sptCore::Path>(new sptCore::BezierPath(begin, cpBegin, end, cpEnd));
+    };
+
+    assert(false && "Unsuported path type");
+}; // ::readPath(reader)
+
+void readTracks(sptCore::Sector& sector, BinaryReader& reader, Tracks& output)
+{
+    reader.expectChunk("TRLS");
+
+    size_t count;
+    reader.read(count);
+
+    while(count--)
+    {
+        std::auto_ptr<sptCore::Path> path = readPath(reader);
+        std::auto_ptr<sptCore::Track> track(new sptCore::Track(sector, path));
+        output.push_back(track);
+    };
+
+    reader.endChunk("TRLS");
+}; // ::readTracks(sector, reader, output)
+
+void readSwitches(sptCore::Sector& sector, BinaryReader& reader, Switches& output)
+{
+    reader.expectChunk("SWLS");
+    size_t count;
+    reader.read(count);
+
+    while(count--)
+    {
+        std::auto_ptr<sptCore::Path> straight = readPath(reader);
+        std::auto_ptr<sptCore::Path> diverted = readPath(reader);
+        std::auto_ptr<sptCore::Switch> switch_(new sptCore::Switch(sector, straight, diverted));
+        output.push_back(switch_);
+    };
+
+    reader.endChunk("SWLS");
+}; // ::readSwitches(sector, reader, output)
+
+}; // anonymous namespace
 
 struct SectorOffsetsReader::OffsetGreater
 {
@@ -58,47 +131,16 @@ std::auto_ptr<sptCore::Sector> SectorReader::readSector()
 
     std::auto_ptr<sptCore::DynamicSector> sector;
 
-    readTracks(*sector);
-    readSwitches(*sector);
+    Tracks tracks;
+    readTracks(*sector, _reader, tracks);
+
+    Switches switches;
+    readSwitches(*sector, _reader, switches);
 
     _reader.endChunk("SECT");
 
     return std::auto_ptr<sptCore::Sector>(sector);
 
-};
-
-void SectorReader::readTracks(sptCore::Sector& sector)
-{
-    _reader.expectChunk("TRLS");
-
-    size_t count;
-    _reader.read(count);
-
-    while(count--)
-    {
-        std::auto_ptr<sptCore::Path> path = readPath();
-        std::auto_ptr<sptCore::Track> track(new sptCore::Track(sector, path));
-        _tracks.push_back(track);
-    };
-
-    _reader.endChunk("TRLS");
-};
-
-void SectorReader::readSwitches(sptCore::Sector& sector)
-{
-    _reader.expectChunk("SWLS");
-    size_t count;
-    _reader.read(count);
-
-    while(count--)
-    {
-        std::auto_ptr<sptCore::Path> straight = readPath();
-        std::auto_ptr<sptCore::Path> diverted = readPath();
-        std::auto_ptr<sptCore::Switch> switch_(new sptCore::Switch(sector, straight, diverted));
-        _switches.push_back(switch_);
-    };
-
-    _reader.endChunk("SWLS");
 };
 
 void SectorReader::readNames()
@@ -131,39 +173,3 @@ void SectorReader::readNames()
         _reader.endChunk("SWNM");
     };
 };
-
-std::auto_ptr<sptCore::Path> SectorReader::readPath()
-{
-    char type;
-    _reader.read(type);
-    
-    if(type == STRAIGHT)
-    {
-        osg::Vec3f begin;
-        osg::Vec3f end;
-
-        _reader.read(begin);
-        _reader.read(end);
-
-        return std::auto_ptr<sptCore::Path>(new sptCore::StraightPath(begin, end));
-    };
-
-    if(type == BEZIER)
-    {
-        osg::Vec3f begin;
-        osg::Vec3f cpBegin;
-        osg::Vec3f end;
-        osg::Vec3f cpEnd;
-
-        _reader.read(begin);
-        _reader.read(cpBegin);
-        _reader.read(end);
-        _reader.read(cpEnd);
-
-        return std::auto_ptr<sptCore::Path>(new sptCore::BezierPath(begin, cpBegin, end, cpEnd));
-    };
-
-    assert(false && "Unsuported path type");
-
-};
-
