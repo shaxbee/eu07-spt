@@ -13,7 +13,7 @@ Sector& DynamicScenery::getSector(const osg::Vec3& position)
     {
         return _sectors.at(position);
     } 
-    catch(boost::bad_ptr_container_operation) 
+    catch(boost::bad_ptr_container_operation&) 
     {
         throw SectorNotFoundException() << PositionInfo(position);
     }

@@ -38,7 +38,7 @@ void SectorOffsetsReader::readOffsets()
     _reader.read(_offsets);
 
     // check if offsets are sorted
-    assert(std::adjacent_find(_offsets.begin(), _offsets.end(), OffsetGreater()) == _offsets.end());
+    assert(std::adjacent_find(_offsets.begin(), _offsets.end(), OffsetGreater()) == _offsets.end() && "Invalid offsets order");
 };
 
 SectorOffsetsReader::Offsets::const_iterator SectorOffsetsReader::findSector(const osg::Vec2d& position)
@@ -63,11 +63,11 @@ std::auto_ptr<sptCore::Sector> SectorReader::readSector()
 
     _reader.endChunk("SECT");
 
-    return std::auto_ptr<sptCore::Sector>(NULL);
+    return std::auto_ptr<sptCore::Sector>(sector);
 
 };
 
-void SectorReader::readTracks(sptCore::DynamicSector& sector)
+void SectorReader::readTracks(sptCore::Sector& sector)
 {
     _reader.expectChunk("TRLS");
 
@@ -77,14 +77,14 @@ void SectorReader::readTracks(sptCore::DynamicSector& sector)
     while(count--)
     {
         std::auto_ptr<sptCore::Path> path = readPath();
-        std::auto_ptr<sptCore::RailTracking> tracking(new sptCore::Track(sector, path));
-        _tracking.push_back(tracking);
+        std::auto_ptr<sptCore::Track> track(new sptCore::Track(sector, path));
+        _tracks.push_back(track);
     };
 
     _reader.endChunk("TRLS");
 };
 
-void SectorReader::readSwitches(sptCore::DynamicSector& sector)
+void SectorReader::readSwitches(sptCore::Sector& sector)
 {
     _reader.expectChunk("SWLS");
     size_t count;
@@ -92,9 +92,10 @@ void SectorReader::readSwitches(sptCore::DynamicSector& sector)
 
     while(count--)
     {
-        std::auto_ptr<sptCore::Path> path = readPath();
-        std::auto_ptr<sptCore::RailTracking> tracking(new sptCore::Track(sector, path));
-        _tracking.push_back(tracking);
+        std::auto_ptr<sptCore::Path> straight = readPath();
+        std::auto_ptr<sptCore::Path> diverted = readPath();
+        std::auto_ptr<sptCore::Switch> switch_(new sptCore::Switch(sector, straight, diverted));
+        _switches.push_back(switch_);
     };
 
     _reader.endChunk("SWLS");

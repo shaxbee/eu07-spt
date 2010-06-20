@@ -8,7 +8,9 @@
 #include <fstream>
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include "sptCore/DynamicSector.h"
+#include "sptCore/Sector.h"
+#include "sptCore/Track.h"
+#include "sptCore/Switch.h"
 
 namespace sptDB
 {
@@ -110,16 +112,19 @@ private:
         unsigned int version;
     };
 
-    typedef boost::ptr_vector<sptCore::RailTracking> Tracking;
+    typedef boost::ptr_vector<sptCore::Track> Tracks;
+    typedef boost::ptr_vector<sptCore::Switch> Switches;
 
     std::ifstream& _input;
     BinaryReader _reader;
-    Tracking _tracking;
+
+    Tracks _tracks;
+    Switches _switches;
 
     std::auto_ptr<sptCore::Path> readPath();
 
-    void readTracks(sptCore::DynamicSector& sector);
-    void readSwitches(sptCore::DynamicSector& sector);
+    void readTracks(sptCore::Sector& sector);
+    void readSwitches(sptCore::Sector& sector);
     void readNames();
 
 }; // class sptDB::SceneryReader
