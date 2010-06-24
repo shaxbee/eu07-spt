@@ -1,55 +1,102 @@
 #ifndef SPTCORE_SECTOR_H
-#define SPTCORE_SECTOR_H
-
-#include <map>
-
-#include <boost/exception.hpp>
-#include <boost/noncopyable.hpp>
+#define SPTCORE_SECTOR_H 1
 
 #include <osg/Vec3>
-#include <osg/ref_ptr>
+#include <vector>
+#include <boost/ptr_container/ptr_vector.hpp>
 
-#include <sptCore/RailTracking.h>
+#include "sptCore/RailTracking.h"
 
 namespace sptCore
 {
 
-class Scenery;
-
-//! \brief Bounded region of Scenery
-//! Sector manages RailTracking instances and connections between them.
-//! \author Zbyszek "ShaXbee" Mandziejewicz
-class Sector: boost::noncopyable
+class Sector
 {
 
 public:
-    Sector(Scenery& scenery, osg::Vec3 position): _scenery(scenery), _position(position) { };
-    virtual ~Sector() { };
+    template <typename RailTrackingContainerT, typename ConnectionContainerT>
+    Sector(RailTrackingContainerT& trackings, const ConnectionContainerT& connections);
+
+    const RailTracking& getNextTrack(const osg::Vec3& position, const RailTracking& from) const;
+    size_t getTracksCount() const;
+
+    template <typename ContainerT>
+    void updateConnections(const ContainerT& connections); 
+
+    struct Connection
+    {
+        osg::Vec3 position;
+        RailTracking* first;
+        RailTracking* second;
+    };
+
+    struct ConnectionUpdate
+    {
+        osg::Vec3 position;
+        RailTracking* tracking;
+    };
 
     static float SIZE;
 
-    Scenery& getScenery() { return _scenery; };
-    const osg::Vec3& getPosition() const { return _position; };
-
-    //! \brief Get other track connected at given position
-    //! \throw UnknownConnectionException if there is no connection at given position
-    virtual const RailTracking& getNextTrack(const osg::Vec3& position, const RailTracking& from) const = 0;
-    virtual size_t getTotalTracks() const = 0;
-
-    typedef std::pair<const RailTracking*, const RailTracking*> Connection;
-
-    //! \brief Get tracks connected at given position
-    //! \throw UnknownConnectionException if there is no connection at given position
-    virtual const Connection& getConnection(const osg::Vec3& position) const = 0;
-
-    typedef boost::error_info<struct tag_position, osg::Vec3f> PositionInfo;
-    class UnknownConnectionException: public boost::exception { };
-
 private:
-    Scenery& _scenery;
-    osg::Vec3 _position;
+    typedef std::vector<Connection> Connections;
+    typedef boost::ptr_vector<RailTracking> RailTrackings;
+
+    Connections _connections;
+    RailTrackings _trackings;
 
 }; // class sptCore::Sector
+
+namespace
+{
+
+struct ConnectionGreater
+{
+    bool operator()(const Sector::Connection& left, const Sector::Connection& right) const { return right.position < left.position; }
+}; // struct ::ConnectionGreater
+
+struct ConnectionLess
+{
+    bool operator()(const Sector::Connection& left, const Sector::Connection& right) const { return left.position < right.position; }
+}; // struct ::ConnectionLess
+
+}; // anonymous namespace
+
+template <typename RailTrackingContainerT, typename ConnectionContainerT>
+Sector::Sector(RailTrackingContainerT& trackings, const ConnectionContainerT& connections)
+{
+    _trackings = trackings.release();
+
+    // check if connections are sorted
+    assert(std::adjacent_find(connections.begin(), connections.end(), ConnectionGreater()) == connections.end() && "Invalid connections order");
+
+    _connections.reserve(connections.size());
+    std::copy(connections.begin(), connections.end(), std::back_inserter(connections));
+}; // Sector::Sector(tracking, connections)
+
+template <typename ContainerT>
+void Sector::updateConnections(const ContainerT& connections)
+{
+    Connections::iterator dest = _connections.begin();
+
+    for(typename ContainerT::const_iterator iter = connections.begin(); iter != connections.end(); iter++)
+    {
+        Connections::iterator dest = std::lower_bound(dest, _connections.end(), *iter, ConnectionLess());
+
+        assert(dest != _connections.end());
+        assert(iter.first == dest->position);
+        assert(!iter->first || !iter->second);
+
+        if(!dest->first)
+        {
+            dest->first = iter->tracking;
+        }
+        else
+        {
+            dest->second = iter->tracking;
+        };
+    };
+};
 
 } // namespace sptCore
 
