@@ -18,7 +18,7 @@ class DynamicScenery: public Scenery
 public:
     virtual ~DynamicScenery() { };
 
-    virtual Sector& getSector(const osg::Vec3& position);
+    virtual const Sector& getSector(const osg::Vec3& position) const;
     virtual bool hasSector(const osg::Vec3& position) const;
 
     virtual Track& getTrack(const std::string& name);

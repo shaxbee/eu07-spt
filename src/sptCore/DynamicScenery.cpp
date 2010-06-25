@@ -6,9 +6,8 @@
 
 using namespace sptCore;
 
-Sector& DynamicScenery::getSector(const osg::Vec3& position)
+const Sector& DynamicScenery::getSector(const osg::Vec3& position) const
 {
-
     try
     {
         return _sectors.at(position);
@@ -17,7 +16,6 @@ Sector& DynamicScenery::getSector(const osg::Vec3& position)
     {
         throw SectorNotFoundException() << PositionInfo(position);
     }
-    
 }; // DynamicScenery::getSector
         
 bool DynamicScenery::hasSector(const osg::Vec3& position) const
@@ -62,7 +60,7 @@ SwitchableTracking& DynamicScenery::getSwitch(const std::string& name)
 void DynamicScenery::addSector(std::auto_ptr<Sector> sector)
 {
 
-    size_t totalTracks = sector->getTotalTracks();
+    size_t totalTracks = sector->getTracksCount();
 
     std::pair<Sectors::iterator, bool> ret;
     osg::Vec3f position(sector->getPosition());
@@ -86,7 +84,7 @@ std::auto_ptr<Sector> DynamicScenery::removeSector(const osg::Vec3& position)
     if(iter == _sectors.end())
         throw SectorNotFoundException() << PositionInfo(position);
 
-    _statistics.totalTracks -= iter->second->getTotalTracks();
+    _statistics.totalTracks -= iter->second->getTracksCount();
     _statistics.sectors--;
 
     return std::auto_ptr<Sector>(_sectors.release(iter).release());
