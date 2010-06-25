@@ -1,6 +1,6 @@
 Import('env')
 
-objects = env.Object(Split('RailTracking.cpp Track.cpp SwitchableTracking.cpp Switch.cpp Path.cpp Sector.cpp DynamicScenery.cpp Follower.cpp'))
+objects = env.Object(Split('RailTracking.cpp Track.cpp SwitchableTracking.cpp Switch.cpp Path.cpp Sector.cpp Scenery.cpp Follower.cpp'))
 library = env.StaticLibrary('sptCore', objects);
 
 env.Install('#/lib', library)

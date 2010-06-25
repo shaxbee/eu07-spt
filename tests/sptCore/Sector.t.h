@@ -31,14 +31,16 @@ public:
         std::auto_ptr<Path> path1(new StraightPath(_pointA, _pointB));
         std::auto_ptr<Path> path2(new StraightPath(_pointB, _pointC));
 
-        boost::ptr_vector<RailTracking> tracks;
-        tracks.push_back(new Track(*_sector, path1));
-        tracks.push_back(new Track(*_sector, path2));
+        boost::array<RailTracking*, 2> tracks =
+        {{
+            new Track(*_sector, path1),
+            new Track(*_sector, path2)
+        }};
 
         boost::array<Sector::Connection, 2> connections =
         {{
-            {_pointA, NULL, &tracks[0]},
-            {_pointB, &tracks[0], &tracks[1]}
+            {_pointA, NULL, tracks[0]},
+            {_pointB, tracks[0], tracks[1]}
         }};
 
         _sector->setData(tracks, connections);

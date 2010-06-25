@@ -4,9 +4,8 @@
 
 #include <sptCore/Follower.h>
 
-#include <sptCore/SceneryBuilder.h>
-#include <sptCore/DynamicScenery.h>
-#include <sptCore/DynamicSector.h>
+#include <sptCore/Scenery.h>
+#include <sptCore/Sector.h>
 #include <sptCore/Track.h>
 
 using namespace sptCore;
@@ -26,6 +25,23 @@ public:
 
     void setUp()
     {
+        _scenery.reset(new Scenery());
+
+        {
+            std::auto_ptr<Sector> sector(new Sector(*scenery, _sector1));
+
+            boost::ptr_vector<RailTracking> trackings;
+            trackings.push_back(new Track(_point1, _point2));
+
+        }
+
+        {
+
+        }
+
+        {
+
+        }
 
         _builder.reset(new SceneryBuilder());
 
@@ -106,12 +122,15 @@ public:
     }; 
 
 private:
-    boost::scoped_ptr<SceneryBuilder> _builder;
-    DynamicScenery* _scenery;
+    boost::scoped_ptr<DynamicScenery> _scenery;
 
     osg::Vec3 _point1;
     osg::Vec3 _point2;
     osg::Vec3 _point3;
     osg::Vec3 _point4;
+
+    osg::Vec3d _sector1;
+    osg::Vec3d _sector2;
+    osg::Vec3d _sector3;
 
 }; // class FollowerTestSuite
