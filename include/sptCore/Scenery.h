@@ -19,7 +19,7 @@ class Scenery
 public:
     virtual ~Scenery() { };
 
-    virtual Sector& getSector(const osg::Vec3& position) = 0;
+    virtual const Sector& getSector(const osg::Vec3& position) const = 0;
     virtual bool hasSector(const osg::Vec3& position) const = 0;
 
     //! \throw RailTrackingNotFoundException if tracking was not found

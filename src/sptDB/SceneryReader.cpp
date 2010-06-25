@@ -1,5 +1,5 @@
 #include "sptDB/SceneryReader.h"
-#include "sptCore/DynamicSector.h"
+#include "sptCore/Sector.h"
 #include "sptCore/Track.h"
 #include "sptCore/Switch.h"
 
@@ -129,7 +129,7 @@ std::auto_ptr<sptCore::Sector> SectorReader::readSector()
 {
     _reader.expectChunk("SECT");
 
-    std::auto_ptr<sptCore::DynamicSector> sector;
+    std::auto_ptr<sptCore::Sector> sector;
 
     Tracks tracks;
     readTracks(*sector, _reader, tracks);
@@ -139,7 +139,7 @@ std::auto_ptr<sptCore::Sector> SectorReader::readSector()
 
     _reader.endChunk("SECT");
 
-    return std::auto_ptr<sptCore::Sector>(sector);
+    return sector;
 
 };
 
