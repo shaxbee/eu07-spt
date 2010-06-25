@@ -26,7 +26,7 @@ public:
     const osg::Vec3d& getPosition() const { return _position; };
     
     template <typename RailTrackingContainerT, typename ConnectionContainerT>
-    void setData(RailTrackingContainerT& trackings, ConnectionContainerT& connections);
+    void setData(RailTrackingContainerT& trackings, const ConnectionContainerT& connections);
 
     //! Get other track connected at given position
     //!
@@ -77,28 +77,42 @@ private:
 namespace
 {
 
-struct ConnectionGreater
-{
-    bool operator()(const Sector::Connection& left, const Sector::Connection& right) const { return right.position < left.position; }
-}; // struct ::ConnectionGreater
+    struct ConnectionGreater
+    {
+        bool operator()(const Sector::Connection& left, const Sector::Connection& right) const { return right.position < left.position; }
+    }; // struct ::ConnectionGreater
 
-struct ConnectionLess
-{
-    bool operator()(const Sector::Connection& left, const Sector::Connection& right) const { return left.position < right.position; }
-}; // struct ::ConnectionLess
+    struct ConnectionLess
+    {
+        bool operator()(const Sector::Connection& left, const Sector::Connection& right) const { return left.position < right.position; }
+    }; // struct ::ConnectionLess
+
+    template <typename RailTrackingContainerT>
+    void transferTrackings(RailTrackingContainerT& source, boost::ptr_vector<RailTracking>& dest)
+    {
+        for(typename RailTrackingContainerT::iterator iter = source.begin(); iter != source.end(); iter++)
+            dest.push_back(*iter);
+    };
+
+    template <>
+    void transferTrackings(boost::ptr_vector<RailTracking>& source, boost::ptr_vector<RailTracking>& dest)
+    {
+        dest.transfer(dest.begin(), source);
+    };
 
 }; // anonymous namespace
 
 template <typename RailTrackingContainerT, typename ConnectionContainerT>
-void Sector::setData(RailTrackingContainerT& trackings, ConnectionContainerT& connections)
+void Sector::setData(RailTrackingContainerT& trackings, const ConnectionContainerT& connections)
 {
     assert(_trackings.empty() && _connections.empty() && "Data already set");
 
     _trackings.reserve(trackings.size());
-    _trackings.transfer(_trackings.begin(), trackings.begin(), trackings.end(), trackings);
+    transferTrackings(trackings, _trackings);
 
     assert(std::adjacent_find(connections.begin(), connections.end(), ConnectionGreater()) == connections.end() && "Invalid connections order");
 
+    _connections.reserve(connections.size());
     std::copy(connections.begin(), connections.end(), std::back_inserter(_connections));
 }; // Sector::Sector(tracking, connections)
 
