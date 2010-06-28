@@ -24,10 +24,8 @@ void Follower::move(float distance)
 
     while(_distance < 0)
     {
-        
         changeTrack(_path->front());
         _distance += _path->length();
-
     };
     
     while(_distance > _path->length())
@@ -47,7 +45,6 @@ float segmentLength(osg::Vec3Array::const_iterator& iter)
 
 void Follower::findPosition(osg::ref_ptr<osg::Vec3Array> points, osg::Vec3Array::const_iterator& iter, float& ratio) const
 {
-
     iter = points->begin() + 1;
     float distance = segmentLength(iter); 
 
@@ -60,12 +57,10 @@ void Follower::findPosition(osg::ref_ptr<osg::Vec3Array> points, osg::Vec3Array:
 
     // ratio = position in segment / segment length
     ratio = (distance - _distance) / segmentLength(iter);
-
 }; // Follower::findPosition
 
 osg::Vec3 Follower::getPosition() const
 {
-
     osg::ref_ptr<osg::Vec3Array> points(_path->points());
     osg::Vec3Array::const_iterator iter;
     float ratio;
@@ -73,12 +68,10 @@ osg::Vec3 Follower::getPosition() const
     findPosition(points, iter, ratio);
 
     return sptUtil::mix(*(iter - 1), *iter, ratio);
-
 }; // Follower::getPosition
 
 osg::Matrix Follower::getMatrix() const
 {
-
     osg::ref_ptr<osg::Vec3Array> points(_path->points());
     osg::Vec3Array::const_iterator iter;
     float ratio;
@@ -100,38 +93,15 @@ osg::Matrix Follower::getMatrix() const
     transform.makeTranslate(sptUtil::mix(begin, end, ratio));
 
     return transform;
-
 }; // Follower::getMatrix
 
 void Follower::changeTrack(osg::Vec3 position)
 {
+    const Sector& sector = _track->getSector();
+    _track = &(sector.getNextTrack(position, *_track));
 
-    const Sector* sector = &(_track->getSector());
-    osg::Vec3 offset(floor(position.x() / Sector::SIZE), floor(position.y() / Sector::SIZE), 0);
-
-    // if position is outside current sector
-    if(offset != osg::Vec3())
-    {
-
-        offset *= Sector::SIZE;
-        sector = &(getScenery().getSector(sector->getPosition() + offset));
-        position -= offset;
-
-    };
-
-    try
-    {
-        _track = &(sector->getNextTrack(position, *_track));
-    }
-    catch(Sector::UnknownConnectionException exc)
-    {
-        throw NullTrackException();
-    };
-
-    // if connection contained null track then sector is corrupt
-    assert(_track != NULL);
+    position -= (_track->getSector().getPosition() - sector.getPosition());
 
     // update path
     _path = &(_track->getPath(position));
-
 }; // Follower::moveToNextTrack

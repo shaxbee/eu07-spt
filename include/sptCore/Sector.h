@@ -74,6 +74,11 @@ private:
 
 }; // class sptCore::Sector
 
+struct ConnectionLess
+{
+    bool operator()(const Sector::Connection& left, const Sector::Connection& right) const { return left.position < right.position; }
+}; // struct sptCore::ConnectionLess
+
 namespace
 {
 
@@ -81,11 +86,6 @@ namespace
     {
         bool operator()(const Sector::Connection& left, const Sector::Connection& right) const { return right.position < left.position; }
     }; // struct ::ConnectionGreater
-
-    struct ConnectionLess
-    {
-        bool operator()(const Sector::Connection& left, const Sector::Connection& right) const { return left.position < right.position; }
-    }; // struct ::ConnectionLess
 
     template <typename RailTrackingContainerT>
     void transferTrackings(RailTrackingContainerT& source, boost::ptr_vector<RailTracking>& dest)
