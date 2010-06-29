@@ -7,10 +7,11 @@ if env['DEBUG']:
     env.Append(CXXFLAGS='-g')
 #    env.Append(CXXFLAGS='-fprofile-arcs')
 #    env.Append(CXXFLAGS='-ftest-coverage')
-    env.Append(LIBS=['gcov'])
+#    env.Append(LIBS=['gcov'])
 else:
     env.Append(CXXFLAGS='-O3')
-    env.Append(LIBS=[])
+
+env.Append(LIBS=[])
 
 #variant = GetOption('variant')
 #env = SConscript(os.path.join(variant, 'SConscript'), exports=['env'])
