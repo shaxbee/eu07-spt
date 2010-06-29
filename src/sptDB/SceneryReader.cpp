@@ -1,10 +1,14 @@
 #include "sptDB/SceneryReader.h"
-#include "sptCore/DynamicSector.h"
-#include "sptCore/Track.h"
-#include "sptCore/Switch.h"
 
+#include <string>
 #include <algorithm>
+
 #include <boost/ptr_container/ptr_vector.hpp>
+
+#include <sptCore/Scenery.h>
+#include <sptCore/Sector.h>
+#include <sptCore/Track.h>
+#include <sptCore/Switch.h>
 
 using namespace sptDB;
 
@@ -88,48 +92,58 @@ void readSwitches(sptCore::Sector& sector, BinaryReader& reader, Switches& outpu
     reader.endChunk("SWLS");
 }; // ::readSwitches(sector, reader, output)
 
+void readTrackNames(sptCore::Scenery& scenery, BinaryReader& reader, Tracks& tracks)
+{
+    // read named tracks
+    {
+        reader.expectChunk("TRNM");
+        size_t count;
+        reader.read(count);
+
+        while(count--)
+        {
+            int index;
+            reader.read(index);
+
+            std::string name;
+            reader.read(name);
+
+            scenery.addTrack(name, tracks.at(index));
+        };
+
+        reader.endChunk("TRNM");
+    };
+};
+
+void readSwitchNames(sptCore::Scenery& scenery, BinaryReader& reader, Switches& switches)
+{
+    // read named tracks
+    {
+        reader.expectChunk("SWNM");
+        size_t count;
+        reader.read(count);
+
+        while(count--)
+        {
+            int index;
+            reader.read(index);
+
+            std::string name;
+            reader.read(name);
+
+            scenery.addSwitch(name, switches.at(index));
+        };
+        reader.endChunk("SWNM");
+    };
+}; // ::readSwitchNames
+
 }; // anonymous namespace
-
-struct SectorOffsetsReader::OffsetGreater
-{
-    bool operator()(const SectorOffset& left, const SectorOffset& right) { return right.position < left.position; }
-};
-
-struct SectorOffsetsReader::OffsetLess
-{
-    bool operator()(const SectorOffset& left, const SectorOffset& right) { return left.position < right.position; }
-};
-
-SectorReader::SectorReader(std::ifstream& input):
-    _input(input), _reader(input)
-{
-};
-
-void SectorOffsetsReader::readOffsets()
-{
-    assert(_reader.expectChunk("SROF"));
-    _reader.read(_offsets);
-
-    // check if offsets are sorted
-    assert(std::adjacent_find(_offsets.begin(), _offsets.end(), OffsetGreater()) == _offsets.end() && "Invalid offsets order");
-};
-
-SectorOffsetsReader::Offsets::const_iterator SectorOffsetsReader::findSector(const osg::Vec2d& position)
-{
-    SectorOffset search = {position, 0};
-    return std::lower_bound(_offsets.begin(), _offsets.end(), search, OffsetLess());
-}
-
-bool SectorOffsetsReader::hasSector(const osg::Vec2d& position)
-{
-    return findSector(position) != _offsets.end();
-}
 
 std::auto_ptr<sptCore::Sector> SectorReader::readSector()
 {
     _reader.expectChunk("SECT");
 
-    std::auto_ptr<sptCore::DynamicSector> sector;
+    std::auto_ptr<sptCore::Sector> sector;
 
     Tracks tracks;
     readTracks(*sector, _reader, tracks);
@@ -137,39 +151,11 @@ std::auto_ptr<sptCore::Sector> SectorReader::readSector()
     Switches switches;
     readSwitches(*sector, _reader, switches);
 
+    readTrackNames(_scenery, _reader, tracks);
+    readSwitchNames(_scenery, _reader, switches);
+
     _reader.endChunk("SECT");
 
-    return std::auto_ptr<sptCore::Sector>(sector);
+    return sector;
 
-};
-
-void SectorReader::readNames()
-{
-    // read named tracks
-    {
-        _reader.expectChunk("TRNM");
-        size_t count;
-        _reader.read(count);
-
-        while(count--)
-        {
-
-        };
-
-        _reader.endChunk("TRNM");
-    };
-
-    // read named switches
-    {
-        _reader.expectChunk("SWNM");
-        size_t count;
-        _reader.read(count);
-
-        while(count--)
-        {
-
-        };
-
-        _reader.endChunk("SWNM");
-    };
 };

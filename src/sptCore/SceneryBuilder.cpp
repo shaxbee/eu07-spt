@@ -195,12 +195,4 @@ void SceneryBuilder::removeSwitch(const std::string& name)
 void SceneryBuilder::cleanup()
 {
 
-    const DynamicScenery::Sectors& sectors = _scenery->getSectors();
-
-//    for(DynamicScenery::Sectors::const_iterator iter = sectors.begin(); iter != sectors.end(); iter++)
-//    {
-//        DynamicSector& sector = dynamic_cast<DynamicSector&>(*(iter->second));
-//        sector.cleanup();
-//    };
-
 }; // SceneryBuilder::cleanup

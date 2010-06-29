@@ -19,32 +19,11 @@ public:
     //! \param straight straight path
     //! \param diverted diverted path
     //! \param position initial position
-    Switch(Sector& sector, std::auto_ptr<Path> straight, std::auto_ptr<Path> diverted, const std::string& position = "STRAIGHT"):
+    template <typename T1, typename T2>
+    Switch(Sector& sector, T1 straight, T2 diverted, const std::string& position = "STRAIGHT"):
         SwitchableTracking(sector), 
         _straight(straight), 
         _diverted(diverted),
-        _straightReversed(_straight->reverse()),
-        _divertedReversed(_diverted->reverse())
-    {
-        setPosition(position);
-    };
-    
-    template <typename T1, typename T2>
-    Switch(Sector& sector, T1* straight, T2* diverted, const std::string& position = "STRAIGHT"): 
-        SwitchableTracking(sector), 
-        _straight(straight), 
-        _diverted(diverted),
-        _straightReversed(_straight->reverse()),
-        _divertedReversed(_diverted->reverse())
-    {
-        setPosition(position);
-    };
-
-    template <typename T1, typename T2>
-    Switch(Sector& sector, std::auto_ptr<T1> straight, std::auto_ptr<T2> diverted, const std::string& position = "STRAIGHT"): 
-        SwitchableTracking(sector),
-        _straight(straight.release()), 
-        _diverted(diverted.release()),
         _straightReversed(_straight->reverse()),
         _divertedReversed(_diverted->reverse())
     {
@@ -55,6 +34,7 @@ public:
 
     virtual const osg::Vec3& getExit(const osg::Vec3& entry) const;
     virtual const Path& getPath(const osg::Vec3& entry) const;
+    virtual const Path& reversePath(const Path& path) const;
 
     virtual const ValidPositions& getValidPositions() const;
 
@@ -66,11 +46,10 @@ private:
 
     static ValidPositions _positions;
 
-    boost::scoped_ptr<Path> _straight;
-    boost::scoped_ptr<Path> _diverted;
-
-    mutable boost::scoped_ptr<Path> _straightReversed;
-    mutable boost::scoped_ptr<Path> _divertedReversed;
+    std::auto_ptr<Path> _straight;
+    std::auto_ptr<Path> _diverted;
+    std::auto_ptr<Path> _straightReversed;
+    std::auto_ptr<Path> _divertedReversed;
 
 }; // class Switch
 
