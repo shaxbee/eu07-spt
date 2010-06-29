@@ -4,6 +4,8 @@
 #include <memory>
 #include <fstream>
 
+#include <osg/Vec3d>
+
 #include <sptCore/Sector.h>
 #include <sptCore/Scenery.h>
 
@@ -17,7 +19,7 @@ class SectorReader
 
 public:
     SectorReader(std::ifstream& input, sptCore::Scenery& scenery);
-    std::auto_ptr<sptCore::Sector> readSector();
+    std::auto_ptr<sptCore::Sector> readSector(const osg::Vec3d& position);
 
 private:
     struct Header

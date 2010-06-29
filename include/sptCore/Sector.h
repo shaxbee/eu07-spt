@@ -3,7 +3,6 @@
 
 #include <vector>
 
-#include <boost/swap.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <osg/Vec3f>
