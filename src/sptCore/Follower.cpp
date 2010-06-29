@@ -25,6 +25,7 @@ void Follower::move(float distance)
     while(_distance < 0)
     {
         changeTrack(_path->front());
+        _path = &_track->reversePath(*_path);
         _distance += _path->length();
     };
     

@@ -17,6 +17,7 @@ public:
 
     virtual const osg::Vec3& getExit(const osg::Vec3& entry) const { return get_override("getExit")(entry); };
     virtual const Path& getPath(const osg::Vec3& entry) const { return get_override("getPath")(entry); };
+    virtual const Path& reversePath(const Path& path) const { return get_override("reversePath")(path); };
 
 };
 
@@ -26,6 +27,8 @@ struct SwitchableTrackingWrapper: SwitchableTracking, wrapper<SwitchableTracking
 
     virtual const osg::Vec3& getExit(const osg::Vec3& entry) const { return get_override("getExit")(entry); };
     virtual const Path& getPath(const osg::Vec3& entry) const { return get_override("getPath")(entry); };    
+    virtual const Path& reversePath(const Path& path) const { return get_override("reversePath")(path); };
+
     virtual const ValidPositions& getValidPositions() const { return get_override("getValidPositions")(); };
     virtual void setPosition(const std::string& position) 
     { 

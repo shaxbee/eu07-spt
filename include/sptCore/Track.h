@@ -3,18 +3,14 @@
 
 #include <sptCore/RailTracking.h>
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 namespace sptCore
 {
 
 class Track: public RailTracking
 {
-
 public:
-    //! Construct straight track
-    Track(Sector& sector, std::auto_ptr<Path> path): RailTracking(sector), _forward(path.release()), _backward(_forward->reverse()) { };
-
     template <typename PathT>
     Track(Sector& sector, PathT path): RailTracking(sector), _forward(path), _backward(_forward->reverse()) { };
 
@@ -22,14 +18,14 @@ public:
 
     virtual const osg::Vec3& getExit(const osg::Vec3& entry) const;
     virtual const Path& getPath(const osg::Vec3& entry) const;
+    virtual const Path& reversePath(const Path& path) const;
 
     //! \brief Get default (forward) path
     const Path& getDefaultPath() const { return *_forward; }
     
 private:
-    boost::scoped_ptr<Path> _forward;
-    mutable boost::scoped_ptr<Path> _backward;
-
+    std::auto_ptr<Path> _forward;
+    std::auto_ptr<Path> _backward;
 };
 
 } // namespace sptCore
