@@ -29,3 +29,14 @@ const Path& Track::getPath(const osg::Vec3& entry) const
     throw UnknownEntryException() << PositionInfo(entry);
 
 }; // Track::getPath
+
+const Path& Track::reversePath(const Path& path) const
+{
+    if(&path == _forward.get())
+        return *_backward;
+
+    if(&path == _backward.get())
+        return *_forward;
+
+    assert(false && "Unknown path");
+}; // Track::getReversedPath

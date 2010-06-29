@@ -54,6 +54,22 @@ const Path& Switch::getPath(const osg::Vec3& entry) const
 
 }; // Switch::getPath(entry)
 
+const Path& Switch::reversePath(const Path& path) const
+{
+    if(&path == _straight.get())
+        return *_straightReversed;
+
+    if(&path == _straightReversed.get())
+        return *_straight;
+
+    if(&path == _diverted.get())
+        return *_divertedReversed;
+
+    if(&path == _divertedReversed.get())
+        return *_diverted;
+
+    throw std::logic_error("Unknown path");
+}; // Switch::reversePath
 
 const SwitchableTracking::ValidPositions& Switch::getValidPositions() const
 {
