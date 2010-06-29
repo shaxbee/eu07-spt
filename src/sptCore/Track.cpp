@@ -38,5 +38,5 @@ const Path& Track::reversePath(const Path& path) const
     if(&path == _backward.get())
         return *_forward;
 
-    assert(false && "Unknown path");
+    throw std::logic_error("Unknown path");
 }; // Track::getReversedPath

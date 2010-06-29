@@ -2,5 +2,5 @@ Import('env')
 
 # include osg types output for cxxtest
 env.Prepend(CXXTEST_OPTS = "--include=tests/OsgTypeTraits.h")
-#env.CxxTest('sptCore', Glob('*.t.h'), LIBS=env['LIBS'] + ['osg', 'sptCore'])
-env.CxxTest('sptCore', ['Sector.t.h', 'Scenery.t.h', 'Follower.t.h'], LIBS=env['LIBS'] + ['osg', 'sptCore'])
+env.CxxTest('sptCore', Glob('*.t.h'), LIBS=env['LIBS'] + ['osg', 'sptCore'])
+#env.CxxTest('sptCore', ['Sector.t.h', 'Scenery.t.h', 'Follower.t.h', 'Path.t.h'], LIBS=env['LIBS'] + ['osg', 'sptCore'])
