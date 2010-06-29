@@ -1,6 +1,7 @@
 #include "sptDB/SceneryReader.h"
 
 #include <string>
+#include <vector>
 #include <algorithm>
 
 #include <boost/ptr_container/ptr_vector.hpp>
@@ -23,6 +24,8 @@ enum PathType
 
 typedef boost::ptr_vector<sptCore::Track> Tracks;
 typedef boost::ptr_vector<sptCore::Switch> Switches;
+typedef boost::ptr_vector<sptCore::RailTracking> RailTrackings;
+typedef std::vector<sptCore::Sector::Connection> Connections;
 
 std::auto_ptr<sptCore::Path> readPath(BinaryReader& reader)
 {
@@ -92,27 +95,101 @@ void readSwitches(sptCore::Sector& sector, BinaryReader& reader, Switches& outpu
     reader.endChunk("SWLS");
 }; // ::readSwitches(sector, reader, output)
 
-void readTrackNames(sptCore::Scenery& scenery, BinaryReader& reader, Tracks& tracks)
+void readCustomTracking(sptCore::Sector& sector, BinaryReader& reader, Tracks& tracks, Switches& switches)
 {
-    // read named tracks
+    reader.expectChunk("RTLS");
+    size_t count;
+    reader.read(count);
+
+    if(count != 0)
+        throw std::logic_error("Custom RailTracking reading not implemented");
+
+    reader.endChunk("RTLS");
+};
+
+void readConnections(BinaryReader& reader, const RailTrackings& trackings, Connections& connections, Connections& externals)
+{
+    reader.expectChunk("RTCN");
+
+    // read connections
     {
-        reader.expectChunk("TRNM");
         size_t count;
         reader.read(count);
 
         while(count--)
         {
-            int index;
-            reader.read(index);
+            osg::Vec3f position;
+            reader.read(position);
 
-            std::string name;
-            reader.read(name);
+            size_t left;
+            reader.read(left);
 
-            scenery.addTrack(name, tracks.at(index));
+            size_t right;
+            reader.read(right);
+
+            sptCore::Sector::Connection connection =
+            {
+                position,
+                &trackings.at(left),
+                &trackings.at(right)
+            };
+
+            connections.push_back(connection);
+
         };
 
-        reader.endChunk("TRNM");
     };
+
+    size_t external = std::numeric_limits<size_t>::max();
+
+    // read external connections
+    {
+        size_t count;
+        reader.read(count);
+
+        while(count--)
+        {
+            osg::Vec3f position;
+            reader.read(position);
+
+            size_t left;
+            reader.read(left);
+
+            size_t right;
+            reader.read(right);
+
+            sptCore::Sector::Connection connection = 
+            {
+                position,
+                left != external ? &trackings.at(left) : NULL,
+                right != external ? &trackings.at(right) : NULL
+            };
+
+            externals.push_back(connection);
+        };
+    };
+
+    reader.endChunk("RTCN");
+}; // ::readConnections(reader, trackings, output)
+
+void readTrackNames(sptCore::Scenery& scenery, BinaryReader& reader, Tracks& tracks)
+{
+    reader.expectChunk("TRNM");
+    size_t count;
+    reader.read(count);
+
+    while(count--)
+    {
+        size_t index;
+        reader.read(index);
+
+        std::string name;
+        reader.read(name);
+
+        scenery.addTrack(name, tracks.at(index));
+    };
+
+    reader.endChunk("TRNM");
 };
 
 void readSwitchNames(sptCore::Scenery& scenery, BinaryReader& reader, Switches& switches)
@@ -139,23 +216,39 @@ void readSwitchNames(sptCore::Scenery& scenery, BinaryReader& reader, Switches& 
 
 }; // anonymous namespace
 
-std::auto_ptr<sptCore::Sector> SectorReader::readSector()
+std::auto_ptr<sptCore::Sector> SectorReader::readSector(const osg::Vec3d& position)
 {
     _reader.expectChunk("SECT");
 
-    std::auto_ptr<sptCore::Sector> sector;
+    std::auto_ptr<sptCore::Sector> sector(new sptCore::Sector(_scenery, position));
 
+    // TRLS - Tracks List
     Tracks tracks;
     readTracks(*sector, _reader, tracks);
 
+    // SWLS - Switches List
     Switches switches;
     readSwitches(*sector, _reader, switches);
 
+    // RTLS - Custom RailTracking List
+    readCustomTracking(*sector, _reader, tracks, switches);
+
+    // TRNM - Track Names
     readTrackNames(_scenery, _reader, tracks);
+    // SWNM - Switch Names
     readSwitchNames(_scenery, _reader, switches);
+
+    RailTrackings trackings;
+    trackings.reserve(tracks.size() + switches.size());
+    trackings.transfer(trackings.begin(), tracks);
+    trackings.transfer(trackings.end() - 1, switches);
+
+    // RTCN - RailTracking Connections
+    Connections connections;
+    Connections externals;
+    readConnections(_reader, trackings, connections, externals);
 
     _reader.endChunk("SECT");
 
     return sector;
-
 };
