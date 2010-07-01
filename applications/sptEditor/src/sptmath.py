@@ -23,7 +23,7 @@ class Vec3:
         self.z = z
 
     def __repr__(self):
-        return "(%.3f,%.3f,%.3f)" % (self.x, self.y, self.z)
+        return "Vec3(%.3f,%.3f,%.3f)" % self.to_tuple() 
 
     def __eq__(self, other):
         if other == None:
@@ -34,6 +34,15 @@ class Vec3:
 
     def __hash__(self):
         return 37 + hash(self.x)*7 + hash(self.y)*11 + hash(self.z)*3
+
+    def __add__(self, other):
+        return Vec3(self.x + other.x, self.y + other.y, self.z + other.z)
+
+    def __sub__(self, other):
+        return Vec3(self.x - other.x, self.y - other.y, self.z - other.z)
+
+    def to_tuple(self):
+        return (self.x, self.y, self.z)
 
     def __setattr__(self, name, arg):
         """

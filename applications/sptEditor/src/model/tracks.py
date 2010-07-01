@@ -131,14 +131,12 @@ class Track(RailTracking):
         """
         Gives a detailed information about this object.
         """
-        return "Track[" \
-            + "name=" + str(self.name) \
-            + ", p1=" + coord2str(self.p1) \
-            + ", v1=" + coord2str(self.v1) \
-            + ", v2=" + coord2str(self.v2) \
-            + ", p2=" + coord2str(self.p2) \
-            + "]"
-
+        return "Track(name=%s, p1=%s, v1=%s, v2=%s, p2=%s)" % (
+            str(self.name),
+            repr(self.p1),
+            repr(self.v1),
+            repr(self.v2),
+            repr(self.p2))
             
     def __eq__(self,other):
         """
