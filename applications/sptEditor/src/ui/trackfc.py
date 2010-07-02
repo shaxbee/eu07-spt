@@ -89,9 +89,6 @@ class TrackFactory:
 
         return Track(p1, v1, v2, p2)
         
-
-
-
 class AbstractTransform:
     """
     A transform does something with the geometry of track.

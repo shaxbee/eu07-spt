@@ -11,19 +11,19 @@ from wx import Point
 THREE_POINTS = Decimal('1.000')
 
 
-class Vec3:
+class Vec3(object):
     """
     A vector in 3D world.
     It uses fixed decimal point coordinates. It stores three decimal places.
     """
 
-    def __init__(self, x = Decimal(0), y = Decimal(0), z = Decimal(0)):
-        self.x = x
-        self.y = y
-        self.z = z
+    def __init__(self, x = 0, y = 0, z = 0):
+        self.x = Decimal(x)
+        self.y = Decimal(y)
+        self.z = Decimal(z)
 
     def __repr__(self):
-        return "(%.3f,%.3f,%.3f)" % (self.x, self.y, self.z)
+        return "Vec3(%.3f,%.3f,%.3f)" % self.to_tuple() 
 
     def __eq__(self, other):
         if other == None:
@@ -34,6 +34,15 @@ class Vec3:
 
     def __hash__(self):
         return 37 + hash(self.x)*7 + hash(self.y)*11 + hash(self.z)*3
+
+    def __add__(self, other):
+        return Vec3(self.x + other.x, self.y + other.y, self.z + other.z)
+
+    def __sub__(self, other):
+        return Vec3(self.x - other.x, self.y - other.y, self.z - other.z)
+
+    def to_tuple(self):
+        return (self.x, self.y, self.z)
 
     def __setattr__(self, name, arg):
         """
@@ -49,7 +58,13 @@ class Vec3:
         """
         The length of the vector.
         """
-        return math.sqrt(self.x*self.x + self.y*self.y + self.z*self.z)
+        return math.sqrt(self.length2())
+
+    def length2(self):
+        """
+        Squared length of vector.
+        """
+        return self.x*self.x + self.y*self.y + self.z*self.z
 
     def dotProduct(self, other):
         """
@@ -66,6 +81,63 @@ class Vec3:
         self.y = self.y / _length
         self.z = self.z / _length
 
+def parseVec(*args):
+    vec = None
+    if len(args) == 1:
+        vec = args[0]
+    elif len(args) == 3:
+        vec = Vec3(*args)
+    else:
+        raise ValueError("Invalid vector")
+
+    return vec
+
+class TransformMatrix(object):
+    def __init__(self, data = None):
+        self.__data = data if data else TransformMatrix.makeIdentity()
+
+    def __getitem__(self, index):
+        return self.__data[index]
+
+    def __mul__(self, vec):
+        if vec is not Vec3f:
+            raise ValueError("Vector expected")
+
+        mat = self.__data
+        d = Decimal(1) / (mat[3][0]*vec.x() + mat[3][1]*vec.y() + mat[3][2]*vec.z() + mat[3][3])
+
+        return Vec3f((mat[0][0]*vec.x() + mat[0][1]*vec.y() + mat[0][2]*vec.z() + mat[0][3]) * d,
+                     (mat[1][0]*vec.x() + mat[1][1]*vec.y() + mat[1][2]*vec.z() + mat[1][3]) * d,
+                     (mat[2][0]*vec.x() + mat[2][1]*vec.y() + mat[2][2]*vec.z() + mat[2][3]) * d)
+
+    @classmethod
+    def makeIdentity(cls):
+        return TransformMatrix([
+            [Decimal(1), Decimal(0), Decimal(0), Decimal(0)],
+            [Decimal(0), Decimal(1), Decimal(0), Decimal(0)],
+            [Decimal(0), Decimal(0), Decimal(1), Decimal(0)],
+            [Decimal(0), Decimal(0), Decimal(0), Decimal(1)]
+        ])
+
+    @classmethod
+    def makeScale(cls, *args):
+        vec = parseVec(*args)
+        return TransformMatrix([
+            [vec.x     , Decimal(0), Decimal(0), Decimal(0)],
+            [Decimal(0), vec.y     , Decimal(0), Decimal(0)],
+            [Decimal(0), Decimal(0), vec.z     , Decimal(0)],
+            [Decimal(0), Decimal(0), Decimal(0), Decimal(1)]
+        ])
+
+    @classmethod
+    def makeTranslate(cls, *args):
+        vec = parseVec(*args)
+        return TransformMatrix([
+            [Decimal(1), Decimal(0), Decimal(0), Decimal(0)],
+            [Decimal(0), Decimal(1), Decimal(0), Decimal(0)],
+            [Decimal(0), Decimal(0), Decimal(1), Decimal(0)],
+            [vec.x     , vec.y     , vec.z     , Decimal(1)]
+        ])
 
 def dotProduct(a, b):
     """
