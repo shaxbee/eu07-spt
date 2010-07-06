@@ -17,10 +17,10 @@ class Vec3:
     It uses fixed decimal point coordinates. It stores three decimal places.
     """
 
-    def __init__(self, x = Decimal(0), y = Decimal(0), z = Decimal(0)):
-        self.x = x
-        self.y = y
-        self.z = z
+    def __init__(self, x = 0, y = 0, z = 0):
+        self.x = Decimal(x)
+        self.y = Decimal(y)
+        self.z = Decimal(z)
 
     def __repr__(self):
         return "Vec3(%.3f,%.3f,%.3f)" % self.to_tuple() 

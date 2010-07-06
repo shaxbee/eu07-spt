@@ -18,14 +18,14 @@ class BinaryWriter(object):
 
     def __writeChunkToFile(self):
         self.__input.write(self.__currentChunk.name)
-        self.__input.write(uIntFormat.pack(len(self.__currentChunk.data)))
-        self.__input.write(self.__currentChunk.data)
+        self.__input.write(BinaryWriter.uIntFormat.pack(len(self.__currentChunk.data)))
+        self.__input.write(str(self.__currentChunk.data))
 
     def beginChunk(self, name):
         if len(name) != 4:
             raise ValueError("Invalid chunk identifier")
 
-        self.__chunks.append((name, bytearray()))
+        self.__chunks.append(Chunk(name))
         self.__currentChunk = self.__chunks[-1] 
 
     def endChunk(self, name):
@@ -60,21 +60,21 @@ class BinaryWriter(object):
         self.write(fmt.pack(*values))
 
     def write(self, value):
-        self.__currentChunk.expand(value)
+        self.__currentChunk.data.extend(value)
 
     def writeString(self, value):
         self.writeUInt(len(value))
         self.write(value)
 
     def writeUInt(self, value):
-        self.writeFmt(uIntFormat, value)
+        self.write(BinaryWriter.uIntFormat.pack(value))
 
-__trackFormats = [
+_trackFormats = [
     Struct("B 3f3f"), # straight
     Struct("B 3f3f3f3f") # bezier
 ]
 
-__switchFormats = [
+_switchFormats = [
     Struct("B 3f3f 3f3f"), # straight, straight
     Struct("B 3f3f 3f3f3f3f"), # straight, bezier
     Struct("B 3f3f3f3f 3f3f"), # bezier, straight
@@ -88,42 +88,38 @@ class PathKind(object):
 class StraightPath(object):
     kind = PathKind.STRAIGHT
 
-    def __init__(p1, p2):
+    def __init__(self, p1, p2):
         self.p1 = p1
         self.p2 = p2
 
     def __sub__(self, other):
-        self.p1 -= other
-        self.p2 -= other
+        return StraightPath(self.p1 - other, self.p2 - other)
 
     def to_tuple(self):
-        return (self.p1, self.p2)
+        return self.p1.to_tuple() + self.p2.to_tuple()
 
 class BezierPath(object):
     kind = PathKind.BEZIER
 
-    def __init__(p1, v1, p2, v2):
+    def __init__(self, p1, v1, p2, v2):
         self.p1 = p1
         self.v1 = v1
         self.p2 = p2
         self.v2 = v2
 
     def __sub__(self, other):
-        self.p1 -= other
-        self.v1 -= other
-        self.p2 -= other
-        self.v2 -= other
+        return BezierPath(self.p1 - other, self.v1 - other, self.p2 - other, self.v2 - other)
 
     def to_tuple(self):
-        return (self.p1, self.v1, self.p2, self.v2)
+        return self.p1.to_tuple() + self.v1.to_tuple() + self.p2.to_tuple() + self.v2.to_tuple()
 
-def __tracksGen(tracks, offset):
+def _tracksGen(tracks, offset):
     for track in tracks:
-        yield (track.path - offset).to_tuple()
+        yield (track.path.kind, ) + (track.path - offset).to_tuple()
 
-def __switchGen(switches, offset):
+def _switchGen(switches, offset):
     for switch in switches:
-        fmt = __switchFormats[switch.straight.kind + switch.diverted.kind * 2]
+        fmt = _switchFormats[switch.straight.kind + switch.diverted.kind * 2]
         yield (fmt, (switch.straight - offset).to_tuple() + \
                     (switch.diverted - offset).to_tuple() + \
                     (0 if switch.position == "STRAIGHT" else 1,))
@@ -136,39 +132,32 @@ class SectorWriter(BinaryWriter):
 
     def __writeTrackList(self):
         self.beginChunk("TRLS")
+        self.writeUInt(len(self.__tracks[PathKind.STRAIGHT]) + len(self.__tracks[PathKind.BEZIER]))
         for kind in range(2):
-            size = len(self.__tracks[PathKind.STRAIGHT])
-            self.writeUInt(size)
-            self.writeArray(__trackFormats[kind], __tracksGen(self.__tracks[kind], self.__offset), size)
+            self.writeArray(_trackFormats[kind], _tracksGen(self.__tracks[kind], self.__offset), len(self.__tracks[kind]))
         self.endChunk("TRLS")
 
     def __writeSwitchList(self):
         self.writeUInt(len(self.__switches))
-        self.writeVarArray(__switchGen(self.__switches))
+        self.writeVarArray(_switchGen(self.__switches))
 
-    def write(self):
+    def writeToFile(self):
         self.beginChunk("SECT")
         self.__writeTrackList()
         self.endChunk("SECT")
 
     def addTrack(self, track):
-        if not track.v1 and not track.v2:
-            track.path = StraightPath(track.p1, track.p2)
-        else:
-            track.path = BezierPath(track.p1, track.v1, track.p2, track.v2)
         self.__tracks[track.path.kind].append(track)
 
 if __name__ == "__main__":
     class Track(object):
-        def __init__(self, p1, v1, v2, p2):
-            self.p1 = p1
-            self.v1 = v1
-            self.v2 = v2
-            self.p2 = p2
+        def __init__(self, path):
+            self.path = path
 
     output = file("test.sct", "w+")
     writer = SectorWriter(output, Vec3())
-    writer.addTrack(Track(Vec3(), Vec3(), Vec3(), Vec3(100, 100, 0)))
-    writer.write()
+    writer.addTrack(Track(StraightPath(Vec3(100, 100, 0), Vec3(200, 100, 0))))
+    writer.addTrack(Track(BezierPath(Vec3(), Vec3(), Vec3(), Vec3(100, 100, 0))))
+    writer.writeToFile()
 
     output.close()
