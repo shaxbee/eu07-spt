@@ -62,6 +62,10 @@
           <label>&amp;Curve track</label>
           <help>Inserts curved track at the basepoint.</help>
         </object>
+        <object class="wxMenuItem" name="ID_INSERT_RAIL_SWITCH">
+          <label>Rail S&amp;witch</label>
+          <help>Inserts rail switch.</help>
+        </object>
       </object>
       <object class="wxMenuItem" name="wxID_DELETE">
         <label>&amp;Delete track</label>
@@ -136,10 +140,11 @@
             <hgap>5</hgap>
           </object>
         </object>
+        <flag>wxTOP|wxBOTTOM|wxLEFT|wxRIGHT</flag>
+        <border>2</border>
       </object>
       <object class="sizeritem">
         <object class="wxBoxSizer">
-          <orient>wxHORIZONTAL</orient>
           <object class="sizeritem">
             <object class="wxButton" name="wxID_OK">
               <label>Ok</label>
@@ -154,7 +159,10 @@
             <flag>wxLEFT</flag>
             <border>5</border>
           </object>
+          <orient>wxHORIZONTAL</orient>
         </object>
+        <flag>wxTOP|wxBOTTOM|wxLEFT|wxRIGHT</flag>
+        <border>10</border>
       </object>
     </object>
   </object>
@@ -278,10 +286,11 @@
           </object>
         </object>
         <option>1</option>
+        <flag>wxTOP|wxBOTTOM|wxLEFT|wxRIGHT</flag>
+        <border>2</border>
       </object>
       <object class="sizeritem">
         <object class="wxBoxSizer">
-          <orient>wxHORIZONTAL</orient>
           <object class="sizeritem">
             <object class="wxButton" name="wxID_OK"/>
             <option>1</option>
@@ -292,9 +301,10 @@
             <flag>wxLEFT</flag>
             <border>5</border>
           </object>
+          <orient>wxHORIZONTAL</orient>
         </object>
         <option>0</option>
-        <flag>wxALIGN_CENTRE|wxALIGN_TOP|wxALIGN_BOTTOM</flag>
+        <flag>wxTOP|wxBOTTOM|wxLEFT|wxRIGHT|wxALIGN_CENTRE|wxALIGN_TOP|wxALIGN_BOTTOM</flag>
         <border>10</border>
       </object>
     </object>
@@ -344,10 +354,11 @@
           </object>
         </object>
         <option>1</option>
+        <flag>wxTOP|wxBOTTOM|wxLEFT|wxRIGHT</flag>
+        <border>2</border>
       </object>
       <object class="sizeritem">
         <object class="wxBoxSizer">
-          <orient>wxHORIZONTAL</orient>
           <object class="sizeritem">
             <object class="wxButton" name="wxID_OK"/>
             <option>1</option>
@@ -358,9 +369,10 @@
             <flag>wxLEFT</flag>
             <border>5</border>
           </object>
+          <orient>wxHORIZONTAL</orient>
         </object>
         <option>0</option>
-        <flag>wxALIGN_CENTRE|wxALIGN_TOP|wxALIGN_BOTTOM</flag>
+        <flag>wxTOP|wxBOTTOM|wxLEFT|wxRIGHT|wxALIGN_CENTRE|wxALIGN_TOP|wxALIGN_BOTTOM</flag>
         <border>10</border>
       </object>
     </object>
@@ -431,10 +443,11 @@
           </object>
         </object>
         <option>1</option>
+        <flag>wxTOP|wxBOTTOM|wxLEFT|wxRIGHT</flag>
+        <border>2</border>
       </object>
       <object class="sizeritem">
         <object class="wxBoxSizer">
-          <orient>wxHORIZONTAL</orient>
           <object class="sizeritem">
             <object class="wxButton" name="wxID_OK"/>
             <option>1</option>
@@ -445,9 +458,90 @@
             <flag>wxLEFT</flag>
             <border>5</border>
           </object>
+          <orient>wxHORIZONTAL</orient>
         </object>
         <option>0</option>
-        <flag>wxALIGN_CENTRE|wxALIGN_TOP|wxALIGN_BOTTOM</flag>
+        <flag>wxTOP|wxBOTTOM|wxLEFT|wxRIGHT|wxALIGN_CENTRE|wxALIGN_TOP|wxALIGN_BOTTOM</flag>
+        <border>10</border>
+      </object>
+    </object>
+  </object>
+  <object class="wxDialog" name="InsertRailSwitch">
+    <size>200, 200</size>
+    <title>Rail switch</title>
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxPanel">
+          <object class="wxBoxSizer">
+            <orient>wxVERTICAL</orient>
+            <object class="sizeritem">
+              <object class="wxListBox" name="predefined">
+                <style>wxLB_SINGLE</style>
+              </object>
+              <flag>wxEXPAND|wxGROW</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxRadioBox" name="leftOrRight">
+                <label>Spin</label>
+                <dimension>1</dimension>
+                <content>
+                  <item>Left</item>
+                  <item>Right</item>
+                </content>
+                <dimension>1</dimension>
+              </object>
+              <flag>wxEXPAND|wxALIGN_CENTRE|wxALIGN_CENTRE_VERTICAL|wxALIGN_CENTRE_HORIZONTAL</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxRadioBox" name="handles">
+                <label>Handles</label>
+                <dimension>1</dimension>
+                <content>
+                  <item>Common</item>
+                  <item>Straight</item>
+                  <item>Diverging</item>
+                </content>
+                <dimension>1</dimension>
+              </object>
+              <flag>wxEXPAND</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxBoxSizer">
+                <object class="sizeritem">
+                  <object class="wxStaticText">
+                    <label>Name:</label>
+                  </object>
+                </object>
+                <object class="sizeritem">
+                  <object class="wxTextCtrl" name="name"/>
+                </object>
+                <orient>wxHORIZONTAL</orient>
+              </object>
+              <option>1</option>
+              <flag>wxEXPAND|wxALIGN_CENTRE|wxALIGN_CENTRE_VERTICAL|wxALIGN_CENTRE_HORIZONTAL</flag>
+            </object>
+          </object>
+        </object>
+        <flag>wxTOP|wxBOTTOM|wxLEFT|wxRIGHT</flag>
+        <border>2</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <object class="sizeritem">
+            <object class="wxButton" name="wxID_OK"/>
+            <option>1</option>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="wxID_CANCEL"/>
+            <option>1</option>
+            <flag>wxLEFT</flag>
+            <border>5</border>
+          </object>
+          <orient>wxHORIZONTAL</orient>
+        </object>
+        <option>0</option>
+        <flag>wxTOP|wxBOTTOM|wxLEFT|wxRIGHT|wxALIGN_CENTRE|wxALIGN_TOP|wxALIGN_BOTTOM</flag>
         <border>10</border>
       </object>
     </object>

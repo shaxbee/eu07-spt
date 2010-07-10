@@ -238,3 +238,41 @@ class InsertCurveTrack(wx.Dialog):
             # Swallow the exception
             pass
 
+
+
+class InsertRailSwitch(wx.Dialog):
+    """
+    Dialog for inserting rail switch
+    """
+
+    def __init__(self, parent):
+        w = parent.xRes.LoadDialog(parent, "InsertRailSwitch")
+        self.PostCreate(w)
+
+        self.Bind(wx.EVT_BUTTON, self.OnButton, id=wx.ID_OK)
+
+        self.FillContent(parent)
+
+        self.Fit()
+        self.Centre()
+        self.ShowModal()
+
+        self.Destroy()
+
+
+    def FillContent(self, parent):
+        self.predefinedList = wx.xrc.XRCCTRL(self, "predefined")
+        # TODO: add items
+        self.handles = wx.xrc.XRCCTRL(self, "handles")
+        self.leftOrRight = wx.xrc.XRCCTRL(self, "leftOrRight")
+        self.name = wx.xrc.XRCCTRL(self, "name")
+
+
+    def OnButton(self, event):
+        try:
+            self.Destroy()
+        except:
+            pass
+
+
+    
