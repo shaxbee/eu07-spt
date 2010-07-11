@@ -100,7 +100,8 @@ class SceneryLoader:
         t.v2 = map["v2"]
         t.p2 = map["p2"]
         t.name = map["name"]
-        self.parent.insert(t)
+        if self.parent != None:
+            self.parent.insert(t)
 #        t.n1 = map["n1"]
 #        t.n2 = map["n2"]
         return t
@@ -117,7 +118,8 @@ class SceneryLoader:
         s.v1 = map["v1"]
         s.v2 = map["v2"]
         s.name = map["name"]
-        self.parent.insert(s)
+        if self.parent != None:
+            self.parent.insert(s)
 #        s.nc = map["nc"]
 #        s.n1 = map["n1"]
 #        s.n2 = map["n2"]

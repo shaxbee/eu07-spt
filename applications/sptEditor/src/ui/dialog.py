@@ -7,9 +7,10 @@ This module contains all dialogs defined in editor application.
 import math
 import wx
 import wx.xrc
+import yaml
 from decimal import Decimal
 
-from model.tracks import Track
+from model.tracks import Track, Switch
 import ui.editor
 import ui.trackfc
 from sptmath import Vec3
@@ -251,6 +252,7 @@ class InsertRailSwitch(wx.Dialog):
 
         self.Bind(wx.EVT_BUTTON, self.OnButton, id=wx.ID_OK)
 
+        self.PrepareList()
         self.FillContent(parent)
 
         self.Fit()
@@ -260,9 +262,13 @@ class InsertRailSwitch(wx.Dialog):
         self.Destroy()
 
 
+    def PrepareList(self):
+        self.predefined = yaml.load(file("prefabric.yaml", "r"))
+
+
     def FillContent(self, parent):
         self.predefinedList = wx.xrc.XRCCTRL(self, "predefined")
-        # TODO: add items
+        self.predefinedList.SetItems(map(lambda r: r.name, self.predefined))
         self.handles = wx.xrc.XRCCTRL(self, "handles")
         self.leftOrRight = wx.xrc.XRCCTRL(self, "leftOrRight")
         self.name = wx.xrc.XRCCTRL(self, "name")
