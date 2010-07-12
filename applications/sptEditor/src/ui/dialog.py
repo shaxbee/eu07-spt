@@ -276,6 +276,10 @@ class InsertRailSwitch(wx.Dialog):
 
     def OnButton(self, event):
         try:
+            index = self.predefinedList.GetSelection()
+            if index != wx.NOT_FOUND:
+                wx.MessageBox("Selected: %s" % (self.predefined[index]), "Debug", wx.OK | wx.ICON_INFORMATION, \
+                    self)
             self.Destroy()
         except:
             pass
