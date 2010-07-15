@@ -36,13 +36,13 @@ env.Decider('MD5-timestamp')
 
 conf = Configure(env)
 
-if not conf.CheckLibWithHeader('osg', 'osg/Node', 'c++'):
-	print 'OpenSceneGraph library not found'
-	exit(1);
+#if not conf.CheckLibWithHeader('osg', 'osg/Node', 'c++'):
+#	print 'OpenSceneGraph library not found'
+#	exit(1);
 	
-if not conf.CheckCXXHeader('boost/exception.hpp'):
-	print 'Boost library not found'
-	exit(1);
+#if not conf.CheckCXXHeader('boost/exception.hpp'):
+#	print 'Boost library not found'
+#	exit(1);
 
 env = conf.Finish();
 
@@ -60,14 +60,14 @@ env.Append(CPPDEFINES = defines)
 Export('env')
 
 # common library
-SConscript('src/SConscript', variant_dir = buildDir, duplicate = 0)
+SConscript('src/SConscript', variant_dir = os.path.join(buildDir, 'lib'), duplicate = 0)
 
 # applications
 SConscript('applications/SConscript', variant_dir = os.path.join(buildDir, 'applications'), duplicate = 0)
 
 # python wrappers
-if 'wrappers' in COMMAND_LINE_TARGETS:
-    SConscript('wrappers/SConscript', variant_dir = os.path.join(buildDir, 'wrappers'), duplicate = 0)
+# if 'wrappers' in COMMAND_LINE_TARGETS:
+SConscript('wrappers/SConscript', variant_dir = os.path.join(buildDir, 'wrappers'), duplicate = 0)
 
 # unit tests
 if 'check' in COMMAND_LINE_TARGETS:
@@ -76,3 +76,5 @@ if 'check' in COMMAND_LINE_TARGETS:
 # documentation
 if 'doc' in COMMAND_LINE_TARGETS:
     SConscript('doc/SConscript')
+
+env.Alias('install', ['#/bin', '#/python'])

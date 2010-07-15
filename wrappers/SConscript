@@ -2,9 +2,9 @@ import os.path
 
 Import('env')
 
-env = env.Clone(SHLIBPREFIX='', toolpath=['#/build/pypp'], tools=['default', 'pypp'])
+#env = env.Clone(SHLIBPREFIX='', toolpath=['#/build/pypp'], tools=['default', 'pypp'])
 
-env.Append(CPPPATH = env['PYTHON_INCLUDE'])
+env.Append(CPPPATH = '/usr/include/python2.6')
 env.Append(CXXFLAGS=['-DBOOST_PYTHON_DYNAMIC_LIB'])
 
 libraries = ['sptCore']

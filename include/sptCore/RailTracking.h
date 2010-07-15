@@ -31,6 +31,9 @@ public:
     //! \throw UnknownEntryException if there is no path for given entry
     virtual const Path& getPath(const osg::Vec3& entry) const = 0;
 
+    //! Reverse path
+    virtual const Path& reversePath(const Path& path) const = 0;
+
     Sector& getSector() const { return _sector; }
 
     typedef boost::error_info<struct tag_position, osg::Vec3f> PositionInfo;
@@ -38,18 +41,6 @@ public:
 
     bool operator<(const RailTracking& other) const { return this < &other; }
 
-protected:
-    template <typename PtrT>
-    const Path& getReversedPath(const PtrT& source, PtrT& dest) const
-    {
-
-        if(!dest)
-            dest.reset(source->reverse().release());
-
-        return *dest;
-
-    };
-    
 private:
     Sector& _sector;
 

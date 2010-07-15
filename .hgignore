@@ -1,17 +1,21 @@
 syntax: glob
 
 *~
+*.swp
 *.o
 *.pyc
 .sconsign.dblite
 *.log
+*.orig
 
 .sconf_temp
 
 lib/*
+bin/*
+python/*
+cache/*
+
 build/linux/debug
 build/linux/release
 
-bin/spt
-bin/sptd
-bin/sptEditor
+doc/html

@@ -2,8 +2,8 @@
 
 #include <sptCore/Switch.h>
 
-#include <sptCore/DynamicScenery.h>
-#include <sptCore/DynamicSector.h>
+#include <sptCore/Scenery.h>
+#include <sptCore/Sector.h>
 
 using namespace sptCore;
 
@@ -17,7 +17,7 @@ public:
         _diverted(10.0f, 10.0f, 0.0f), 
         _scenery(),
         _sector(_scenery, osg::Vec3()),
-        _switch(_sector, _begin, _begin, _straight, _straight, _diverted, _diverted) 
+        _switch(_sector, new StraightPath(_begin, _straight), new StraightPath(_begin, _diverted)) 
     { 
 
     };
@@ -99,8 +99,8 @@ public:
     };
    
 private:
-    DynamicScenery _scenery;
-    DynamicSector _sector;
+    Scenery _scenery;
+    Sector _sector;
 
     osg::Vec3 _begin;
     osg::Vec3 _straight;

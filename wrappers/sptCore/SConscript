@@ -1,8 +1,7 @@
 Import('env')
 
-headers = ['RailTracking.h', 'Track.h', 'Path.h']
+#headers = ['RailTracking.h', 'Track.h', 'Path.h']
+#sources = env.PyPP(target = 'sptCore', source=['#/include/sptCore/' + header for header in headers]+['wrappers.py'])
 
-sources = env.PyPP(target = 'sptCore', source=['#/include/sptCore/' + header for header in headers]+['wrappers.py'])
-
-library = env.SharedLibrary('sptCore', sources, LIBS=Split('boost_python-mt osg sptCore'))
+library = env.SharedLibrary(target='sptCore', source='sptCore.cpp', SHLIBPREFIX='', LIBS=Split('boost_python osg sptCore'))
 env.Install('#/python', library)

@@ -2,8 +2,8 @@
 
 #include <sptCore/Track.h>
 
-#include <sptCore/DynamicScenery.h>
-#include <sptCore/DynamicSector.h>
+#include <sptCore/Scenery.h>
+#include <sptCore/Sector.h>
 
 using namespace sptCore;
 
@@ -15,8 +15,8 @@ public:
         _begin(0.0f, 0.0f, 0.0f), 
         _end(10.0f, 10.0f, 10.0f), 
         _scenery(),
-        _sector(new DynamicSector(_scenery, osg::Vec3())),
-        _track(*_sector, _begin, _end) { };
+        _sector(new Sector(_scenery, osg::Vec3())),
+        _track(*_sector, new StraightPath(_begin, _end)) { };
 
     void testGetExit()
     {
@@ -34,26 +34,18 @@ public:
         TS_ASSERT_EQUALS(_track.getPath(_begin).back(), _end);
         TS_ASSERT_EQUALS(_track.getPath(_end).back(), _begin);
        
-        TS_ASSERT_DIFFERS(_track.getPath(_begin), _track.getPath(_end));
+        TS_ASSERT_DIFFERS(&_track.getPath(_begin), &_track.getPath(_end));
         
         TS_ASSERT_THROWS(_track.getPath(osg::Vec3f(0.0f, 0.0f, 1.0f)), RailTracking::UnknownEntryException);
         
     };
     
-//    void testReverse()
-//    {
-//        
-//        TS_ASSERT_EQUALS(_track.getPath(_begin), _track.reverse(_track.getPath(_end)));
-//        TS_ASSERT_DIFFERS(_track.getPath(_begin), _track.reverse(_track.getPath(_begin)));
-//        
-//    };
-
 private:
     osg::Vec3 _begin;
     osg::Vec3 _end;
 
-    DynamicScenery _scenery;
-    DynamicSector* _sector;
+    Scenery _scenery;
+    Sector* _sector;
 
     Track _track;
     

@@ -14,12 +14,12 @@ public:
         osg::Vec3 begin(0.0f, 0.0f, 0.0f);
         osg::Vec3 end(100.0f, 100.0f, 0.0f);
 
-        Path path(begin, end);
+        StraightPath path(begin, end);
 
         TS_ASSERT_EQUALS(path.front(), begin);
         TS_ASSERT_EQUALS(path.back(), end);
 
-        TS_ASSERT_EQUALS(path.getNumElements(), 2);
+        TS_ASSERT_EQUALS(path.points()->getNumElements(), 2);
 
     };
 
@@ -29,11 +29,14 @@ public:
         osg::Vec3 begin(0.0f, 0.0f, 0.0f);
         osg::Vec3 end(100.0f, 100.0f, 10.0f);
 
-        Path path(begin, osg::Vec3(100.0f, 0.0f, 10.0f), end, osg::Vec3(0.0f, 100.0f, 0.0f), 32);
+        BezierPath path(begin, osg::Vec3(100.0f, 0.0f, 10.0f), end, osg::Vec3(100.0f, 0.0f, 0.0f));
 
         TS_ASSERT_EQUALS(path.front(), begin);
         TS_ASSERT_EQUALS(path.back(), end);
-        TS_ASSERT_EQUALS(path.getNumElements(), 33);
+        TS_ASSERT_DELTA(path.length(), 114.0f, 0.5f);
+
+        TS_ASSERT_DELTA(path.frontDir().x(), 1.0f, 0.01f);
+        TS_ASSERT_DELTA(path.backDir().y(), 1.0f, 0.01f);
 
     };
 
