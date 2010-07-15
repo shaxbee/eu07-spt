@@ -231,7 +231,6 @@ class InsertCurveTrack(wx.Dialog):
             config.Write("/InsertCurveTrack/radius", self.radius.GetValue())
             config.WriteInt("/InsertCurveTrack/leftOrRight", leftOrRight)
 
-            editor = self.GetParent().editor
             editor.scenery.AddRailTracking(t)
 
             self.Destroy()
@@ -255,6 +254,14 @@ class InsertRailSwitch(wx.Dialog):
         self.PrepareList()
         self.FillContent(parent)
 
+        config = wx.FileConfig.Get()
+        defaultPrefabric = config.ReadInt("/InsertRailSwitch/prefabric", 0)
+        defaultLeftOrRight = config.ReadInt("/InsertRailSwitch/leftOrRight", 0)
+        defaultHandle = config.ReadInt("/InsertRailSwitch/handle", 0)
+        self.predefinedList.SetSelection(defaultPrefabric)
+        self.leftOrRight.SetSelection(defaultLeftOrRight)
+        self.handles.SetSelection(defaultHandle)
+
         self.Fit()
         self.Centre()
         self.ShowModal()
@@ -277,11 +284,31 @@ class InsertRailSwitch(wx.Dialog):
     def OnButton(self, event):
         try:
             index = self.predefinedList.GetSelection()
-            if index != wx.NOT_FOUND:
-                wx.MessageBox("Selected: %s" % (self.predefined[index]), "Debug", wx.OK | wx.ICON_INFORMATION, \
-                    self)
+            leftOrRight = self.leftOrRight.GetSelection()
+            handle = self.handles.GetSelection()
+            name = self.name.GetValue().strip()
+
+            if index == wx.NOT_FOUND:
+                return
+            if name == "":
+                # Switch should have the name
+                return
+
+            editor = self.GetParent().editor
+            tf = ui.trackfc.TrackFactory(editor)
+            s = tf.CreateSwitch()
+            s.name = name
+
+            config = wx.FileConfig.Get()
+            config.WriteInt("/InsertRailSwitch/prefabric", index)
+            config.WriteInt("/InsertRailSwitch/leftOrRight", leftOrRight)
+            config.WriteInt("/InsertRailSwitch/handle", handle)
+
+            editor.scenery.AddRailTracking(s)
+
             self.Destroy()
-        except:
+        except ValueError:
+            # Swallow the exception
             pass
 
 

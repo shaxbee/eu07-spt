@@ -88,6 +88,11 @@ class TrackFactory:
         self.editor.SetBasePoint(basePoint)
 
         return Track(p1, v1, v2, p2)
+
+
+    def CreateSwitch(self):
+        # TODO: implement this
+        pass
         
 
 
