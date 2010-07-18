@@ -327,14 +327,14 @@ class RailSwitchView(View, Snapable):
 
     def IsSelectionPossible(self, point):
         lines = sptmath.toLineSegments(self.straight)
-        if self.IsSelectionPossible(point, lines):
+        if self.__IsSelectionPossible(point, lines):
             return True
         else:
-            lines = sptmath.toLineSegments(self, diverging)
-            return self.IsSelectionPossible(point, lines)
+            lines = sptmath.toLineSegments(self.diverging)
+            return self.__IsSelectionPossible(point, lines)
 
 
-    def IsSelectionPossible(self, point, lines):
+    def __IsSelectionPossible(self, point, lines):
         i = 1
         while i < len(lines):
             l = lines[i-1:i+1]
@@ -402,7 +402,7 @@ def CreateView(element):
     if type(element) == model.tracks.Track:
         return TrackView(element)
     elif type(element) == model.tracks.Switch:
-        return SwitchView(switch)
+        return RailSwitchView(element)
     else:
         raise ValueError("Unsupported element: " + str(type(element)))
 

@@ -79,7 +79,7 @@ class RailContainer:
             raise ValueError, "Connected rail tracking cannot " \
                 + "be inserted into group"
 
-        geometry = tracking.getGeometry()
+        geometry = tracking.getEndPoints()
 
         i = 0
         founds = 0L
@@ -170,7 +170,7 @@ class RailContainer:
         if not self.contains(tracking):
             raise ValueError, "Rail tracking is not in this group"
 
-        geometry = tracking.getGeometry()
+        geometry = tracking.getEndPoints()
 
         # Check if the points don't make existing group connections
         for gpoint in geometry:
@@ -225,7 +225,7 @@ class RailContainer:
 
 
     def isOutlineNow(self, tracking):
-        geometry = tracking.getGeometry()
+        geometry = tracking.getEndPoints()
         for p in geometry:
             if tracking.point2tracking(p) == None:
                 return True

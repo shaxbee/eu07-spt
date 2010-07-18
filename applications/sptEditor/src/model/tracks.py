@@ -100,7 +100,14 @@ class RailTracking(object):
 
     def getGeometry(self):
         """
-        Gets the geometry of the rail tracking expressed as end points.
+        Gets the 3d-geometry of the rail tracking.
+        """
+        pass # Implement it in subclasses
+
+
+    def getEndPoints(self):
+        """
+        Get the 3d-geometry array of end points.
         """
         pass # Implement it in subclasses
 
@@ -207,7 +214,7 @@ class Track(RailTracking):
             return None
 
 
-    def contains(self, point):
+    def containsPoint(self, point):
         return point == self.p1 or point == self.p2
 
 
@@ -223,8 +230,12 @@ class Track(RailTracking):
             self.n2 = next
 
 
-    def getGeometry(self):
+    def getEndPoints(self):
         return [self.p1, self.p2]
+
+
+    def getGeometry(self):
+        return [self.p1, self.v1, self.v2, self.p2]
 
 
     def getNormalVector(self, point):
@@ -379,7 +390,7 @@ class Switch(RailTracking):
             return None
 
 
-    def contains(self, point):
+    def containsPoint(self, point):
         return point == self.pc or point == self.p1 or point == self.p2
 
 
@@ -397,8 +408,12 @@ class Switch(RailTracking):
             self.n2 = next
 
 
-    def getGeometry(self):
+    def getEndPoints(self):
         return [self.pc, self.p1, self.p2]
+
+
+    def getGeometry(self):
+        return [self.pc, self.v1, self.v1c, self.p1, self.v2, self.v2c, self.p2]
 
 
     def getNormalVector(self, point):
@@ -459,7 +474,7 @@ def isDisconnected(tracking):
     Disconnected track means such rail tracking element
     that isn't connected to any other rail trackings.
     """
-    geometry = tracking.getGeometry()
+    geometry = tracking.getEndPoints()
     for p in geometry:
         if tracking.point2tracking(p) != None:
             return False
