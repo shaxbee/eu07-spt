@@ -28,7 +28,7 @@ void ChunkWatcher::pop(const std::string& name)
     Chunk& chunk = _chunks.top();
 
     if(name != chunk.name)
-        throw std::logic_error(str(format("Invalid chunk end - got %s expected %s") % _chunks.name % name));
+        throw std::logic_error(str(format("Invalid chunk end - got %s expected %s") % chunk.name % name));
 
     if(chunk.left != 0)
         throw std::runtime_error(str(format("Incomplete read of chunk %s, %d bytes left") % chunk.name % chunk.left));

@@ -130,6 +130,7 @@ class SectorWriter(BinaryWriter):
         BinaryWriter.__init__(self, output)
         self.__offset = offset
         self.__tracks = [list(), list()]
+        self.__switches = list()
 
     def __writeTrackList(self):
         self.beginChunk("TRLS")
@@ -139,26 +140,38 @@ class SectorWriter(BinaryWriter):
         self.endChunk("TRLS")
 
     def __writeSwitchList(self):
+        self.beginChunk("SWLS")
         self.writeUInt(len(self.__switches))
-        self.writeVarArray(_switchGen(self.__switches))
+        self.writeVarArray(_switchGen(self.__switches, self.__offset))
+        self.endChunk("SWLS")
 
     def writeToFile(self):
         self.beginChunk("SECT")
         self.__writeTrackList()
+        self.__writeSwitchList()
         self.endChunk("SECT")
 
     def addTrack(self, track):
         self.__tracks[track.path.kind].append(track)
+
+    def addSwitch(self, switch):
+        self.__switches.append(switch)
 
 if __name__ == "__main__":
     class Track(object):
         def __init__(self, path):
             self.path = path
 
+    class Switch(object):
+        def __init__(self, straight, diverted, position = "STRAIGHT"):
+            self.straight = straight
+            self.diverted = diverted
+
     output = file("test.sct", "w+")
     writer = SectorWriter(output, Vec3())
     writer.addTrack(Track(StraightPath(Vec3(100, 100, 0), Vec3(200, 100, 0))))
     writer.addTrack(Track(BezierPath(Vec3(), Vec3(), Vec3(), Vec3(100, 100, 0))))
+    writer.addSwitch(Switch(StraightPath(Vec3(0, 0, 0), Vec3(100, 0, 0)), StraightPath(Vec3(0, 0, 0), Vec3(0, 100, 0))))
     writer.writeToFile()
 
     output.close()

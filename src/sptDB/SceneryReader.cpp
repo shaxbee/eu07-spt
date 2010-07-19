@@ -29,6 +29,11 @@ typedef boost::ptr_vector<sptCore::Switch> Switches;
 typedef boost::ptr_vector<sptCore::RailTracking> RailTrackings;
 typedef std::vector<sptCore::Sector::Connection> Connections;
 
+void print_vec(const osg::Vec3f& vec)
+{
+    std::cout << "(" << vec.x() << ", " << vec.y() << ", " << vec.z() << ") ";
+}
+
 std::auto_ptr<sptCore::Path> readPath(BinaryReader& reader)
 {
     char type;
@@ -36,17 +41,24 @@ std::auto_ptr<sptCore::Path> readPath(BinaryReader& reader)
     
     if(type == STRAIGHT)
     {
+        std::cout << "STRAIGHT ";
+
         osg::Vec3f begin;
         osg::Vec3f end;
 
         reader.read(begin);
         reader.read(end);
 
+        print_vec(begin);
+        print_vec(end);
+
         return std::auto_ptr<sptCore::Path>(new sptCore::StraightPath(begin, end));
     };
 
     if(type == BEZIER)
     {
+        std::cout << "BEZIER ";
+
         osg::Vec3f begin;
         osg::Vec3f cpBegin;
         osg::Vec3f end;
@@ -56,6 +68,11 @@ std::auto_ptr<sptCore::Path> readPath(BinaryReader& reader)
         reader.read(cpBegin);
         reader.read(end);
         reader.read(cpEnd);
+
+        print_vec(begin);
+        print_vec(cpBegin);
+        print_vec(end);
+        print_vec(cpEnd);
 
         return std::auto_ptr<sptCore::Path>(new sptCore::BezierPath(begin, cpBegin, end, cpEnd));
     };
@@ -72,9 +89,11 @@ void readTracks(sptCore::Sector& sector, BinaryReader& reader, Tracks& output)
 
     while(count--)
     {
+        std::cout << "TRACK ";
         std::auto_ptr<sptCore::Path> path = readPath(reader);
         std::auto_ptr<sptCore::Track> track(new sptCore::Track(sector, path));
         output.push_back(track);
+        std::cout << std::endl;
     };
 
     reader.endChunk("TRLS");
@@ -88,10 +107,12 @@ void readSwitches(sptCore::Sector& sector, BinaryReader& reader, Switches& outpu
 
     while(count--)
     {
+        std::cout << "SWITCH ";
         std::auto_ptr<sptCore::Path> straight = readPath(reader);
         std::auto_ptr<sptCore::Path> diverted = readPath(reader);
         std::auto_ptr<sptCore::Switch> switch_(new sptCore::Switch(sector, straight, diverted));
         output.push_back(switch_);
+        std::cout << std::endl;
     };
 
     reader.endChunk("SWLS");
@@ -228,11 +249,11 @@ std::auto_ptr<sptCore::Sector> SectorReader::readSector(const osg::Vec3d& positi
     Tracks tracks;
     readTracks(*sector, _reader, tracks);
 
-#if 0
     // SWLS - Switches List
     Switches switches;
     readSwitches(*sector, _reader, switches);
 
+#if 0
     // RTLS - Custom RailTracking List
     readCustomTracking(*sector, _reader, tracks, switches);
 
