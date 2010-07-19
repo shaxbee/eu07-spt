@@ -11,6 +11,8 @@
 #include <sptCore/Track.h>
 #include <sptCore/Switch.h>
 
+#include <iostream>
+
 using namespace sptDB;
 
 namespace
@@ -226,11 +228,11 @@ std::auto_ptr<sptCore::Sector> SectorReader::readSector(const osg::Vec3d& positi
     Tracks tracks;
     readTracks(*sector, _reader, tracks);
 
+#if 0
     // SWLS - Switches List
     Switches switches;
     readSwitches(*sector, _reader, switches);
 
-#if 0
     // RTLS - Custom RailTracking List
     readCustomTracking(*sector, _reader, tracks, switches);
 

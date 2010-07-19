@@ -5,7 +5,7 @@
 using namespace boost;
 using namespace sptDB;
 
-void ChunkWatcher::check(size_t bytes)
+void ChunkWatcher::check(unsigned int bytes)
 {
     if(_chunks.empty())
         return;
@@ -14,10 +14,10 @@ void ChunkWatcher::check(size_t bytes)
     chunk.left -= bytes;
 
     if(chunk.left < 0)
-        throw std::runtime_error(str(format("Unexpected chunk end, tried to read %d bytes, %d bytes available") % bytes % (chunk.left + bytes)));
+        throw std::runtime_error(str(format("Unexpected end in chunk %s, tried to read %d bytes, %d bytes available") % chunk.name % bytes % (chunk.left + bytes)));
 };
 
-void ChunkWatcher::push(const std::string& name, size_t size)
+void ChunkWatcher::push(const std::string& name, unsigned int size)
 {
     Chunk chunk = {name, size, size};
     _chunks.push(chunk);
@@ -25,13 +25,21 @@ void ChunkWatcher::push(const std::string& name, size_t size)
 
 void ChunkWatcher::pop(const std::string& name)
 {
-    if(name != _chunks.top().name)
-        throw std::logic_error(str(format("Invalid chunk end - got %s expected %s") % _chunks.top().name % name));
+    Chunk& chunk = _chunks.top();
 
-    if(_chunks.top().left != 0)
-        throw std::runtime_error(str(format("Chunk read incomplete - %d bytes left") % _chunks.top().left));
+    if(name != chunk.name)
+        throw std::logic_error(str(format("Invalid chunk end - got %s expected %s") % _chunks.name % name));
 
+    if(chunk.left != 0)
+        throw std::runtime_error(str(format("Incomplete read of chunk %s, %d bytes left") % chunk.name % chunk.left));
+
+    unsigned int size = chunk.size;
     _chunks.pop();
+
+    if(!_chunks.empty())
+    {
+        _chunks.top().left -= size;
+    }
 };
 
 BinaryReader::BinaryReader(std::ifstream& stream): 
@@ -46,7 +54,7 @@ std::string BinaryReader::readChunk()
     assert_chunk_read(4);
     _input.read(chunk, 4);
 
-    size_t size;
+    unsigned int size;
     read(size);
 
     std::string name(chunk, 4);
@@ -77,7 +85,7 @@ void BinaryReader::read(osg::Vec3d& output)
 
 void BinaryReader::read(std::string& output)
 {
-    size_t length;
+    unsigned int length;
     read(length);
 
     char* buffer = new char[length];

@@ -7,9 +7,9 @@ class Chunk(object):
         self.data = bytearray(size)
 
 class BinaryWriter(object):
-    uIntFormat = Struct("I")
-    vec3fFormat = Struct("fff")
-    vec3dFormat = Struct("ddd")
+    uIntFormat = Struct("<I")
+    vec3fFormat = Struct("<fff")
+    vec3dFormat = Struct("<ddd")
 
     def __init__(self, ifile):
         self.__input = ifile
@@ -17,6 +17,7 @@ class BinaryWriter(object):
         self.__currentChunk = None
 
     def __writeChunkToFile(self):
+        print "write chunk %s %d" % (self.__currentChunk.name, len(self.__currentChunk.data))
         self.__input.write(self.__currentChunk.name)
         self.__input.write(BinaryWriter.uIntFormat.pack(len(self.__currentChunk.data)))
         self.__input.write(str(self.__currentChunk.data))
@@ -70,15 +71,15 @@ class BinaryWriter(object):
         self.write(BinaryWriter.uIntFormat.pack(value))
 
 _trackFormats = [
-    Struct("B 3f3f"), # straight
-    Struct("B 3f3f3f3f") # bezier
+    Struct("<B 3f3f"), # straight
+    Struct("<B 3f3f3f3f") # bezier
 ]
 
 _switchFormats = [
-    Struct("B 3f3f 3f3f"), # straight, straight
-    Struct("B 3f3f 3f3f3f3f"), # straight, bezier
-    Struct("B 3f3f3f3f 3f3f"), # bezier, straight
-    Struct("B 3f3f3f3f 3f3f3f3f") # bezier, bezier
+    Struct("<B 3f3f 3f3f"), # straight, straight
+    Struct("<B 3f3f 3f3f3f3f"), # straight, bezier
+    Struct("<B 3f3f3f3f 3f3f"), # bezier, straight
+    Struct("<B 3f3f3f3f 3f3f3f3f") # bezier, bezier
 ]
 
 class PathKind(object):
