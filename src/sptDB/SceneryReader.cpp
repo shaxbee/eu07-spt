@@ -230,6 +230,7 @@ std::auto_ptr<sptCore::Sector> SectorReader::readSector(const osg::Vec3d& positi
     Switches switches;
     readSwitches(*sector, _reader, switches);
 
+#if 0
     // RTLS - Custom RailTracking List
     readCustomTracking(*sector, _reader, tracks, switches);
 
@@ -247,6 +248,7 @@ std::auto_ptr<sptCore::Sector> SectorReader::readSector(const osg::Vec3d& positi
     Connections connections;
     Connections externals;
     readConnections(_reader, trackings, connections, externals);
+#endif
 
     _reader.endChunk("SECT");
 

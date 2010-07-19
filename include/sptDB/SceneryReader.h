@@ -18,7 +18,9 @@ class SectorReader
 {
 
 public:
-    SectorReader(std::ifstream& input, sptCore::Scenery& scenery);
+    SectorReader(std::ifstream& input, sptCore::Scenery& scenery):
+        _input(input), _scenery(scenery), _reader(input) { };
+
     std::auto_ptr<sptCore::Sector> readSector(const osg::Vec3d& position);
 
 private:

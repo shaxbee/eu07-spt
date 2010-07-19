@@ -4,6 +4,10 @@
 #include <stack>
 #include <fstream>
 #include <string>
+#include <vector>
+
+#include <osg/Vec3f>
+#include <osg/Vec3d>
 
 namespace sptDB
 {
@@ -39,7 +43,11 @@ public:
     template <typename T>
     void read(std::vector<T>& output);
 
-    std::string& readChunk();
+    void read(std::string& output);
+    void read(osg::Vec3f& output);
+    void read(osg::Vec3d& output);
+
+    std::string readChunk();
     bool expectChunk(const std::string& type);
     void endChunk(const std::string& type);
 
@@ -62,21 +70,6 @@ void BinaryReader::read(T& output)
 {
     assert_chunk_read(sizeof(T));
     _input.read(reinterpret_cast<char*>(&output), sizeof(T));
-};
-
-template <>
-void BinaryReader::read(std::string& output)
-{
-    size_t length;
-    read(length);
-
-    char* buffer = new char[length];
-
-    assert_chunk_read(length);
-    _input.read(buffer, length);
-
-    output = std::string(buffer, length);
-    delete[] buffer;
 };
 
 template <typename T>
@@ -105,18 +98,6 @@ void BinaryReader::readOsgVec(T& output)
 {
     assert_chunk_read(T::num_components * sizeof(typename T::value_type));
     _input.read(reinterpret_cast<char*>(output.ptr()), T::num_components * sizeof(typename T::value_type));
-};
-
-template <>
-void BinaryReader::read(osg::Vec3f& output)
-{
-    readOsgVec(output);
-};
-
-template <>
-void BinaryReader::read(osg::Vec3d& output)
-{
-    readOsgVec(output);
 };
 
 }; // namespace sptDB

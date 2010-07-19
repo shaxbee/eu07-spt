@@ -12,6 +12,7 @@ else:
     env.Append(CXXFLAGS='-O3')
 
 env.Append(LIBS=[])
+env.Append(CXXFLAGS='-fPIC')
 
 #variant = GetOption('variant')
 #env = SConscript(os.path.join(variant, 'SConscript'), exports=['env'])

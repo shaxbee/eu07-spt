@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 
 #include <osg/Geode>
 #include <osg/PolygonMode>
@@ -9,6 +10,7 @@
 
 #include <sptCore/Path.h>
 #include <sptGFX/Extruder.h>
+#include <sptDB/SceneryReader.h>
 
 using namespace sptCore;
 using namespace sptGFX;
@@ -104,6 +106,13 @@ osg::Geode* createAxes(osg::Geode* geode)
 
 int main()
 {
+
+    {
+        sptCore::Scenery scenery;
+        std::ifstream input("test.sct", std::ios::binary);
+        sptDB::SectorReader reader(input, scenery);
+        std::auto_ptr<Sector> sector(reader.readSector(osg::Vec3()));
+    }
  
     osg::ref_ptr<osg::Group> root = new osg::Group;
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
