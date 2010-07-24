@@ -30,6 +30,7 @@ class BinaryWriter(object):
         self.__currentChunk = self.__chunks[-1] 
 
     def endChunk(self, name):
+        print "end chunk %s %d" % (name, len(self.__currentChunk.data))
         if not len(self.__chunks):
             raise ValueError("No chunk to finish")
         if name != self.__currentChunk.name:
@@ -76,10 +77,10 @@ _trackFormats = [
 ]
 
 _switchFormats = [
-    Struct("<B 3f3f 3f3f"), # straight, straight
-    Struct("<B 3f3f 3f3f3f3f"), # straight, bezier
-    Struct("<B 3f3f3f3f 3f3f"), # bezier, straight
-    Struct("<B 3f3f3f3f 3f3f3f3f") # bezier, bezier
+    Struct("<B B 3f3f B 3f3f"), # position, straight, straight
+    Struct("<B B 3f3f B 3f3f3f3f"), # position, straight, bezier
+    Struct("<B B 3f3f3f3f B 3f3f"), # position, bezier, straight
+    Struct("<B B 3f3f3f3f B 3f3f3f3f") # position, bezier, bezier
 ]
 
 class PathKind(object):
@@ -121,9 +122,9 @@ def _tracksGen(tracks, offset):
 def _switchGen(switches, offset):
     for switch in switches:
         fmt = _switchFormats[switch.straight.kind + switch.diverted.kind * 2]
-        yield (fmt, (switch.straight - offset).to_tuple() + \
-                    (switch.diverted - offset).to_tuple() + \
-                    (0 if switch.position == "STRAIGHT" else 1,))
+        yield (fmt, (0 if switch.position == "STRAIGHT" else 1,) + \
+                    (switch.straight.kind,) + (switch.straight - offset).to_tuple() + \
+                    (switch.diverted.kind,) + (switch.diverted - offset).to_tuple())
 
 class SectorWriter(BinaryWriter):
     def __init__(self, output, offset):
@@ -145,10 +146,42 @@ class SectorWriter(BinaryWriter):
         self.writeVarArray(_switchGen(self.__switches, self.__offset))
         self.endChunk("SWLS")
 
+    def __collectNamedTracking(self, source, offset = 0):
+        result = list()
+
+        for tracking in source:
+            if tracking.name:
+                result.append((offset, tracking.name))
+            offset += 1
+
+        return result
+
+    def __writeNames(self, source):
+        self.writeUInt(len(source))
+
+        for offset, name in source:
+            self.writeUInt(offset)
+            self.writeString(name)
+
+    def __writeTrackNames(self):
+        self.beginChunk("TRNM")
+        tracks = self.__collectNamedTracking(self.__tracks[PathKind.STRAIGHT])
+        tracks.extend(self.__collectNamedTracking(self.__tracks[PathKind.BEZIER], len(self.__tracks[PathKind.STRAIGHT])))
+        self.__writeNames(tracks)
+        self.endChunk("TRNM")
+
+    def __writeSwitchNames(self):
+        self.beginChunk("SWNM")
+        switches = self.__collectNamedTracking(self.__switches)
+        self.__writeNames(switches)
+        self.endChunk("SWNM")
+
     def writeToFile(self):
         self.beginChunk("SECT")
         self.__writeTrackList()
         self.__writeSwitchList()
+        self.__writeTrackNames()
+        self.__writeSwitchNames()
         self.endChunk("SECT")
 
     def addTrack(self, track):
@@ -159,17 +192,20 @@ class SectorWriter(BinaryWriter):
 
 if __name__ == "__main__":
     class Track(object):
-        def __init__(self, path):
+        def __init__(self, path, name = None):
             self.path = path
+            self.name = name
 
     class Switch(object):
-        def __init__(self, straight, diverted, position = "STRAIGHT"):
+        def __init__(self, straight, diverted, position = "STRAIGHT", name = None):
             self.straight = straight
             self.diverted = diverted
+            self.position = position
+            self.name = name
 
     output = file("test.sct", "w+")
     writer = SectorWriter(output, Vec3())
-    writer.addTrack(Track(StraightPath(Vec3(100, 100, 0), Vec3(200, 100, 0))))
+    writer.addTrack(Track(StraightPath(Vec3(100, 100, 0), Vec3(200, 100, 0)), "start"))
     writer.addTrack(Track(BezierPath(Vec3(), Vec3(), Vec3(), Vec3(100, 100, 0))))
     writer.addSwitch(Switch(StraightPath(Vec3(0, 0, 0), Vec3(100, 0, 0)), StraightPath(Vec3(0, 0, 0), Vec3(0, 100, 0))))
     writer.writeToFile()

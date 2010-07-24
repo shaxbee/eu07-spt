@@ -108,9 +108,17 @@ void readSwitches(sptCore::Sector& sector, BinaryReader& reader, Switches& outpu
     while(count--)
     {
         std::cout << "SWITCH ";
+
+        unsigned char position;
+        reader.read(position);
+        std::string position_str(position ? "DIVERTED" : "STRAIGHT");
+        std::cout << "POS_" << position_str << " ";
+
         std::auto_ptr<sptCore::Path> straight = readPath(reader);
         std::auto_ptr<sptCore::Path> diverted = readPath(reader);
-        std::auto_ptr<sptCore::Switch> switch_(new sptCore::Switch(sector, straight, diverted));
+
+        std::auto_ptr<sptCore::Switch> switch_(new sptCore::Switch(sector, straight, diverted, position_str));
+
         output.push_back(switch_);
         std::cout << std::endl;
     };
@@ -209,6 +217,8 @@ void readTrackNames(sptCore::Scenery& scenery, BinaryReader& reader, Tracks& tra
         std::string name;
         reader.read(name);
 
+        std::cout << "TRACK " << index << " ALIAS " << name << std::endl;
+
         scenery.addTrack(name, tracks.at(index));
     };
 
@@ -256,11 +266,14 @@ std::auto_ptr<sptCore::Sector> SectorReader::readSector(const osg::Vec3d& positi
 #if 0
     // RTLS - Custom RailTracking List
     readCustomTracking(*sector, _reader, tracks, switches);
+#endif
 
     // TRNM - Track Names
     readTrackNames(_scenery, _reader, tracks);
+
     // SWNM - Switch Names
     readSwitchNames(_scenery, _reader, switches);
+#if 0
 
     RailTrackings trackings;
     trackings.reserve(tracks.size() + switches.size());
