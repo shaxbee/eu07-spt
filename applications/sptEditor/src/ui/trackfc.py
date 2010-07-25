@@ -6,6 +6,7 @@ on tracks within editor.
 """
 
 from math import sin, cos, atan, radians, pi, degrees
+import copy
 import decimal
 
 from sptmath import Vec3
@@ -90,9 +91,66 @@ class TrackFactory:
         return Track(p1, v1, v2, p2)
 
 
-    def CreateSwitch(self):
-        # TODO: implement this
-        pass
+    def CopyRailTracking(self, template, startPoint):
+        """
+        Copies template rail tracking (single one or a group)
+        into scenery.
+
+        template = rail tracking to copy
+        startPoint = Vec3 point within that template which is the insertation point.
+        """
+
+        basePoint = self.editor.basePoint
+        
+        # 1. Make a copy of template
+        tCopy = copy.deepcopy(template)
+
+        # 2. Find the startPoint within copy
+        if not tCopy.containsPoint(startPoint):
+            raise ValueError, "Cannot find startPoint"
+
+        # 3. Move to specified startPoint
+        nVector = tCopy.getNormalVector(startPoint)
+
+        nextPoint = tCopy.nextPoint(startPoint)
+
+        tPoints = tCopy.getEndPoints()
+        tGeo = tCopy.getGeometry()
+        tVecs = [e for e in tGeo if e not in tPoints]
+
+        for p in tPoints:
+            p.moveBy(-startPoint)
+
+        # 4. Rotate to specified startPoint
+        angle = nVector.angleToJUnit()
+
+        cos_a = cos(-angle - pi)
+        sin_a = sin(-angle - pi)
+
+        rMatrix = [ \
+             [cos_a, sin_a, 0.0],
+             [-sin_a, cos_a, 0.0],
+             [0.0, 0.0, 1.0]]
+        
+        for g in tGeo:
+            transformVec3(rMatrix, g)
+
+        # 5-6. Rotate then to base point vector
+        bpt = BasePointTransform(basePoint)
+        bpt.Transform(tPoints, tVecs)
+
+        # 7. Set the new position and vector of base point
+        basePoint.point = Vec3(nextPoint.x, nextPoint.y, nextPoint.z)
+
+        nVector = tCopy.getNormalVector(nextPoint)
+        angle = nVector.angleToJUnit()
+
+        basePoint.alpha = -angle
+
+        self.editor.SetBasePoint(basePoint)
+
+        # Return copy
+        return tCopy
         
 
 
@@ -212,7 +270,7 @@ class BasePointTransform(AbstractTransform):
 
 def transformVec3(m, vec3):
     """
-    Transforms Vec3 using matrix 4x4
+    Transforms Vec3 using matrix 3x3
     """
     x, y, z = float(vec3.x), float(vec3.y), float(vec3.z)
 
@@ -221,3 +279,13 @@ def transformVec3(m, vec3):
     vec3.z = decimal.Decimal(str(m[2][0] * x + m[2][1] * y + m[2][2] * z))
 
 
+def transformVec3_4(m, vec3):
+    """
+    Transform Vec3 using 4x4 matrix.
+    """
+    x, y, z = float(vec3.x), float(vec3.y), float(vec3.z)
+
+    vec3.x = decimal.Decimal(str(m[0][0] * x + m[0][1] * y + m[0][2] * z + m[0][3]))
+    vec3.y = decimal.Decimal(str(m[1][0] * x + m[1][1] * y + m[1][2] * z + m[1][3]))
+    vec3.z = decimal.Decimal(str(m[2][0] * x + m[2][1] * y + m[2][2] * z + m[2][3]))
+    

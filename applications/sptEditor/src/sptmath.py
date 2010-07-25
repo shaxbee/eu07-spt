@@ -45,6 +45,26 @@ class Vec3:
            arg = Decimal(arg)
         self.__dict__[name] = arg.quantize(THREE_POINTS)
 
+    def __add__(self, arg):
+       x = self.x + arg.x
+       y = self.y + arg.y
+       z = self.z + arg.z
+       return Vec3(x, y, z)
+
+    def __sub__(self, arg):
+       x = self.x - arg.x
+       y = self.y - arg.y
+       z = self.z - arg.z
+       return Vec3(x, y, z)
+
+    def __neg__(self):
+       return Vec3(-self.x, -self.y, -self.z)
+
+    def moveBy(self, v):
+       self.x = self.x + v.x
+       self.y = self.y + v.y
+       self.z = self.z + v.z
+
     def length(self):
         """
         The length of the vector.
@@ -65,6 +85,18 @@ class Vec3:
         self.x = self.x / _length
         self.y = self.y / _length
         self.z = self.z / _length
+
+    def angleToJUnit(self):
+        """
+        Returns the angle in radians to the unit vector J=(0, 1, 0).
+        """
+        theta = math.acos(float(self.y) / self.length())
+        if self.x <= -0.0:
+            return theta
+        else:
+            return -theta
+
+
 
 
 def dotProduct(a, b):
@@ -179,3 +211,5 @@ def sqDistanceTo(line, point):
         lenSq = 0.0
     return lenSq
     
+
+

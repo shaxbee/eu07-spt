@@ -27,9 +27,13 @@ class CenterAtDialog(wx.Dialog):
         w = parent.xRes.LoadDialog(parent, "CenterAtDialog")
         self.PostCreate(w)
 
+        editor = parent.editor
+
         self.x = wx.xrc.XRCCTRL(self, "x")
         self.y = wx.xrc.XRCCTRL(self, "y")
         self.z = wx.xrc.XRCCTRL(self, "z")
+        self.zoom = wx.xrc.XRCCTRL(self, "zoom")
+        self.zoom.SetValue(str(editor.parts[0].GetScale())) 
 
         self.Bind(wx.EVT_BUTTON, self.OnButton, id=wx.ID_OK)
 
@@ -48,10 +52,12 @@ class CenterAtDialog(wx.Dialog):
             px = Decimal(self.x.GetValue())
             py = Decimal(self.y.GetValue())
             pz = Decimal(self.z.GetValue())
+            pScale = float(self.zoom.GetValue())
 
             editor = self.GetParent().editor
             (vx, vy) = editor.parts[0].ModelToView(Vec3(px, py, pz))
             editor.parts[0].CenterViewAt(vx, vy)
+            editor.parts[0].SetScale(pScale)
 
             self.Destroy()
         except ValueError: 
@@ -296,7 +302,8 @@ class InsertRailSwitch(wx.Dialog):
 
             editor = self.GetParent().editor
             tf = ui.trackfc.TrackFactory(editor)
-            s = tf.CreateSwitch()
+            template = self.predefined[index]
+            s = tf.CopyRailTracking(template, self.GetStartPoint(template, handle))
             s.name = name
 
             config = wx.FileConfig.Get()
@@ -312,4 +319,13 @@ class InsertRailSwitch(wx.Dialog):
             pass
 
 
-    
+    def GetStartPoint(self, switch, index):
+        if index == 0:
+            return switch.pc
+        elif index == 1:
+            return switch.p1
+        elif index == 2:
+            return switch.p2
+        else:
+            raise ValueError, "Cannot find startPoint"
+

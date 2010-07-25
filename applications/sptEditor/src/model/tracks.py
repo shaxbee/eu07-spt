@@ -349,9 +349,9 @@ class Switch(RailTracking):
 
     def nextPoint(self, start):
         if start == self.pc:
-            return p1
+            return self.p1
         elif start == self.p1 or start == self.p2:
-            return pc
+            return self.pc
 
         raise ValueError, "Start point not found in geometry"
 
@@ -413,7 +413,7 @@ class Switch(RailTracking):
 
 
     def getGeometry(self):
-        return [self.pc, self.v1, self.v1c, self.p1, self.v2, self.v2c, self.p2]
+        return [self.pc, self.vc1, self.v1, self.p1, self.vc2, self.v2, self.p2]
 
 
     def getNormalVector(self, point):

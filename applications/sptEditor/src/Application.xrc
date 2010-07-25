@@ -134,8 +134,23 @@
               <option>1</option>
               <flag>wxEXPAND</flag>
             </object>
+            <object class="sizeritem">
+              <object class="wxStaticText">
+                <label>Zoom:</label>
+              </object>
+              <option>0</option>
+              <flag>wxEXPAND</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxTextCtrl" name="zoom">
+                <value>400</value>
+                <style>wxTE_RIGHT</style>
+              </object>
+              <option>1</option>
+              <flag>wxEXPAND</flag>
+            </object>
             <cols>2</cols>
-            <rows>3</rows>
+            <rows>4</rows>
             <vgap>5</vgap>
             <hgap>5</hgap>
           </object>
@@ -148,6 +163,7 @@
           <object class="sizeritem">
             <object class="wxButton" name="wxID_OK">
               <label>Ok</label>
+              <default>1</default>
             </object>
             <option>1</option>
           </object>
@@ -292,7 +308,9 @@
       <object class="sizeritem">
         <object class="wxBoxSizer">
           <object class="sizeritem">
-            <object class="wxButton" name="wxID_OK"/>
+            <object class="wxButton" name="wxID_OK">
+              <default>1</default>
+            </object>
             <option>1</option>
           </object>
           <object class="sizeritem">
@@ -360,7 +378,9 @@
       <object class="sizeritem">
         <object class="wxBoxSizer">
           <object class="sizeritem">
-            <object class="wxButton" name="wxID_OK"/>
+            <object class="wxButton" name="wxID_OK">
+              <default>1</default>
+            </object>
             <option>1</option>
           </object>
           <object class="sizeritem">
@@ -449,7 +469,9 @@
       <object class="sizeritem">
         <object class="wxBoxSizer">
           <object class="sizeritem">
-            <object class="wxButton" name="wxID_OK"/>
+            <object class="wxButton" name="wxID_OK">
+              <default>1</default>
+            </object>
             <option>1</option>
           </object>
           <object class="sizeritem">
@@ -529,7 +551,9 @@
       <object class="sizeritem">
         <object class="wxBoxSizer">
           <object class="sizeritem">
-            <object class="wxButton" name="wxID_OK"/>
+            <object class="wxButton" name="wxID_OK">
+              <default>1</default>
+            </object>
             <option>1</option>
           </object>
           <object class="sizeritem">

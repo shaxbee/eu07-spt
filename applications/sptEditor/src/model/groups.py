@@ -88,7 +88,7 @@ class RailContainer:
                 + tracks.coord2str(gpoint)) % i)
 
             for child in self.children:
-                if child.contains(gpoint):
+                if child.containsPoint(gpoint):
                     _logger.debug("Found following rail tracking that has " \
                         + "geometry point " + str(child))
 
