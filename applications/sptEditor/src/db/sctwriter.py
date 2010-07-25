@@ -72,8 +72,8 @@ class BinaryWriter(object):
         self.write(BinaryWriter.uIntFormat.pack(value))
 
 _trackFormats = [
-    Struct("<B 3f3f"), # straight
-    Struct("<B 3f3f3f3f") # bezier
+    Struct("<3f3f"), # straight
+    Struct("<3f3f3f3f") # bezier
 ]
 
 _switchFormats = [
@@ -117,7 +117,7 @@ class BezierPath(object):
 
 def _tracksGen(tracks, offset):
     for track in tracks:
-        yield (track.path.kind, ) + (track.path - offset).to_tuple()
+        yield (track.path - offset).to_tuple()
 
 def _switchGen(switches, offset):
     for switch in switches:
@@ -135,8 +135,8 @@ class SectorWriter(BinaryWriter):
 
     def __writeTrackList(self):
         self.beginChunk("TRLS")
-        self.writeUInt(len(self.__tracks[PathKind.STRAIGHT]) + len(self.__tracks[PathKind.BEZIER]))
         for kind in range(2):
+            self.writeUInt(len(self.__tracks[kind]))
             self.writeArray(_trackFormats[kind], _tracksGen(self.__tracks[kind], self.__offset), len(self.__tracks[kind]))
         self.endChunk("TRLS")
 

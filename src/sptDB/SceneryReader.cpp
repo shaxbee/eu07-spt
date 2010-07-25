@@ -34,48 +34,54 @@ void print_vec(const osg::Vec3f& vec)
     std::cout << "(" << vec.x() << ", " << vec.y() << ", " << vec.z() << ") ";
 }
 
+std::auto_ptr<sptCore::Path> readStraightPath(BinaryReader& reader)
+{
+    std::cout << "STRAIGHT ";
+
+    osg::Vec3f begin;
+    osg::Vec3f end;
+
+    reader.read(begin);
+    reader.read(end);
+
+    print_vec(begin);
+    print_vec(end);
+
+    return std::auto_ptr<sptCore::Path>(new sptCore::StraightPath(begin, end));
+}
+
+std::auto_ptr<sptCore::Path> readBezierPath(BinaryReader& reader)
+{
+    std::cout << "BEZIER ";
+
+    osg::Vec3f begin;
+    osg::Vec3f cpBegin;
+    osg::Vec3f end;
+    osg::Vec3f cpEnd;
+
+    reader.read(begin);
+    reader.read(cpBegin);
+    reader.read(end);
+    reader.read(cpEnd);
+
+    print_vec(begin);
+    print_vec(cpBegin);
+    print_vec(end);
+    print_vec(cpEnd);
+
+    return std::auto_ptr<sptCore::Path>(new sptCore::BezierPath(begin, cpBegin, end, cpEnd));
+};
+
 std::auto_ptr<sptCore::Path> readPath(BinaryReader& reader)
 {
     char type;
     reader.read(type);
     
     if(type == STRAIGHT)
-    {
-        std::cout << "STRAIGHT ";
-
-        osg::Vec3f begin;
-        osg::Vec3f end;
-
-        reader.read(begin);
-        reader.read(end);
-
-        print_vec(begin);
-        print_vec(end);
-
-        return std::auto_ptr<sptCore::Path>(new sptCore::StraightPath(begin, end));
-    };
+        return readStraightPath(reader);
 
     if(type == BEZIER)
-    {
-        std::cout << "BEZIER ";
-
-        osg::Vec3f begin;
-        osg::Vec3f cpBegin;
-        osg::Vec3f end;
-        osg::Vec3f cpEnd;
-
-        reader.read(begin);
-        reader.read(cpBegin);
-        reader.read(end);
-        reader.read(cpEnd);
-
-        print_vec(begin);
-        print_vec(cpBegin);
-        print_vec(end);
-        print_vec(cpEnd);
-
-        return std::auto_ptr<sptCore::Path>(new sptCore::BezierPath(begin, cpBegin, end, cpEnd));
-    };
+        return readBezierPath(reader);
 
     assert(false && "Unsuported path type");
 }; // ::readPath(reader)
@@ -84,16 +90,34 @@ void readTracks(sptCore::Sector& sector, BinaryReader& reader, Tracks& output)
 {
     reader.expectChunk("TRLS");
 
-    size_t count;
-    reader.read(count);
-
-    while(count--)
+    // straight tracks
     {
-        std::cout << "TRACK ";
-        std::auto_ptr<sptCore::Path> path = readPath(reader);
-        std::auto_ptr<sptCore::Track> track(new sptCore::Track(sector, path));
-        output.push_back(track);
-        std::cout << std::endl;
+        size_t count;
+        reader.read(count);
+
+        while(count--)
+        {
+            std::cout << "TRACK ";
+            std::auto_ptr<sptCore::Path> path = readStraightPath(reader);
+            std::auto_ptr<sptCore::Track> track(new sptCore::Track(sector, path));
+            output.push_back(track);
+            std::cout << std::endl;
+        };
+    };
+
+    // bezier tracks
+    {
+        size_t count;
+        reader.read(count);
+
+        while(count--)
+        {
+            std::cout << "TRACK ";
+            std::auto_ptr<sptCore::Path> path = readBezierPath(reader);
+            std::auto_ptr<sptCore::Track> track(new sptCore::Track(sector, path));
+            output.push_back(track);
+            std::cout << std::endl;
+        };
     };
 
     reader.endChunk("TRLS");
