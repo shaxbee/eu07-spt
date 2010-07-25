@@ -104,9 +104,6 @@ class RailTracking(object):
         """
         pass # Implement it in subclasses
 
-
-
-
 class Track(RailTracking):
     """
     This is a track. Can be a straight track, an arc.
@@ -394,10 +391,8 @@ class Switch(RailTracking):
         elif point == self.p2:
             self.n2 = next
 
-
     def getGeometry(self):
         return [self.pc, self.p1, self.p2]
-
 
     def getNormalVector(self, point):
         if point == self.pc:

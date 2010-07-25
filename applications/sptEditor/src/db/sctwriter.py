@@ -117,14 +117,17 @@ class BezierPath(object):
 
 def _tracksGen(tracks, offset):
     for track in tracks:
-        yield (track.path - offset).to_tuple()
+        yield track.path.to_tuple()
 
 def _switchGen(switches, offset):
     for switch in switches:
         fmt = _switchFormats[switch.straight.kind + switch.diverted.kind * 2]
         yield (fmt, (0 if switch.position == "STRAIGHT" else 1,) + \
-                    (switch.straight.kind,) + (switch.straight - offset).to_tuple() + \
-                    (switch.diverted.kind,) + (switch.diverted - offset).to_tuple())
+                    (switch.straight.kind,) + switch.straight.to_tuple() + \
+                    (switch.diverted.kind,) + switch.diverted.to_tuple())
+
+class SectorWriterError(RuntimeError):
+    pass
 
 class SectorWriter(BinaryWriter):
     def __init__(self, output, offset):
@@ -176,6 +179,39 @@ class SectorWriter(BinaryWriter):
         self.__writeNames(switches)
         self.endChunk("SWNM")
 
+    def __buildTrackingIndexImpl(self, source, offset = 0):
+        index = dict()
+        for tracking in source:
+            index[tracking] = offset
+            offset += 1
+
+        return index
+
+    def __buildTrackingIndex(self):
+        self.__index = self.__buildTrackingIndexImpl(self.__tracks)
+        self.__index.extend(self.__buildTrackingIndexImpl(self.__switches, len(self.__tracks)))
+
+    def __addInternalConnection(self, position, from, to):
+        if position not in self.__connections:
+            self.__connections[position] = (self.__index[from], self.__index[to])
+
+    def __collectConnections(self):
+        self.__connections = dict()
+
+        for track in self.__tracks:
+            if track.n1:
+                self.__addConnection(track.p1, track, track.n1)
+            if track.n2:
+                self.__addConnection(track.p2, track, track.n2)
+
+        for switch in self.__switches:
+            if switch.n1:
+                self.__addConnection(switch.p1, switch, switch.n1)
+            if switch.n2:
+                self.__addConnection(switch.p2, switch, switch.n2)
+            if switch.n3:
+                self.__addConnection(switch.p3, switch, switch.n3)
+
     def writeToFile(self):
         self.beginChunk("SECT")
         self.__writeTrackList()
@@ -184,10 +220,28 @@ class SectorWriter(BinaryWriter):
         self.__writeSwitchNames()
         self.endChunk("SECT")
 
+    def __getPath(self, p1, v1, p2, v2):
+        if not v1 and not v2:
+            return StraightPath(p1, p2)
+        
+        return BezierPath(p1, v1, p2, v2)
+
     def addTrack(self, track):
+        track.p1 -= offset
+        track.p2 -= offset
+
+        track.path = self.__getPath(track.p1, track.v1, track.p2, track.v2)
+
         self.__tracks[track.path.kind].append(track)
 
     def addSwitch(self, switch):
+        switch.p1 -= offset
+        switch.p2 -= offset
+        switch.p3 -= offset
+
+        switch.straight = self.__getPath(switch.p1, switch.v1, switch.p2, switch.v2)
+        switch.diverted = self.__getPath(switch.p1, switch.v1, switch.p3, switch.v3)
+
         self.__switches.append(switch)
 
 if __name__ == "__main__":
