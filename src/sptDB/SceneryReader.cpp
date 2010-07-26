@@ -166,7 +166,7 @@ void readConnections(BinaryReader& reader, const RailTrackings& trackings, Conne
 {
     reader.expectChunk("RTCN");
 
-    // read connections
+    // read internal connections
     {
         size_t count;
         reader.read(count);
@@ -195,8 +195,6 @@ void readConnections(BinaryReader& reader, const RailTrackings& trackings, Conne
 
     };
 
-    size_t external = std::numeric_limits<size_t>::max();
-
     // read external connections
     {
         size_t count;
@@ -207,17 +205,14 @@ void readConnections(BinaryReader& reader, const RailTrackings& trackings, Conne
             osg::Vec3f position;
             reader.read(position);
 
-            size_t left;
-            reader.read(left);
-
-            size_t right;
-            reader.read(right);
+            size_t index;
+            reader.read(index);
 
             sptCore::Sector::Connection connection = 
             {
                 position,
-                left != external ? &trackings.at(left) : NULL,
-                right != external ? &trackings.at(right) : NULL
+                &trackings.at(index),
+                NULL
             };
 
             externals.push_back(connection);
@@ -297,7 +292,6 @@ std::auto_ptr<sptCore::Sector> SectorReader::readSector(const osg::Vec3d& positi
 
     // SWNM - Switch Names
     readSwitchNames(_scenery, _reader, switches);
-#if 0
 
     RailTrackings trackings;
     trackings.reserve(tracks.size() + switches.size());
@@ -308,7 +302,6 @@ std::auto_ptr<sptCore::Sector> SectorReader::readSector(const osg::Vec3d& positi
     Connections connections;
     Connections externals;
     readConnections(_reader, trackings, connections, externals);
-#endif
 
     _reader.endChunk("SECT");
 

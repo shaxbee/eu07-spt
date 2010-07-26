@@ -30,7 +30,7 @@ class BinaryWriter(object):
         self.__currentChunk = self.__chunks[-1] 
 
     def endChunk(self, name):
-        print "end chunk %s %d" % (name, len(self.__currentChunk.data))
+        print "chunk %s %d" % (name, len(self.__currentChunk.data))
         if not len(self.__chunks):
             raise ValueError("No chunk to finish")
         if name != self.__currentChunk.name:
@@ -83,8 +83,8 @@ _switchFormats = [
     Struct("<B B 3f3f3f3f B 3f3f3f3f") # position, bezier, bezier
 ]
 
-_internalConnectionFormat = Struct("<3f3f3f I I") # position, from index, to index
-_externalConnectionFormat = Struct("<3f3f3f I") # position, index
+_internalConnectionFormat = Struct("<3f I I") # position, from index, to index
+_externalConnectionFormat = Struct("<3f I") # position, index
 
 SECTOR_SIZE = 1000
 
@@ -138,14 +138,15 @@ class SectorWriter(BinaryWriter):
     def __init__(self, output, offset):
         BinaryWriter.__init__(self, output)
         self.__offset = offset
-        self.__tracks = [list(), list()]
+        self.__tracks = list()
+        self.__tracksKinds = [list(), list()]
         self.__switches = list()
 
     def __writeTrackList(self):
         self.beginChunk("TRLS")
         for kind in range(2):
-            self.writeUInt(len(self.__tracks[kind]))
-            self.writeArray(_trackFormats[kind], _tracksGen(self.__tracks[kind], self.__offset), len(self.__tracks[kind]))
+            self.writeUInt(len(self.__tracksKinds[kind]))
+            self.writeArray(_trackFormats[kind], _tracksGen(self.__tracksKinds[kind], self.__offset), len(self.__tracksKinds[kind]))
         self.endChunk("TRLS")
 
     def __writeSwitchList(self):
@@ -154,13 +155,12 @@ class SectorWriter(BinaryWriter):
         self.writeVarArray(_switchGen(self.__switches, self.__offset))
         self.endChunk("SWLS")
 
-    def __collectNamedTracking(self, source, offset = 0):
+    def __collectNamedTracking(self, source):
         result = list()
 
         for tracking in source:
             if tracking.name:
-                result.append((offset, tracking.name))
-            offset += 1
+                result.append((self.__index[tracking], tracking.name))
 
         return result
 
@@ -173,8 +173,7 @@ class SectorWriter(BinaryWriter):
 
     def __writeTrackNames(self):
         self.beginChunk("TRNM")
-        tracks = self.__collectNamedTracking(self.__tracks[PathKind.STRAIGHT])
-        tracks.extend(self.__collectNamedTracking(self.__tracks[PathKind.BEZIER], len(self.__tracks[PathKind.STRAIGHT])))
+        tracks = self.__collectNamedTracking(self.__tracks)
         self.__writeNames(tracks)
         self.endChunk("TRNM")
 
@@ -184,22 +183,17 @@ class SectorWriter(BinaryWriter):
         self.__writeNames(switches)
         self.endChunk("SWNM")
 
-    def __buildTrackingIndexImpl(self, source, offset = 0):
-        index = dict()
+    def __buildTrackingIndexImpl(self, source):
+        offset = len(self.__index)
+
         for tracking in source:
-            index[tracking] = offset
+            self.__index[tracking] = offset
             offset += 1
 
-        return index
-
     def __buildTrackingIndex(self):
-        self.__index = self.__buildTrackingIndexImpl(self.__tracks[PathKind.STRAIGHT])
-
-        offset = len(self.__tracks[PathKind.STRAIGHT])
-        self.__index = self.__buildTrackingIndexImpl(self.__tracks[PathKind.BEZIER], offset)
-
-        offset += len(self.__tracks[PathKind.BEZIER])
-        self.__index.update(self.__buildTrackingIndexImpl(self.__switches, offset))
+        self.__index = dict()
+        self.__buildTrackingIndexImpl(self.__tracks)
+        self.__buildTrackingIndexImpl(self.__switches)
 
     def __addConnection(self, position, left, right):
         if position.x < 0 or position.x > SECTOR_SIZE or position.y < 0 or position.y > SECTOR_SIZE:
@@ -221,8 +215,11 @@ class SectorWriter(BinaryWriter):
         self.__internalConnections = dict()
         self.__externalConnections = dict()
 
-        self.__collectTracksConnections(self.__tracks[PathKind.STRAIGHT])
-        self.__collectTracksConnections(self.__tracks[PathKind.BEZIER])
+        for track in self.__tracks:
+            if track.n1:
+                self.__addConnection(track.p1, track, track.n1)
+            if track.n2:
+                self.__addConnection(track.p2, track, track.n2)
 
         for switch in self.__switches:
             if switch.n1:
@@ -240,16 +237,20 @@ class SectorWriter(BinaryWriter):
         self.writeUInt(len(self.__internalConnections))
         self.writeArray(
             _internalConnectionFormat, 
-            ((position, ) + indexes for position, indexes in self.__internalConnections.iteritems()),
+            (position.to_tuple() + indexes for position, indexes in self.__internalConnections.iteritems()),
             len(self.__internalConnections))
 
         self.writeUInt(len(self.__externalConnections))
-        self.writeArray(_externalConnectionFormat, self.__externalConnections.iteritems(), len(self.__externalConnections))
+        self.writeArray(
+            _externalConnectionFormat, 
+            (position.to_tuple() + (index, ) for position, index in self.__externalConnections.iteritems()),
+            len(self.__externalConnections))
 
         self.endChunk("CNLS")
 
     def writeToFile(self):
         self.beginChunk("SECT")
+        self.__buildTrackingIndex()
         self.__writeTrackList()
         self.__writeSwitchList()
         self.__writeTrackNames()
@@ -269,7 +270,8 @@ class SectorWriter(BinaryWriter):
 
         track.path = self.__getPath(track.p1, track.v1, track.p2, track.v2)
 
-        self.__tracks[track.path.kind].append(track)
+        self.__tracks.append(track)
+        self.__tracksKinds[track.path.kind].append(track)
 
     def addSwitch(self, switch):
         switch.p1 -= self.__offset
