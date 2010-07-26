@@ -12,6 +12,8 @@
 #include <sptGFX/Extruder.h>
 #include <sptDB/SceneryReader.h>
 
+#include "SectorView.h"
+
 using namespace sptCore;
 using namespace sptGFX;
 
@@ -107,72 +109,15 @@ osg::Geode* createAxes(osg::Geode* geode)
 int main()
 {
 
-    sptCore::Scenery scenery;
-    {
-        std::ifstream input("test.sct", std::ios::binary);
-        sptDB::readSector(input, scenery, osg::Vec3());
-    }
- 
     osg::ref_ptr<osg::Group> root = new osg::Group;
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
 
-//    osg::StateSet* state = root->getOrCreateStateSet();
-//    osg::PolygonMode* polygonMode = new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
-//    state->setAttribute(polygonMode);
+    sptCore::Scenery scenery;
+    std::ifstream input("test.sct", std::ios::binary);
+    SectorViewBuilder builder(geode, createProfile());
 
-    osg::Vec3 begin  (  0.0f,   0.0f, 0.0f);
-    osg::Vec3 cpBegin(100.0f,   0.0f, 0.0f);
-    osg::Vec3 end    (100.0f, 100.0f, 0.0f);
-    osg::Vec3 cpEnd  (100.0f,   0.0f, 0.0f);
+    sptDB::readSector(input, scenery, osg::Vec3(), &builder);
 
-    Path* path = new BezierPath(
-        begin,
-        cpBegin,
-        end,
-        cpEnd);
-//        40);
-
-    {
-        osg::Geometry* geometry = new osg::Geometry;
-        geometry->setVertexArray(path->points());
-        
-        // set the colors as before, plus using the above
-        osg::Vec4Array* colors = new osg::Vec4Array;
-        colors->push_back(osg::Vec4(1.0f,1.0f,0.0f,1.0f));
-        geometry->setColorArray(colors);
-        geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
-
-        // set the normal in the same way color.
-        osg::Vec3Array* normals = new osg::Vec3Array;
-        normals->push_back(osg::Vec3(0.0f,-1.0f,0.0f));
-        geometry->setNormalArray(normals);
-        geometry->setNormalBinding(osg::Geometry::BIND_OVERALL);
-
-        geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINE_STRIP, 0, path->points()->getNumElements()));
-        geode->addDrawable(geometry);
-
-    };
-
-    osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
-    geometry->setVertexArray(new osg::Vec3Array);
-    geometry->setTexCoordArray(0, new osg::Vec2Array);
-
-    osg::Vec4Array* colors = new osg::Vec4Array;
-    colors->push_back(osg::Vec4(1.0f, 0.0f, 0.0f, 1.0f));
-    geometry->setColorArray(colors);
-    geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
-
-    osg::Geometry* profile(createProfile());
-    Extruder::Settings settings;
-//    settings.vertex.to = profile->getVertexArray()->getNumElements() - 2;
-    Extruder extruder(profile, settings);
-    extruder.setGeometry(geometry.get());
-
-    extruder.extrude(*path);
-
-    osgUtil::SmoothingVisitor::smooth(*geometry);
-
-    geode->addDrawable(geometry.get());
     root->addChild(geode.get());
     root->addChild(createAxes(geode.get()));
 

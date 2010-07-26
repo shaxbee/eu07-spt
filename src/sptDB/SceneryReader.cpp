@@ -88,7 +88,7 @@ std::auto_ptr<sptCore::Path> readPath(BinaryReader& reader)
     assert(false && "Unsuported path type");
 }; // ::readPath(reader)
 
-void readTracks(sptCore::Sector& sector, BinaryReader& reader, Tracks& output, SectorReaderCallback& callback)
+void readTracks(sptCore::Sector& sector, BinaryReader& reader, Tracks& output, SectorReaderCallback* callback)
 {
     reader.expectChunk("TRLS");
 
@@ -103,7 +103,8 @@ void readTracks(sptCore::Sector& sector, BinaryReader& reader, Tracks& output, S
             std::auto_ptr<sptCore::Path> path = readStraightPath(reader);
             std::auto_ptr<sptCore::Track> track(new sptCore::Track(sector, path));
 
-            callback.visit(*track);
+            if(callback)
+                callback->visit(*track);
 
             output.push_back(track);
             std::cout << std::endl;
@@ -121,7 +122,8 @@ void readTracks(sptCore::Sector& sector, BinaryReader& reader, Tracks& output, S
             std::auto_ptr<sptCore::Path> path = readBezierPath(reader);
             std::auto_ptr<sptCore::Track> track(new sptCore::Track(sector, path));
 
-            callback.visit(*track);
+            if(callback)
+                callback->visit(*track);
 
             output.push_back(track);
             std::cout << std::endl;
@@ -131,7 +133,7 @@ void readTracks(sptCore::Sector& sector, BinaryReader& reader, Tracks& output, S
     reader.endChunk("TRLS");
 }; // ::readTracks(sector, reader, output)
 
-void readSwitches(sptCore::Sector& sector, BinaryReader& reader, Switches& output, SectorReaderCallback& callback)
+void readSwitches(sptCore::Sector& sector, BinaryReader& reader, Switches& output, SectorReaderCallback* callback)
 {
     reader.expectChunk("SWLS");
     size_t count;
@@ -151,7 +153,8 @@ void readSwitches(sptCore::Sector& sector, BinaryReader& reader, Switches& outpu
 
         std::auto_ptr<sptCore::Switch> switch_(new sptCore::Switch(sector, straight, diverted, position_str));
 
-        callback.visit(*switch_);
+        if(callback)
+            callback->visit(*switch_);
 
         output.push_back(switch_);
         std::cout << std::endl;
@@ -289,7 +292,7 @@ std::auto_ptr<sptCore::Sector> readSector(std::ifstream& input, sptCore::Scenery
 };
 #endif
 
-std::auto_ptr<sptCore::Sector> readSector(std::ifstream& input, sptCore::Scenery& scenery, const osg::Vec3d& position, SectorReaderCallback callback)
+std::auto_ptr<sptCore::Sector> readSector(std::ifstream& input, sptCore::Scenery& scenery, const osg::Vec3d& position, SectorReaderCallback* callback)
 {
     BinaryReader reader(input);
     std::auto_ptr<sptCore::Sector> sector(new sptCore::Sector(scenery, position));

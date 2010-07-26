@@ -294,8 +294,8 @@ if __name__ == "__main__":
 
     zero = Vec3(0, 0, 0)
 
-    t1 = Track(Vec3(100, 100, 0), Vec3(100, 100, 0), Vec3(200, 100, 0), Vec3(200, 100, 0), "start")
-    t2 = Track(zero, zero, Vec3(100, 100, 0), Vec3(100, 100, 0))
+    t1 = Track(Vec3(100, 100, 0), Vec3(200, 100, 0), Vec3(200, 100, 0), Vec3(200, 100, 0), "start")
+    t2 = Track(zero, Vec3(100, 100, 0), Vec3(100, 100, 0), Vec3(100, 100, 0))
     t1.connect(Vec3(100, 100, 0), t2)
 
     writer.addTrack(t1)

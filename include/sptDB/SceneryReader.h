@@ -21,7 +21,7 @@ public:
 };
 
 //std::auto_ptr<sptCore::Sector> readSector(std::ifstream& input, sptCore::Scenery& scenery, const osg::Vec3d& position);
-std::auto_ptr<sptCore::Sector> readSector(std::ifstream& input, sptCore::Scenery& scenery, const osg::Vec3d& position, SectorReaderCallback callback = SectorReaderCallback());
+std::auto_ptr<sptCore::Sector> readSector(std::ifstream& input, sptCore::Scenery& scenery, const osg::Vec3d& position, SectorReaderCallback* callback = NULL);
 
 }; // namespace sptDB
 
