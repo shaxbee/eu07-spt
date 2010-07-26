@@ -9,32 +9,19 @@
 #include <sptCore/Sector.h>
 #include <sptCore/Scenery.h>
 
-#include <sptDB/BinaryReader.h>
-
 namespace sptDB
 {
 
-class SectorReader
+class SectorReaderCallback
 {
-
 public:
-    SectorReader(std::ifstream& input, sptCore::Scenery& scenery):
-        _input(input), _scenery(scenery), _reader(input) { };
+    virtual ~SectorReaderCallback() { };
+    virtual void visit(const sptCore::Track& tracking) { };
+    virtual void visit(const sptCore::Switch& tracking) { };
+};
 
-    std::auto_ptr<sptCore::Sector> readSector(const osg::Vec3d& position);
-
-private:
-    struct Header
-    {
-        unsigned int version;
-    };
-
-    std::ifstream& _input;
-    sptCore::Scenery& _scenery;
-
-    BinaryReader _reader;
-
-}; // class sptDB::SceneryReader
+//std::auto_ptr<sptCore::Sector> readSector(std::ifstream& input, sptCore::Scenery& scenery, const osg::Vec3d& position);
+std::auto_ptr<sptCore::Sector> readSector(std::ifstream& input, sptCore::Scenery& scenery, const osg::Vec3d& position, SectorReaderCallback callback = SectorReaderCallback());
 
 }; // namespace sptDB
 

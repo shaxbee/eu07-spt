@@ -107,11 +107,10 @@ osg::Geode* createAxes(osg::Geode* geode)
 int main()
 {
 
+    sptCore::Scenery scenery;
     {
-        sptCore::Scenery scenery;
         std::ifstream input("test.sct", std::ios::binary);
-        sptDB::SectorReader reader(input, scenery);
-        std::auto_ptr<Sector> sector(reader.readSector(osg::Vec3()));
+        sptDB::readSector(input, scenery, osg::Vec3());
     }
  
     osg::ref_ptr<osg::Group> root = new osg::Group;
@@ -132,9 +131,6 @@ int main()
         end,
         cpEnd);
 //        40);
-
-    print_vec(path->frontDir());
-    print_vec(path->backDir());
 
     {
         osg::Geometry* geometry = new osg::Geometry;
