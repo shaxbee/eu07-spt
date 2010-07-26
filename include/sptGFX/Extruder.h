@@ -31,7 +31,7 @@ public:
     //! \param position vector added to all points
     //! \param offset deviation from axis of path
     //! \param texCoordOffset initial offset for texture coordinates
-    void extrude(sptCore::Path& path, const osg::Vec3& position = osg::Vec3(), const osg::Vec3& offset = osg::Vec3(), double texCoordOffset = 0.0f);
+    void extrude(const sptCore::Path& path, const osg::Vec3& position = osg::Vec3(), const osg::Vec3& offset = osg::Vec3(), double texCoordOffset = 0.0f);
 
     //! \brief Set output geometry
     void setGeometry(osg::Geometry* geometry);

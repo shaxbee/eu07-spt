@@ -27,7 +27,7 @@ void Extruder::setGeometry(osg::Geometry* geometry)
 
 };
 
-void Extruder::extrude(sptCore::Path& path, const osg::Vec3& position, const osg::Vec3& offset, double texCoordOffset)
+void Extruder::extrude(const sptCore::Path& path, const osg::Vec3& position, const osg::Vec3& offset, double texCoordOffset)
 {
 
     size_t numProfileVerts = vertsCount();

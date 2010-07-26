@@ -1,6 +1,13 @@
 #include "SectorView.h"
 
+#include <osg/Geometry>
+#include <osgUtil/SmoothingVisitor>
+
+#include <sptGFX/Extruder.h>
+
 #include <sptCore/Path.h>
+#include <sptCore/Track.h>
+#include <sptCore/Switch.h>
 
 namespace 
 {
@@ -17,9 +24,9 @@ void extrude(osg::Geode* target, osg::Geometry* profile, const sptCore::Path& pa
     geometry->setColorArray(colors);
     geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
 
-    Extruder::Settings settings;
+    sptGFX::Extruder::Settings settings;
 //    settings.vertex.to = profile->getVertexArray()->getNumElements() - 2;
-    Extruder extruder(profile, settings);
+    sptGFX::Extruder extruder(profile, settings);
     extruder.setGeometry(geometry.get());
 
     extruder.extrude(path);
@@ -30,13 +37,14 @@ void extrude(osg::Geode* target, osg::Geometry* profile, const sptCore::Path& pa
 
 };
 
+};
+
 void SectorViewBuilder::visit(const sptCore::Track& tracking) 
 {
-    extrude(_target, _profile, tracking.getDefaultPath());
+    extrude(_target.get(), _profile.get(), tracking.getDefaultPath());
 };
 
 void SectorViewBuilder::visit(const sptCore::Switch& tracking) 
 { 
 };
 
-}; // anonymous namespace

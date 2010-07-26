@@ -1,4 +1,4 @@
 Import('env')
 
-objects = env.Object(source = Split('main.cpp'))
+objects = env.Object(source = Split('main.cpp SectorView.cpp'))
 Return('objects')
