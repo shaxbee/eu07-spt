@@ -13,6 +13,9 @@
 namespace sptCore
 {
 
+
+//! Container for rail trackings located in square part of Scenery
+//! \author Zbigniew "ShaXbee" Mandziejewicz
 class Sector
 {
 
@@ -20,12 +23,11 @@ public:
     Sector(const osg::Vec3d& position);
 
     const osg::Vec3d& getPosition() const { return _position; };
-    
+   
     template <typename RailTrackingContainerT, typename ConnectionContainerT>
     void setData(RailTrackingContainerT& trackings, const ConnectionContainerT& connections);
 
-    //! Get other track connected at given position
-    //!
+    //! \brief Get other track connected at given position.
     //! \throw UnknownConnectionException if there is no connection at given position
     const RailTracking& getNextTrack(const osg::Vec3& position, const RailTracking& from) const;
 
@@ -33,8 +35,7 @@ public:
 
     size_t getTracksCount() const;
 
-    //! Update track connections
-    //!
+    //! \brief Update track connections.
     //! \param connections Container of ConnectionUpdate
     template <typename ContainerT>
     void updateConnections(const ContainerT& connections); 
@@ -69,13 +70,13 @@ private:
 
 }; // class sptCore::Sector
 
-struct ConnectionLess
-{
-    bool operator()(const Sector::Connection& left, const Sector::Connection& right) const { return left.position < right.position; }
-}; // struct sptCore::ConnectionLess
-
 namespace
 {
+
+    struct ConnectionLess
+    {
+        bool operator()(const Sector::Connection& left, const Sector::Connection& right) const { return left.position < right.position; }
+    }; // struct sptCore::ConnectionLess
 
     struct ConnectionGreater
     {

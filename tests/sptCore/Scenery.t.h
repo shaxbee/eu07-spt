@@ -28,7 +28,7 @@ public:
         _scenery->addTrack("track1", *testTrack);
 
         TS_ASSERT_EQUALS(&_scenery->getTrack("track1"), testTrack.get());
-        TS_ASSERT_THROWS(&_scenery->getTrack("track2"), Scenery::RailTrackingNotFoundException);
+        TS_ASSERT_THROWS(&_scenery->getTrack("track2"), SceneryException);
     };
 
     void testSwitch()
@@ -40,7 +40,7 @@ public:
         _scenery->addSwitch("switch1", *testSwitch);
         
         TS_ASSERT_EQUALS(&_scenery->getSwitch("switch1"), testSwitch.get());
-        TS_ASSERT_THROWS(&_scenery->getSwitch("switch2"), Scenery::RailTrackingNotFoundException);
+        TS_ASSERT_THROWS(&_scenery->getSwitch("switch2"), SceneryException);
     };
 
     void testSector()
