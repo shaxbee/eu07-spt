@@ -1,8 +1,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include <sptCore/Track.h>
-
-#include <sptCore/Scenery.h>
 #include <sptCore/Sector.h>
 
 using namespace sptCore;
@@ -14,8 +12,7 @@ public:
     TrackTestSuite():
         _begin(0.0f, 0.0f, 0.0f), 
         _end(10.0f, 10.0f, 10.0f), 
-        _scenery(),
-        _sector(new Sector(_scenery, osg::Vec3())),
+        _sector(new Sector(osg::Vec3())),
         _track(*_sector, new StraightPath(_begin, _end)) { };
 
     void testGetExit()
@@ -44,7 +41,6 @@ private:
     osg::Vec3 _begin;
     osg::Vec3 _end;
 
-    Scenery _scenery;
     Sector* _sector;
 
     Track _track;

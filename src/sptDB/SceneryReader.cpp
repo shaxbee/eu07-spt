@@ -297,7 +297,7 @@ std::auto_ptr<sptCore::Sector> readSector(std::ifstream& input, sptCore::Scenery
 std::auto_ptr<sptCore::Sector> readSector(std::ifstream& input, sptCore::Scenery& scenery, const osg::Vec3d& position, SectorReaderCallback* callback)
 {
     BinaryReader reader(input);
-    std::auto_ptr<sptCore::Sector> sector(new sptCore::Sector(scenery, position));
+    std::auto_ptr<sptCore::Sector> sector(new sptCore::Sector(position));
 
     reader.expectChunk("SECT");
 

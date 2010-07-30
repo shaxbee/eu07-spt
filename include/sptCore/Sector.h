@@ -13,15 +13,12 @@
 namespace sptCore
 {
 
-class Scenery;
-
 class Sector
 {
 
 public:
-    Sector(Scenery& scenery, const osg::Vec3d& position);
+    Sector(const osg::Vec3d& position);
 
-    const Scenery& getScenery() const { return _scenery; };
     const osg::Vec3d& getPosition() const { return _position; };
     
     template <typename RailTrackingContainerT, typename ConnectionContainerT>
@@ -65,7 +62,6 @@ private:
     typedef std::vector<Connection> Connections;
     typedef boost::ptr_vector<RailTracking> RailTrackings;
 
-    Scenery& _scenery;
     const osg::Vec3d _position;
 
     Connections _connections;

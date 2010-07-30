@@ -21,7 +21,7 @@ public:
 
     void testTrack()
     {
-        Sector sector(*_scenery, _dummy);
+        Sector sector(_dummy);
         
         std::auto_ptr<Track> testTrack(new Track(sector, new StraightPath(_dummy, _dummy)));
     
@@ -33,7 +33,7 @@ public:
 
     void testSwitch()
     {
-        Sector sector(*_scenery, _dummy);
+        Sector sector(_dummy);
         
         std::auto_ptr<Switch> testSwitch(new Switch(sector, new StraightPath(_dummy, _dummy), new StraightPath(_dummy, _dummy)));
 
@@ -45,7 +45,7 @@ public:
 
     void testSector()
     {
-        std::auto_ptr<Sector> sector(new Sector(*_scenery, _dummy));
+        std::auto_ptr<Sector> sector(new Sector(_dummy));
         _scenery->addSector(sector);
 
         TS_ASSERT(_scenery->hasSector(_dummy));
