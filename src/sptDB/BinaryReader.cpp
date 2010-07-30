@@ -51,7 +51,7 @@ BinaryReader::BinaryReader(std::ifstream& stream):
 std::string BinaryReader::readChunk()
 {
     char chunk[4];
-    assert_chunk_read(4);
+    _watcher.check(4);
     _input.read(chunk, 4);
 
     unsigned int size;
@@ -90,7 +90,7 @@ void BinaryReader::read(std::string& output)
 
     char* buffer = new char[length];
 
-    assert_chunk_read(length);
+    _watcher.check(length);
     _input.read(buffer, length);
 
     output = std::string(buffer, length);
