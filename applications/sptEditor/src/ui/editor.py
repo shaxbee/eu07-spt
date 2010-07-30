@@ -118,7 +118,8 @@ class PlanePart(wx.ScrolledWindow):
 
         self.logger = logging.getLogger('Paint')
 
-        self.scale = 400.0
+        self.scale = 1600.0
+        self.GetParent().GetParent().SetStatusText("%.2f px/m" % self.scale, 2)
 
         self.minX = -1000.0
         self.minY = -1000.0
@@ -127,7 +128,7 @@ class PlanePart(wx.ScrolledWindow):
 
         self.extentX = 0
         self.extentY = 0
-        
+
         self.trackCache = []
         self.switchCache = []
         self.basePointView = None
@@ -186,7 +187,7 @@ class PlanePart(wx.ScrolledWindow):
         if selection != None:
             view = self.FindView(selection)
             if view == None:
-                raise Error, "Cannot find view in cache"
+                raise TransitionError, "Cannot find view in cache"
             self.selectedView = view
             newRect = view.GetRepaintBounds()
             newRect.x -= vx * ux
@@ -197,12 +198,16 @@ class PlanePart(wx.ScrolledWindow):
 
 
     def AddView(self, element):
+        view = None
         if isinstance(element, model.tracks.Track):
-            self.trackCache.append(ui.views.TrackView(element))
+            view = ui.views.TrackView(element)
+            self.trackCache.append(view)
         elif isinstance(element, model.tracks.Switch):
-            self.switchCache.append(ui.views.RailSwitchView(element))
+            view = ui.views.RailSwitchView(element)
+            self.switchCache.append(view)
         else:
             raise ValueError("Unsupported element: " + str(type(element)))
+        return view
 
 
     def FindView(self, element):
@@ -277,6 +282,7 @@ class PlanePart(wx.ScrolledWindow):
         self.Refresh()
         self.GetParent().topRuler.Refresh()
         self.GetParent().leftRuler.Refresh()
+        self.GetParent().GetParent().SetStatusText("%.2f px/m" % scale, 2)
         
         
     def __ScaleAll(self, scale):
@@ -450,7 +456,6 @@ class PlanePart(wx.ScrolledWindow):
         self.PaintTracks(dc, clip)
         self.PaintSwitches(dc, clip)
         self.PaintSelection(dc, clip)
-        self.PaintScale(dc, clip)
         self.PaintSnapPoint(dc, clip)
         self.PaintBasePoint(dc, clip)
         
@@ -476,7 +481,7 @@ class PlanePart(wx.ScrolledWindow):
         """
         oldPen = dc.GetPen()
         try:
-            dc.SetPen(wx.Pen((255, 153, 153), \
+            dc.SetPen(wx.Pen((173, 255, 47), \
                 3 if self.scale >= 1000.0 else 1))
             for v in self.switchCache:
                 if v != self.selectedView:
@@ -511,16 +516,6 @@ class PlanePart(wx.ScrolledWindow):
              dc.DrawBitmap(wx.BitmapFromImage(ui.views.SNAP_BASEPOINT_IMAGES[index]), \
                  self.snapData.p2d.x - ui.views.SNAP_BASEPOINT_IMAGES[index].GetWidth()/2, \
                  self.snapData.p2d.y - ui.views.SNAP_BASEPOINT_IMAGES[index].GetHeight()/2)
-
-
-    def PaintScale(self, dc, clip):
-        """
-        Paints a scale.
-        """
-
-        # TODO: Draw scale in upper, right corner
-
-        dc.DrawText("%.2f" % self.scale, 5, 5)
 
 
     def OnMoveUpdateStatusBar(self, event):
@@ -860,11 +855,9 @@ class SceneryListener(model.scenery.SceneryListener):
         (vx, vy) = part.GetViewStart()
         (ux, uy) = part.GetScrollPixelsPerUnit()
 
-        # TODO: switches are not supported here yet
         view = None
         if changeType == model.scenery.CHANGE_ADD:
-            view = ui.views.CreateView(element)
-            part.trackCache.append(view)
+            view = part.AddView(element)
         elif changeType == model.scenery.CHANGE_REMOVE:
             if element == self.editor.GetSelection():
                  self.editor.SetSelection(None)

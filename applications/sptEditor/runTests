@@ -1,13 +1,22 @@
 #!/bin/bash
 
-PYTHONPATH=".:"`pwd`"/src/"
-export PYTHONPATH
+# If you have nosetests installed, please specify the path to it
+# default path:
+#NOSETESTS_PATH=/usr/bin/nosetests
+NOSETESTS_PATH=/usr/bin/nosetests-2.5
 
-pushd "test"
+if [[ -x $NOSETESTS_PATH ]]; then
+  $NOSETESTS_PATH -v --with-doctest test/t_groups.py test/t_switches.py test/t_tracks.py src/sptmath.py
+else
+  PYTHONPATH=".:"`pwd`"/src/"
+  export PYTHONPATH
 
-python t_groups.py
-python t_switches.py
-python t_tracks.py
+  pushd "test"
 
-popd
+  python t_groups.py
+  python t_switches.py
+  python t_tracks.py
+
+  popd
+fi
 

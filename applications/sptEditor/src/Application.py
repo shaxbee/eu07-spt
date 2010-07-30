@@ -124,8 +124,8 @@ class MainWindow(wx.Frame):
     def CreateStatusBar(self):
 
         bar = wx.StatusBar(self)
-        bar.SetFieldsCount(2)
-        bar.SetStatusWidths([250, -1])
+        bar.SetFieldsCount(3)
+        bar.SetStatusWidths([250, 250, -1])
         bar.SetStatusText("Ready.")
 
         self.SetStatusBar(bar)

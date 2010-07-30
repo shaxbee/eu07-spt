@@ -145,7 +145,7 @@ class TrackFactory:
         nVector = tCopy.getNormalVector(nextPoint)
         angle = nVector.angleToJUnit()
 
-        basePoint.alpha = -angle
+        basePoint.alpha = degrees(angle)
 
         self.editor.SetBasePoint(basePoint)
 

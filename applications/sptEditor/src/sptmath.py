@@ -89,12 +89,28 @@ class Vec3:
     def angleToJUnit(self):
         """
         Returns the angle in radians to the unit vector J=(0, 1, 0).
+
+        Examples:
+
+        >>> str(Vec3("0", "1", "0").angleToJUnit())
+        '0.0'
+        >>> str(Vec3("1", "0", "0").angleToJUnit())
+        '1.57079632679'
+        >>> str(Vec3("-1", "0", "0").angleToJUnit())
+        '4.71238898038'
+        >>> str(Vec3("0", "-1", "0").angleToJUnit())
+        '3.14159265359'
+        >>> str(Vec3("1", "1", "0").angleToJUnit())
+        '0.785398163397'
+        >>> str(Vec3("-1", "1", "0").angleToJUnit())
+        '5.49778714378'
         """
         theta = math.acos(float(self.y) / self.length())
-        if self.x <= -0.0:
-            return theta
+        if float(self.x) < -0.0:
+            return 2*math.pi - theta
         else:
-            return -theta
+            return theta
+
 
 
 
@@ -109,6 +125,12 @@ def dotProduct(a, b):
 def isNegativeVector(a, b):
     """
     Checks if a spin of vector a is negative to spin of vector b.
+
+    Examples:    
+    >>> isNegativeVector(Vec3("1", "-1", "0"), Vec3("-1", "1", "0"))
+    True
+    >>> isNegativeVector(Vec3("-1", "-1", "0"), Vec3("2", "-2", "0"))
+    False
     """
     cosinus = dotProduct(a, b) / (a.length() * b.length())
     if cosinus < -1.0:
@@ -121,10 +143,20 @@ def isNegativeVector(a, b):
 def cardinality(value, len):
     """
     Number of bits set in integer value.
+
+    Examples:
+    >>> cardinality(0x5cc5, 16)
+    8
+    >>> cardinality(0xf, 16)
+    4
+    >>> cardinality(0x0, 8)
+    0
+    >>> cardinality(0xf, 2)
+    2
     """
     i = 0
-    n = len
-    while n > 0:
+    n = len-1
+    while n >= 0:
         if (value & (1 << n)) > 0:
             i = i+1
         n = n-1
@@ -183,9 +215,15 @@ def sqDistanceTo(line, point):
     """
     Returns squared distance of line and point (defined as wx.Points)
 
-    Example
-    >>> sqDistanceTo([wx.Point(3,3), wx.Point(3,-3)], wx.Point(0, -1))
-    3.0
+    Example:    
+    >>> sqDistanceTo([Point(3,3), Point(3,-3)], Point(0,-1))
+    9.0
+    >>> sqDistanceTo([Point(3,3), Point(3,-3)], Point(5,1))
+    4.0
+    >>> sqDistanceTo([Point(3,3), Point(3,-3)], Point(3,-5))
+    4.0
+    >>> sqDistanceTo([Point(3,3), Point(3,-3)], Point(3,0))
+    0.0
     """
     x1, y1 = line[0].x, line[0].y
     x2, y2 = line[1].x, line[1].y
@@ -205,7 +243,7 @@ def sqDistanceTo(line, point):
         if dotprod <= 0.0:
             projLenSq = 0.0
         else:
-            projLenSq = dotprod * dotprod / (x2*x2 + y2*y2)
+            projLenSq = dotprod * dotprod / float(x2*x2 + y2*y2)
     lenSq = px*px + py*py - projLenSq
     if lenSq < 0.0:
         lenSq = 0.0

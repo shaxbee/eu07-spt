@@ -221,7 +221,7 @@ class Track(RailTracking):
     def setTracking(self, point, next):
         if point == None:
             raise ValueError, "Point is none"
-        if not self.contains(point):
+        if not self.containsPoint(point):
             raise ValueError, "Point is not in geometry"
 
         if point == self.p1:
@@ -397,7 +397,7 @@ class Switch(RailTracking):
     def setTracking(self, point, next):
         if point == None:
             raise ValueError, "Point is null"
-        if not self.contains(point):
+        if not self.containsPoint(point):
             raise ValueError, "Point is not in geometry"
 
         if point == self.pc:

@@ -437,7 +437,7 @@ class RailContainerTest(unittest.TestCase):
 if __name__ == "__main__":
      # Optionally specify logging configuration by an argument in command line
      # and apply it
-     if sys.argv[1] != None and os.path.isfile(sys.argv[1]):
+     if len(sys.argv) > 1 and os.path.isfile(sys.argv[1]):
          logging.config.fileConfig(sys.argv[1])
      unittest.main(argv = [sys.argv[0]])
 
