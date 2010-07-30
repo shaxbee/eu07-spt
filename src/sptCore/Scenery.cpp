@@ -53,7 +53,7 @@ SwitchableTracking& Scenery::getSwitch(const std::string& name)
 void Scenery::addSector(std::auto_ptr<Sector> sector)
 {
 
-    size_t totalTracks = sector->getTracksCount();
+//    size_t totalTracks = sector->getTracksCount();
 
     std::pair<Sectors::iterator, bool> ret;
     osg::Vec3f position(sector->getPosition());

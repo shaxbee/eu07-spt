@@ -86,6 +86,8 @@ std::auto_ptr<sptCore::Path> readPath(BinaryReader& reader)
         return readBezierPath(reader);
 
     assert(false && "Unsuported path type");
+
+    return std::auto_ptr<sptCore::Path>(NULL);
 }; // ::readPath(reader)
 
 void readTracks(sptCore::Sector& sector, BinaryReader& reader, Tracks& output, SectorReaderCallback* callback)
