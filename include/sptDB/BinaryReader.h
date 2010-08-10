@@ -59,16 +59,10 @@ private:
     void readOsgVec(T& output);
 };
 
-#ifdef DEBUG
-    #define assert_chunk_read(bytes) _watcher.check(bytes)
-#else
-    #define assert_chunk_read(ignore) ((void)0)
-#endif
-
 template <typename T>
 void BinaryReader::read(T& output)
 {
-    assert_chunk_read(sizeof(T));
+    _watcher.check(sizeof(T));
     _input.read(reinterpret_cast<char*>(&output), sizeof(T));
 };
 
@@ -81,7 +75,7 @@ void BinaryReader::read(std::vector<T>& output)
     const unsigned int elementSize = sizeof(T);
 
     assert(output.empty() && "Trying to write to non-empty vector");
-    assert_chunk_read(elementSize * count);
+    _watcher.check(elementSize * count);
 
     output.reserve(count);
 
@@ -96,7 +90,7 @@ void BinaryReader::read(std::vector<T>& output)
 template <typename T>
 void BinaryReader::readOsgVec(T& output)
 {
-    assert_chunk_read(T::num_components * sizeof(typename T::value_type));
+    _watcher.check(T::num_components * sizeof(typename T::value_type));
     _input.read(reinterpret_cast<char*>(output.ptr()), T::num_components * sizeof(typename T::value_type));
 };
 

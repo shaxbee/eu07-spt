@@ -86,6 +86,8 @@ std::auto_ptr<sptCore::Path> readPath(BinaryReader& reader)
         return readBezierPath(reader);
 
     assert(false && "Unsuported path type");
+
+    return std::auto_ptr<sptCore::Path>(NULL);
 }; // ::readPath(reader)
 
 void readTracks(sptCore::Sector& sector, BinaryReader& reader, Tracks& output, SectorReaderCallback* callback)
@@ -295,7 +297,7 @@ std::auto_ptr<sptCore::Sector> readSector(std::ifstream& input, sptCore::Scenery
 std::auto_ptr<sptCore::Sector> readSector(std::ifstream& input, sptCore::Scenery& scenery, const osg::Vec3d& position, SectorReaderCallback* callback)
 {
     BinaryReader reader(input);
-    std::auto_ptr<sptCore::Sector> sector(new sptCore::Sector(scenery, position));
+    std::auto_ptr<sptCore::Sector> sector(new sptCore::Sector(position));
 
     reader.expectChunk("SECT");
 

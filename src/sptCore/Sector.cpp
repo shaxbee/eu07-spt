@@ -4,7 +4,7 @@ using namespace sptCore;
 
 float Sector::SIZE = 2000.0;
 
-Sector::Sector(Scenery& scenery, const osg::Vec3d& position): _scenery(scenery), _position(position)
+Sector::Sector(const osg::Vec3d& position): _position(position)
 {
 
 }; // Sector::Sector(scenery)

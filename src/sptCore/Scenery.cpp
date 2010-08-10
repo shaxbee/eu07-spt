@@ -4,6 +4,8 @@
 #include <sptCore/Track.h>
 #include <sptCore/Switch.h>
 
+#include <boost/format.hpp>
+
 using namespace sptCore;
 
 const Sector& Scenery::getSector(const osg::Vec3d& position) const
@@ -14,7 +16,10 @@ const Sector& Scenery::getSector(const osg::Vec3d& position) const
     } 
     catch(boost::bad_ptr_container_operation&) 
     {
-        throw SectorNotFoundException() << PositionInfo(position);
+        throw SceneryException(boost::str(boost::format("Sector already exists at position (%f, %f, %f)") %
+                    position.x() %
+                    position.y() %
+                    position.z()));
     }
 }; // Scenery::getSector
         
@@ -32,7 +37,7 @@ Track& Scenery::getTrack(const std::string& name)
     Tracks::const_iterator iter = _tracks.find(name);
     
     if(iter == _tracks.end())
-        throw RailTrackingNotFoundException() << NameInfo(name);
+        throw SceneryException(boost::str(boost::format("Track with name %s doesn't exist.") % name));
 
     return *(iter->second);
     
@@ -44,7 +49,7 @@ SwitchableTracking& Scenery::getSwitch(const std::string& name)
     Switches::const_iterator iter = _switches.find(name);
 
     if(iter == _switches.end())
-        throw RailTrackingNotFoundException() << NameInfo(name);    
+        throw SceneryException(boost::str(boost::format("Switch with name %s doesn't exist.") % name));
 
     return *(iter->second);
     
@@ -53,7 +58,7 @@ SwitchableTracking& Scenery::getSwitch(const std::string& name)
 void Scenery::addSector(std::auto_ptr<Sector> sector)
 {
 
-    size_t totalTracks = sector->getTracksCount();
+//    size_t totalTracks = sector->getTracksCount();
 
     std::pair<Sectors::iterator, bool> ret;
     osg::Vec3f position(sector->getPosition());
@@ -61,7 +66,12 @@ void Scenery::addSector(std::auto_ptr<Sector> sector)
 
     // if sector already existed
     if(!ret.second)
-        throw SectorExistsException() << PositionInfo(sector->getPosition());
+    {
+        throw SceneryException(boost::str(boost::format("Sector already exist at position (%f, %f, %f)") %
+                    position.x() %
+                    position.y() %
+                    position.z()));
+    };
 
     // update statistics
 //    _statistics.sectors++;
@@ -75,7 +85,10 @@ std::auto_ptr<Sector> Scenery::removeSector(const osg::Vec3d& position)
     Sectors::iterator iter = _sectors.find(position);
 
     if(iter == _sectors.end())
-        throw SectorNotFoundException() << PositionInfo(position);
+        throw SceneryException(boost::str(boost::format("No sector to remove at position (%f, %f, %f)") %
+                    position.x() %
+                    position.y() %
+                    position.z()));
 
 //    _statistics.totalTracks -= iter->second->getTracksCount();
 //    _statistics.sectors--;
@@ -91,7 +104,7 @@ void Scenery::addTrack(const std::string& name, Track& track)
     ret = _tracks.insert(std::make_pair(name, &track));
     
     if(!ret.second)
-        throw RailTrackingExistsException() << NameInfo(name);
+        throw SceneryException(boost::str(boost::format("Track with name %s already exists.") % name));
 
 //    _statistics.tracks++;
     
@@ -117,7 +130,7 @@ void Scenery::addSwitch(const std::string& name, SwitchableTracking& track)
     ret = _switches.insert(std::make_pair(name, &track));
     
     if(!ret.second)
-        throw RailTrackingExistsException() << NameInfo(name);
+        throw SceneryException(boost::str(boost::format("Switch with name %s already exists.") % name));
 
 //    _statistics.switches++;
     

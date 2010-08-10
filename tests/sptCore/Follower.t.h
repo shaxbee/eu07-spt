@@ -60,9 +60,9 @@ public:
     {
         _scenery.reset(new Scenery());
 
-        std::auto_ptr<Sector> sector1(new Sector(*_scenery, osg::Vec3d(0, 0, 0)));  
-        std::auto_ptr<Sector> sector2(new Sector(*_scenery, osg::Vec3d(Sector::SIZE, 0, 0)));
-        std::auto_ptr<Sector> sector3(new Sector(*_scenery, osg::Vec3d(Sector::SIZE, Sector::SIZE, 0)));
+        std::auto_ptr<Sector> sector1(new Sector(osg::Vec3d(0, 0, 0)));  
+        std::auto_ptr<Sector> sector2(new Sector(osg::Vec3d(Sector::SIZE, 0, 0)));
+        std::auto_ptr<Sector> sector3(new Sector(osg::Vec3d(Sector::SIZE, Sector::SIZE, 0)));
         
         boost::array<Track*, 3> tracks = 
         {{ 
