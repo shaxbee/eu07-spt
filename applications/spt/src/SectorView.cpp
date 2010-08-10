@@ -33,8 +33,6 @@ void extrude(osg::Geode* target, osg::Geometry* profile, const sptCore::Path& pa
 
     extruder.extrude(path);
 
-    osgUtil::SmoothingVisitor::smooth(*geometry);
-
     target->addDrawable(geometry.get());
 
 };
@@ -43,7 +41,6 @@ void extrude(osg::Geode* target, osg::Geometry* profile, const sptCore::Path& pa
 
 void SectorViewBuilder::visit(const sptCore::Track& tracking) 
 {
-    std::cout << "track" << std::endl;
     extrude(_target.get(), _profile.get(), tracking.getDefaultPath());
 };
 
