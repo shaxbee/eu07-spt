@@ -1,36 +1,344 @@
-- !<Switch>
-  name: "l27.138 r190.0 1:9"
-  p1: !<Vec3> ['0.000', '27.138', '0.000']
-  p2: !<Vec3> ['1.164', '21.003', '0.000']
-  pc: !<Vec3> ['0.000', '0.000', '0.000']
-  v1: !<Vec3> ['0.000', '0.000', '0.000']
-  v2: !<Vec3> ['-0.776', '-6.974', '0.000']
-  vc1: !<Vec3> ['0.000', '0.000', '0.000']
-  vc2: !<Vec3> ['0.000', '7.017', '0.000']
-- !<Switch>
-  name: "l33.230 r300.0 1:9"
-  p1: !<Vec3> ['0.000', '33.230', '0.000']
-  p2: !<Vec3> ['1.838', '33.162', '0.000']
-  pc: !<Vec3> ['0.000', '0.000', '0.000']
-  v1: !<Vec3> ['0.000', '0.000', '0.000']
-  v2: !<Vec3> ['-1.225', '-11.012', '0.000']
-  vc1: !<Vec3> ['0.000', '0.000', '0.000']
-  vc2: !<Vec3> ['0.000', '11.079', '0.000']
-- !<Switch>
-  name: "l10.423 r190.0 1:9"
-  p1: !<Vec3> ['0.000', '10.423', '0.000']
-  p2: !<Vec3> ['0.286', '10.418', '0.000']
-  pc: !<Vec3> ['0.000', '0.000', '0.000']
-  v1: !<Vec3> ['0.000', '0.000', '0.000']
-  v2: !<Vec3> ['-0.191', '-3.469', '0.000']
-  vc1: !<Vec3> ['0.000', '0.000', '0.000']
-  vc2: !<Vec3> ['0.000', '3.476', '0.000']
-- !<Switch>
-  name: "l64.818 r1200.0 1:18\xBD"
-  p1: !<Vec3> ['0.000', '64.818', '0.000']
-  p2: !<Vec3> ['1.750', '64.782', '0.000']
-  pc: !<Vec3> ['0.000', '0.000', '0.000']
-  v1: !<Vec3> ['0.000', '0.000', '0.000']
-  v2: !<Vec3> ['-1.166', '-21.576', '0.000']
-  vc1: !<Vec3> ['0.000', '0.000', '0.000']
-  vc2: !<Vec3> ['0.000', '21.607', '0.000']
+straight:
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '1.0'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_s1
+  railTracking: !<Track>
+    name: null
+    p1: !<Vec3> ['0.000', '0.000', '0.000']
+    p2: !<Vec3> ['1.000', '0.000', '0.000']
+    v1: !<Vec3> ['0.000', '0.000', '0.000']
+    v2: !<Vec3> ['0.000', '0.000', '0.000']
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '2.0'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_s1
+  railTracking: !<Track>
+    name: null
+    p1: !<Vec3> ['0.000', '0.000', '0.000']
+    p2: !<Vec3> ['2.000', '0.000', '0.000']
+    v1: !<Vec3> ['0.000', '0.000', '0.000']
+    v2: !<Vec3> ['0.000', '0.000', '0.000']
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '5.0'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_s1
+  railTracking: !<Track>
+    name: null
+    p1: !<Vec3> ['0.000', '0.000', '0.000']
+    p2: !<Vec3> ['5.000', '0.000', '0.000']
+    v1: !<Vec3> ['0.000', '0.000', '0.000']
+    v2: !<Vec3> ['0.000', '0.000', '0.000']
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '6.0'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_s1
+  railTracking: !<Track>
+    name: null
+    p1: !<Vec3> ['0.000', '0.000', '0.000']
+    p2: !<Vec3> ['6.000', '0.000', '0.000']
+    v1: !<Vec3> ['0.000', '0.000', '0.000']
+    v2: !<Vec3> ['0.000', '0.000', '0.000']
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '10.0'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_s1
+  railTracking: !<Track>
+    name: null
+    p1: !<Vec3> ['0.000', '0.000', '0.000']
+    p2: !<Vec3> ['10.000', '0.000', '0.000']
+    v1: !<Vec3> ['0.000', '0.000', '0.000']
+    v2: !<Vec3> ['0.000', '0.000', '0.000']
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '16.0'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_s1
+  railTracking: !<Track>
+    name: null
+    p1: !<Vec3> ['0.000', '0.000', '0.000']
+    p2: !<Vec3> ['16.000', '0.000', '0.000']
+    v1: !<Vec3> ['0.000', '0.000', '0.000']
+    v2: !<Vec3> ['0.000', '0.000', '0.000']
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '20.0'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_s1
+  railTracking: !<Track>
+    name: null
+    p1: !<Vec3> ['0.000', '0.000', '0.000']
+    p2: !<Vec3> ['20.000', '0.000', '0.000']
+    v1: !<Vec3> ['0.000', '0.000', '0.000']
+    v2: !<Vec3> ['0.000', '0.000', '0.000']
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '50.0'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_s1
+  railTracking: !<Track>
+    name: null
+    p1: !<Vec3> ['0.000', '0.000', '0.000']
+    p2: !<Vec3> ['50.000', '0.000', '0.000']
+    v1: !<Vec3> ['0.000', '0.000', '0.000']
+    v2: !<Vec3> ['0.000', '0.000', '0.000']
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '100.0'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_s1
+  railTracking: !<Track>
+    name: null
+    p1: !<Vec3> ['0.000', '0.000', '0.000']
+    p2: !<Vec3> ['100.000', '0.000', '0.000']
+    v1: !<Vec3> ['0.000', '0.000', '0.000']
+    v2: !<Vec3> ['0.000', '0.000', '0.000']
+arcs:
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '33.23', radius: '300.0'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_al
+  - !!python/tuple
+    - !<Vec3> ['-1.838', '33.162', '0.000']
+    - handle_t_ar
+  railTracking: !<Track>
+    name: null
+    p1: !<Vec3> ['0.000', '0.000', '0.000']
+    p2: !<Vec3> ['-1.838', '33.162', '0.000']
+    v1: !<Vec3> ['0.000', '11.079', '0.000']
+    v2: !<Vec3> ['1.225', '-11.012', '0.000']
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '21.046', radius: '190.0'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_al
+  - !!python/tuple
+    - !<Vec3> ['-1.164', '21.004', '0.000']
+    - handle_t_ar
+  railTracking: !<Track>
+    name: null
+    p1: !<Vec3> ['0.000', '0.000', '0.000']
+    p2: !<Vec3> ['-1.164', '21.004', '0.000']
+    v1: !<Vec3> ['0.000', '7.018', '0.000']
+    v2: !<Vec3> ['0.776', '-6.974', '0.000']
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '64.818', radius: '1200.0'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_al
+  - !!python/tuple
+    - !<Vec3> ['-1.75', '64.786', '0.000']
+    - handle_t_ar
+  railTracking: !<Track>
+    name: null
+    p1: !<Vec3> ['0.000', '0.000', '0.000']
+    p2: !<Vec3> ['-1.75', '64.786', '0.000']
+    v1: !<Vec3> ['0.000', '21.607', '0.000']
+    v2: !<Vec3> ['1.166', '-21.576', '0.000']
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '50.0', radius: '300.0'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_al
+  - !!python/tuple
+    - !<Vec3> ['-4.157', '49.769', '0.000']
+    - handle_t_ar
+  railTracking: !<Track>
+    name: null
+    p1: !<Vec3> ['0.000', '0.000', '0.000']
+    p2: !<Vec3> ['-4.157', '49.769', '0.000']
+    v1: !<Vec3> ['0.000', '16.679', '0.000']
+    v2: !<Vec3> ['2.767', '-16.445', '0.000']
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '50.0', radius: '500.0'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_al
+  - !!python/tuple
+    - !<Vec3> ['-2.498', '49.917', '0.000']
+    - handle_t_ar
+  railTracking: !<Track>
+    name: null
+    p1: !<Vec3> ['0.000', '0.000', '0.000']
+    p2: !<Vec3> ['-2.498', '49.917', '0.000']
+    v1: !<Vec3> ['0.000', '16.67', '0.000']
+    v2: !<Vec3> ['1.664', '-16.587', '0.000']
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '50.0', radius: '800.0'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_al
+  - !!python/tuple
+    - !<Vec3> ['-1.562', '49.967', '0.000']
+    - handle_t_ar
+  railTracking: !<Track>
+    name: null
+    p1: !<Vec3> ['0.000', '0.000', '0.000']
+    p2: !<Vec3> ['-1.562', '49.967', '0.000']
+    v1: !<Vec3> ['0.000', '16.668', '0.000']
+    v2: !<Vec3> ['1.041', '-16.635', '0.000']
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '50.0', radius: '1200.0'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_al
+  - !!python/tuple
+    - !<Vec3> ['-1.042', '49.986', '0.000']
+    - handle_t_ar
+  railTracking: !<Track>
+    name: null
+    p1: !<Vec3> ['0.000', '0.000', '0.000']
+    p2: !<Vec3> ['-1.042', '49.986', '0.000']
+    v1: !<Vec3> ['0.000', '16.667', '0.000']
+    v2: !<Vec3> ['0.694', '-16.653', '0.000']
+right_switches:
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '27.138', radius: '190.0', divergence: '1:9', type: 'right'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_rsc
+  - !!python/tuple
+    - !<Vec3> ['0.000', '27.138', '0.000']
+    - handle_t_rs1
+  - !!python/tuple
+    - !<Vec3> ['1.164', '21.003', '0.000']
+    - handle_t_rs2
+  railTracking: !<Switch>
+    name: null
+    p1: !<Vec3> ['0.000', '27.138', '0.000']
+    p2: !<Vec3> ['1.164', '21.003', '0.000']
+    pc: !<Vec3> ['0.000', '0.000', '0.000']
+    v1: !<Vec3> ['0.000', '0.000', '0.000']
+    v2: !<Vec3> ['-0.776', '-6.974', '0.000']
+    vc1: !<Vec3> ['0.000', '0.000', '0.000']
+    vc2: !<Vec3> ['0.000', '7.017', '0.000']
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '33.230', radius: '300.0', divergence: '1:9', type: 'right'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_rsc
+  - !!python/tuple
+    - !<Vec3> ['0.000', '33.230', '0.000']
+    - handle_t_rs1
+  - !!python/tuple
+    - !<Vec3> ['1.838', '33.162', '0.000']
+    - handle_t_rs2
+  railTracking: !<Switch>
+    name: null
+    p1: !<Vec3> ['0.000', '33.230', '0.000']
+    p2: !<Vec3> ['1.838', '33.162', '0.000']
+    pc: !<Vec3> ['0.000', '0.000', '0.000']
+    v1: !<Vec3> ['0.000', '0.000', '0.000']
+    v2: !<Vec3> ['-1.225', '-11.012', '0.000']
+    vc1: !<Vec3> ['0.000', '0.000', '0.000']
+    vc2: !<Vec3> ['0.000', '11.079', '0.000']
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '64.818', radius: '1200.0', divergence: "1:18\xBD", type: 'right'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_rsc
+  - !!python/tuple
+    - !<Vec3> ['0.000', '64.818', '0.000']
+    - handle_t_rs1
+  - !!python/tuple
+    - !<Vec3> ['1.750', '64.786', '0.000']
+    - handle_t_rs2
+  railTracking: !<Switch>
+    name: null
+    p1: !<Vec3> ['0.000', '64.818', '0.000']
+    p2: !<Vec3> ['1.750', '64.786', '0.000']
+    pc: !<Vec3> ['0.000', '0.000', '0.000']
+    v1: !<Vec3> ['0.000', '0.000', '0.000']
+    v2: !<Vec3> ['-1.166', '-21.576', '0.000']
+    vc1: !<Vec3> ['0.000', '0.000', '0.000']
+    vc2: !<Vec3> ['0.000', '21.607', '0.000']
+left_switches:
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '27.138', radius: '190.0', divergence: '1:9', type: 'left'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_rsc
+  - !!python/tuple
+    - !<Vec3> ['0.000', '27.138', '0.000']
+    - handle_t_rs1
+  - !!python/tuple
+    - !<Vec3> ['-1.164', '21.003', '0.000']
+    - handle_t_rs2
+  railTracking: !<Switch>
+    name: null
+    p1: !<Vec3> ['0.000', '27.138', '0.000']
+    p2: !<Vec3> ['-1.164', '21.003', '0.000']
+    pc: !<Vec3> ['0.000', '0.000', '0.000']
+    v1: !<Vec3> ['0.000', '0.000', '0.000']
+    v2: !<Vec3> ['0.776', '-6.974', '0.000']
+    vc1: !<Vec3> ['0.000', '0.000', '0.000']
+    vc2: !<Vec3> ['0.000', '7.017', '0.000']
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '33.230', radius: '300.0', divergence: '1:9', type: 'left'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_rsc
+  - !!python/tuple
+    - !<Vec3> ['0.000', '33.230', '0.000']
+    - handle_t_rs1
+  - !!python/tuple
+    - !<Vec3> ['-1.838', '33.162', '0.000']
+    - handle_t_rs2
+  railTracking: !<Switch>
+    name: null
+    p1: !<Vec3> ['0.000', '33.230', '0.000']
+    p2: !<Vec3> ['-1.838', '33.162', '0.000']
+    pc: !<Vec3> ['0.000', '0.000', '0.000']
+    v1: !<Vec3> ['0.000', '0.000', '0.000']
+    v2: !<Vec3> ['1.225', '-11.012', '0.000']
+    vc1: !<Vec3> ['0.000', '0.000', '0.000']
+    vc2: !<Vec3> ['0.000', '11.079', '0.000']
+- !!python/object:ui.palette.TrackingItem
+  description: {length: '64.818', radius: '1200.0', divergence: "1:18\xBD", type: 'left'}
+  handles:
+  - !!python/tuple
+    - !<Vec3> ['0.000', '0.000', '0.000']
+    - handle_t_rsc
+  - !!python/tuple
+    - !<Vec3> ['0.000', '64.818', '0.000']
+    - handle_t_rs1
+  - !!python/tuple
+    - !<Vec3> ['-1.750', '64.786', '0.000']
+    - handle_t_rs2
+  railTracking: !<Switch>
+    name: null
+    p1: !<Vec3> ['0.000', '64.818', '0.000']
+    p2: !<Vec3> ['-1.750', '64.786', '0.000']
+    pc: !<Vec3> ['0.000', '0.000', '0.000']
+    v1: !<Vec3> ['0.000', '0.000', '0.000']
+    v2: !<Vec3> ['1.166', '-21.576', '0.000']
+    vc1: !<Vec3> ['0.000', '0.000', '0.000']
+    vc2: !<Vec3> ['0.000', '21.607', '0.000']
+

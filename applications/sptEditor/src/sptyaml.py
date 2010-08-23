@@ -9,6 +9,8 @@ import decimal
 import yaml
 
 import model.tracks
+import model.groups
+import model.scenery
 import sptmath
 import model.vd.axleCounter
 

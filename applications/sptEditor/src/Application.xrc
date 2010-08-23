@@ -504,18 +504,6 @@
               <flag>wxEXPAND|wxGROW</flag>
             </object>
             <object class="sizeritem">
-              <object class="wxRadioBox" name="leftOrRight">
-                <label>Spin</label>
-                <dimension>1</dimension>
-                <content>
-                  <item>Left</item>
-                  <item>Right</item>
-                </content>
-                <dimension>1</dimension>
-              </object>
-              <flag>wxEXPAND|wxALIGN_CENTRE|wxALIGN_CENTRE_VERTICAL|wxALIGN_CENTRE_HORIZONTAL</flag>
-            </object>
-            <object class="sizeritem">
               <object class="wxRadioBox" name="handles">
                 <label>Handles</label>
                 <dimension>1</dimension>

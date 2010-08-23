@@ -262,10 +262,8 @@ class InsertRailSwitch(wx.Dialog):
 
         config = wx.FileConfig.Get()
         defaultPrefabric = config.ReadInt("/InsertRailSwitch/prefabric", 0)
-        defaultLeftOrRight = config.ReadInt("/InsertRailSwitch/leftOrRight", 0)
         defaultHandle = config.ReadInt("/InsertRailSwitch/handle", 0)
         self.predefinedList.SetSelection(defaultPrefabric)
-        self.leftOrRight.SetSelection(defaultLeftOrRight)
         self.handles.SetSelection(defaultHandle)
 
         self.Fit()
@@ -276,21 +274,20 @@ class InsertRailSwitch(wx.Dialog):
 
 
     def PrepareList(self):
-        self.predefined = yaml.load(file("prefabric.yaml", "r"))
+        pd_types = yaml.load(file("prefabric.yaml", "r"))        
+        self.predefined = pd_types['right_switches'] + pd_types['left_switches']
 
 
     def FillContent(self, parent):
         self.predefinedList = wx.xrc.XRCCTRL(self, "predefined")
-        self.predefinedList.SetItems(map(lambda r: r.name, self.predefined))
+        self.predefinedList.SetItems(map(lambda item: unicode(item), self.predefined))
         self.handles = wx.xrc.XRCCTRL(self, "handles")
-        self.leftOrRight = wx.xrc.XRCCTRL(self, "leftOrRight")
         self.name = wx.xrc.XRCCTRL(self, "name")
 
 
     def OnButton(self, event):
         try:
             index = self.predefinedList.GetSelection()
-            leftOrRight = self.leftOrRight.GetSelection()
             handle = self.handles.GetSelection()
             name = self.name.GetValue().strip()
 
@@ -308,7 +305,6 @@ class InsertRailSwitch(wx.Dialog):
 
             config = wx.FileConfig.Get()
             config.WriteInt("/InsertRailSwitch/prefabric", index)
-            config.WriteInt("/InsertRailSwitch/leftOrRight", leftOrRight)
             config.WriteInt("/InsertRailSwitch/handle", handle)
 
             editor.scenery.AddRailTracking(s)
