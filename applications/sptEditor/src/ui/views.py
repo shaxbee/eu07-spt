@@ -5,6 +5,7 @@ Module containing views of scenery elements.
 """
 
 import math
+import os.path
 import wx
 from decimal import Decimal
 
@@ -37,8 +38,10 @@ def getImageIndexByAngle(angle):
     return int(d * 72)
 
 
-BASEPOINT_IMAGES = loadImages("basepoint.png", 72)
-SNAP_BASEPOINT_IMAGES = loadImages("snappoint.png", 72)
+BASEPOINT_IMAGES = loadImages(os.path.join( \
+    "icons", "canvas", "basepoint.png"), 72)
+SNAP_BASEPOINT_IMAGES = loadImages(os.path.join( \
+    "icons", "canvas", "snappoint.png"), 72)
 
 SNAP_DISTANCE = 25
 

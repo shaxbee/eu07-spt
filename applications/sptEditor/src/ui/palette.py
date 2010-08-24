@@ -57,3 +57,9 @@ class TrackingItem:
         return sb
 
 
+    def Verify(self):
+        for p in map(lambda h: h[0] in self.handles):
+            if not self.railTracking.containsPoint(p):
+                return False
+        return True
+

@@ -4,7 +4,7 @@ straight:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_s1
+    - handle-track-straight
   railTracking: !<Track>
     name: null
     p1: !<Vec3> ['0.000', '0.000', '0.000']
@@ -16,7 +16,7 @@ straight:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_s1
+    - handle-track-straight
   railTracking: !<Track>
     name: null
     p1: !<Vec3> ['0.000', '0.000', '0.000']
@@ -28,7 +28,7 @@ straight:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_s1
+    - handle-track-straight
   railTracking: !<Track>
     name: null
     p1: !<Vec3> ['0.000', '0.000', '0.000']
@@ -40,7 +40,7 @@ straight:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_s1
+    - handle-track-straight
   railTracking: !<Track>
     name: null
     p1: !<Vec3> ['0.000', '0.000', '0.000']
@@ -52,7 +52,7 @@ straight:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_s1
+    - handle-track-straight
   railTracking: !<Track>
     name: null
     p1: !<Vec3> ['0.000', '0.000', '0.000']
@@ -64,7 +64,7 @@ straight:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_s1
+    - handle-track-straight
   railTracking: !<Track>
     name: null
     p1: !<Vec3> ['0.000', '0.000', '0.000']
@@ -76,7 +76,7 @@ straight:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_s1
+    - handle-track-straight
   railTracking: !<Track>
     name: null
     p1: !<Vec3> ['0.000', '0.000', '0.000']
@@ -88,7 +88,7 @@ straight:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_s1
+    - handle-track-straight
   railTracking: !<Track>
     name: null
     p1: !<Vec3> ['0.000', '0.000', '0.000']
@@ -100,7 +100,7 @@ straight:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_s1
+    - handle-track-straight
   railTracking: !<Track>
     name: null
     p1: !<Vec3> ['0.000', '0.000', '0.000']
@@ -113,10 +113,10 @@ arcs:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_al
+    - handle-track-left
   - !!python/tuple
     - !<Vec3> ['-1.838', '33.162', '0.000']
-    - handle_t_ar
+    - handle-track-right
   railTracking: !<Track>
     name: null
     p1: !<Vec3> ['0.000', '0.000', '0.000']
@@ -128,10 +128,10 @@ arcs:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_al
+    - handle-track-left
   - !!python/tuple
     - !<Vec3> ['-1.164', '21.004', '0.000']
-    - handle_t_ar
+    - handle-track-right
   railTracking: !<Track>
     name: null
     p1: !<Vec3> ['0.000', '0.000', '0.000']
@@ -143,10 +143,10 @@ arcs:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_al
+    - handle-track-left
   - !!python/tuple
     - !<Vec3> ['-1.75', '64.786', '0.000']
-    - handle_t_ar
+    - handle-track-right
   railTracking: !<Track>
     name: null
     p1: !<Vec3> ['0.000', '0.000', '0.000']
@@ -158,10 +158,10 @@ arcs:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_al
+    - handle-track-left
   - !!python/tuple
     - !<Vec3> ['-4.157', '49.769', '0.000']
-    - handle_t_ar
+    - handle-track-right
   railTracking: !<Track>
     name: null
     p1: !<Vec3> ['0.000', '0.000', '0.000']
@@ -173,10 +173,10 @@ arcs:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_al
+    - handle-track-left
   - !!python/tuple
     - !<Vec3> ['-2.498', '49.917', '0.000']
-    - handle_t_ar
+    - handle-track-right
   railTracking: !<Track>
     name: null
     p1: !<Vec3> ['0.000', '0.000', '0.000']
@@ -188,10 +188,10 @@ arcs:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_al
+    - handle-track-left
   - !!python/tuple
     - !<Vec3> ['-1.562', '49.967', '0.000']
-    - handle_t_ar
+    - handle-track-right
   railTracking: !<Track>
     name: null
     p1: !<Vec3> ['0.000', '0.000', '0.000']
@@ -203,10 +203,10 @@ arcs:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_al
+    - handle-track-left
   - !!python/tuple
     - !<Vec3> ['-1.042', '49.986', '0.000']
-    - handle_t_ar
+    - handle-track-right
   railTracking: !<Track>
     name: null
     p1: !<Vec3> ['0.000', '0.000', '0.000']
@@ -219,13 +219,13 @@ right_switches:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_rsc
+    - handle-switch-right-pc
   - !!python/tuple
     - !<Vec3> ['0.000', '27.138', '0.000']
-    - handle_t_rs1
+    - handle-switch-right-p1
   - !!python/tuple
     - !<Vec3> ['1.164', '21.003', '0.000']
-    - handle_t_rs2
+    - handle-switch-right-p2
   railTracking: !<Switch>
     name: null
     p1: !<Vec3> ['0.000', '27.138', '0.000']
@@ -240,13 +240,13 @@ right_switches:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_rsc
+    - handle-switch-right-pc
   - !!python/tuple
     - !<Vec3> ['0.000', '33.230', '0.000']
-    - handle_t_rs1
+    - handle-switch-right-p1
   - !!python/tuple
     - !<Vec3> ['1.838', '33.162', '0.000']
-    - handle_t_rs2
+    - handle-switch-right-p2
   railTracking: !<Switch>
     name: null
     p1: !<Vec3> ['0.000', '33.230', '0.000']
@@ -261,13 +261,13 @@ right_switches:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_rsc
+    - handle-switch-right-pc
   - !!python/tuple
     - !<Vec3> ['0.000', '64.818', '0.000']
-    - handle_t_rs1
+    - handle-switch-right-p1
   - !!python/tuple
     - !<Vec3> ['1.750', '64.786', '0.000']
-    - handle_t_rs2
+    - handle-switch-right-p2
   railTracking: !<Switch>
     name: null
     p1: !<Vec3> ['0.000', '64.818', '0.000']
@@ -283,13 +283,13 @@ left_switches:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_rsc
+    - handle-switch-left-pc
   - !!python/tuple
     - !<Vec3> ['0.000', '27.138', '0.000']
-    - handle_t_rs1
+    - handle-switch-left-p1
   - !!python/tuple
     - !<Vec3> ['-1.164', '21.003', '0.000']
-    - handle_t_rs2
+    - handle-switch-left-p2
   railTracking: !<Switch>
     name: null
     p1: !<Vec3> ['0.000', '27.138', '0.000']
@@ -304,13 +304,13 @@ left_switches:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_rsc
+    - handle-switch-left-pc
   - !!python/tuple
     - !<Vec3> ['0.000', '33.230', '0.000']
-    - handle_t_rs1
+    - handle-switch-left-p1
   - !!python/tuple
     - !<Vec3> ['-1.838', '33.162', '0.000']
-    - handle_t_rs2
+    - handle-switch-left-p2
   railTracking: !<Switch>
     name: null
     p1: !<Vec3> ['0.000', '33.230', '0.000']
@@ -325,13 +325,13 @@ left_switches:
   handles:
   - !!python/tuple
     - !<Vec3> ['0.000', '0.000', '0.000']
-    - handle_t_rsc
+    - handle-switch-left-pc
   - !!python/tuple
     - !<Vec3> ['0.000', '64.818', '0.000']
-    - handle_t_rs1
+    - handle-switch-left-p1
   - !!python/tuple
     - !<Vec3> ['-1.750', '64.786', '0.000']
-    - handle_t_rs2
+    - handle-switch-left-p2
   railTracking: !<Switch>
     name: null
     p1: !<Vec3> ['0.000', '64.818', '0.000']

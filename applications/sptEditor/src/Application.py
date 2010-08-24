@@ -64,7 +64,7 @@ class MainWindow(wx.Frame):
         # Load resource file
         self.xRes = wx.xrc.XmlResource("Application.xrc")
 
-        #self.SetIcon(wx.IconFromXPMData("w8_7.xpm"))
+        self.SetIcons(self.PrepareApplicationIcons())
 
         self.modified = False
         self.path = None
@@ -93,6 +93,23 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MAXIMIZE, self.OnMaximise)
 
         self.Show(True)
+
+
+    def PrepareApplicationIcons(self):
+        appIcons = wx.IconBundle()
+        appIconDir = os.path.join(os.path.dirname(__file__), \
+            "icons", "apps")
+        appIcons.AddIconFromFile(os.path.join(appIconDir, "ei07_large.png"), \
+            wx.BITMAP_TYPE_ANY)
+        appIcons.AddIconFromFile(os.path.join(appIconDir, "ei07_gnome.png"), \
+            wx.BITMAP_TYPE_ANY)
+        appIcons.AddIconFromFile(os.path.join(appIconDir, "ei07_medium.png"), \
+            wx.BITMAP_TYPE_ANY)
+        appIcons.AddIconFromFile(os.path.join(appIconDir, "ei07_small.png"), \
+            wx.BITMAP_TYPE_ANY)
+        appIcons.AddIconFromFile(os.path.join(appIconDir, "ei07_xsmall.png"), \
+            wx.BITMAP_TYPE_ANY)
+        return appIcons
 
 
     def CreateMenu(self):
