@@ -20,11 +20,13 @@ import model.groups
 import model.scenery
 import ui.editor
 import ui.dialog
+import ui.palette
 import sptyaml
 
 # Stock items
 ID_CENTER_AT = wx.ID_HIGHEST + 1
 ID_BASEPOINT_EDIT = wx.ID_HIGHEST + 2
+ID_PALETTE_FRAME = wx.ID_HIGHEST + 3
 
 
 class Application(wx.App):
@@ -59,7 +61,8 @@ class MainWindow(wx.Frame):
         """
         Creates application window.
         """
-        wx.Frame.__init__(self, parent, id, "EI07", size=(200,100))
+        wx.Frame.__init__(self, parent, id, "EI07", size=(300,200))
+        self.SetMinSize((300, 200))
 
         # Load resource file
         self.xRes = wx.xrc.XmlResource("Application.xrc")
@@ -134,8 +137,19 @@ class MainWindow(wx.Frame):
         wx.EVT_MENU(self, wx.xrc.XRCID('ID_INSERT_STRAIGHT_TRACK'), self.OnInsertStraightTrack)
         wx.EVT_MENU(self, wx.xrc.XRCID('ID_INSERT_CURVE_TRACK'), self.OnInsertCurveTrack )
         wx.EVT_MENU(self, wx.xrc.XRCID('ID_INSERT_RAIL_SWITCH'), self.OnInsertRailSwitch )
+        wx.EVT_MENU(self, wx.xrc.XRCID('ID_FRAMES_PALETTE'), self.OnToggleFramePalette )
         wx.EVT_MENU(self, wx.ID_DELETE, self.OnDelete)
         wx.EVT_MENU(self, wx.ID_ABOUT, self.OnAbout)
+
+        config = wx.FileConfig.Get()
+        shown = config.ReadInt("/EIFrame/framesPalette", 1)        
+        self.miTogglePalette = mainMenu.FindItemById(wx.xrc.XRCID('ID_FRAMES_PALETTE'))
+        if shown == 1:
+            self.miTogglePalette.Check(True)
+            self.OpenPaletteFrame()
+        else:
+            self.miTogglePalette.Check(False)
+        
 
 
     def CreateStatusBar(self):
@@ -174,24 +188,26 @@ class MainWindow(wx.Frame):
         Application exit callback.
 
         Saves configuration options.
-        """
+        """        
         if not self.CheckIfModified():
             return
 
-        config = wx.FileConfig.Get()
+        try:
+            config = wx.FileConfig.Get()
 
-        size = self.GetSize()
-        pos = self.GetPosition()
+            size = self.GetSize()
+            pos = self.GetPosition()
 
-        config.WriteInt("/EIFrame/maximised", self.IsMaximized())
-        if not self.IsMaximized():
-            config.WriteInt("/EIFrame/x", pos.x)
-            config.WriteInt("/EIFrame/y", pos.y)
-            config.WriteInt("/EIFrame/width", size.width)
-            config.WriteInt("/EIFrame/height", size.height)
-        config.Write("/EIApp/workingDirectory", self.workingDirectory)
-
-	self.Destroy()
+            config.WriteInt("/EIFrame/maximised", self.IsMaximized())
+            if not self.IsMaximized():
+                config.WriteInt("/EIFrame/x", pos.x)
+                config.WriteInt("/EIFrame/y", pos.y)
+                config.WriteInt("/EIFrame/width", size.width)
+                config.WriteInt("/EIFrame/height", size.height)
+            config.Write("/EIApp/workingDirectory", self.workingDirectory)
+            config.WriteInt("/EIFrame/framesPalette", self.miTogglePalette.IsChecked())
+        finally:
+            self.Destroy()
 
 
     def OnMaximise(self, event):
@@ -442,6 +458,23 @@ class MainWindow(wx.Frame):
         """
         scale = self.editor.parts[0].GetScale()
         self.editor.parts[0].SetScale(scale / 2)
+
+
+    def OnToggleFramePalette(self, event):
+        if event.IsChecked():
+            self.OpenPaletteFrame()
+        else:
+            self.ClosePaletteFrame()
+
+
+    def OpenPaletteFrame(self):
+        self.paletteFrame = ui.palette.PaletteFrame(self, ID_PALETTE_FRAME)
+
+
+    def ClosePaletteFrame(self):
+        self.paletteFrame.Close()
+        self.paletteFrame = None 
+
 
 
 

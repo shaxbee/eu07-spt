@@ -73,6 +73,18 @@
         <help>Deletes selected scenery element.</help>
       </object>
     </object>
+    <object class="wxMenu" name="WindowMenu">
+      <label>&amp;Windows</label>
+      <object class="wxMenu" name="FramesSubmenu">
+        <label>&amp;Toolbars</label>
+        <object class="wxMenuItem" name="ID_FRAMES_PALETTE">
+          <label>&amp;Palette</label>
+          <help>Toggles palette window.</help>
+          <checkable>1</checkable>
+          <enabled>1</enabled>
+        </object>
+      </object>
+    </object>
     <object class="wxMenu" name="HelpMenu">
       <label>&amp;Help</label>
       <object class="wxMenuItem" name="wxID_ABOUT">
