@@ -6,6 +6,11 @@ import os.path
 import yaml
 import wx
 
+import Application
+import model.tracks
+import ui.dialog
+import ui.trackfc
+
 
 
 class PaletteFrame(wx.Frame):
@@ -140,7 +145,6 @@ class TrackPalette(wx.Panel):
     def OnClearSearch(self, event):
         self.searchTextCtrl.Clear()
         self.searchTextCtrl.SetFocus()
-        self.ClearSearch()
 
 
     def OnTextSearch(self, event):
@@ -288,6 +292,8 @@ class TrackingHandleButton(wx.BitmapButton):
         self.SetBitmapLabel(wx.Bitmap(bitmapPath))
         self.point = point
 
+        self.editor = None
+
         self.Bind(wx.EVT_BUTTON, self.OnHandle, id=wx.ID_ANY)
 
 
@@ -295,9 +301,31 @@ class TrackingHandleButton(wx.BitmapButton):
         return self.GetParent().GetParent().item.railTracking
 
 
+    def GetEditor(self):
+        if self.editor == None:
+            # Cache reference
+            self.editor = wx.FindWindowById(Application.ID_EDITOR)
+        return self.editor
+
+
     def OnHandle(self, event):
-        rail = self.GetRailTracking()
-        print "Point %s on %s" % (self.point, rail)
+        template = self.GetRailTracking()
+        editor = self.GetEditor()
+
+        name = None
+        if not isinstance(template, model.tracks.Track):
+            #print "Request for name!"
+            nameDialog = ui.dialog.NameDialog(wx.FindWindowById(Application.ID_MAIN_FRAME))
+            ret = nameDialog.ShowModal()
+            if ret != wx.ID_OK:
+                return
+            name = nameDialog.GetName()
+
+        tf = ui.trackfc.TrackFactory(editor)
+        rail = tf.CopyRailTracking(template, self.point)
+        rail.name = name
+
+        editor.scenery.AddRailTracking(rail)
 
 
 
@@ -308,12 +336,12 @@ class TrackingItem:
     """
 
     """
-    Textual description - searchable
+    Textual description
     """
     description = dict()
     """
     List of handles. Each element is a tuple of
-    Vec3 and the icon description
+    Vec3 and the standarized handle icon name
     """
     handles = list()
     """

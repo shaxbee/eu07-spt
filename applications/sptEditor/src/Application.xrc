@@ -532,7 +532,7 @@
               <object class="wxBoxSizer">
                 <object class="sizeritem">
                   <object class="wxStaticText">
-                    <label>Name:</label>
+                    <label>* Name:</label>
                   </object>
                 </object>
                 <object class="sizeritem">
@@ -566,6 +566,62 @@
         </object>
         <option>0</option>
         <flag>wxTOP|wxBOTTOM|wxLEFT|wxRIGHT|wxALIGN_CENTRE|wxALIGN_TOP|wxALIGN_BOTTOM</flag>
+        <border>10</border>
+      </object>
+    </object>
+  </object>
+  <object class="wxDialog" name="NameDialog">
+    <size>200, 200</size>
+    <title>Name</title>
+    <centered>1</centered>
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxPanel">
+          <object class="wxFlexGridSizer">
+            <object class="sizeritem">
+              <object class="wxStaticText">
+                <label>* Name:</label>
+              </object>
+              <option>0</option>
+              <flag>wxALIGN_RIGHT</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxTextCtrl" name="name">
+                <value></value>
+              </object>
+              <option>1</option>
+              <flag>wxEXPAND</flag>
+            </object>
+            <cols>2</cols>
+            <rows>1</rows>
+            <vgap>5</vgap>
+            <hgap>5</hgap>
+          </object>
+        </object>
+        <flag>wxTOP|wxBOTTOM|wxLEFT|wxRIGHT</flag>
+        <border>2</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <object class="sizeritem">
+            <object class="wxButton" name="wxID_OK">
+              <label>Ok</label>
+              <default>1</default>
+            </object>
+            <option>1</option>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="wxID_CANCEL">
+              <label>Cancel</label>
+            </object>
+            <option>1</option>
+            <flag>wxLEFT</flag>
+            <border>5</border>
+          </object>
+          <orient>wxHORIZONTAL</orient>
+        </object>
+        <flag>wxTOP|wxBOTTOM|wxLEFT|wxRIGHT</flag>
         <border>10</border>
       </object>
     </object>

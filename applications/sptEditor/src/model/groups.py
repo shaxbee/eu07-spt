@@ -197,7 +197,7 @@ class RailContainer:
                     _logger.debug("Adding previous tracking " + str(previous) \
                         + " to outlines")
 
-                    self.outline_tracking.append(previous)
+                    self.outline_trackings.append(previous)
 
                 _logger.debug("Adding point " + tracks.coord2str(gpoint) \
                     + " to outline points now")

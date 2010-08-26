@@ -24,9 +24,11 @@ import ui.palette
 import sptyaml
 
 # Stock items
-ID_CENTER_AT = wx.ID_HIGHEST + 1
-ID_BASEPOINT_EDIT = wx.ID_HIGHEST + 2
-ID_PALETTE_FRAME = wx.ID_HIGHEST + 3
+ID_CENTER_AT = wx.ID_HIGHEST       + 1
+ID_BASEPOINT_EDIT = wx.ID_HIGHEST  + 2
+ID_PALETTE_FRAME = wx.ID_HIGHEST   + 3
+ID_EDITOR = wx.ID_HIGHEST          + 4
+ID_MAIN_FRAME = wx.ID_HIGHEST      + 5
 
 
 class Application(wx.App):
@@ -166,7 +168,7 @@ class MainWindow(wx.Frame):
         """
         Creates main content of application.
         """
-        self.editor = ui.editor.SceneryEditor(self, wx.ID_ANY)
+        self.editor = ui.editor.SceneryEditor(self, ID_EDITOR)
         self.NewScenery()
 
 
@@ -489,6 +491,6 @@ if __name__ == "__main__":
         logging.config.fileConfig(options.logging)
     
     app = Application()
-    frame = MainWindow(None, wx.ID_ANY)
+    frame = MainWindow(None, ID_MAIN_FRAME)
     app.MainLoop()
 

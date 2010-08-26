@@ -166,8 +166,8 @@ class InsertStraightTrack(wx.Dialog):
             editor = self.GetParent().editor
             tf = ui.trackfc.TrackFactory(editor)
             t = tf.CreateStraight(length)
-            if len(name) > 0:
-                t.name = name
+            if name.strip() != "":
+                t.name = name.strip()
 
             # Remember entered values
             config = wx.FileConfig.Get()
@@ -229,8 +229,8 @@ class InsertCurveTrack(wx.Dialog):
             editor = self.GetParent().editor
             tf = ui.trackfc.TrackFactory(editor)
             t = tf.CreateCurve(length, radius, leftOrRight == 0)
-            if len(name) > 0:
-                t.name = name
+            if name.strip() != "":
+                t.name = name.strip()
 
             config = wx.FileConfig.Get()
             config.Write("/InsertCurveTrack/length", self.length.GetValue())
@@ -293,13 +293,14 @@ class InsertRailSwitch(wx.Dialog):
 
             if index == wx.NOT_FOUND:
                 return
-            if name == "":
-                # Switch should have the name
+            if name.strip() == "":
+                wx.MessageBox("Rail switch must have a name.", \
+                    self.GetTitle(), wx.OK | wx.ICON_ERROR, self)
                 return
 
             editor = self.GetParent().editor
             tf = ui.trackfc.TrackFactory(editor)
-            template = self.predefined[index]
+            template = self.predefined[index].railTracking
             s = tf.CopyRailTracking(template, self.GetStartPoint(template, handle))
             s.name = name
 
@@ -324,4 +325,41 @@ class InsertRailSwitch(wx.Dialog):
             return switch.p2
         else:
             raise ValueError, "Cannot find startPoint"
+
+
+
+
+class NameDialog(wx.Dialog):
+    """
+    Very simple dialog for filling the name.
+    """
+
+    def __init__(self, parent):
+        w = parent.xRes.LoadDialog(parent, "NameDialog")
+        self.PostCreate(w)
+
+        self.Bind(wx.EVT_BUTTON, self.OnButton, id=wx.ID_OK)
+
+        self.FillContent()
+
+        self.Fit()
+        self.Centre()
+      
+
+    def FillContent(self):
+        self.nameCtrl = wx.xrc.XRCCTRL(self, "name")
+ 
+
+    def OnButton(self, event):
+        name = self.nameCtrl.GetValue()
+        if name.strip() == "":
+            wx.MessageBox("This rail tracking must have a name.", \
+                self.GetTitle(), wx.OK | wx.ICON_ERROR, self)
+            return
+
+        self.EndModal(wx.ID_OK)
+
+
+    def GetName(self):
+        return self.nameCtrl.GetValue().strip()
 
