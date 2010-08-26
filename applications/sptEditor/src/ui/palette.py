@@ -84,6 +84,9 @@ class TrackPalette(wx.Panel):
 
         self.searchTextCtrl = wx.TextCtrl(searchPanel, wx.ID_ANY)
         self.searchTextCtrl.SetMaxLength(32)
+        self.searchTextCtrl.SetFocus()
+
+        self.searchTextCtrl.Bind(wx.EVT_TEXT, self.OnTextSearch, id=wx.ID_ANY)
 
         sizerSearch.Add(self.searchTextCtrl, 3, wx.EXPAND)
 
@@ -93,55 +96,28 @@ class TrackPalette(wx.Panel):
         sizerSearch.Add(self.clearSearch, 1, wx.EXPAND)
         searchPanel.SetSizer(sizerSearch)
 
-        sizerPalette = wx.BoxSizer(wx.VERTICAL)
+        self.sizerPalette = wx.BoxSizer(wx.VERTICAL)
         palettePanel = wx.Panel(self, wx.ID_ANY, style = wx.BORDER_SUNKEN)
-        for trackingType in self.prefabs.keys():
-            groupPanel = wx.Panel(palettePanel, wx.ID_ANY)
-            groupSizer = wx.BoxSizer(wx.VERTICAL)
 
-            itemContainerPanel = wx.ScrolledWindow(groupPanel, wx.ID_ANY, \
-                name=trackingType, style = wx.HSCROLL | wx.BORDER_SIMPLE)
-            itemContainerSizer = wx.BoxSizer(wx.VERTICAL)
+        # Straight
+        straightGroup = TrackingTypeGroup(palettePanel, 'Straight', self.prefabs['straight'])
+        self.sizerPalette.Add(straightGroup, 0, wx.EXPAND)
 
-            for e in self.prefabs[trackingType]:
-                itemPanel = wx.Panel(itemContainerPanel, wx.ID_ANY, name=e.label)
-                itemSizer = wx.BoxSizer(wx.HORIZONTAL)
+        # Arcs
+        arcGroup = TrackingTypeGroup(palettePanel, 'Arcs', self.prefabs['arcs'])
+        self.sizerPalette.Add(arcGroup, 0, wx.EXPAND)
 
-                itemLabel = wx.StaticText(itemPanel, wx.ID_ANY, label=e.label)
-                itemSizer.Add(itemLabel, 1, wx.EXPAND | wx.ALIGN_CENTER)
+        # Left switches
+        lSwitchGroup = TrackingTypeGroup(palettePanel, 'Left switches', self.prefabs['left_switches'])
+        self.sizerPalette.Add(lSwitchGroup, 0, wx.EXPAND)
 
-                handlesPanel = wx.Panel(itemPanel, wx.ID_ANY)
-                handlesSizer = wx.BoxSizer(wx.HORIZONTAL)
-                ## Handles
-                for h in e.handles:
-                    hButton = wx.BitmapButton(handlesPanel, wx.ID_ANY)
-                    bitmapPath = os.path.join("icons", "actions", h[1]) + ".png"
-                    hButton.SetBitmapLabel(wx.Bitmap(bitmapPath))
-                    handlesSizer.Add(hButton, 0, wx.SHAPED)
-                
-                handlesPanel.SetSizer(handlesSizer)
+        # Right switches
+        rSwitchGroup = TrackingTypeGroup(palettePanel, 'Right switches', self.prefabs['right_switches'])
+        self.sizerPalette.Add(rSwitchGroup, 0, wx.EXPAND)
 
-                itemSizer.Add(handlesPanel, 1, wx.EXPAND)
+        self.groups = [straightGroup, arcGroup, lSwitchGroup, rSwitchGroup]
 
-                itemPanel.SetSizer(itemSizer)
-                itemContainerSizer.Add(itemPanel, 0, wx.EXPAND)
-
-            itemContainerPanel.SetSizer(itemContainerSizer)
-            itemContainerSizer.FitInside(itemContainerPanel)
-            itemContainerPanel.EnableScrolling(False, True)
-            itemContainerPanel.SetVirtualSizeHints(300, 50)
-
-            expanderButton = wx.Button(groupPanel, wx.ID_ANY, name="eb_" + trackingType)
-            expanderButton.SetLabel("%s <<" % trackingType)
-            expanderButton.Bind(wx.EVT_BUTTON, self.OnExpandButton, id=wx.ID_ANY)
-            
-            groupSizer.Add(expanderButton, 0, wx.EXPAND)
-            groupSizer.Add(itemContainerPanel, 0, wx.EXPAND | wx.ALL, 2)
-            groupPanel.SetSizer(groupSizer)
-
-            sizerPalette.Add(groupPanel, 0, wx.EXPAND)
-
-        palettePanel.SetSizer(sizerPalette)
+        palettePanel.SetSizer(self.sizerPalette)
 
         sizerRoot.Add(searchPanel, 0, wx.EXPAND | wx.ALL, 5)
         sizerRoot.Add(palettePanel, 1, wx.EXPAND | wx.ALL, 5)
@@ -161,26 +137,168 @@ class TrackPalette(wx.Panel):
                     raise ValueError, "%s is invalid palette item" % e
 
 
-    def OnExpandButton(self, event):
-        button = event.GetEventObject()
-        label = button.GetLabel()[:-3]
-        panel = button.GetParent()
-        sizer = panel.GetSizer()
-        if sizer.IsShown(1):
-            sizer.Hide(1, True)
-            label = label + " >>"
-        else:
-            sizer.Show(1, True)
-            label = label + " <<"
-        button.SetLabel(label)
-        sizer.Layout()
-        panel.GetParent().GetSizer().Layout()
-
-
     def OnClearSearch(self, event):
         self.searchTextCtrl.Clear()
         self.searchTextCtrl.SetFocus()
-        # Show all hidden fields
+        self.ClearSearch()
+
+
+    def OnTextSearch(self, event):
+        exp = event.GetEventObject().GetValue()
+        if exp.strip() == "":
+            self.ClearSearch()
+        else:
+            self.Search(exp)
+
+
+    def ClearSearch(self):
+        for g in self.groups:
+            g.ClearSearch()
+        self.sizerPalette.Layout()
+
+
+    def Search(self, exp):
+        for g in self.groups:
+            g.Search(exp)
+        self.sizerPalette.Layout()
+
+
+
+
+class TrackingTypeGroup(wx.Panel):
+    """
+    Panel grouping rail tracking type.
+    """
+
+    def __init__(self, parent, label, elements):
+        wx.Panel.__init__(self, parent, wx.ID_ANY)
+
+        self.label = label
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+
+        itemContainerPanel = wx.ScrolledWindow(self, wx.ID_ANY, \
+                style = wx.HSCROLL | wx.BORDER_SIMPLE)
+        itemContainerSizer = wx.BoxSizer(wx.VERTICAL)
+
+        self.rows = []
+
+        for elem in elements:
+            row = TrackingItemRow(itemContainerPanel, elem)
+            itemContainerSizer.Add(row, 0, wx.EXPAND)
+            self.rows.append(row)
+
+        itemContainerPanel.SetSizer(itemContainerSizer)
+        itemContainerPanel.SetVirtualSizeHints(300, 50)
+        itemContainerPanel.FitInside()
+        #itemContainerPanel.SetScrollRate(-1, 50)
+
+        self.expanderButton = wx.Button(self, wx.ID_ANY)
+        self.expanderButton.SetLabel("%s <<" % label)
+        self.expanderButton.Bind(wx.EVT_BUTTON, self.OnExpand, id=wx.ID_ANY)
+            
+        sizer.Add(self.expanderButton, 0, wx.EXPAND)
+        sizer.Add(itemContainerPanel, 0, wx.EXPAND | wx.ALL, 2)
+        self.SetSizer(sizer)
+
+
+    def OnExpand(self, event):
+        sizer = self.GetSizer()
+        if sizer.IsShown(1):
+            sizer.Hide(1, True)
+            label = self.label + " >>"
+        else:
+            sizer.Show(1, True)
+            label = self.label + " <<"
+        self.expanderButton.SetLabel(label)
+        sizer.Layout()
+        self.GetParent().GetSizer().Layout()
+
+
+    def ClearSearch(self):
+        for row in self.rows:
+            row.ClearSearch()
+        if not self.IsShown():
+            self.Show(True)
+
+
+    def Search(self, exp):
+        visible = 0
+        for row in self.rows:
+            if row.Search(exp):
+                visible = visible + 1
+        self.Show(visible != 0)
+
+
+
+
+class TrackingItemRow(wx.Panel):
+    """
+    A row that contains palette item.
+    """
+
+    def __init__(self, parent, item):
+        wx.Panel.__init__(self, parent, id=wx.ID_ANY)
+        self.item = item
+
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        itemLabel = wx.StaticText(self, wx.ID_ANY, label=item.label)
+        sizer.Add(itemLabel, 1, wx.EXPAND | wx.ALIGN_CENTER)
+
+        handlesPanel = wx.Panel(self, wx.ID_ANY)
+        handlesSizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        # Handles
+        for h in item.handles:
+            hButton = TrackingHandleButton(handlesPanel, h[0], h[1])
+            handlesSizer.Add(hButton, 0, wx.SHAPED)
+                
+        handlesPanel.SetSizer(handlesSizer)
+        sizer.Add(handlesPanel, 1, wx.EXPAND)
+
+        self.SetSizer(sizer)
+
+
+    def ClearSearch(self):
+        if not self.IsShown():
+             self.Show(True)
+
+
+    def Search(self, exp):
+        match = False
+        exps = exp.lower().split("*")
+        for e in exps:
+            if self.item.label.lower().find(e) != -1:
+                match = True
+        self.Show(match)
+        return match
+        
+
+
+
+class TrackingHandleButton(wx.BitmapButton):
+    """
+    Bitmap button with handle
+    """
+
+    def __init__(self, parent, point, iconName):
+        wx.BitmapButton.__init__(self, parent, id=wx.ID_ANY, size=(32, 32))
+        bitmapPath = os.path.join("icons", "actions", iconName) + ".png"
+        self.SetBitmapLabel(wx.Bitmap(bitmapPath))
+        self.point = point
+
+        self.Bind(wx.EVT_BUTTON, self.OnHandle, id=wx.ID_ANY)
+
+
+    def GetRailTracking(self):
+        return self.GetParent().GetParent().item.railTracking
+
+
+    def OnHandle(self, event):
+        rail = self.GetRailTracking()
+        print "Point %s on %s" % (self.point, rail)
+
 
 
 
