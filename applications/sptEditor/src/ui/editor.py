@@ -43,14 +43,14 @@ class SceneryEditor(wx.Panel):
         self.selection = None
 
         sizer.Add(corner)
-        sizer.Add(self.topRuler, flag = wx.LEFT | wx.EXPAND)
-        sizer.Add(self.leftRuler, flag = wx.TOP | wx.EXPAND)
-        sizer.Add(self.parts[0], 1, wx.EXPAND | wx.ALL)
+        sizer.Add(self.topRuler, 0, flag = wx.EXPAND)
+        sizer.Add(self.leftRuler, 0, flag = wx.EXPAND)
+        sizer.Add(self.parts[0], 1, wx.EXPAND)
         sizer.AddGrowableCol(1, 1)
         sizer.AddGrowableRow(1, 1)
         
         self.SetSizer(sizer)
-        
+
         self.SetBasePoint(BasePoint(Vec3(), 0.0, 0.0))
 
 
@@ -87,6 +87,14 @@ class SceneryEditor(wx.Panel):
 
     def GetSelection(self):
         return self.selection
+
+
+    def CenterViewAt(self, cx, cy):
+        self.parts[0].CenterViewAt(cx, cy)
+
+
+    def ModelToView(self, vec3 = Vec3()):
+        return self.parts[0].ModelToView(vec3)
 
 
 
@@ -133,7 +141,7 @@ class PlanePart(wx.ScrolledWindow):
         self.switchCache = []
         self.basePointView = None
         
-        size = self.ComputePreferredSize() 
+        size = self.ComputePreferredSize()
         self.SetVirtualSize(size)
         self.SetupScrolling()       
         
@@ -305,7 +313,7 @@ class PlanePart(wx.ScrolledWindow):
         return p3d
 
 
-    def ModelToView(self, point):
+    def ModelToView(self, point = Vec3()):
         """
         Converts 3D point of scenery coordiante into 2D point of
         UI editor coordinates.
@@ -336,6 +344,7 @@ class PlanePart(wx.ScrolledWindow):
 
     def OnSize(self, event):
         self.Refresh()
+        self.Layout()
 
 
     def ComputePreferredSize(self):
@@ -351,7 +360,7 @@ class PlanePart(wx.ScrolledWindow):
         """
         Sets up scrolling of the window.
         """
-        self.SetScrollRate(20, 20)        
+        self.SetScrollRate(20, 20)
 
 
     def OnPaint(self, event):
@@ -533,6 +542,11 @@ class PlanePart(wx.ScrolledWindow):
         self.GetParent().leftRuler.UpdateMousePointer(opoint)
 
 
+    def SetSize(self, size):
+        print size
+        wx.Panel.SetSize(size)
+
+
 
 
 class Ruler(wx.Control):
@@ -587,6 +601,7 @@ class Ruler(wx.Control):
 
             part = self.GetParent().parts[0]
             (unitX, unitY) = part.GetScrollPixelsPerUnit()
+            # Here is a problem with GetViewStart method under wxGTK
             (vx, vy) = part.GetViewStart()
             (w, h) = self.GetSize()
             if self.orientation == wx.VERTICAL:

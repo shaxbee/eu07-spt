@@ -55,9 +55,9 @@ class CenterAtDialog(wx.Dialog):
             pScale = float(self.zoom.GetValue())
 
             editor = self.GetParent().editor
+            editor.parts[0].SetScale(pScale)
             (vx, vy) = editor.parts[0].ModelToView(Vec3(px, py, pz))
             editor.parts[0].CenterViewAt(vx, vy)
-            editor.parts[0].SetScale(pScale)
 
             self.Destroy()
         except ValueError: 
@@ -118,8 +118,8 @@ class BasePointDialog(wx.Dialog):
 
             editor = self.GetParent().editor
             editor.SetBasePoint(ui.editor.BasePoint(Vec3(px, py, pz), alpha, gradient))
-            #(vx, vy) = editor.parts[0].ModelToView((px, py, pz))
-            #editor.parts[0].CenterViewAt(vx, vy)
+            (vx, vy) = editor.parts[0].ModelToView(Vec3(px, py, pz))
+            editor.parts[0].CenterViewAt(vx, vy)
 
             self.Destroy()
         except ValueError: 

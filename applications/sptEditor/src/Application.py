@@ -97,7 +97,11 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.OnExit)
         self.Bind(wx.EVT_MAXIMIZE, self.OnMaximise)
 
+        self.Layout()
+        (x, y) = self.editor.ModelToView()
+        self.editor.CenterViewAt(x, y)
         self.Show(True)
+
 
 
     def PrepareApplicationIcons(self):
@@ -168,8 +172,14 @@ class MainWindow(wx.Frame):
         """
         Creates main content of application.
         """
+        rootSizer = wx.GridSizer(1, 1)
+
         self.editor = ui.editor.SceneryEditor(self, ID_EDITOR)
         self.NewScenery()
+
+        rootSizer.Add(self.editor, 1, wx.EXPAND)
+
+        self.SetSizer(rootSizer)
 
 
     def OnAbout(self, event):
