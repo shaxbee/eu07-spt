@@ -114,6 +114,8 @@ class PlanePart(wx.ScrolledWindow):
         self.selectedView = None
         highlighter = Highlighter(self)
 
+        self.wheelScaler = WheelScaler(self)
+
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_SCROLLWIN, parent.topRuler.HandleOnScroll)
@@ -123,6 +125,7 @@ class PlanePart(wx.ScrolledWindow):
         eventManager.Register(self.basePointMover.OnMousePress, wx.EVT_LEFT_DOWN, self)
         eventManager.Register(self.basePointMover.OnMouseRelease, wx.EVT_LEFT_UP, self)
         eventManager.Register(highlighter.OnMouseClick, wx.EVT_LEFT_DOWN, self)
+        eventManager.Register(self.wheelScaler.OnMouseWheel, wx.EVT_MOUSEWHEEL, self)
 
         self.logger = logging.getLogger('Paint')
 
@@ -848,6 +851,29 @@ class Highlighter:
                 idelta = delta.days * 86400 + delta.seconds * 1000000 \
                     + delta.microseconds
                 self.editorPart.logger.debug(u"Selection lasted %d \u00b5s" % idelta)
+
+
+
+
+class WheelScaler:
+    """
+    Responds to mouse wheel in scenery editor and adjust the scale.
+    """
+
+    def __init__(self, editor):
+        self.editor = editor
+
+
+    def OnMouseWheel(self, event):
+        if event.ControlDown():
+            delta = event.GetWheelRotation()
+            scale = self.editor.GetScale()
+            if delta < 0:
+                self.editor.SetScale(scale * 2)
+            else:
+                self.editor.SetScale(scale / 2)
+        else:
+            event.Skip()
 
 
 
