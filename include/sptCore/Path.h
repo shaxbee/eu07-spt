@@ -30,7 +30,7 @@ public:
 
     virtual float length() const = 0;
 
-    static const float DEFAULT_SCALE = 1.0f;
+    static const float DEFAULT_SCALE;
 
     virtual osg::ref_ptr<osg::Vec3Array> points(float scale = DEFAULT_SCALE) const = 0;
 

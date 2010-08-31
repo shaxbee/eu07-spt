@@ -113,10 +113,23 @@ int main()
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
 
     sptCore::Scenery scenery;
-    std::ifstream input("test.sct", std::ios::binary);
-    SectorViewBuilder builder(geode, createProfile());
 
-    sptDB::readSector(input, scenery, osg::Vec3(), &builder);
+	std::ifstream input("test.sct", std::ios::binary);
+
+	if(input.fail())
+	{
+		std::cout << "Failed to open test.sct" << std::endl;
+		return 0;
+	};
+
+	try
+	{
+		SectorViewBuilder builder(geode, createProfile());
+		sptDB::readSector(input, scenery, osg::Vec3(), &builder);
+	} catch (std::exception e) {
+		std::cout << e.what() << std::endl;
+		return 0;
+	}
 
     root->addChild(geode.get());
     root->addChild(createAxes(geode.get()));

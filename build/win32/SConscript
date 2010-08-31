@@ -1,3 +1,4 @@
+import sys
 import os.path
 import SCons.Util
 
@@ -7,17 +8,15 @@ import build_config
 Import('env')
 
 # configure additional include and library paths according to user environment config
-paths = ['OPENSCENEGRAPH', 'OPENSCENEGRAPH_DEP']
+# paths = ['OPENSCENEGRAPH', 'OPENSCENEGRAPH_DEP']
 
-for path in paths:
-    path = getattr(build_config, path + '_PATH')
-    env.Append(CPPPATH = [os.path.join(path, 'include')])
-    env.Append(LIBPATH = [os.path.join(path, 'lib')])
-    env.Append(ENV = os.environ)
+env.AppendUnique(CPPPATH = ['#/ext/include'])
+env.AppendUnique(LIBPATH = ['#/ext/lib'])
+
+env.AppendUnique(CPPPATH = os.path.join(sys.prefix, 'include'))
+env.AppendUnique(LIBPATH = os.path.join(sys.prefix, 'lib'))
+#env.AppendUnique(LINKFLAGS = ['/EXPORT'])
     
-env.Append(CPPPATH = [build_config.BOOST_PATH])
-env.Append(LIBPATH = [os.path.join(build_config.BOOST_PATH, 'lib')])
-
 # add WIN32 define and exception handling flags
 env.Append(CXXFLAGS = ['/GR', '/EHsc'])
 env.Append(CPPDEFINES = ['WIN32'])
@@ -26,16 +25,8 @@ env.Append(CPPDEFINES = ['WIN32'])
 if env['DEBUG']:
 	env.Append(CXXFLAGS = ['/Zi', '/Od'])
 	env.Append(LINKFLAGS = ['/DEBUG'])
-	env['LIBSUFFIX'] = 'd' + env['LIBSUFFIX']
 else:
 	env.Append(CXXFLAGS = ['/O2'])
-	
-if os.environ.has_key('PYTHONPATH'):
-	env.Append(PYTHON_INCLUDE = os.path.join(os.environ['PYTHONPATH'], 'include'))
-else:
-	env.Append(PYTHON_INCLUDE = os.path.join(build_config.PYTHON_PATH , 'include'))
-	
-env['GCCXML_PATH'] = build_config.GCCXML_PATH
 	
 # return modified environment
 Return('env')

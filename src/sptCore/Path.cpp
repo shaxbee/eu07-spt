@@ -87,8 +87,6 @@ struct FindBezierPathEntry
 
 }; // anonymous namespace
 
-const float Path::DEFAULT_SCALE;
-
 std::auto_ptr<Path> StraightPath::reverse() const
 {
     return std::auto_ptr<Path>(new StraightPath(back(), front()));
@@ -190,3 +188,4 @@ osg::ref_ptr<osg::Vec3Array> BezierPath::points(float scale) const
     return result;
 };
 
+const float Path::DEFAULT_SCALE = 1.0f;

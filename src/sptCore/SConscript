@@ -1,6 +1,6 @@
 Import('env')
 
 sources = Split('RailTracking.cpp Track.cpp SwitchableTracking.cpp Switch.cpp Path.cpp Sector.cpp Scenery.cpp Follower.cpp')
-library = env.SharedLibrary('sptCore', sources);
+library = env.Library('sptCore', sources, LIBS=['osg']);
 
 env.Install('#/lib', library)

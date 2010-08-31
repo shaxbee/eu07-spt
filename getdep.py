@@ -23,12 +23,15 @@ def module_exists(name):
 		
 	return True
 	
-def urllib_reporthook(bytes_read, blocks_size, total_size):
-	if bytes_read != 0:
-		percentage = int((float(bytes_read) / total_size) * 100)
-		progress_bar = '.' * (percentage / 10) + ' ' * (10 - (percentage / 10))
-		print ("\r %s %d%%" % (progress_bar, percentage)),
-	
+def urllib_reporthook(numblocks, blocksize, filesize):
+	try:
+		percent = min((numblocks*blocksize*100)/filesize, 100)
+	except:
+		percent = 100
+	if numblocks != 0:
+		sys.stdout.write("\b"*70)
+	sys.stdout.write("\r%3d%%" % percent)
+
 def extract_archive(filename, dest):
 	archive = None
 	if filename.endswith('.zip'):
@@ -45,11 +48,12 @@ def download(baseurl, filename):
 	print "Downloading %s%s" % (baseurl, filename)
 	tempname = os.path.join(tempdir, filename)
 	if os.path.exists(tempname):
-		response = raw_input("File %s already exists. Do you want to download it again? (y/n)" % filename)
+		response = raw_input("File %s already exists. Do you want to download it again? (y/n) " % filename)
 		if response != 'y':
 			return tempname
 			
 	tempname, headers = urllib.urlretrieve(baseurl + filename, tempname, urllib_reporthook)
+	print ""
 	
 	return tempname
 	
@@ -60,7 +64,7 @@ def download_and_extract(baseurl, filename, dest):
 
 def init_ext():
 	print "Initializing ext/ directory"
-	dirs = ['ext', 'ext/bin', 'ext/doc', 'ext/include', 'ext/lib']
+	dirs = ['ext', 'ext/include', 'ext/lib']
 	
 	for path in dirs:
 		if not os.path.exists(path):
@@ -111,19 +115,19 @@ def install_osg():
 	
 	print "Installing OSG libraries"
 	
-	for dist in ['Debug', 'Release']:
-		download_and_extract(osg_url, 'openscenegraph-all-%s-win32-x86-vc90sp1-%s.tar.gz' % (OSG_VERSION, dist), 'ext/')
+	for lib in ['libopenscenegraph',  'libopenscenegraph-dev', 'libopenthreads', 'libopenthreads-dev']:
+		for dist in ['Debug', 'Release']:
+			download_and_extract(osg_url, '%s-%s-win32-x86-vc90sp1-%s.tar.gz' % (lib, OSG_VERSION, dist), tempdir)
 
 	# cleanup after extract
 	print "Moving OSG files"
-	download_dir = 'ext/OpenSceneGraph-' + OSG_VERSION
+	download_dir = os.path.join(tempdir, 'OpenSceneGraph-' + OSG_VERSION)
 	for dir in ['include', 'bin', 'lib']:
+		dest = dir if dir != 'bin' else 'lib'
 		for path in os.listdir(os.path.join(download_dir, dir)):
-			print "\t" + path
-			shutil.move(os.path.join(download_dir, dir, path), os.path.join('ext', dir))
+			shutil.move(os.path.join(download_dir, dir, path), os.path.join('ext', dest))
 		
 	shutil.rmtree(download_dir)
-		
 
 init_ext()
 install_scons()
