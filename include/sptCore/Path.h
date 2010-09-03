@@ -18,6 +18,7 @@ class Path
 
 public:
     Path(const osg::Vec3f& front, const osg::Vec3f& back): _front(front), _back(back) { };
+    virtual ~Path() { };
 
     //! Return reversed path
     virtual std::auto_ptr<Path> reverse() const = 0;

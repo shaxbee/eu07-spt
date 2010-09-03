@@ -4,11 +4,6 @@ using namespace sptCore;
 
 SwitchableTracking::ValidPositions Switch::_positions;
 
-Switch::~Switch()
-{
-
-}; // Switch::~Switch
-
 const osg::Vec3& Switch::getExit(const osg::Vec3& entry) const
 {
     

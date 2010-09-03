@@ -3,14 +3,33 @@
 #include <sptDB/SectorNode.h>
 #include <sptDB/SectorReader.h>
 
+#include <boost/lexical_cast.hpp>
+
 using namespace sptDB;
 
 namespace 
 {
-    osg::Vec3 decodeSectorPosition(const std::string& fileName)
+    struct SectorInfo
     {
-        assert(false && "Not implemented");
-        return osg::Vec3();
+        unsigned int variant;
+        osg::Vec2 position;
+    };
+
+    SectorInfo decodeSectorName(const std::string& fileName)
+    {
+        SectorInfo result;
+
+        fileName.erase(fileName.rfind("."), fileName.end());
+        std::vector<std::string> fields;
+
+        boost::split(fields, fileName, std::equals('_'));
+
+        assert(result.size() >= 2 && "Invalid sector file name format");
+
+        result.position = osg::Vec2(boost::lexical_cast<float>(fields[0]), boost::lexical_cast<float>(fields[1]));
+        result.variant  = (fields.size() == 3) ? boost::lexical_cast<unsigned int>(fields[2]) : 0;
+
+        return result;
     }; // decodeSectorPosition
 
     std::auto_ptr<SectorReaderCallback> getSectorReaderCallback(const osgDB::Options* options)

@@ -30,7 +30,7 @@ public:
         setPosition(position);
     };
 
-    virtual ~Switch();
+    virtual ~Switch() { };
 
     virtual const osg::Vec3& getExit(const osg::Vec3& entry) const;
     virtual const Path& getPath(const osg::Vec3& entry) const;

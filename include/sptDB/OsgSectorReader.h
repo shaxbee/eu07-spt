@@ -14,6 +14,12 @@ public:
 
 }; // class sptDB::OsgSectorReader
 
+struct OsgSectorReaderConfig
+{
+    sptCore::Scenery& scenery;
+    sptDB::SectorReaderCallback& callback;
+};
+
 }; // namespace sptDB
 
 #endif
