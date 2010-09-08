@@ -117,9 +117,7 @@ class BasePointDialog(wx.Dialog):
             gradient = float(self.gradient.GetValue())
 
             editor = self.GetParent().editor
-            editor.SetBasePoint(ui.editor.BasePoint(Vec3(px, py, pz), alpha, gradient))
-            (vx, vy) = editor.parts[0].ModelToView(Vec3(px, py, pz))
-            editor.parts[0].CenterViewAt(vx, vy)
+            editor.SetBasePoint(ui.editor.BasePoint(Vec3(px, py, pz), alpha, gradient), True)
 
             self.Destroy()
         except ValueError: 

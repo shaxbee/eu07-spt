@@ -18,6 +18,9 @@ import ui.views
 from sptmath import Vec3
 
 SCALE_FACTOR = 1000.0
+BASE_POINT_MARGIN = 50
+
+
 
 
 class SceneryEditor(wx.Panel):
@@ -71,13 +74,13 @@ class SceneryEditor(wx.Panel):
         return self.scenery
 
 
-    def SetBasePoint(self, basePoint):
+    def SetBasePoint(self, basePoint, follow = False):
         """
         Sets the basepoint. Notify also active editor parts.
         """
         self.basePoint = basePoint
         for part in self.parts:
-            part.SetBasePoint(basePoint)
+            part.SetBasePoint(basePoint, follow)
 
 
     def SetSelection(self, selection):
@@ -159,7 +162,7 @@ class PlanePart(wx.ScrolledWindow):
         self.Refresh()
         
         
-    def SetBasePoint(self, basePoint):
+    def SetBasePoint(self, basePoint, follow = False):
         (vx, vy) = self.GetViewStart()
         (ux, uy) = self.GetScrollPixelsPerUnit()
         
@@ -183,6 +186,16 @@ class PlanePart(wx.ScrolledWindow):
             newRect.x -= vx * ux
             newRect.y -= vy * uy
             self.RefreshRect(newRect, False)
+
+        if follow:
+            p = self.basePointView.point
+            (wx, wy) = self.GetSize()
+            if wx > 2*BASE_POINT_MARGIN and wy > 2*BASE_POINT_MARGIN:
+                if p.x < vx*ux + BASE_POINT_MARGIN or p.x > vx*ux + wx - BASE_POINT_MARGIN \
+                        or p.y < vy*uy + BASE_POINT_MARGIN or p.y > vy*uy + wy - BASE_POINT_MARGIN:
+                    self.CenterViewAt(p.x, p.y)
+            else:
+                self.CenterViewAt(p.x, p.y)
 
 
     def SetSelection(self, selection):

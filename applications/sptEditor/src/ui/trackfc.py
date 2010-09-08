@@ -37,9 +37,7 @@ class TrackFactory:
         basePoint.point = Vec3(p2.x, p2.y, p2.z)
 
         # Refresh editor
-        self.editor.SetBasePoint(basePoint)
-        (cx, cy) = self.editor.parts[0].ModelToView(basePoint.point)
-        self.editor.CenterViewAt(cx, cy)
+        self.editor.SetBasePoint(basePoint, True)
 
         return Track(p1, v1, v2, p2)
 
@@ -88,9 +86,7 @@ class TrackFactory:
             basePoint.alpha += degrees(angle)
 
         # Refresh editor
-        self.editor.SetBasePoint(basePoint)
-        (cx, cy) = self.editor.parts[0].ModelToView(basePoint.point)
-        self.editor.CenterViewAt(cx, cy)
+        self.editor.SetBasePoint(basePoint, True)
 
         return Track(p1, v1, v2, p2)
 
@@ -151,9 +147,7 @@ class TrackFactory:
 
         basePoint.alpha = degrees(angle)
 
-        self.editor.SetBasePoint(basePoint)
-        (cx, cy) = self.editor.parts[0].ModelToView(basePoint.point)
-        self.editor.CenterViewAt(cx, cy)
+        self.editor.SetBasePoint(basePoint, True)
 
         # Return copy
         return tCopy
