@@ -10,6 +10,7 @@ import logging
 import logging.config
 import wx
 import wx.xrc
+import wx.aui
 import yaml
 import os.path
 import sys
@@ -152,7 +153,6 @@ class MainWindow(wx.Frame):
         self.miTogglePalette = mainMenu.FindItemById(wx.xrc.XRCID('ID_FRAMES_PALETTE'))
         if shown == 1:
             self.miTogglePalette.Check(True)
-            self.OpenPaletteFrame()
         else:
             self.miTogglePalette.Check(False)
         
@@ -174,14 +174,50 @@ class MainWindow(wx.Frame):
         """
         rootSizer = wx.GridSizer(1, 1)
 
+
+        '''Prepare pane manager'''
+        self._paneManager = wx.aui.AuiManager(self)
+
+        '''Preparing pane infos for new panes'''
+        self.PreparePalettePaneInfo()
+
+        '''Creating new palette pane'''
+        self.paletteFrame = ui.palette.PaletteFrame(self, ID_PALETTE_FRAME)
         self.editor = ui.editor.SceneryEditor(self, ID_EDITOR)
+
+#        self._perspectiveView = ui.editorOSG.OSGWindow(self,wx.ID_ANY,0,0,400,400)
+#        self._perspectiveView.viewer.setSceneData(self.osgRootNode)
+        #test = wx.TextCtrl(self,-1,'SAMPLE TEXT',wx.DefaultPosition,wx.Size(200,150),wx.DEFAULT_MINIFRAME_STYLE|wx.NO_BORDER|wx.TE_MULTILINE)
+        '''Adding palette pane to manager as child'''
+#        self._paneManager.AddPane(self.paletteFrame, self._palettePaneInfo)
+#        fl = self._paneManager.CreateFloatingFrame()
+        self._paneManager.AddPane(self.editor,wx.CENTER,'Main Window')
+        self._paneManager.Update()
+
         self.NewScenery()
 
-        rootSizer.Add(self.editor, 1, wx.EXPAND)
+#        rootSizer.Add(self.editor, 1, wx.EXPAND)
 
-        self.SetSizer(rootSizer)
+#        self.SetSizer(rootSizer)
 
-
+    def PreparePalettePaneInfo(self):
+        self._palettePaneInfo = wx.aui.AuiPaneInfo()
+        #self._palettePaneInfo.Floatable()
+        #self._palettePaneInfo.Dockable()
+        self._palettePaneInfo.CloseButton()
+        self._palettePaneInfo.Dockable()
+        #self._palettePaneInfo.IsMovable()
+        self._palettePaneInfo.PinButton()
+        self._palettePaneInfo.MinimizeButton()
+        self._palettePaneInfo.MaximizeButton()
+        #self._palettePaneInfo.Gripper()
+        #self._palettePaneInfo.GripperTop()
+        #self._palettePaneInfo.ToolbarPane()
+        self._palettePaneInfo.FloatingSize(wx.Size(400,400))
+        self._palettePaneInfo.BestSize(wx.Size(400,400))
+        self._palettePaneInfo.CaptionVisible()
+        self._palettePaneInfo.Caption('Perspective View')
+        
     def OnAbout(self, event):
         """
         Displays About box.
@@ -480,12 +516,16 @@ class MainWindow(wx.Frame):
 
 
     def OpenPaletteFrame(self):
-        self.paletteFrame = ui.palette.PaletteFrame(self, ID_PALETTE_FRAME)
+        '''Open palette with track models'''
+        self._paneManager.RestorePane(self._palettePaneInfo)
+        self._paneManager.Update()
 
 
     def ClosePaletteFrame(self):
-        self.paletteFrame.Close()
-        self.paletteFrame = None 
+        '''Close palette with track models'''
+ #       self.paletteFrame.Close()
+ #       self.paletteFrame = None
+        self._paneManager.ClosePane(self._perspectivePaneInfo)
 
 
 
