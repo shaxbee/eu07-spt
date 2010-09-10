@@ -15,6 +15,7 @@ import os.path
 import sys
 import optparse
 
+import db.sctwriter
 import model.tracks
 import model.groups
 import model.scenery
@@ -22,6 +23,7 @@ import ui.editor
 import ui.dialog
 import ui.palette
 import sptyaml
+import sptmath
 
 # Stock items
 ID_CENTER_AT = wx.ID_HIGHEST       + 1
@@ -347,7 +349,7 @@ class MainWindow(wx.Frame):
                 if answer == wx.NO:
                     return False
 
-            self.exportDirectory = exportDirectory.GetDirectory()
+            self.exportDirectory = exportDialog.GetDirectory()
             self.Export(path)
 
 
@@ -428,13 +430,17 @@ class MainWindow(wx.Frame):
             return self.SaveScenery(self.path)
 
     
-    def Export(self, file):
+    def Export(self, filename):
         """
         Do the right export.
         """
         wx.BeginBusyCursor()
         try:
-	    pass
+            writer = db.sctwriter.SectorWriter(file(filename, "w"), sptmath.Vec3())
+	    scenery = self.editor.GetScenery()
+            for t in scenery.tracks.tracks():
+                writer.addTrack(t)
+            writer.writeToFile()
         finally:
             wx.EndBusyCursor()
 

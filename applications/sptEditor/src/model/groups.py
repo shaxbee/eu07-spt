@@ -232,7 +232,17 @@ class RailContainer:
         return False
 
 
-
+    def tracks(self):
+        """
+        Iterates over tracks in this rail container.
+        """
+        for c in self.children:
+            if type(c) is tracks.Track:
+                yield c
+            elif type(c) is RailContainer:
+                for c in c.tracks():
+                    yield c
+            
 
 class RailGroup(RailContainer):
     """
