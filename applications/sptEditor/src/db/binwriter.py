@@ -69,3 +69,6 @@ class BinaryWriter(object):
 
     def writeUInt(self, value):
         self.write(BinaryWriter.uIntFormat.pack(value))
+
+    def finalize(self):
+        self.__input.close()

@@ -106,7 +106,7 @@ void Sector::setData(RailTrackingContainerT& trackings, const ConnectionContaine
     _trackings.reserve(trackings.size());
     transferTrackings(trackings, _trackings);
 
-    assert(std::adjacent_find(connections.begin(), connections.end(), ConnectionGreater()) == connections.end() && "Invalid connections order");
+//    assert(std::adjacent_find(connections.begin(), connections.end(), ConnectionGreater()) == connections.end() && "Invalid connections order");
 
     _connections.reserve(connections.size());
     std::copy(connections.begin(), connections.end(), std::back_inserter(_connections));
