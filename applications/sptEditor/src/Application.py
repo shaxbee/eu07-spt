@@ -89,6 +89,7 @@ class MainWindow(wx.Frame):
         height = config.ReadInt("/EIFrame/height", 420)
         self.workingDirectory = config.Read("/EIAPP/workingDirectory", \
             wx.GetHomeDir())
+        self.exportDirectory = config.Read("/EIApp/exportDirectory")
 
         self.Move((posX, posY))
         self.SetSize((width, height))
@@ -135,6 +136,7 @@ class MainWindow(wx.Frame):
         wx.EVT_MENU(self, wx.ID_OPEN, self.OnOpen)
         wx.EVT_MENU(self, wx.ID_SAVE, self.OnSave)
         wx.EVT_MENU(self, wx.ID_SAVEAS, self.OnSaveAs)
+        wx.EVT_MENU(self, wx.xrc.XRCID('ID_EXPORT'), self.OnExport)
         wx.EVT_MENU(self, wx.ID_CLOSE, self.OnExit)
         wx.EVT_MENU(self, wx.xrc.XRCID('ID_CENTER_AT'), self.OnCenterAt)
         wx.EVT_MENU(self, wx.ID_ZOOM_IN, self.OnZoomIn)
@@ -217,6 +219,7 @@ class MainWindow(wx.Frame):
                 config.WriteInt("/EIFrame/width", size.width)
                 config.WriteInt("/EIFrame/height", size.height)
             config.Write("/EIApp/workingDirectory", self.workingDirectory)
+            config.Write("/EIApp/exportDirectory", self.exportDirectory)
             config.WriteInt("/EIFrame/framesPalette", self.miTogglePalette.IsChecked())
         finally:
             self.Destroy()
@@ -326,6 +329,29 @@ class MainWindow(wx.Frame):
             return False
 
 
+    def OnExport(self, event):
+        """
+        Exports scenery to binary format
+        """
+        exportDialog = wx.FileDialog(self, "Choose binary scenery file", \
+            self.exportDirectory, "", \
+            "Binary format (*.sct)|*.sct", wx.FD_SAVE)
+        exportDialog.CentreOnParent()
+        
+        if exportDialog.ShowModal() == wx.ID_OK: 
+            path = exportDialog.GetPath()
+
+            if os.path.exists(path):
+                answer = wx.MessageBox("Overwrite existing file?", "Confirm", \
+                    wx.YES_NO | wx.ICON_QUESTION, self)
+                if answer == wx.NO:
+                    return False
+
+            self.exportDirectory = exportDirectory.GetDirectory()
+            self.Export(path)
+
+
+
     def NewScenery(self):
         """
         Creates new scenery.
@@ -400,6 +426,17 @@ class MainWindow(wx.Frame):
             return self.SaveAs()
         else:
             return self.SaveScenery(self.path)
+
+    
+    def Export(self, file):
+        """
+        Do the right export.
+        """
+        wx.BeginBusyCursor()
+        try:
+	    pass
+        finally:
+            wx.EndBusyCursor()
 
 
     def UpdateTitle(self):

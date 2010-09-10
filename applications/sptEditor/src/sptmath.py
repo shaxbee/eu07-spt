@@ -104,13 +104,38 @@ class Vec3:
         '0.785398163397'
         >>> str(Vec3("-1", "1", "0").angleToJUnit())
         '5.49778714378'
-        """
-        theta = math.acos(float(self.y) / self.length())
+        """        
+        div = float(self.y) / self.length()
+        if div <= -1.0:
+            theta = math.pi
+        else:
+            theta = math.acos(div)
         if float(self.x) < -0.0:
             return 2*math.pi - theta
         else:
             return theta
 
+
+    def scale(self, s):
+        """
+        Scales the vector by scale s.
+
+        Examples:
+
+        >>> Vec3("1", "3", "0.5").scale(2)
+        (2.000,6.000,1.000)
+        >>> Vec3("-4", "0.001", "-0.999").scale(0.5)
+        (-2.000,0.000,-0.500)
+        >>> Vec3("0", "7", "-3").scale(-2)
+        (-0.000,-14.000,6.000)
+        >>> Vec3("5", "0.45", "-0.002").scale(0)
+        (0.000,0.000,-0.000)
+        """
+        decScale = Decimal(str(s))
+        self.x = self.x * decScale
+        self.y = self.y * decScale
+        self.z = self.z * decScale
+        return self
 
 
 
