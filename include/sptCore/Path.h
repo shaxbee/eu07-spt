@@ -18,6 +18,7 @@ class Path
 
 public:
     Path(const osg::Vec3f& front, const osg::Vec3f& back): _front(front), _back(back) { };
+    virtual ~Path() { };
 
     //! Return reversed path
     virtual std::auto_ptr<Path> reverse() const = 0;
@@ -30,7 +31,7 @@ public:
 
     virtual float length() const = 0;
 
-    static const float DEFAULT_SCALE = 1.0f;
+    static const float DEFAULT_SCALE;
 
     virtual osg::ref_ptr<osg::Vec3Array> points(float scale = DEFAULT_SCALE) const = 0;
 

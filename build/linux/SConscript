@@ -9,9 +9,10 @@ if env['DEBUG']:
 #    env.Append(CXXFLAGS='-ftest-coverage')
 #    env.Append(LIBS=['gcov'])
 else:
-    env.Append(CXXFLAGS='-O3')
+    env.Append(CXXFLAGS=['-O2', '-g'])
 
 env.Append(LIBS=[])
+env.AppendUnique(CXXFLAGS=['-fPIC', '-Wall'])
 
 #variant = GetOption('variant')
 #env = SConscript(os.path.join(variant, 'SConscript'), exports=['env'])

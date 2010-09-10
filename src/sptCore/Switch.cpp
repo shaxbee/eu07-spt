@@ -4,20 +4,12 @@ using namespace sptCore;
 
 SwitchableTracking::ValidPositions Switch::_positions;
 
-Switch::~Switch()
-{
-
-}; // Switch::~Switch
-
 const osg::Vec3& Switch::getExit(const osg::Vec3& entry) const
 {
     
     // entry == begin
     if(entry == _straight->front())
-        if(getPosition() == "STRAIGHT")
-            return _straight->back();
-        else
-            return _diverted->back();
+        return (getPosition() == "STRAIGHT") ? _straight->back() : _diverted->back();
 
     if(entry == _straight->back())
         return _straight->front();
@@ -36,10 +28,7 @@ const Path& Switch::getPath(const osg::Vec3& entry) const
 {
 
     if(entry == _straight->front())
-        if(getPosition() == "STRAIGHT")
-            return *_straight;
-        else
-            return *_diverted;
+        return (getPosition() == "STRAIGHT") ? *_straight : *_diverted;
 
     if(entry == _straight->back())
        return *_straightReversed;

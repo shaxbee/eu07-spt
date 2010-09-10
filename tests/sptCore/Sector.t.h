@@ -2,8 +2,8 @@
 
 #include <boost/array.hpp>
 
-#include <sptCore/Sector.h>
 #include <sptCore/Track.h>
+#include <sptCore/Sector.h>
 
 namespace sptCore
 {
@@ -19,14 +19,13 @@ public:
     SectorTestSuite(): 
         _pointA(0, 0, 0),
         _pointB(100, 0, 0),
-        _pointC(200, 0, 0),
-        _scenery()
+        _pointC(200, 0, 0)
     { 
     };
 
     void setUp()
     {
-        _sector.reset(new Sector(_scenery, _pointA));
+        _sector.reset(new Sector(_pointA));
 
         std::auto_ptr<Path> path1(new StraightPath(_pointA, _pointB));
         std::auto_ptr<Path> path2(new StraightPath(_pointB, _pointC));
@@ -70,7 +69,6 @@ public:
 
 
 private:
-    Scenery _scenery;
     std::auto_ptr<Sector> _sector;
 
     const osg::Vec3 _pointA;

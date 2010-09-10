@@ -46,11 +46,10 @@ float segmentLength(osg::Vec3Array::const_iterator& iter)
 
 void Follower::findPosition(osg::ref_ptr<osg::Vec3Array> points, osg::Vec3Array::const_iterator& iter, float& ratio) const
 {
-    iter = points->begin() + 1;
     float distance = segmentLength(iter); 
 
     // find point location on path matching distance
-    for(iter; distance < _distance && iter != points->end(); iter++)
+    for(iter = points->begin() + 1; distance < _distance && iter != points->end(); iter++)
         distance += segmentLength(iter);
 
     // if we didn't found segment it means that _distance is wrong

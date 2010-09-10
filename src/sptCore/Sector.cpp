@@ -4,7 +4,7 @@ using namespace sptCore;
 
 float Sector::SIZE = 2000.0;
 
-Sector::Sector(Scenery& scenery, const osg::Vec3d& position): _scenery(scenery), _position(position)
+Sector::Sector(const osg::Vec3d& position): _position(position)
 {
 
 }; // Sector::Sector(scenery)
@@ -31,7 +31,7 @@ const RailTracking& Sector::getRailTracking(size_t index) const
     return _trackings.at(index);
 };
 
-size_t Sector::getTracksCount() const
+size_t Sector::getRailTrackingCount() const
 {
-    return _connections.size();
-}; // Sector::getTracksCount()
+    return _trackings.size();
+}; // Sector::getRailTrackingCount()

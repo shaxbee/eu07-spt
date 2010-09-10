@@ -15,7 +15,7 @@ objects = SConscript('src/SConscript')
 program = env.Program(
     'spt' if not env['DEBUG'] else 'sptd', 
     objects, 
-    LIBS=env['LIBS'] + ['osg', 'osgUtil', 'osgViewer', 'OpenThreads', 'sptCore', 'sptGFX'])
+    LIBS=['osg', 'osgUtil', 'osgViewer', 'OpenThreads', 'sptGFX', 'sptDB', 'sptCore'])
 
 # install it
 env.Install('#/bin', program)

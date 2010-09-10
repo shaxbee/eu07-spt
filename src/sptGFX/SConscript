@@ -1,6 +1,6 @@
 Import('env')
 
-objects = env.Object(Split('Extruder.cpp'))
-library = env.StaticLibrary('sptGFX', source=objects)
+sources = Split('Extruder.cpp')
+library = env.Library('sptGFX', sources) #, LIBS=['sptCore', 'osg', 'osgUtil'])
 
 env.Install('#/lib', library)

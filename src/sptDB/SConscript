@@ -1,6 +1,6 @@
 Import('env')
 
-objects = env.Object(Split('SceneryReader.cpp'))
-library = env.StaticLibrary('sptDB', objects);
+sources = Split('SceneryReader.cpp BinaryReader.cpp')
+library = env.StaticLibrary('sptDB', sources, LIBS=['sptCore', 'osg']);
 
 env.Install('#/lib', library)

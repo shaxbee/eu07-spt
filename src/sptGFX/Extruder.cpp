@@ -27,7 +27,7 @@ void Extruder::setGeometry(osg::Geometry* geometry)
 
 };
 
-void Extruder::extrude(sptCore::Path& path, const osg::Vec3& position, const osg::Vec3& offset, double texCoordOffset)
+void Extruder::extrude(const sptCore::Path& path, const osg::Vec3& position, const osg::Vec3& offset, double texCoordOffset)
 {
 
     size_t numProfileVerts = vertsCount();
@@ -35,16 +35,12 @@ void Extruder::extrude(sptCore::Path& path, const osg::Vec3& position, const osg
     osg::ref_ptr<osg::Vec3Array> points(path.points());
     size_t numPathVerts = points->getNumElements();
 
-    std::cout << numProfileVerts << std::endl;
-
     // resize vertices and texture coordinate arrays
     {
-
         size_t numVerts = numProfileVerts * numPathVerts;
 
         _vertices->reserve(_vertices->size() + numVerts);
         _texCoords->reserve(_texCoords->size() + numVerts);
-
     }
 
     double texCoordV = texCoordOffset;
@@ -57,7 +53,6 @@ void Extruder::extrude(sptCore::Path& path, const osg::Vec3& position, const osg
     // profiles from second
     for(size_t row = 1; row < numPathVerts - 1; row++)
     {
-
         osg::Vec3 point = (*points)[row]; 
         osg::Vec3 dir = point - prev;
         texCoordV += dir.length();
@@ -65,20 +60,15 @@ void Extruder::extrude(sptCore::Path& path, const osg::Vec3& position, const osg
         transformProfile(point, offset, dir, texCoordV);
 
         prev = point;
-
     };
 
     // last profile
     texCoordV += (path.back() - prev).length(); 
     transformProfile(path.back(), offset, path.backDir(), texCoordV);
 
-    std::cout << path.back().x() << " " << path.back().y() << std::endl;
-    std::cout << _vertices->getNumElements() << std::endl;
-
     // create faces index arrays
     for(size_t face = 0; face < numProfileVerts - 1; face++)
     {
-
         osg::DrawElementsUInt* primitiveSet = new osg::DrawElementsUInt(GL_TRIANGLE_STRIP, numPathVerts * 2);
             
         for(size_t row=0; row < numPathVerts; row++)
@@ -90,8 +80,16 @@ void Extruder::extrude(sptCore::Path& path, const osg::Vec3& position, const osg
         };
 
         _geometry->addPrimitiveSet(primitiveSet);
-
     };
+
+    // create normal vectors
+    // TODO: change this to some native implementation
+    osgUtil::SmoothingVisitor::smooth(*_geometry);
+    osg::Vec3Array* normals = static_cast<osg::Vec3Array*>(_geometry->getNormalArray());
+
+    for(osg::Vec3Array::iterator iter = normals->begin(); iter != normals->end(); iter++)
+        *iter = -(*iter);
+
 
 }; // Extruder::createPrimitiveSet
 
@@ -105,10 +103,8 @@ void Extruder::transformProfile(const osg::Vec3& position, const osg::Vec3& offs
 
     for(size_t index = _settings.vertex.from; index < _settings.vertex.to; index++)
     {
-
         _vertices->push_back(transform * (profileVertices[index] + offset) + position);
         _texCoords->push_back(profileTexCoords[index] + osg::Vec2(0, texCoordV));
-
     };
 
 };

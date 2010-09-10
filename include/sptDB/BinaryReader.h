@@ -4,6 +4,10 @@
 #include <stack>
 #include <fstream>
 #include <string>
+#include <vector>
+
+#include <osg/Vec3f>
+#include <osg/Vec3d>
 
 namespace sptDB
 {
@@ -31,7 +35,7 @@ private:
 class BinaryReader
 {
 public:
-    BinaryReader(std::ifstream& stream);
+    BinaryReader(std::istream& stream);
 
     template <typename T>
     void read(T& output);
@@ -39,44 +43,27 @@ public:
     template <typename T>
     void read(std::vector<T>& output);
 
-    std::string& readChunk();
+    void read(std::string& output);
+    void read(osg::Vec3f& output);
+    void read(osg::Vec3d& output);
+
+    std::string readChunk();
     bool expectChunk(const std::string& type);
     void endChunk(const std::string& type);
 
 private:
-    std::ifstream& _input;
+    std::istream& _input;
     ChunkWatcher _watcher;
 
     template <typename T>
     void readOsgVec(T& output);
 };
 
-#ifdef DEBUG
-    #define assert_chunk_read(bytes) _watcher.check(bytes)
-#else
-    #define assert_chunk_read(ignore) ((void)0)
-#endif
-
 template <typename T>
 void BinaryReader::read(T& output)
 {
-    assert_chunk_read(sizeof(T));
+    _watcher.check(sizeof(T));
     _input.read(reinterpret_cast<char*>(&output), sizeof(T));
-};
-
-template <>
-void BinaryReader::read(std::string& output)
-{
-    size_t length;
-    read(length);
-
-    char* buffer = new char[length];
-
-    assert_chunk_read(length);
-    _input.read(buffer, length);
-
-    output = std::string(buffer, length);
-    delete[] buffer;
 };
 
 template <typename T>
@@ -88,7 +75,7 @@ void BinaryReader::read(std::vector<T>& output)
     const unsigned int elementSize = sizeof(T);
 
     assert(output.empty() && "Trying to write to non-empty vector");
-    assert_chunk_read(elementSize * count);
+    _watcher.check(elementSize * count);
 
     output.reserve(count);
 
@@ -103,20 +90,8 @@ void BinaryReader::read(std::vector<T>& output)
 template <typename T>
 void BinaryReader::readOsgVec(T& output)
 {
-    assert_chunk_read(T::num_components * sizeof(typename T::value_type));
+    _watcher.check(T::num_components * sizeof(typename T::value_type));
     _input.read(reinterpret_cast<char*>(output.ptr()), T::num_components * sizeof(typename T::value_type));
-};
-
-template <>
-void BinaryReader::read(osg::Vec3f& output)
-{
-    readOsgVec(output);
-};
-
-template <>
-void BinaryReader::read(osg::Vec3d& output)
-{
-    readOsgVec(output);
 };
 
 }; // namespace sptDB

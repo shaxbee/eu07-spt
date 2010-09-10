@@ -152,9 +152,6 @@ class TrackFactory:
         # Return copy
         return tCopy
         
-
-
-
 class AbstractTransform:
     """
     A transform does something with the geometry of track.
