@@ -10,8 +10,14 @@ import Application
 import model.tracks
 import ui.dialog
 import ui.trackfc
+import wx.glcanvas
 
 
+
+class OSGWindow(wx.glcanvas.GLCanvas):
+    def __init__(self,parent,id,x,y,width,height):
+        style = wx.WANTS_CHARS | wx.FULL_REPAINT_ON_RESIZE
+        wx.glcanvas.GLCanvas.__init__(self,parent,id,wx.DefaultPosition,wx.Size(400,400),style)
 
 class PaletteFrame(wx.Frame):
     """
@@ -19,20 +25,19 @@ class PaletteFrame(wx.Frame):
     """
 
     def __init__(self, parent, id):
-        wx.Frame.__init__(self, parent, id, "Palette", \
-            style = wx.CAPTION | wx.CLOSE_BOX | wx.RESIZE_BORDER \
-                | wx.FRAME_FLOAT_ON_PARENT)
-        self.SetMinSize((350, 400))
-        self.SetIcons(parent.PrepareApplicationIcons())
+        wx.Panel.__init__(self, parent, id, "Palette", \
+            style = wx.WANTS_CHARS | wx.FULL_REPAINT_ON_RESIZE)
+#        self.SetMinSize((350, 400))
+#        self.SetIcons(parent.PrepareApplicationIcons())
 
-        self.palette = TrackPalette(self)
+#        self.palette = TrackPalette(self)
 
-        self.Bind(wx.EVT_CLOSE, self.OnClose)
+#        self.Bind(wx.EVT_CLOSE, self.OnClose)
 
-        self.RestoreFrame()
+#        self.RestoreFrame()
 
-        self.Layout()
-        self.Show(True)
+#        self.Layout()
+#        self.Show(True)
 
 
     def OnClose(self, event):
@@ -74,9 +79,13 @@ class TrackPalette(wx.Panel):
     Track palette
     """
 
-    def __init__(self, parent, id = wx.ID_ANY):
-        wx.Panel.__init__(self, parent, id)
+    def __init__(self, parent, id = wx.ID_ANY, x=0, y=0, w=400, h=400):
+        wx.Panel.__init__(self, parent, id, wx.DefaultPosition,wx.Size(400,400),style = wx.WANTS_CHARS | wx.FULL_REPAINT_ON_RESIZE)
 
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
+        self.Bind(wx.EVT_ICONIZE, self.OnClose)
+ #       self.parent = parent
+        
         self.LoadPrefabs()
         self.VerifyPrefabs()
 
@@ -130,6 +139,10 @@ class TrackPalette(wx.Panel):
         self.SetSizer(sizerRoot)
         sizerRoot.Fit(self)
 
+
+    def OnClose(self):
+        self.Parent.miTogglePalette.Check(False)
+        print "Palette on Close"
 
     def LoadPrefabs(self):
         self.prefabs = yaml.load(file("prefabric.yaml", "r"))

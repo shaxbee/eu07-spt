@@ -151,10 +151,10 @@ class MainWindow(wx.Frame):
         config = wx.FileConfig.Get()
         shown = config.ReadInt("/EIFrame/framesPalette", 1)        
         self.miTogglePalette = mainMenu.FindItemById(wx.xrc.XRCID('ID_FRAMES_PALETTE'))
-        if shown == 1:
-            self.miTogglePalette.Check(True)
-        else:
-            self.miTogglePalette.Check(False)
+#        if shown == 1:
+#            self.miTogglePalette.Check(True)
+#        else:
+#            self.miTogglePalette.Check(False)
         
 
 
@@ -182,15 +182,12 @@ class MainWindow(wx.Frame):
         self.PreparePalettePaneInfo()
 
         '''Creating new palette pane'''
-        self.paletteFrame = ui.palette.PaletteFrame(self, ID_PALETTE_FRAME)
         self.editor = ui.editor.SceneryEditor(self, ID_EDITOR)
+        self.trackPaletteFrame = ui.palette.TrackPalette(self,ID_PALETTE_FRAME,0,0,400,400)
 
-#        self._perspectiveView = ui.editorOSG.OSGWindow(self,wx.ID_ANY,0,0,400,400)
-#        self._perspectiveView.viewer.setSceneData(self.osgRootNode)
-        #test = wx.TextCtrl(self,-1,'SAMPLE TEXT',wx.DefaultPosition,wx.Size(200,150),wx.DEFAULT_MINIFRAME_STYLE|wx.NO_BORDER|wx.TE_MULTILINE)
         '''Adding palette pane to manager as child'''
-#        self._paneManager.AddPane(self.paletteFrame, self._palettePaneInfo)
-#        fl = self._paneManager.CreateFloatingFrame()
+        self._paneManager.AddPane(self.trackPaletteFrame, self._trackPalettePaneInfo)
+        self.miTogglePalette.Check(True)
         self._paneManager.AddPane(self.editor,wx.CENTER,'Main Window')
         self._paneManager.Update()
 
@@ -201,22 +198,22 @@ class MainWindow(wx.Frame):
 #        self.SetSizer(rootSizer)
 
     def PreparePalettePaneInfo(self):
-        self._palettePaneInfo = wx.aui.AuiPaneInfo()
+        self._trackPalettePaneInfo = wx.aui.AuiPaneInfo()
         #self._palettePaneInfo.Floatable()
         #self._palettePaneInfo.Dockable()
-        self._palettePaneInfo.CloseButton()
-        self._palettePaneInfo.Dockable()
+        self._trackPalettePaneInfo.CloseButton()
+        self._trackPalettePaneInfo.Dockable()
         #self._palettePaneInfo.IsMovable()
-        self._palettePaneInfo.PinButton()
-        self._palettePaneInfo.MinimizeButton()
-        self._palettePaneInfo.MaximizeButton()
+        self._trackPalettePaneInfo.PinButton()
+        self._trackPalettePaneInfo.MinimizeButton()
+        self._trackPalettePaneInfo.MaximizeButton()
         #self._palettePaneInfo.Gripper()
         #self._palettePaneInfo.GripperTop()
         #self._palettePaneInfo.ToolbarPane()
-        self._palettePaneInfo.FloatingSize(wx.Size(400,400))
-        self._palettePaneInfo.BestSize(wx.Size(400,400))
-        self._palettePaneInfo.CaptionVisible()
-        self._palettePaneInfo.Caption('Perspective View')
+        self._trackPalettePaneInfo.FloatingSize(wx.Size(400,400))
+        self._trackPalettePaneInfo.BestSize(wx.Size(400,400))
+        self._trackPalettePaneInfo.CaptionVisible()
+        self._trackPalettePaneInfo.Caption('Track Palette')
         
     def OnAbout(self, event):
         """
@@ -517,15 +514,18 @@ class MainWindow(wx.Frame):
 
     def OpenPaletteFrame(self):
         '''Open palette with track models'''
-        self._paneManager.RestorePane(self._palettePaneInfo)
+        self._paneManager.RestorePane(self._trackPalettePaneInfo)
         self._paneManager.Update()
+        self.miTogglePalette.Check(True)
 
 
     def ClosePaletteFrame(self):
         '''Close palette with track models'''
  #       self.paletteFrame.Close()
  #       self.paletteFrame = None
-        self._paneManager.ClosePane(self._perspectivePaneInfo)
+        self._paneManager.DetachPane(self.trackPaletteFrame)
+        self._paneManager.Update()
+        self.miTogglePalette.Check(False)
 
 
 
