@@ -2,7 +2,7 @@
 #define SPTDB_SCENERYREADER_H 1
 
 #include <memory>
-#include <fstream>
+#include <iostream>
 
 #include <osg/Vec3d>
 
@@ -12,16 +12,8 @@
 namespace sptDB
 {
 
-class SectorReaderCallback
-{
-public:
-    virtual ~SectorReaderCallback() { };
-    virtual void visit(const sptCore::Track& tracking) { };
-    virtual void visit(const sptCore::Switch& tracking) { };
-};
-
 //std::auto_ptr<sptCore::Sector> readSector(std::ifstream& input, sptCore::Scenery& scenery, const osg::Vec3d& position);
-std::auto_ptr<sptCore::Sector> readSector(std::ifstream& input, sptCore::Scenery& scenery, const osg::Vec3d& position, SectorReaderCallback* callback = NULL);
+sptCore::Sector& readSector(std::istream& input, sptCore::Scenery& scenery);
 
 }; // namespace sptDB
 

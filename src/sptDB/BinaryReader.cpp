@@ -42,7 +42,7 @@ void ChunkWatcher::pop(const std::string& name)
     }
 };
 
-BinaryReader::BinaryReader(std::ifstream& stream): 
+BinaryReader::BinaryReader(std::istream& stream): 
     _input(stream)
 { 
     _input.exceptions(std::ios::badbit | std::ios::failbit | std::ios::eofbit);

@@ -35,7 +35,7 @@ private:
 class BinaryReader
 {
 public:
-    BinaryReader(std::ifstream& stream);
+    BinaryReader(std::istream& stream);
 
     template <typename T>
     void read(T& output);
@@ -52,7 +52,7 @@ public:
     void endChunk(const std::string& type);
 
 private:
-    std::ifstream& _input;
+    std::istream& _input;
     ChunkWatcher _watcher;
 
     template <typename T>

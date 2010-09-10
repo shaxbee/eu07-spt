@@ -33,7 +33,7 @@ public:
 
     const RailTracking& getRailTracking(size_t index) const;
 
-    size_t getTracksCount() const;
+    size_t getRailTrackingCount() const;
 
     //! \brief Update track connections.
     //! \param connections Container of ConnectionUpdate

@@ -6,12 +6,13 @@
 #include <osg/LineWidth>
 
 #include <osgUtil/SmoothingVisitor>
+#include <osgDB/ReadFile>
 #include <osgViewer/Viewer>
 
 #include <sptCore/Path.h>
 #include <sptGFX/Extruder.h>
-#include <sptDB/SceneryReader.h>
 
+#include "SectorNode.h"
 #include "SectorView.h"
 
 using namespace sptCore;
@@ -112,24 +113,10 @@ int main()
     osg::ref_ptr<osg::Group> root = new osg::Group;
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
 
-    sptCore::Scenery scenery;
+    osg::ref_ptr<SectorNode> sectorNode = dynamic_cast<SectorNode*>(osgDB::readNodeFile("test.sct"));
 
-	std::ifstream input("test.sct", std::ios::binary);
-
-	if(input.fail())
-	{
-		std::cout << "Failed to open test.sct" << std::endl;
-		return 0;
-	};
-
-	try
-	{
-		SectorViewBuilder builder(geode, createProfile());
-		sptDB::readSector(input, scenery, osg::Vec3(), &builder);
-	} catch (std::exception e) {
-		std::cout << e.what() << std::endl;
-		return 0;
-	}
+    osg::ref_ptr<osg::Geometry> profile(createProfile());
+    createSectorGeometry(geode.get(), profile.get(), sectorNode->getSector());
 
     root->addChild(geode.get());
     root->addChild(createAxes(geode.get()));

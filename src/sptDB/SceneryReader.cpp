@@ -90,7 +90,19 @@ std::auto_ptr<sptCore::Path> readPath(BinaryReader& reader)
     return std::auto_ptr<sptCore::Path>(NULL);
 }; // ::readPath(reader)
 
-void readTracks(sptCore::Sector& sector, BinaryReader& reader, Tracks& output, SectorReaderCallback* callback)
+osg::Vec3d readHeader(BinaryReader& reader)
+{
+    reader.expectChunk("HEAD");
+
+    osg::Vec3f result;
+    reader.read(result);
+
+    reader.endChunk("HEAD");
+
+    return result;
+}; // ::readHeader(reader)
+
+void readTracks(sptCore::Sector& sector, BinaryReader& reader, Tracks& output)
 {
     reader.expectChunk("TRLS");
 
@@ -104,9 +116,6 @@ void readTracks(sptCore::Sector& sector, BinaryReader& reader, Tracks& output, S
             std::cout << "TRACK ";
             std::auto_ptr<sptCore::Path> path = readStraightPath(reader);
             std::auto_ptr<sptCore::Track> track(new sptCore::Track(sector, path));
-
-            if(callback)
-                callback->visit(*track);
 
             output.push_back(track);
             std::cout << std::endl;
@@ -124,9 +133,6 @@ void readTracks(sptCore::Sector& sector, BinaryReader& reader, Tracks& output, S
             std::auto_ptr<sptCore::Path> path = readBezierPath(reader);
             std::auto_ptr<sptCore::Track> track(new sptCore::Track(sector, path));
 
-            if(callback)
-                callback->visit(*track);
-
             output.push_back(track);
             std::cout << std::endl;
         };
@@ -135,7 +141,7 @@ void readTracks(sptCore::Sector& sector, BinaryReader& reader, Tracks& output, S
     reader.endChunk("TRLS");
 }; // ::readTracks(sector, reader, output)
 
-void readSwitches(sptCore::Sector& sector, BinaryReader& reader, Switches& output, SectorReaderCallback* callback)
+void readSwitches(sptCore::Sector& sector, BinaryReader& reader, Switches& output)
 {
     reader.expectChunk("SWLS");
     size_t count;
@@ -154,9 +160,6 @@ void readSwitches(sptCore::Sector& sector, BinaryReader& reader, Switches& outpu
         std::auto_ptr<sptCore::Path> diverted = readPath(reader);
 
         std::auto_ptr<sptCore::Switch> switch_(new sptCore::Switch(sector, straight, diverted, position_str));
-
-        if(callback)
-            callback->visit(*switch_);
 
         output.push_back(switch_);
         std::cout << std::endl;
@@ -294,20 +297,22 @@ std::auto_ptr<sptCore::Sector> readSector(std::ifstream& input, sptCore::Scenery
 };
 #endif
 
-std::auto_ptr<sptCore::Sector> readSector(std::ifstream& input, sptCore::Scenery& scenery, const osg::Vec3d& position, SectorReaderCallback* callback)
+sptCore::Sector& readSector(std::istream& input, sptCore::Scenery& scenery)
 {
     BinaryReader reader(input);
-    std::auto_ptr<sptCore::Sector> sector(new sptCore::Sector(position));
 
     reader.expectChunk("SECT");
 
+    osg::Vec3d position = readHeader(reader);
+    std::auto_ptr<sptCore::Sector> sector(new sptCore::Sector(position));
+
     // TRLS - Tracks List
     Tracks tracks;
-    readTracks(*sector, reader, tracks, callback);
+    readTracks(*sector, reader, tracks);
 
     // SWLS - Switches List
     Switches switches;
-    readSwitches(*sector, reader, switches, callback);
+    readSwitches(*sector, reader, switches);
 
 #if 0
     // RTLS - Custom RailTracking List
@@ -330,9 +335,15 @@ std::auto_ptr<sptCore::Sector> readSector(std::ifstream& input, sptCore::Scenery
     Connections externals;
     readConnections(reader, trackings, connections, externals);
 
+    sector->setData(trackings, connections);
+
     reader.endChunk("SECT");
 
-    return sector;
+    sptCore::Sector& sectorRef = *sector;
+    scenery.addSector(sector);
+
+    return sectorRef;
+
 };
 
 }; // namespace sptDB

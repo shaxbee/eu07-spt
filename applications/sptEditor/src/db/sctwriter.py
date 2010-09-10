@@ -25,6 +25,7 @@ class SectorWriter(BinaryWriter):
     def writeToFile(self):
         self.beginChunk("SECT")
         self.__buildTrackingIndex()
+        self.__writeHeader()
         self.__writeTrackList()
         self.__writeSwitchList()
         self.__writeTrackNames()
@@ -56,6 +57,13 @@ class SectorWriter(BinaryWriter):
 
         self.__switches.append(switch)
 
+    def __writeHeader(self):
+        self.beginChunk("HEAD")
+
+        self.write(struct.pack("<3f", *self.__offset.to_tuple()))
+
+        self.endChunk("HEAD")
+
     def __writeTrackList(self):
         self.beginChunk("TRLS")
 
@@ -78,7 +86,7 @@ class SectorWriter(BinaryWriter):
         result = list()
 
         for tracking in source:
-            if tracking.name:
+            if tracking.name is not None:
                 result.append((self.__index[tracking], tracking.name))
 
         return result

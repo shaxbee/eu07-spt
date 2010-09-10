@@ -1,5 +1,7 @@
 #include "SectorView.h"
 
+#include <typeinfo>
+
 #include <osg/Geometry>
 #include <osgUtil/SmoothingVisitor>
 
@@ -9,14 +11,11 @@
 #include <sptCore/Track.h>
 #include <sptCore/Switch.h>
 
-#include <iostream>
-
 namespace 
 {
 
 void extrude(osg::Geode* target, osg::Geometry* profile, const sptCore::Path& path)
 {
-
     osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
     geometry->setVertexArray(new osg::Vec3Array);
     geometry->setTexCoordArray(0, new osg::Vec2Array);
@@ -34,17 +33,19 @@ void extrude(osg::Geode* target, osg::Geometry* profile, const sptCore::Path& pa
     extruder.extrude(path);
 
     target->addDrawable(geometry.get());
-
 };
 
 };
 
-void SectorViewBuilder::visit(const sptCore::Track& tracking) 
+void createSectorGeometry(osg::Geode* target, osg::Geometry* profile, const sptCore::Sector& sector)
 {
-    extrude(_target.get(), _profile.get(), tracking.getDefaultPath());
+    for(unsigned int index = 0; index != sector.getRailTrackingCount(); index++)
+    {
+        const sptCore::RailTracking& tracking = sector.getRailTracking(index);
+        if(typeid(tracking) == typeid(sptCore::Track))
+        {
+            const sptCore::Track& track = static_cast<const sptCore::Track&>(tracking);
+            extrude(target, profile, track.getDefaultPath());
+        };
+    };
 };
-
-void SectorViewBuilder::visit(const sptCore::Switch& tracking) 
-{ 
-};
-
