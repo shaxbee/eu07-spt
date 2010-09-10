@@ -156,7 +156,7 @@ class PlanePart(wx.ScrolledWindow):
         self.trackCache = []
         self.switchCache = []
         for element in scenery.RailTrackingIterator():
-            self.__AddView(element)
+            self.AddView(element)
             
         self.ComputeMinMax(True)
         self.Refresh()
