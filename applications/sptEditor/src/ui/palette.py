@@ -79,8 +79,8 @@ class TrackPalette(wx.Panel):
     Track palette
     """
 
-    def __init__(self, parent, id = wx.ID_ANY, x=0, y=0, w=400, h=400):
-        wx.Panel.__init__(self, parent, id, wx.DefaultPosition,wx.Size(400,400),style = wx.WANTS_CHARS | wx.FULL_REPAINT_ON_RESIZE)
+    def __init__(self, parent, id = wx.ID_ANY, w=400, h=400):
+        wx.Panel.__init__(self, parent, id, wx.DefaultPosition,wx.Size(w,h),style = wx.WANTS_CHARS | wx.FULL_REPAINT_ON_RESIZE)
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.Bind(wx.EVT_ICONIZE, self.OnClose)

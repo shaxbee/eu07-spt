@@ -27,7 +27,7 @@ import sptyaml
 # Stock items
 ID_CENTER_AT = wx.ID_HIGHEST       + 1
 ID_BASEPOINT_EDIT = wx.ID_HIGHEST  + 2
-ID_PALETTE_FRAME = wx.ID_HIGHEST   + 3
+ID_TRACK_PALETTE = wx.ID_HIGHEST   + 3
 ID_EDITOR = wx.ID_HIGHEST          + 4
 ID_MAIN_FRAME = wx.ID_HIGHEST      + 5
 
@@ -144,13 +144,13 @@ class MainWindow(wx.Frame):
         wx.EVT_MENU(self, wx.xrc.XRCID('ID_INSERT_STRAIGHT_TRACK'), self.OnInsertStraightTrack)
         wx.EVT_MENU(self, wx.xrc.XRCID('ID_INSERT_CURVE_TRACK'), self.OnInsertCurveTrack )
         wx.EVT_MENU(self, wx.xrc.XRCID('ID_INSERT_RAIL_SWITCH'), self.OnInsertRailSwitch )
-        wx.EVT_MENU(self, wx.xrc.XRCID('ID_FRAMES_PALETTE'), self.OnToggleFramePalette )
+        wx.EVT_MENU(self, wx.xrc.XRCID('ID_TRACK_PALETTE'), self.OnToggleFramePalette )
         wx.EVT_MENU(self, wx.ID_DELETE, self.OnDelete)
         wx.EVT_MENU(self, wx.ID_ABOUT, self.OnAbout)
 
         config = wx.FileConfig.Get()
         shown = config.ReadInt("/EIFrame/framesPalette", 1)        
-        self.miTogglePalette = mainMenu.FindItemById(wx.xrc.XRCID('ID_FRAMES_PALETTE'))
+        self.miTogglePalette = mainMenu.FindItemById(wx.xrc.XRCID('ID_TRACK_PALETTE'))
 #        if shown == 1:
 #            self.miTogglePalette.Check(True)
 #        else:
@@ -174,7 +174,7 @@ class MainWindow(wx.Frame):
         """
         rootSizer = wx.GridSizer(1, 1)
 
-
+        print "Creating content"
         '''Prepare pane manager'''
         self._paneManager = wx.aui.AuiManager(self)
 
@@ -183,16 +183,10 @@ class MainWindow(wx.Frame):
 
         '''Creating new palette pane'''
         self.editor = ui.editor.SceneryEditor(self, ID_EDITOR)
-        self.trackPaletteFrame = ui.palette.TrackPalette(self,ID_PALETTE_FRAME,0,0,400,400)
-
-        '''Adding palette pane to manager as child'''
-        self._paneManager.AddPane(self.trackPaletteFrame, self._trackPalettePaneInfo)
-        self.miTogglePalette.Check(True)
         self._paneManager.AddPane(self.editor,wx.CENTER,'Main Window')
         self._paneManager.Update()
-
         self.NewScenery()
-
+        self.OpenTrackPaletteFrame()
 #        rootSizer.Add(self.editor, 1, wx.EXPAND)
 
 #        self.SetSizer(rootSizer)
@@ -210,8 +204,8 @@ class MainWindow(wx.Frame):
         #self._palettePaneInfo.Gripper()
         #self._palettePaneInfo.GripperTop()
         #self._palettePaneInfo.ToolbarPane()
-        self._trackPalettePaneInfo.FloatingSize(wx.Size(400,400))
-        self._trackPalettePaneInfo.BestSize(wx.Size(400,400))
+        #self._trackPalettePaneInfo.FloatingSize(wx.Size(400,400))
+        #self._trackPalettePaneInfo.BestSize(wx.Size(400,400))
         self._trackPalettePaneInfo.CaptionVisible()
         self._trackPalettePaneInfo.Caption('Track Palette')
         
@@ -507,25 +501,35 @@ class MainWindow(wx.Frame):
 
     def OnToggleFramePalette(self, event):
         if event.IsChecked():
-            self.OpenPaletteFrame()
+            self.OpenTrackPaletteFrame()
         else:
-            self.ClosePaletteFrame()
+            self.CloseTrackPaletteFrame()
 
 
-    def OpenPaletteFrame(self):
+    def OpenTrackPaletteFrame(self):
         '''Open palette with track models'''
-        self._paneManager.RestorePane(self._trackPalettePaneInfo)
-        self._paneManager.Update()
+        #self._paneManager.RestorePane(self._trackPalettePaneInfo)
+        #self.miTogglePalette.Check(True)
+        print "Open palette frame"
+        self.trackPaletteFrame = ui.palette.TrackPalette(self,ID_TRACK_PALETTE,300,400)
+
+        '''Adding palette pane to manager as child'''
+        self._paneManager.AddPane(self.trackPaletteFrame, self._trackPalettePaneInfo)
         self.miTogglePalette.Check(True)
+        self._paneManager.Update()
 
 
-    def ClosePaletteFrame(self):
+    def CloseTrackPaletteFrame(self):
         '''Close palette with track models'''
  #       self.paletteFrame.Close()
  #       self.paletteFrame = None
+#        self._paneManager.Hide(self._trackPalettePaneInfo)
+        #self._trackPalettePaneInfo.Show(False)
         self._paneManager.DetachPane(self.trackPaletteFrame)
         self._paneManager.Update()
         self.miTogglePalette.Check(False)
+        self.trackPaletteFrame.Destroy()
+        print "Close palette frame"
 
 
 
