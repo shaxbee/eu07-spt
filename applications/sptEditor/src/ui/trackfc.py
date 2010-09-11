@@ -151,6 +151,37 @@ class TrackFactory:
 
         # Return copy
         return tCopy
+
+
+    def CreateClosureTrack(self, startTrack, startPoint, endTrack, endPoint):
+        """
+        Creates closure tracks between two others.
+
+        startTrack points to first track to connect and startPoint selects its geometry
+        point.
+        endTrack points to the second track to connect and its endPoint.
+        """
+        if not startTrack.containsPoint(startPoint):
+            raise ValueError, "Start point is not defined in startTrack"
+        if not endTrack.containsPoint(endPoint):
+            raise ValueError, "End point is not defined in endTrack"
+
+        # Get normal vectors
+        startVec = startTrack.getNormalVector(startPoint)
+        endVec = endTrack.getNormalVector(endPoint)
+
+        length = (startPoint - endPoint).length()
+
+        startVec.normalize()
+        startVec.scale(length * 0.333)
+        endVec.normalize()
+        endVec.scale(length * 0.333)
+
+        t = Track(p1 = startPoint, v1 = startVec, v2 = endVec, p2 = endPoint)
+        return t
+
+
+
         
 class AbstractTransform:
     """

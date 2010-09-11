@@ -26,11 +26,13 @@ import sptyaml
 import sptmath
 
 # Stock items
-ID_CENTER_AT = wx.ID_HIGHEST       + 1
-ID_BASEPOINT_EDIT = wx.ID_HIGHEST  + 2
-ID_PALETTE_FRAME = wx.ID_HIGHEST   + 3
-ID_EDITOR = wx.ID_HIGHEST          + 4
-ID_MAIN_FRAME = wx.ID_HIGHEST      + 5
+ID_CENTER_AT = wx.ID_HIGHEST          + 1
+ID_BASEPOINT_EDIT = wx.ID_HIGHEST     + 2
+ID_PALETTE_FRAME = wx.ID_HIGHEST      + 3
+ID_EDITOR = wx.ID_HIGHEST             + 4
+ID_MAIN_FRAME = wx.ID_HIGHEST         + 5
+ID_MODE_TRACK_NORMAL = wx.ID_HIGHEST  + 6
+ID_MODE_TRACK_CLOSURE = wx.ID_HIGHEST + 7
 
 
 class Application(wx.App):
@@ -145,21 +147,23 @@ class MainWindow(wx.Frame):
         wx.EVT_MENU(self, wx.ID_ZOOM_OUT, self.OnZoomOut)
         wx.EVT_MENU(self, wx.xrc.XRCID('ID_BASEPOINT_EDIT'), self.OnBasePointEdit)
         wx.EVT_MENU(self, wx.xrc.XRCID('ID_INSERT_STRAIGHT_TRACK'), self.OnInsertStraightTrack)
-        wx.EVT_MENU(self, wx.xrc.XRCID('ID_INSERT_CURVE_TRACK'), self.OnInsertCurveTrack )
-        wx.EVT_MENU(self, wx.xrc.XRCID('ID_INSERT_RAIL_SWITCH'), self.OnInsertRailSwitch )
+        wx.EVT_MENU(self, wx.xrc.XRCID('ID_INSERT_CURVE_TRACK'), self.OnInsertCurveTrack)
+        wx.EVT_MENU(self, wx.xrc.XRCID('ID_INSERT_RAIL_SWITCH'), self.OnInsertRailSwitch)
+        wx.EVT_MENU(self, wx.xrc.XRCID('ID_MODE_TRACK_NORMAL'), self.OnChangeEditorMode)
+        wx.EVT_MENU(self, wx.xrc.XRCID('ID_MODE_TRACK_CLOSURE'), self.OnChangeEditorMode)
         wx.EVT_MENU(self, wx.xrc.XRCID('ID_FRAMES_PALETTE'), self.OnToggleFramePalette )
         wx.EVT_MENU(self, wx.ID_DELETE, self.OnDelete)
         wx.EVT_MENU(self, wx.ID_ABOUT, self.OnAbout)
 
         config = wx.FileConfig.Get()
         shown = config.ReadInt("/EIFrame/framesPalette", 1)        
-        self.miTogglePalette = mainMenu.FindItemById(wx.xrc.XRCID('ID_FRAMES_PALETTE'))
+        self.miTogglePalette = mainMenu.FindItemById(wx.xrc.XRCID('ID_FRAMES_PALETTE'))        
         if shown == 1:
             self.miTogglePalette.Check(True)
             self.OpenPaletteFrame()
         else:
             self.miTogglePalette.Check(False)
-        
+
 
 
     def CreateStatusBar(self):
@@ -497,6 +501,17 @@ class MainWindow(wx.Frame):
         if selection != None:
             scenery = self.editor.GetScenery()
             scenery.RemoveRailTracking(selection)
+
+
+    def OnChangeEditorMode(self, event):
+        """
+        Menu event handler for changing mode of editor.
+        """
+        wid = event.GetId()
+        if wid == wx.xrc.XRCID('ID_MODE_TRACK_NORMAL'):
+            self.editor.SetMode(ui.editor.MODE_NORMAL)
+        elif wid == wx.xrc.XRCID('ID_MODE_TRACK_CLOSURE'):
+            self.editor.SetMode(ui.editor.MODE_CLOSURE)
 
 
     def OnZoomIn(self, event):

@@ -82,12 +82,25 @@ class Vec3:
 
     def normalize(self):
         """
-        Normalizes the vector
+        Normalizes the vector.
+
+        Examples:
+        >>> Vec3("1", "0", "0").normalize()
+        (1.000,0.000,0.000)
+        >>> Vec3("0", "-1", "0").normalize()
+        (0.000,-1.000,0.000)
+        >>> Vec3("-1", "-1", "0").normalize()
+        (-0.707,-0.707,0.000)
+        >>> Vec3("0.001", "0", "0").normalize()
+        (1.000,0.000,0.000)
+        >>> Vec3("-0.001", "-0.001", "0.001").normalize()
+        (-0.577,-0.577,0.577)
         """
-        _length = length()
+        _length = Decimal(str(self.length()))
         self.x = self.x / _length
         self.y = self.y / _length
         self.z = self.z / _length
+        return self
 
     def angleToJUnit(self):
         """

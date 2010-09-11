@@ -77,13 +77,13 @@
         <help>Deletes selected scenery element.</help>
       </object>
       <object class="separator" />
-      <object class="wxMenuItem" name="MODE_TRACK_NORMAL">
+      <object class="wxMenuItem" name="ID_MODE_TRACK_NORMAL">
         <label>Mode &amp;Normal</label>
         <help>Normal mode of inserting track.</help>
         <radio>1</radio>
         <checked>1</checked>
       </object>
-      <object class="wxMenuItem" name="MODE_TRACK_CLOSURE">
+      <object class="wxMenuItem" name="ID_MODE_TRACK_CLOSURE">
         <label>Mode &amp;Closure</label>
         <help>Closure track mode.</help>
         <radio>1</radio>

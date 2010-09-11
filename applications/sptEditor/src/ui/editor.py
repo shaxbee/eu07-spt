@@ -12,13 +12,21 @@ from decimal import Decimal
 import wx
 from wx.lib.evtmgr import eventManager
 
+import Application
 import model.tracks
 import model.scenery
 import ui.views
+import ui.trackfc
 from sptmath import Vec3
 
+
+# Constants here
 SCALE_FACTOR = 1000.0
 BASE_POINT_MARGIN = 50
+
+# Modes of editor
+MODE_NORMAL = 0 # default
+MODE_CLOSURE = 1 # closure track mode
 
 
 
@@ -100,6 +108,10 @@ class SceneryEditor(wx.Panel):
         return self.parts[0].ModelToView(vec3)
 
 
+    def SetMode(self, mode):
+        self.parts[0].SetMode(mode)
+
+
 
 
 class PlanePart(wx.ScrolledWindow):
@@ -115,11 +127,11 @@ class PlanePart(wx.ScrolledWindow):
         self.basePointMover = BasePointMover(self)
 
         self.selectedView = None
-        highlighter = Highlighter(self)
+        self.highlighter = Highlighter(self)
 
-        self.wheelScaler = WheelScaler(self)
-
+        self.wheelScaler = WheelScaler(self)        
         self.sceneryDragger = SceneryDragger(self)
+        self.trackClosurer = TrackClosurer(self)
 
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_SIZE, self.OnSize)
@@ -129,11 +141,12 @@ class PlanePart(wx.ScrolledWindow):
         eventManager.Register(self.basePointMover.OnMouseDrag, wx.EVT_MOTION, self)
         eventManager.Register(self.basePointMover.OnMousePress, wx.EVT_LEFT_DOWN, self)
         eventManager.Register(self.basePointMover.OnMouseRelease, wx.EVT_LEFT_UP, self)
-        eventManager.Register(highlighter.OnMouseClick, wx.EVT_LEFT_DOWN, self)
+        eventManager.Register(self.highlighter.OnMouseClick, wx.EVT_LEFT_DOWN, self)
         eventManager.Register(self.wheelScaler.OnMouseWheel, wx.EVT_MOUSEWHEEL, self)
         eventManager.Register(self.sceneryDragger.OnMousePress, wx.EVT_LEFT_DOWN, self)
         eventManager.Register(self.sceneryDragger.OnDrag, wx.EVT_MOTION, self)
         eventManager.Register(self.sceneryDragger.OnMouseRelease, wx.EVT_LEFT_UP, self)
+        eventManager.Register(self.trackClosurer.OnMouseClick, wx.EVT_LEFT_UP, self)
 
         self.logger = logging.getLogger('Paint')
 
@@ -151,6 +164,8 @@ class PlanePart(wx.ScrolledWindow):
         self.trackCache = []
         self.switchCache = []
         self.basePointView = None
+
+        self.mode = MODE_NORMAL
         
         size = self.ComputePreferredSize()
         self.SetVirtualSize(size)
@@ -201,6 +216,22 @@ class PlanePart(wx.ScrolledWindow):
                     self.CenterViewAt(p.x, p.y)
             else:
                 self.CenterViewAt(p.x, p.y)
+
+
+    def SetMode(self, mode, updateMenu = False):
+        self.__mode = mode
+        if mode == MODE_NORMAL:
+            self.trackClosurer.SetEnabled(False)
+            self.highlighter.SetEnabled(True)
+            if updateMenu:
+                # Find menu item 
+                mainWindow = wx.FindWindowById(Application.ID_MAIN_FRAME)
+                mainMenu = mainWindow.GetMenuBar()
+                miTrackNormal = mainMenu.FindItemById(wx.xrc.XRCID('ID_MODE_TRACK_NORMAL'))
+                miTrackNormal.Check()
+        elif mode == MODE_CLOSURE:
+            self.trackClosurer.SetEnabled(True)
+            self.highlighter.SetEnabled(False)
 
 
     def SetSelection(self, selection):
@@ -885,6 +916,70 @@ class SceneryDragger:
 
 
 
+class TrackClosurer:
+    """
+    Closure track mouse listener handles creating track closure
+    if editor mode is MODE_CLOSURE
+    """
+
+    def __init__(self, editor):
+        self.__editor = editor
+        # This listener may be switched on or off
+        self.__enabled = False
+        self.__startPoint = None
+        self.__startElement = None
+
+
+    def SetEnabled(self, enabled = True):
+        self.__enabled = enabled
+        if not enabled:
+            self.__startPoint = None
+            self.__startElement = None
+
+
+    def OnMouseClick(self, event):
+        if not self.__enabled:
+            return # Return immediately
+
+        point = self.__editor.CalcUnscrolledPosition(event.GetPosition())
+
+        startTime = datetime.datetime.now()
+        try:
+            foundView = None
+            for v in self.__editor.trackCache + self.__editor.switchCache:
+                if v.IsSelectionPossible(point):
+                    foundView = v
+                    break
+            if foundView is None:
+                # Reset mode to default
+                self.__editor.SetMode(MODE_NORMAL)
+            else:
+                snapData = foundView.GetSnapData(point)
+                snapElement = foundView.GetElement()
+
+                if self.__startPoint is not None:
+                    # Handle second point by creating closure track and adding it to scenery
+                    _trackfc = ui.trackfc.TrackFactory(self.__editor)
+                    closureTrack = _trackfc.CreateClosureTrack( \
+                        self.__startElement, self.__startPoint, snapElement, snapData.p3d)
+                    scenery = self.__editor.GetParent().GetScenery()
+                    scenery.AddRailTracking(closureTrack)
+
+                    # Reset editor mode
+                    self.__editor.SetMode(MODE_NORMAL, True)
+                else:
+                    # Handle first point (store it only)
+                    self.__startPoint = snapData.p3d
+                    self.__startElement = snapElement
+        finally:
+            delta = datetime.datetime.now() - startTime
+            idelta = delta.days * 86400 + delta.seconds * 1000000 \
+                + delta.microseconds
+            self.__editor.logger.debug(u"Create closure track lasted %d \u00b5s" % idelta)
+
+
+
+
 class SnapData:
     """
     Data object containing snap information.
@@ -918,10 +1013,15 @@ class Highlighter:
 
     def __init__(self, editorPart):
         self.editorPart = editorPart
+        self.__enabled = True
+
+
+    def SetEnabled(self, enabled = True):
+        self.__enabled = enabled
 
 
     def OnMouseClick(self, event):
-        if not self.editorPart.basePointMover.pressed:
+        if self.__enabled and not self.editorPart.basePointMover.pressed:
             point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
 
             startTime = datetime.datetime.now()
@@ -956,9 +1056,9 @@ class WheelScaler:
             delta = event.GetWheelRotation()
             scale = self.editor.GetScale()
             if delta < 0:
-                self.editor.SetScale(scale * 2)
-            else:
                 self.editor.SetScale(scale / 2)
+            else:
+                self.editor.SetScale(scale * 2)
         else:
             event.Skip()
 
