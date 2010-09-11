@@ -180,16 +180,23 @@ class MainWindow(wx.Frame):
 
         '''Preparing pane infos for new panes'''
         self.PreparePalettePaneInfo()
-
+        self.PrepareEditorPaneInfo()
         '''Creating new palette pane'''
         self.editor = ui.editor.SceneryEditor(self, ID_EDITOR)
-        self._paneManager.AddPane(self.editor,wx.CENTER,'Main Window')
+        self._paneManager.AddPane(self.editor,self._editorPaneInfo)
         self._paneManager.Update()
         self.NewScenery()
         self.OpenTrackPaletteFrame()
 #        rootSizer.Add(self.editor, 1, wx.EXPAND)
 
 #        self.SetSizer(rootSizer)
+
+    def PrepareEditorPaneInfo(self):
+        self._editorPaneInfo = wx.aui.AuiPaneInfo()
+        self._editorPaneInfo.Name("Editor")
+        self._editorPaneInfo.Caption("Main Window")
+        self._editorPaneInfo.Center()
+        self._editorPaneInfo.CenterPane()
 
     def PreparePalettePaneInfo(self):
         self._trackPalettePaneInfo = wx.aui.AuiPaneInfo()
@@ -204,10 +211,11 @@ class MainWindow(wx.Frame):
         #self._palettePaneInfo.Gripper()
         #self._palettePaneInfo.GripperTop()
         #self._palettePaneInfo.ToolbarPane()
-        #self._trackPalettePaneInfo.FloatingSize(wx.Size(400,400))
-        #self._trackPalettePaneInfo.BestSize(wx.Size(400,400))
+        #self._trackPalettePaneInfo.FloatingSize(wx.Size(300,300))
+        self._trackPalettePaneInfo.BestSize(wx.Size(300,300))
         self._trackPalettePaneInfo.CaptionVisible()
         self._trackPalettePaneInfo.Caption('Track Palette')
+        self._trackPalettePaneInfo.Name("Track Palette")
         
     def OnAbout(self, event):
         """
@@ -510,38 +518,41 @@ class MainWindow(wx.Frame):
         '''Open palette with track models'''
         #self._paneManager.RestorePane(self._trackPalettePaneInfo)
         #self.miTogglePalette.Check(True)
-        print "Open palette frame"
+        print "\nOpen palette frame"
         self.trackPaletteFrame = ui.palette.TrackPalette(self,ID_TRACK_PALETTE,300,400)
 
         '''Adding palette pane to manager as child'''
-        self._paneManager.AddPane(self.trackPaletteFrame, self._trackPalettePaneInfo)
+        self._paneManager.AddPane(self.trackPaletteFrame,self._trackPalettePaneInfo)
         self.miTogglePalette.Check(True)
         self._paneManager.Update()
 
         config = wx.FileConfig.Get()
-        prop = config.Read("/EIFrame/trackPaletteProperties")
-        print prop
-        self._paneManager.LoadPaneInfo(prop,self._trackPalettePaneInfo)
-        self._paneManager.Update()
+        prop = config.Read("/EIFrame/perspectiveProperties")
+        #print prop
+        self._paneManager.LoadPerspective(prop)
+        #self._paneManager.LoadPaneInfo(prop,self._trackPalettePaneInfo)
+        #self._paneManager.Update()
 
 
     def CloseTrackPaletteFrame(self):
         '''Close palette with track models'''
- #       self.paletteFrame.Close()
- #       self.paletteFrame = None
-#        self._paneManager.Hide(self._trackPalettePaneInfo)
+        #self.paletteFrame.Close()
+        #self.paletteFrame = None
+        #self._paneManager.Hide(self._trackPalettePaneInfo)
         #self._trackPalettePaneInfo.Show(False)
-        print "Close palette frame"
+        print "\nClose palette frame"
         config = wx.FileConfig.Get()
-        prop = self._paneManager.SavePaneInfo(self._trackPalettePaneInfo)
-        print prop
-        config.Write("/EIFrame/trackPaletteProperties",prop)
+        #prop = self._paneManager.SavePaneInfo(self._trackPalettePaneInfo)
+        #print prop
+        prop = self._paneManager.SavePerspective()
+        #print prop
+        config.Write("/EIFrame/perspectiveProperties",prop)
 
         self._paneManager.DetachPane(self.trackPaletteFrame)
         self._paneManager.Update()
         self.miTogglePalette.Check(False)
         self.trackPaletteFrame.Destroy()
-        
+
 
 if __name__ == "__main__":
     usage = "Usage: %prog [options]"

@@ -142,7 +142,7 @@ class TrackingTypeGroup(wx.Panel):
             self.rows.append(row)
 
         itemContainerPanel.SetSizer(itemContainerSizer)
-        itemContainerPanel.SetVirtualSizeHints(300, 50)
+        #itemContainerPanel.SetVirtualSizeHints(300, 50)
         itemContainerPanel.FitInside()
         #itemContainerPanel.SetScrollRate(-1, 50)
 
