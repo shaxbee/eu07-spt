@@ -93,9 +93,9 @@
       <label>&amp;Windows</label>
       <object class="wxMenu" name="FramesSubmenu">
         <label>&amp;Toolbars</label>
-        <object class="wxMenuItem" name="ID_FRAMES_PALETTE">
-          <label>&amp;Palette</label>
-          <help>Toggles palette window.</help>
+        <object class="wxMenuItem" name="ID_TRACK_PALETTE">
+          <label>&amp;Track palette</label>
+          <help>Toggles track palette window.</help>
           <checkable>1</checkable>
           <enabled>1</enabled>
         </object>

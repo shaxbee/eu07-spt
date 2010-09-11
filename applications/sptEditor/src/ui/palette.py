@@ -10,62 +10,7 @@ import Application
 import model.tracks
 import ui.dialog
 import ui.trackfc
-
-
-
-class PaletteFrame(wx.Frame):
-    """
-    Standalone window for palette.
-    """
-
-    def __init__(self, parent, id):
-        wx.Frame.__init__(self, parent, id, "Palette", \
-            style = wx.CAPTION | wx.CLOSE_BOX | wx.RESIZE_BORDER \
-                | wx.FRAME_FLOAT_ON_PARENT)
-        self.SetMinSize((350, 400))
-        self.SetIcons(parent.PrepareApplicationIcons())
-
-        self.palette = TrackPalette(self)
-
-        self.Bind(wx.EVT_CLOSE, self.OnClose)
-
-        self.RestoreFrame()
-
-        self.Layout()
-        self.Show(True)
-
-
-    def OnClose(self, event):
-        try:
-            self.GetParent().miTogglePalette.Check(False)
-            self.StoreFrame()
-        finally:
-            self.Destroy()
-
-
-    def RestoreFrame(self):
-        config = wx.FileConfig.Get()
-
-        posX = config.ReadInt("/EIFrame/framesPalette/x", 28)
-        posY = config.ReadInt("/EIFrame/framesPalette/y", 28)
-        width = config.ReadInt("/EIFrame/framesPalette/width", 350)
-        height = config.ReadInt("/EIFrame/framesPalette/height", 400)
-
-        self.Move((posX, posY))
-        self.SetSize((width, height))
-
-
-    def StoreFrame(self):
-        config = wx.FileConfig.Get()
-
-        pos = self.GetPosition()
-        size = self.GetSize()
-
-        config.WriteInt("/EIFrame/framesPalette/x", pos.x)
-        config.WriteInt("/EIFrame/framesPalette/y", pos.y)
-        config.WriteInt("/EIFrame/framesPalette/width", size.width)
-        config.WriteInt("/EIFrame/framesPalette/height", size.height)
-
+import wx.glcanvas
 
 
 
@@ -74,8 +19,8 @@ class TrackPalette(wx.Panel):
     Track palette
     """
 
-    def __init__(self, parent, id = wx.ID_ANY):
-        wx.Panel.__init__(self, parent, id)
+    def __init__(self, parent, id = wx.ID_ANY, w=400, h=400):
+        wx.Panel.__init__(self, parent, id, wx.DefaultPosition,wx.Size(w,h),style = wx.WANTS_CHARS | wx.FULL_REPAINT_ON_RESIZE)
 
         self.LoadPrefabs()
         self.VerifyPrefabs()
@@ -130,6 +75,10 @@ class TrackPalette(wx.Panel):
         self.SetSizer(sizerRoot)
         sizerRoot.Fit(self)
 
+
+    def OnClose(self):
+        self.Parent.miTogglePalette.Check(False)
+        print "Palette on Close"
 
     def LoadPrefabs(self):
         self.prefabs = yaml.load(file("prefabric.yaml", "r"))
@@ -193,7 +142,7 @@ class TrackingTypeGroup(wx.Panel):
             self.rows.append(row)
 
         itemContainerPanel.SetSizer(itemContainerSizer)
-        itemContainerPanel.SetVirtualSizeHints(300, 50)
+        #itemContainerPanel.SetVirtualSizeHints(300, 50)
         itemContainerPanel.FitInside()
         #itemContainerPanel.SetScrollRate(-1, 50)
 
