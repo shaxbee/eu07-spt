@@ -2,6 +2,7 @@ import time
 
 import array
 import struct 
+import operator
 
 from struct import Struct
 from sptmath import Vec3
@@ -35,28 +36,12 @@ class SectorWriter(BinaryWriter):
         self.finalize()
 
     def addTrack(self, track):
-        track.p1 = _translate(track.p1, self.__offset)
-        track.v1 = _translate(track.v1, self.__offset) + track.p1
-        track.p2 = _translate(track.p2, self.__offset)
-        track.v2 = _translate(track.v2, self.__offset) + track.p2
-
-        track.path = _getPath(track.p1, track.v1, track.p2, track.v2)
-
-        self.__tracks.append(track)
-        self.__tracksKinds[track.path.kind].extend(track.path.to_tuple())
+        sectorTrack = SectorTrack(track, self.__offset)
+        self.__tracks.append(sectorTrack)
+        self.__tracksKinds[sectorTrack.path.kind].extend(sectorTrack.path.to_tuple())
 
     def addSwitch(self, switch):
-        switch.p1 = _translate(switch.p1, self.__offset)
-        switch.v1 = _translate(switch.v1, self.__offset)
-        switch.p2 = _translate(switch.p2, self.__offset)
-        switch.v2 = _translate(switch.v2, self.__offset)
-        switch.p3 = _translate(switch.p3, self.__offset)
-        switch.v3 = _translate(switch.v3, self.__offset)
-
-        switch.straight = _getPath(switch.p1, switch.v1, switch.p2, switch.v2)
-        switch.diverted = _getPath(switch.p1, switch.v1, switch.p3, switch.v3)
-
-        self.__switches.append(switch)
+        self.__switches.append(SectorSwitch(switch, self.__offset))
 
     def __writeHeader(self):
         self.beginChunk("HEAD")
@@ -157,6 +142,9 @@ class SectorWriter(BinaryWriter):
             if switch.n3:
                 self.__addConnection(switch.p3, switch, switch.n3)
 
+        self.__internalConnections = sorted(self.__internalConnections.iteritems(), key=operator.itemgetter(0))
+        self.__externalConnections = sorted(self.__externalConnections.iteritems(), key=operator.itemgetter(0))
+
     def __writeConnections(self):
         self.beginChunk("CNLS")
 
@@ -165,13 +153,13 @@ class SectorWriter(BinaryWriter):
         self.writeUInt(len(self.__internalConnections))
         self.writeArray(
             _internalConnectionFormat, 
-            (position.to_tuple() + indexes for position, indexes in self.__internalConnections.iteritems()),
+            (position.to_tuple() + indexes for position, indexes in self.__internalConnections),
             len(self.__internalConnections))
 
         self.writeUInt(len(self.__externalConnections))
         self.writeArray(
             _externalConnectionFormat, 
-            (position.to_tuple() + (index, ) for position, index in self.__externalConnections.iteritems()),
+            (position.to_tuple() + (index, ) for position, index in self.__externalConnections),
             len(self.__externalConnections))
 
         self.endChunk("CNLS")
@@ -253,6 +241,37 @@ class BezierPath(object):
     def to_tuple(self):
         return self.p1.to_tuple() + self.v1.to_tuple() + self.p2.to_tuple() + self.v2.to_tuple()
 
+class SectorTrack(object):
+    def __init__(self, source, offset): 
+        p1 = _translate(source.p1, offset)
+        v1 = _translate(source.v1, offset) + p1
+        p2 = _translate(source.p2, offset)
+        v2 = _translate(source.v2, offset) + p2
+
+        self.path = _getPath(p1, v1, p2, v2)
+        self.n1 = source.n1
+        self.n2 = source.n2
+
+        self.name = source.name
+
+class SectorSwitch(object):
+    def __init__(self, source, offset): 
+        p1 = _translate(source.p1, offset)
+        v1 = _translate(source.v1, offset) + p1 
+        p2 = _translate(source.p2, offset)
+        v2 = _translate(source.v2, offset) + p2
+        p3 = _translate(source.p3, offset)
+        v3 = _translate(source.v3, offset) + p3
+
+        self.straight = _getPath(p1, v1, p2, v2)
+        self.diverted = _getPath(p1, v1, p3, v3)
+
+        self.n1 = source.n1
+        self.n2 = source.n2
+        self.n3 = source.n3
+
+        self.name = source.name
+
 def _tracksGen(tracks, offset):
     for track in tracks:
         yield track.path.to_tuple()
@@ -306,16 +325,17 @@ if __name__ == "__main__":
 
     zero = Vec3(0, 0, 0)
 
-    t1 = Track(Vec3(100, 100, 0), Vec3(200, 100, 0), Vec3(200, 200, 0), Vec3(200, 100, 0), "start")
-    t2 = Track(zero, Vec3(0, 100, 0), Vec3(100, 100, 0), Vec3(0, 100, 0))
-    t1.connect(Vec3(100, 100, 0), t2)
+    tracks = [
+         Track(zero, zero, Vec3(100, 1, 0), zero)]
+#        Track(Vec3(100, 100, 0), Vec3(0, 100, 0), Vec3(200, 200, 0), Vec3(0, -100, 0), "start"),
+#        Track(zero, Vec3(0, 100, 0), Vec3(100, 100, 0), Vec3(-100, 0, 0))]
 
-    writer.addTrack(t1)
-    writer.addTrack(t2)
-    writer.addSwitch(Switch(zero, zero, Vec3(100, 0, 0), Vec3(100, 0, 0), Vec3(0, 100, 0), Vec3(0, 100, 0)))
+#    tracks[0].connect(Vec3(100, 100, 0), tracks[1])
+
+    for track in tracks:
+        writer.addTrack(track)
 
     start = time.time()
     writer.writeToFile()
+    writer.finalize()
     print "Time: %f ms" % ((time.time() - start) * 1000.0)
-
-    output.close()
