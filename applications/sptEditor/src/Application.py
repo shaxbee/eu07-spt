@@ -360,7 +360,7 @@ class MainWindow(wx.Frame):
         """
         self.editor.SetScenery(model.scenery.Scenery())
         self.modified = False
-        self.path = "Unknown.txt"
+        self.path = ""
         self.UpdateTitle()
 
 
@@ -424,7 +424,7 @@ class MainWindow(wx.Frame):
         Saves the file.
         Returns True if save was successful.
         """
-        if self.path == None:
+        if self.path == "":
             return self.SaveAs()
         else:
             return self.SaveScenery(self.path)
