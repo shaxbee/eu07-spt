@@ -2,6 +2,7 @@ import time
 
 import array
 import struct 
+import operator
 
 from struct import Struct
 from sptmath import Vec3
@@ -157,6 +158,9 @@ class SectorWriter(BinaryWriter):
             if switch.n3:
                 self.__addConnection(switch.p3, switch, switch.n3)
 
+        self.__internalConnections = sorted(self.__internalConnections.iteritems(), operator.itemgetter(0))
+        self.__externalConnections = sorted(self.__externalConnections.iteritems(), operator.itemgetter(0))
+
     def __writeConnections(self):
         self.beginChunk("CNLS")
 
@@ -165,13 +169,13 @@ class SectorWriter(BinaryWriter):
         self.writeUInt(len(self.__internalConnections))
         self.writeArray(
             _internalConnectionFormat, 
-            (position.to_tuple() + indexes for position, indexes in self.__internalConnections.iteritems()),
+            (position.to_tuple() + indexes for position, indexes in self.__internalConnections),
             len(self.__internalConnections))
 
         self.writeUInt(len(self.__externalConnections))
         self.writeArray(
             _externalConnectionFormat, 
-            (position.to_tuple() + (index, ) for position, index in self.__externalConnections.iteritems()),
+            (position.to_tuple() + (index, ) for position, index in self.__externalConnections),
             len(self.__externalConnections))
 
         self.endChunk("CNLS")
@@ -306,21 +310,17 @@ if __name__ == "__main__":
 
     zero = Vec3(0, 0, 0)
 
-    tracks = [ 
-        Track(zero, zero, Vec3(100, 100, 0), zero),
-        Track(Vec3(200, 100, 0), zero, Vec3(100, 0, 0), zero),
-        Track(Vec3(100, 0, 0), zero, Vec3(0, 100, 0), zero),
-        Track(Vec3(100, 100, 0), zero, Vec3(200, 0, 0), zero)]
+    tracks = [
+         Track(zero, zero, Vec3(100, 1, 0), zero)]
+#        Track(Vec3(100, 100, 0), Vec3(0, 100, 0), Vec3(200, 200, 0), Vec3(0, -100, 0), "start"),
+#        Track(zero, Vec3(0, 100, 0), Vec3(100, 100, 0), Vec3(-100, 0, 0))]
 
-#    t1 = Track(Vec3(100, 100, 0), Vec3(200, 100, 0), Vec3(200, 200, 0), Vec3(200, 100, 0), "start")
-#    t2 = Track(zero, Vec3(0, 100, 0), Vec3(100, 100, 0), Vec3(0, 100, 0))
-#    t1.connect(Vec3(100, 100, 0), t2)
+#    tracks[0].connect(Vec3(100, 100, 0), tracks[1])
 
     for track in tracks:
         writer.addTrack(track)
 
     start = time.time()
     writer.writeToFile()
+    writer.finalize()
     print "Time: %f ms" % ((time.time() - start) * 1000.0)
-
-    output.close()
