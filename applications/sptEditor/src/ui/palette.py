@@ -14,66 +14,6 @@ import wx.glcanvas
 
 
 
-class OSGWindow(wx.glcanvas.GLCanvas):
-    def __init__(self,parent,id,x,y,width,height):
-        style = wx.WANTS_CHARS | wx.FULL_REPAINT_ON_RESIZE
-        wx.glcanvas.GLCanvas.__init__(self,parent,id,wx.DefaultPosition,wx.Size(400,400),style)
-
-class PaletteFrame(wx.Frame):
-    """
-    Standalone window for palette.
-    """
-
-    def __init__(self, parent, id):
-        wx.Panel.__init__(self, parent, id, "Palette", \
-            style = wx.WANTS_CHARS | wx.FULL_REPAINT_ON_RESIZE)
-#        self.SetMinSize((350, 400))
-#        self.SetIcons(parent.PrepareApplicationIcons())
-
-#        self.palette = TrackPalette(self)
-
-#        self.Bind(wx.EVT_CLOSE, self.OnClose)
-
-#        self.RestoreFrame()
-
-#        self.Layout()
-#        self.Show(True)
-
-
-    def OnClose(self, event):
-        try:
-            self.GetParent().miTogglePalette.Check(False)
-            self.StoreFrame()
-        finally:
-            self.Destroy()
-
-
-    def RestoreFrame(self):
-        config = wx.FileConfig.Get()
-
-        posX = config.ReadInt("/EIFrame/framesPalette/x", 28)
-        posY = config.ReadInt("/EIFrame/framesPalette/y", 28)
-        width = config.ReadInt("/EIFrame/framesPalette/width", 350)
-        height = config.ReadInt("/EIFrame/framesPalette/height", 400)
-
-        self.Move((posX, posY))
-        self.SetSize((width, height))
-
-
-    def StoreFrame(self):
-        config = wx.FileConfig.Get()
-
-        pos = self.GetPosition()
-        size = self.GetSize()
-
-        config.WriteInt("/EIFrame/framesPalette/x", pos.x)
-        config.WriteInt("/EIFrame/framesPalette/y", pos.y)
-        config.WriteInt("/EIFrame/framesPalette/width", size.width)
-        config.WriteInt("/EIFrame/framesPalette/height", size.height)
-
-
-
-
 class TrackPalette(wx.Panel):
     """
     Track palette
@@ -82,10 +22,6 @@ class TrackPalette(wx.Panel):
     def __init__(self, parent, id = wx.ID_ANY, w=400, h=400):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,wx.Size(w,h),style = wx.WANTS_CHARS | wx.FULL_REPAINT_ON_RESIZE)
 
-        self.Bind(wx.EVT_CLOSE, self.OnClose)
-        self.Bind(wx.EVT_ICONIZE, self.OnClose)
- #       self.parent = parent
-        
         self.LoadPrefabs()
         self.VerifyPrefabs()
 

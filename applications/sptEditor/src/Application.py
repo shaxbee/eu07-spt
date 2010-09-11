@@ -518,6 +518,12 @@ class MainWindow(wx.Frame):
         self.miTogglePalette.Check(True)
         self._paneManager.Update()
 
+        config = wx.FileConfig.Get()
+        prop = config.Read("/EIFrame/trackPaletteProperties")
+        print prop
+        self._paneManager.LoadPaneInfo(prop,self._trackPalettePaneInfo)
+        self._paneManager.Update()
+
 
     def CloseTrackPaletteFrame(self):
         '''Close palette with track models'''
@@ -525,14 +531,17 @@ class MainWindow(wx.Frame):
  #       self.paletteFrame = None
 #        self._paneManager.Hide(self._trackPalettePaneInfo)
         #self._trackPalettePaneInfo.Show(False)
+        print "Close palette frame"
+        config = wx.FileConfig.Get()
+        prop = self._paneManager.SavePaneInfo(self._trackPalettePaneInfo)
+        print prop
+        config.Write("/EIFrame/trackPaletteProperties",prop)
+
         self._paneManager.DetachPane(self.trackPaletteFrame)
         self._paneManager.Update()
         self.miTogglePalette.Check(False)
         self.trackPaletteFrame.Destroy()
-        print "Close palette frame"
-
-
-
+        
 
 if __name__ == "__main__":
     usage = "Usage: %prog [options]"
