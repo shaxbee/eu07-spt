@@ -13,16 +13,7 @@ inline osg::Matrix rotationMatrix(osg::Vec3 dir, float roll = 0.0f)
     osg::Matrix result;
     dir.normalize();
 
-    osg::Vec3 refX;
-
-    if(dir.x() == 0.0f && dir.z() == 0.0f)
-    {
-        refX = osg::Vec3(-dir.y(), 0.0f, 0.0f);
-    }
-    else
-    {
-        refX = osg::Vec3(0.0f, 1.0f, 0.0f);
-    };
+    osg::Vec3 refX(0.0f, dir.x() >= 0.0f ? 1.0f : -1.0f, 0.0f);
 
     osg::Vec3 refZ = refX ^ dir;
     refZ.normalize();

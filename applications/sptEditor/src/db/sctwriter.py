@@ -306,13 +306,18 @@ if __name__ == "__main__":
 
     zero = Vec3(0, 0, 0)
 
-    t1 = Track(Vec3(100, 100, 0), Vec3(200, 100, 0), Vec3(200, 200, 0), Vec3(200, 100, 0), "start")
-    t2 = Track(zero, Vec3(0, 100, 0), Vec3(100, 100, 0), Vec3(0, 100, 0))
-    t1.connect(Vec3(100, 100, 0), t2)
+    tracks = [ 
+        Track(zero, zero, Vec3(100, 100, 0), zero),
+        Track(Vec3(200, 100, 0), zero, Vec3(100, 0, 0), zero),
+        Track(Vec3(100, 0, 0), zero, Vec3(0, 100, 0), zero),
+        Track(Vec3(100, 100, 0), zero, Vec3(200, 0, 0), zero)]
 
-    writer.addTrack(t1)
-    writer.addTrack(t2)
-    writer.addSwitch(Switch(zero, zero, Vec3(100, 0, 0), Vec3(100, 0, 0), Vec3(0, 100, 0), Vec3(0, 100, 0)))
+#    t1 = Track(Vec3(100, 100, 0), Vec3(200, 100, 0), Vec3(200, 200, 0), Vec3(200, 100, 0), "start")
+#    t2 = Track(zero, Vec3(0, 100, 0), Vec3(100, 100, 0), Vec3(0, 100, 0))
+#    t1.connect(Vec3(100, 100, 0), t2)
+
+    for track in tracks:
+        writer.addTrack(track)
 
     start = time.time()
     writer.writeToFile()
