@@ -32,12 +32,13 @@ class SectorWriter(BinaryWriter):
         self.__writeSwitchNames()
         self.__writeConnections()
         self.endChunk("SECT")
+        self.finalize()
 
     def addTrack(self, track):
         track.p1 = _translate(track.p1, self.__offset)
-        track.v1 = _translate(track.v1, self.__offset)
+        track.v1 = _translate(track.v1, self.__offset) + track.p1
         track.p2 = _translate(track.p2, self.__offset)
-        track.v2 = _translate(track.v2, self.__offset)
+        track.v2 = _translate(track.v2, self.__offset) + track.p2
 
         track.path = _getPath(track.p1, track.v1, track.p2, track.v2)
 
@@ -208,6 +209,9 @@ class FastVec3(object):
         self.x = float(x)
         self.y = float(y)
         self.z = float(z)
+
+    def __add__(self, other):
+        return FastVec3(self.x + other.x, self.y + other.y, self.z + other.z)
 
     def __sub__(self, other):
         return FastVec3(self.x - other.x, self.y - other.y, self.z - other.z)

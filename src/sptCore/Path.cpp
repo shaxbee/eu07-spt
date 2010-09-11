@@ -62,7 +62,10 @@ osg::ref_ptr<osg::Vec3Array> createPoints(osg::Vec3 p1, osg::Vec3 cp1, osg::Vec3
     tolerance *= tolerance;
 
     osg::ref_ptr<osg::Vec3Array> result(new osg::Vec3Array);
+    result->push_back(p1);
     recursiveBezier(*result, p1, cp1, cp2, p2, tolerance, 1);
+    result->push_back(p2);
+
     return result;
 
 };
