@@ -119,6 +119,8 @@ class PlanePart(wx.ScrolledWindow):
 
         self.wheelScaler = WheelScaler(self)
 
+        self.sceneryDragger = SceneryDragger(self)
+
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_SCROLLWIN, parent.topRuler.HandleOnScroll)
@@ -129,6 +131,9 @@ class PlanePart(wx.ScrolledWindow):
         eventManager.Register(self.basePointMover.OnMouseRelease, wx.EVT_LEFT_UP, self)
         eventManager.Register(highlighter.OnMouseClick, wx.EVT_LEFT_DOWN, self)
         eventManager.Register(self.wheelScaler.OnMouseWheel, wx.EVT_MOUSEWHEEL, self)
+        eventManager.Register(self.sceneryDragger.OnMousePress, wx.EVT_LEFT_DOWN, self)
+        eventManager.Register(self.sceneryDragger.OnDrag, wx.EVT_MOTION, self)
+        eventManager.Register(self.sceneryDragger.OnMouseRelease, wx.EVT_LEFT_UP, self)
 
         self.logger = logging.getLogger('Paint')
 
@@ -305,6 +310,10 @@ class PlanePart(wx.ScrolledWindow):
 
         Scale preserves the center view.
         """
+        # Set limits to the scale
+        if scale >= 100000.0 or scale <= 0.1:
+            return
+
         # 1) Get the center point of editor
         (vx, vy) = self.GetViewStart()
         (ux, uy) = self.GetScrollPixelsPerUnit()
@@ -579,7 +588,6 @@ class PlanePart(wx.ScrolledWindow):
 
 
     def SetSize(self, size):
-        print size
         wx.Panel.SetSize(size)
 
 
@@ -827,6 +835,52 @@ class BasePointMover:
                 self.editorPart.RefreshRect( \
                     wx.Rect(foundSnapData.p2d.x-10, foundSnapData.p2d.y-10, 20, 20), \
                     False)
+
+
+
+
+class SceneryDragger:
+    """
+    Dragger of scenery. This handles mouse drag with 'Ctrl' modifier
+    for movine scenery.
+    """
+
+    def __init__(self, editor):
+        self.editor = editor
+        self.dragging = False
+        self.dragStart = None
+
+
+    def OnMousePress(self, event):
+        """
+        Change the status of scenery dragger.
+        gets the initial position
+        """
+        if event.LeftDown() and not self.editor.basePointMover.pressed:
+            self.dragStart = event.GetPosition()
+            self.dragging = True
+        
+
+    def OnMouseRelease(self, event):
+        """
+        If it is a drag movement, get the delta and scroll the scenery
+        within the editor.
+        """
+        if self.dragging:
+            delta = event.GetPosition() - self.dragStart
+            (vx, vy) = self.editor.GetViewStart()
+            (ux, uy) = self.editor.GetScrollPixelsPerUnit()
+            self.editor.Scroll((vx*ux - delta.x) / ux, (vy*uy - delta.y) / uy)
+        self.dragging = False
+
+
+    def OnDrag(self, event):
+        """
+        Reacts to mouse movement.
+        """
+        if not event.Dragging():
+            # It is not dragging so change the flag
+            self.dragging = False
 
 
 
