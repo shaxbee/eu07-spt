@@ -299,9 +299,29 @@ class PlanePart(wx.ScrolledWindow):
 
 
     def SetScale(self, scale):
+        """
+        Sets the new scale, rescale all scenery elements
+        and refreshes all rulers.
+
+        Scale preserves the center view.
+        """
+        # 1) Get the center point of editor
+        (vx, vy) = self.GetViewStart()
+        (ux, uy) = self.GetScrollPixelsPerUnit()
+        (sx, sy) = self.GetSize()
+
+        p3d = self.ViewToModel((vx*ux + sx/2, vy*uy + sy/2))
+
+        # 2) do ther right scalling
         self.scale = scale
         self.SetVirtualSize(self.ComputePreferredSize())
         self.__ScaleAll(scale)
+
+        # 3) Move to the center of editor component
+        (p2x, p2y) = self.ModelToView(p3d)
+        self.CenterViewAt(p2x, p2y)
+
+        # 4) Refresh views
         self.Update()
         self.Refresh()
         self.GetParent().topRuler.Refresh()
