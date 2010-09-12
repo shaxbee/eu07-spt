@@ -16,8 +16,12 @@ class RailContainer:
     """
     
     def __init__(self, name = None):
+        # Contains all children
         self.children = []
+        # Outline trackings are at borders of this container and may attach
+        # to some external trackings.
         self.outline_trackings = []
+        # A map containing points and external trackings
         self.connections = dict()
 
         self.name = name
@@ -65,6 +69,67 @@ class RailContainer:
         return point in self.connections
 
 
+    def getNormalVector(self, point):
+        """
+        Returns the normal vector for given outline point.
+        """
+        if not self.containsPoint(point):
+            raise ValueError, "This point is not outline point"
+        # Get the tracking that has this outline point
+        internalTracking = None
+        for t in self.outline_trackings:
+            if t.containsPoint(point):
+                internalTracking = t
+        # And now compute normal vector on this track
+        return internalTracking.getNormalVector(point)
+
+
+    def getEndPoints(self):
+        return self.connections.keys()
+
+
+    def getGeometry(self):
+        """
+        Get all geometry points for all children
+        """
+        geo = []
+        for t in self.children:
+            geo += t.getGeometry()
+        return geo
+
+
+    def point2tracking(self, point):
+        return self.connections[point]
+
+
+    def nextPoint(self, point):
+        """
+        Compute next point for this rail tracking.
+        """
+        if not self.containsPoint(point):
+            raise ValueError, "This point is not outline point"
+
+        nextPoint = None
+
+        # Get the first child from this container
+        currentTracking = None
+        for t in self.outline_trackings:
+            if t.containsPoint(point):
+                currentTracking = t
+
+        if currentTracking is None:
+            raise ValueError, "Current tracking not found in container"
+        nextPoint = currentTracking.nextPoint(point)
+
+        # Iterate though children
+        while currentTracking in self.children \
+                and currentTracking.point2tracking(nextPoint) is not None:            
+            currentTracking = currentTracking.point2tracking(nextPoint)
+            nextPoint = currentTracking.nextPoint(nextPoint)
+
+        return nextPoint
+            
+        
     def insert(self, tracking):
         """
         Inserts given rail tracking into group.
@@ -242,6 +307,18 @@ class RailContainer:
             elif type(c) is RailContainer:
                 for c in c.tracks():
                     yield c
+
+
+   def switches(self):
+       """
+       Iterates over switches in this rail container.
+       """
+       for c in self.children:
+           if type(c) is tracks.Switch:
+               yield c
+           elif type(c) is RailContainer:
+               for c in c.switches()
+                   yield c
             
 
 class RailGroup(RailContainer):

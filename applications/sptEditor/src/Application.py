@@ -479,6 +479,8 @@ class MainWindow(wx.Frame):
 	    scenery = self.editor.GetScenery()
             for t in scenery.tracks.tracks():
                 writer.addTrack(t)
+            for s in scenery.tracks.switches():
+                writer.addSwitch(s)
             writer.writeToFile()
         finally:
             wx.EndBusyCursor()

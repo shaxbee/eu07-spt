@@ -131,7 +131,8 @@ class SceneryLoader:
     def construct_RailContainer(self, loader, node):
         map = loader.construct_mapping(node, deep=False)
         c = model.groups.RailContainer()
-        c.name = map["name"]
+        if "name" in map:
+            c.name = map["name"]
         c.children = map["children"]
         c.outline_trackings = map["outline"]
         c.connections = map["connections"]
