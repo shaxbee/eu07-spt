@@ -9,6 +9,7 @@ class BinaryWriter(object):
     uIntFormat = Struct("<I")
     vec3fFormat = Struct("<fff")
     vec3dFormat = Struct("<ddd")
+    versionFormat = Struct("<BB")
 
     def __init__(self, ifile):
         self.__input = ifile
@@ -69,6 +70,11 @@ class BinaryWriter(object):
 
     def writeUInt(self, value):
         self.write(BinaryWriter.uIntFormat.pack(value))
+
+    def writeVersion(self, version):
+        major, minor = version.split('.')
+        # write sector version
+        self.writeFmt(BinaryWriter.versionFormat, (int(major), int(minor)))
 
     def finalize(self):
         self.__input.close()

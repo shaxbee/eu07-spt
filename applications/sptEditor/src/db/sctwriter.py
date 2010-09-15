@@ -37,7 +37,7 @@ def write_sector(fout, position, tracks, switches):
     
     writer.beginChunk("SECT")
     
-    __writeHeader(writer, SECTOR_FILE_VERSION, position)
+    __writeHeader(writer, position)
     
     __writeTrackList(writer, tracks)
     __writeSwitchList(writer, switches)
@@ -63,12 +63,10 @@ def __buildTrackingIndex(*args):
             
     return index
     
-def __writeHeader(writer, version, position):
+def __writeHeader(writer, position):
     writer.beginChunk("HEAD")
     
-    major, minor = version.split('.')
-    # write sector version
-    writer.writeFmt(Struct("<B B"), (int(major), int(minor)))
+    writer.writeVersion(SECTOR_FILE_VERSION)
     # write sector position
     writer.writeFmt(Struct("<3f"), position.to_tuple())
 
