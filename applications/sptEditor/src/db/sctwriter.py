@@ -10,7 +10,7 @@ from sptmath import Vec3
 
 from binwriter import BinaryWriter
 
-SECTOR_SIZE = 1000
+SECTOR_SIZE = 8000
 SECTOR_FILE_VERSION = "1.0"
 
 class SectorWriteError(RuntimeError):
@@ -39,8 +39,8 @@ def write_sector(fout, position, tracks, switches):
     
     __writeHeader(writer, SECTOR_FILE_VERSION, position)
     
-    __writeTracksList(writer, tracks)
-    __writeSwitchesList(writer, switches)
+    __writeTrackList(writer, tracks)
+    __writeSwitchList(writer, switches)
     
     __writeNames(writer, "TRNM", tracks, index)
     __writeNames(writer, "SWNM", switches, index)
@@ -55,7 +55,7 @@ def __buildTrackingIndex(*args):
     
     for source in args:
         # extract tracking.original
-        keys = imap(operator.attrgetter('original'), source)
+        keys = itertools.imap(operator.attrgetter('original'), source)
         # create list of ids
         values = xrange(len(index), len(source) + 1)
         # update index with tracking.original -> id pairs
@@ -65,9 +65,10 @@ def __buildTrackingIndex(*args):
     
 def __writeHeader(writer, version, position):
     writer.beginChunk("HEAD")
-        
+    
+    major, minor = version.split('.')
     # write sector version
-    writer.writeFmt(Struct("<B B"), version.split("."))
+    writer.writeFmt(Struct("<B B"), (int(major), int(minor)))
     # write sector position
     writer.writeFmt(Struct("<3f"), position.to_tuple())
 
@@ -77,7 +78,7 @@ def __writeTrackList(writer, tracks):
     def write_kind(kind, recordSize):
         # get list of floats representing points of each track path
         source = itertools.chain.from_iterable(track.path.to_tuple() for track in tracks if track.path.kind == kind)
-        data = array("f", source)
+        data = array.array("f", source)
            
         # write tracks count
         writer.writeUInt(len(data) / recordSize)
@@ -85,8 +86,8 @@ def __writeTrackList(writer, tracks):
         writer.write(data.tostring())
         
     writer.beginChunk("TRLS")                
-    write_kind(PathKind.STRAIGHT)
-    write_kind(PathKind.BEZIER)
+    write_kind(PathKind.STRAIGHT, 6)
+    write_kind(PathKind.BEZIER, 12)
     writer.endChunk("TRLS")    
     
 def __writeSwitchList(writer, switches):
@@ -103,7 +104,7 @@ def __writeSwitchList(writer, switches):
     
 def __writeNames(writer, chunk, source, index):
     # create list of id -> name pairs for each named tracking
-    source = [(index[tracking.original], tracking.name) for tracking in source if tracking.name is not None)]
+    source = [(index[tracking.original], tracking.name) for tracking in source if tracking.name is not None]
 
     writer.beginChunk(chunk)
         
@@ -148,7 +149,7 @@ def __collectConnections(tracks, switches, index):
     return (internal, external)
 
 def __writeConnections(writer, tracks, switches, index):
-    self.beginChunk("CNLS")
+    writer.beginChunk("CNLS")
         
     internal, external = __collectConnections(tracks, switches, index)
 
@@ -160,13 +161,13 @@ def __writeConnections(writer, tracks, switches, index):
 
     writer.endChunk("CNLS")
 
-def __getPath(p1, v1, p2, v2):
+def _getPath(p1, v1, p2, v2):
     if v1 == p1 and v2 == p2:
         return StraightPath(p1, p2)
     
     return BezierPath(p1, v1, p2, v2)
 
-def __translate(point, offset):
+def _translate(point, offset):
     return FastVec3(*(point - offset).to_tuple())
 
 __trackFormats = [
@@ -236,12 +237,12 @@ class BezierPath(object):
 
 class SectorTrack(object):
     def __init__(self, source, offset): 
-        p1 = _translate(source.p1, offset)
-        v1 = _translate(source.v1, offset) + p1
-        p2 = _translate(source.p2, offset)
-        v2 = _translate(source.v2, offset) + p2
+        self.p1 = _translate(source.p1, offset)
+        self.v1 = _translate(source.v1, offset) + self.p1
+        self.p2 = _translate(source.p2, offset)
+        self.v2 = _translate(source.v2, offset) + self.p2
 
-        self.path = _getPath(p1, v1, p2, v2)
+        self.path = _getPath(self.p1, self.v1, self.p2, self.v2)
         self.n1 = source.n1
         self.n2 = source.n2
 
@@ -250,15 +251,15 @@ class SectorTrack(object):
 
 class SectorSwitch(object):
     def __init__(self, source, offset): 
-        p1 = _translate(source.p1, offset)
-        v1 = _translate(source.v1, offset) + p1 
-        p2 = _translate(source.p2, offset)
-        v2 = _translate(source.v2, offset) + p2
-        p3 = _translate(source.p3, offset)
-        v3 = _translate(source.v3, offset) + p3
+        self.p1 = _translate(source.p1, offset)
+        self.v1 = _translate(source.v1, offset) + self.p1 
+        self.p2 = _translate(source.p2, offset)
+        self.v2 = _translate(source.v2, offset) + self.p2
+        self.p3 = _translate(source.p3, offset)
+        self.v3 = _translate(source.v3, offset) + self.p3
 
-        self.straight = _getPath(p1, v1, p2, v2)
-        self.diverted = _getPath(p1, v1, p3, v3)
+        self.straight = _getPath(self.p1, self.v1, self.p2, self.v2)
+        self.diverted = _getPath(self.p1, self.v1, self.p3, self.v3)
 
         self.n1 = source.n1
         self.n2 = source.n2
@@ -314,5 +315,5 @@ if __name__ == "__main__":
     switches = []
 
     start = time.time()
-    write_sector(file("test.sct", "w+"), FastVec3(), tracks, switches)
+    write_sector(file("test.sct", "w+"), Vec3(), tracks, switches)
     print "Time: %f ms" % ((time.time() - start) * 1000.0)
