@@ -1079,29 +1079,83 @@ class SceneryListener(model.scenery.SceneryListener):
         element = event.GetElement()
         changeType = event.GetType()
 
+        if changeType == model.scenery.CHANGE_ADD \
+            and isinstance(element, model.groups.RailContainer):
+
+            self.sceneryAddGroup(element)
+        elif changeType == model.scenery.CHANGE_ADD:
+            self.sceneryAdd(element)
+        elif changeType == model.scenery.CHANGE_REMOVE:
+            self.sceneryRemove(element)
+      
+
+    def sceneryAdd(self, element):
         part = self.editor.parts[0]
         (vx, vy) = part.GetViewStart()
         (ux, uy) = part.GetScrollPixelsPerUnit()
 
-        view = None
-        if changeType == model.scenery.CHANGE_ADD:
-            view = part.AddView(element)
-        elif changeType == model.scenery.CHANGE_REMOVE:
-            if element == self.editor.GetSelection():
-                 self.editor.SetSelection(None)
-            view = part.FindView(element)
-            part.trackCache.remove(view)
+        view = part.AddView(element)
 
         needPainting = part.ComputeMinMax()
         if needPainting:
             self.editor.Refresh()
         else:
-            if changeType == model.scenery.CHANGE_ADD:
-                view.Scale(part.scale, part.minX, part.maxX, part.minY, part.maxY)
+            view.Scale(part.scale, part.minX, part.maxX, part.minY, part.maxY)
         
             repaintRect = view.GetRepaintBounds()
             repaintRect.x -= vx * ux
             repaintRect.y -= vy * uy
             part.RefreshRect(repaintRect, False)
-      
+    
+
+    def sceneryRemove(self, element):
+        part = self.editor.parts[0]
+        (vx, vy) = part.GetViewStart()
+        (ux, uy) = part.GetScrollPixelsPerUnit()
+
+        if element == self.editor.GetSelection():
+            self.editor.SetSelection(None)
+        view = part.FindView(element)
+        if type(element) is model.tracks.Track:
+            part.trackCache.remove(view)
+        elif type(element) is model.tracks.Switch:
+            part.switchCache.remove(view)
+
+        needPainting = part.ComputeMinMax()
+        if needPainting:
+            self.editor.Refresh()
+        else:
+            repaintRect = view.GetRepaintBounds()
+            repaintRect.x -= vx * ux
+            repaintRect.y -= vy * uy
+            part.RefreshRect(repaintRect, False)
+
+
+    def sceneryAddGroup(self, group):
+        part = self.editor.parts[0]
+        (vx, vy) = part.GetViewStart()
+        (ux, uy) = part.GetScrollPixelsPerUnit()
+
+        views = []
+        for track in group.tracks():
+            views.append(part.AddView(track))
+        for sw in group.switches():
+            views.append(part.AddView(sw))
+
+        needPainting = part.ComputeMinMax()
+        if needPainting:
+            self.editor.Refresh()
+        else:
+            repaintRect = None
+            for view in views:
+                view.Scale(part.scale, part.minX, part.maxX, part.minY, part.maxY)
+                nextRepaintRect = view.GetRepaintBounds()
+                if repaintRect is None:
+                    repaintRect = nextRepaintRect
+                else:
+                    repaintRect = repaintRect.Union(nextRepaintRect)
+
+            repaintRect.x -= vx * ux
+            repaintRect.y -= vy * uy
+            part.RefreshRect(repaintRect, False)
 

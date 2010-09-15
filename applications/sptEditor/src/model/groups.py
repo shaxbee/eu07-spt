@@ -309,17 +309,19 @@ class RailContainer:
                     yield c
 
 
-   def switches(self):
-       """
-       Iterates over switches in this rail container.
-       """
-       for c in self.children:
-           if type(c) is tracks.Switch:
-               yield c
-           elif type(c) is RailContainer:
-               for c in c.switches()
-                   yield c
-            
+    def switches(self):
+        """
+        Iterates over switches in this rail container.
+        """
+        for c in self.children:
+            if type(c) is tracks.Switch:
+                yield c
+            elif type(c) is RailContainer:
+                for c in c.switches():
+                    yield c
+          
+
+  
 
 class RailGroup(RailContainer):
     """

@@ -10,7 +10,6 @@ import Application
 import model.tracks
 import ui.dialog
 import ui.trackfc
-import wx.glcanvas
 
 
 
@@ -120,7 +119,7 @@ class TrackPalette(wx.Panel):
 
 class TrackingTypeGroup(wx.Panel):
     """
-    Panel grouping rail tracking type.
+    Panel grouping rail tracking category.
     """
 
     def __init__(self, parent, label, elements):
