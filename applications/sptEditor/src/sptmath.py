@@ -5,6 +5,7 @@ Module containing dedicated math operations.
 '''
 
 import math
+import decimal
 from decimal import Decimal
 from wx import Point
 
@@ -26,6 +27,17 @@ class Vec3:
         return "(%.3f,%.3f,%.3f)" % self.to_tuple() 
 
     def __eq__(self, other):
+        """
+        Returns True if two Vec3 are equal
+
+        Examples:
+        >>> Vec3("0.000", "-0.000", "0.000") == Vec3("-0.0", "0", "-0")
+        True
+        >>> Vec3("1.0", "-1.0", "0.001") == Vec3("1.000", "-1", "0.001")
+        True
+        >>> Vec3("2", "3", "-4.009") == Vec3("-2", "3.000", "-5")
+        False
+        """
         if other == None:
             return False
         if not isinstance(other, Vec3):
@@ -37,13 +49,39 @@ class Vec3:
 
     def __setattr__(self, name, arg):
         """
-        Setting x,y,z causes to quantize the value
+        Setting x,y,z causes to quantize the value to one millimetre.
+
+        Examples:
+        >>> Vec3('0.001', '-0.001', '0.000')
+        (0.001,-0.001,0.000)
+        >>> a = Vec3('0.0001', '-0.0001', '0.000')
+        >>> a
+        (0.000,-0.000,0.000)
+        >>> Vec3('0.999', '-0.999', '1.000')
+        (0.999,-0.999,1.000)
+        >>> b = Vec3('0.0005', '-0.0006', '-0.0004')
+        >>> str(b.x)
+        '0.001'
+        >>> str(b.y)
+        '-0.001'
+        >>> str(b.z)
+        '-0.000'
+        >>> a + b
+        (0.001,-0.001,0.000)
+        >>> Vec3('0.9999', '-0.9999', '0.000')
+        (1.000,-1.000,0.000)
+        >>> Vec3('1.0001', '0.000', '-1.0001')
+        (1.000,0.000,-1.000)
+        >>> c = Vec3('0.0004', '-0.0004', '0.000')
+        >>> c + c
+        (0.000,-0.000,0.000)
         """
         if arg is None:
            raise ValueError()
         if type(arg) == str:
            arg = Decimal(arg)
-        self.__dict__[name] = arg.quantize(THREE_POINTS)
+        self.__dict__[name] = arg.quantize(THREE_POINTS, rounding=decimal.ROUND_HALF_UP)
+
 
     def __add__(self, arg):
        x = self.x + arg.x
@@ -64,6 +102,18 @@ class Vec3:
        return (self.x, self.y, self.z)
 
     def moveBy(self, v):
+       """
+       Moves this vector by given another v vector.
+
+       Example:
+       >>> a = Vec3('5.67', '34.43', '-898')
+       >>> v = Vec3('-6', '34.44', '0.0004')
+       >>> a.moveBy(-v)
+       >>> a
+       (11.670,-0.010,-898.000)
+       >>> str(a.z)
+       '-898.000'
+       """
        self.x = self.x + v.x
        self.y = self.y + v.y
        self.z = self.z + v.z
@@ -141,7 +191,7 @@ class Vec3:
         >>> Vec3("1", "3", "0.5").scale(2)
         (2.000,6.000,1.000)
         >>> Vec3("-4", "0.001", "-0.999").scale(0.5)
-        (-2.000,0.000,-0.500)
+        (-2.000,0.001,-0.500)
         >>> Vec3("0", "7", "-3").scale(-2)
         (-0.000,-14.000,6.000)
         >>> Vec3("5", "0.45", "-0.002").scale(0)
