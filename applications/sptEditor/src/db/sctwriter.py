@@ -3,6 +3,7 @@ import time
 import array
 import struct 
 import operator
+import itertools
 
 from struct import Struct
 from sptmath import Vec3
@@ -10,183 +11,175 @@ from sptmath import Vec3
 from binwriter import BinaryWriter
 
 SECTOR_SIZE = 1000
+SECTOR_FILE_VERSION = "1.0"
 
-class SectorWriterError(RuntimeError):
+class SectorWriteError(RuntimeError):
     pass
+    
+def write_sector(fout, position, tracks, switches):
+    """
+    Write sector data to file.
+    
+    :param fout: output file object.
+    :param position: sector center position relative to scenery.
+    :param tracks: list of tracks in sector.
+    :param switches: list of switches in sector.
+    :raises: SectorWriteError
+    """
+    writer = BinaryWriter(fout)
+    
+    # transform tracks and switches
+    tracks = [SectorTrack(track, position) for track in tracks]
+    switches = [SectorSwitch(switch, position) for switch in switches]
+    
+    # build id -> tracking index
+    index = __buildTrackingIndex(tracks, switches)
+    
+    writer.beginChunk("SECT")
+    
+    __writeHeader(writer, SECTOR_FILE_VERSION, position)
+    
+    __writeTracksList(writer, tracks)
+    __writeSwitchesList(writer, switches)
+    
+    __writeNames(writer, "TRNM", tracks, index)
+    __writeNames(writer, "SWNM", switches, index)
+    
+    __writeConnections(writer, tracks, switches, index)
+    
+    writer.endChunk("SECT")
+    writer.finalize()
+    
+def __buildTrackingIndex(*args):
+    index = dict()
+    
+    for source in args:
+        # extract tracking.original
+        keys = imap(operator.attrgetter('original'), source)
+        # create list of ids
+        values = xrange(len(index), len(source) + 1)
+        # update index with tracking.original -> id pairs
+        index.update(itertools.izip(keys, values))        
+            
+    return index
+    
+def __writeHeader(writer, version, position):
+    writer.beginChunk("HEAD")
+        
+    # write sector version
+    writer.writeFmt(Struct("<B B"), version.split("."))
+    # write sector position
+    writer.writeFmt(Struct("<3f"), position.to_tuple())
 
-class SectorWriter(BinaryWriter):
-    def __init__(self, output, offset):
-        BinaryWriter.__init__(self, output)
-        self.__offset = offset
-        self.__tracks = list()
-        self.__tracksKinds = [array.array('f'), array.array('f')]
-#        self.__tracksKinds = [list(), list()]
-        self.__switches = list()
+    writer.endChunk("HEAD")
+    
+def __writeTrackList(writer, tracks):
+    def write_kind(kind, recordSize):
+        # get list of floats representing points of each track path
+        source = itertools.chain.from_iterable(track.path.to_tuple() for track in tracks if track.path.kind == kind)
+        data = array("f", source)
+           
+        # write tracks count
+        writer.writeUInt(len(data) / recordSize)
+        # write points
+        writer.write(data.tostring())
+        
+    writer.beginChunk("TRLS")                
+    write_kind(PathKind.STRAIGHT)
+    write_kind(PathKind.BEZIER)
+    writer.endChunk("TRLS")    
+    
+def __writeSwitchList(writer, switches):
+    def flat(switch):
+        fmt = __switchFormats[switch.straight.kind + switch.diverted.kind * 2]
+        return (fmt, (0 if switch.position == "STRAIGHT" else 1,) + \
+            (switch.straight.kind,) + switch.straight.to_tuple() + \
+            (switch.diverted.kind,) + switch.diverted.to_tuple())
+    
+    writer.beginChunk("SWLS")
+    writer.writeUInt(len(switches))
+    writer.writeVarArray(itertools.imap(flat, switches))
+    writer.endChunk("SWLS")
+    
+def __writeNames(writer, chunk, source, index):
+    # create list of id -> name pairs for each named tracking
+    source = [(index[tracking.original], tracking.name) for tracking in source if tracking.name is not None)]
 
-    def writeToFile(self):
-        self.beginChunk("SECT")
-        self.__buildTrackingIndex()
-        self.__writeHeader()
-        self.__writeTrackList()
-        self.__writeSwitchList()
-        self.__writeTrackNames()
-        self.__writeSwitchNames()
-        self.__writeConnections()
-        self.endChunk("SECT")
-        self.finalize()
-
-    def addTrack(self, track):
-        sectorTrack = SectorTrack(track, self.__offset)
-        self.__tracks.append(sectorTrack)
-        self.__tracksKinds[sectorTrack.path.kind].extend(sectorTrack.path.to_tuple())
-
-    def addSwitch(self, switch):
-        self.__switches.append(SectorSwitch(switch, self.__offset))
-
-    def __writeHeader(self):
-        self.beginChunk("HEAD")
-
-        self.write(struct.pack("<3f", *self.__offset.to_tuple()))
-
-        self.endChunk("HEAD")
-
-    def __writeTrackList(self):
-        self.beginChunk("TRLS")
-
-        print "kinds: %d %d" % (len(self.__tracksKinds[0]), len(self.__tracksKinds[1]))
-
-        for kind in range(0, 2):
-            data = self.__tracksKinds[kind]
-            self.writeUInt(len(data) / (6 if kind == PathKind.STRAIGHT else 12)) 
-            self.write(struct.pack("<%df" % len(data), *data))
-
-        self.endChunk("TRLS")
-
-    def __writeSwitchList(self):
-        self.beginChunk("SWLS")
-        self.writeUInt(len(self.__switches))
-        self.writeVarArray(_switchGen(self.__switches, self.__offset))
-        self.endChunk("SWLS")
-
-    def __collectNamedTracking(self, source):
-        result = list()
-
-        for tracking in source:
-            if tracking.name is not None:
-                result.append((self.__index[tracking], tracking.name))
-
-        return result
-
-    def __writeNames(self, source):
-        self.writeUInt(len(source))
-
-        for offset, name in source:
-            self.writeUInt(offset)
-            self.writeString(name)
-
-    def __writeTrackNames(self):
-        self.beginChunk("TRNM")
-        tracks = self.__collectNamedTracking(self.__tracks)
-        self.__writeNames(tracks)
-        self.endChunk("TRNM")
-
-    def __writeSwitchNames(self):
-        self.beginChunk("SWNM")
-        switches = self.__collectNamedTracking(self.__switches)
-        self.__writeNames(switches)
-        self.endChunk("SWNM")
-
-    def __buildTrackingIndexImpl(self, source):
-        offset = len(self.__index)
-
-        for tracking in source:
-            self.__index[tracking] = offset
-            offset += 1
-
-    def __buildTrackingIndex(self):
-        self.__index = dict()
-        self.__buildTrackingIndexImpl(self.__tracks)
-        self.__buildTrackingIndexImpl(self.__switches)
-
-    def __addConnection(self, position, left, right):
-        if position.x < 0 or position.x > SECTOR_SIZE or position.y < 0 or position.y > SECTOR_SIZE:
-            if position not in self.__externalConnections:
-                self.__externalConnections[position] = self.__index[left]
+    writer.beginChunk(chunk)
+        
+    writer.writeUInt(len(source))
+    for offset, name in source:
+        writer.writeUInt(offset)
+        writer.writeString(name)    
+            
+    writer.endChunk(chunk)
+    
+def __collectConnections(tracks, switches, index):
+    internal = dict()
+    external = dict()       
+        
+    def addConnection(position, left, right):
+        position = position.to_tuple()
+        if position[0] < 0 or position[0] > SECTOR_SIZE or position[1] < 0 or position[1] > SECTOR_SIZE:
+            if position not in external:
+                external[position] = index[left]
         else:
-            if position not in self.__internalConnections:
-                self.__internalConnections[position] = (self.__index[left], self.__index[right])
+            if position not in internal:
+                internal[position] = (index[left], index[right])
+        
+    for track in tracks:
+        if track.n1 is not None:
+            addConnection(track.p1, track, track.n1)
+        if track.n2 is not None:
+            addConnection(track.p2, track, track.n2)
 
-    def __collectTracksConnections(self, source):
-        self.__buildTrackingIndex()
-        for track in source:
-            if track.n1:
-                self.__addConnection(track.p1, track, track.n1)
-            if track.n2:
-                self.__addConnection(track.p2, track, track.n2)
+    for switch in switches:
+        if switch.n1 is not None:
+            addConnection(switch.p1, switch, switch.n1)
+        if switch.n2 is not None:
+            addConnection(switch.p2, switch, switch.n2)
+        if switch.n3 is not None:
+            addConnection(switch.p3, switch, switch.n3)
+                
+    # sort connections by position
+    internal = sorted(internal.iteritems(), key=operator.itemgetter(0))
+    external = sorted(external.iteritems(), key=operator.itemgetter(0))
+        
+    return (internal, external)
 
-    def __collectConnections(self):
-        self.__internalConnections = dict()
-        self.__externalConnections = dict()
+def __writeConnections(writer, tracks, switches, index):
+    self.beginChunk("CNLS")
+        
+    internal, external = __collectConnections(tracks, switches, index)
 
-        for track in self.__tracks:
-            if track.n1:
-                self.__addConnection(track.p1, track, track.n1)
-            if track.n2:
-                self.__addConnection(track.p2, track, track.n2)
+    writer.writeUInt(len(internal))
+    writer.writeArray(Struct("<3f I I"), (position + indexes for position, indexes in internal), len(internal))
 
-        for switch in self.__switches:
-            if switch.n1:
-                self.__addConnection(switch.p1, switch, switch.n1)
-            if switch.n2:
-                self.__addConnection(switch.p2, switch, switch.n2)
-            if switch.n3:
-                self.__addConnection(switch.p3, switch, switch.n3)
+    writer.writeUInt(len(external))
+    writer.writeArray(Struct("<3f I"), (position + (index, ) for position, index in external), len(external))
 
-        self.__internalConnections = sorted(self.__internalConnections.iteritems(), key=operator.itemgetter(0))
-        self.__externalConnections = sorted(self.__externalConnections.iteritems(), key=operator.itemgetter(0))
+    writer.endChunk("CNLS")
 
-    def __writeConnections(self):
-        self.beginChunk("CNLS")
-
-        self.__collectConnections()
-
-        self.writeUInt(len(self.__internalConnections))
-        self.writeArray(
-            _internalConnectionFormat, 
-            (position.to_tuple() + indexes for position, indexes in self.__internalConnections),
-            len(self.__internalConnections))
-
-        self.writeUInt(len(self.__externalConnections))
-        self.writeArray(
-            _externalConnectionFormat, 
-            (position.to_tuple() + (index, ) for position, index in self.__externalConnections),
-            len(self.__externalConnections))
-
-        self.endChunk("CNLS")
-
-def _getPath(p1, v1, p2, v2):
+def __getPath(p1, v1, p2, v2):
     if v1 == p1 and v2 == p2:
         return StraightPath(p1, p2)
     
     return BezierPath(p1, v1, p2, v2)
 
-def _translate(point, offset):
+def __translate(point, offset):
     return FastVec3(*(point - offset).to_tuple())
 
-_trackFormats = [
+__trackFormats = [
     Struct("<3f3f"), # straight
     Struct("<3f3f3f3f") # bezier
 ]
 
-_switchFormats = [
+__switchFormats = [
     Struct("<B B 3f3f B 3f3f"), # position, straight, straight
     Struct("<B B 3f3f B 3f3f3f3f"), # position, straight, bezier
     Struct("<B B 3f3f3f3f B 3f3f"), # position, bezier, straight
     Struct("<B B 3f3f3f3f B 3f3f3f3f") # position, bezier, bezier
 ]
-
-_internalConnectionFormat = Struct("<3f I I") # position, from index, to index
-_externalConnectionFormat = Struct("<3f I") # position, index
 
 class PathKind(object):
     STRAIGHT = 0
@@ -212,7 +205,7 @@ class FastVec3(object):
 
     def __repr__(self):
         return "FastVec3(x = %.2f, y = %.2f, z = %.2f)" % self.to_tuple()
-
+        
 class StraightPath(object):
     kind = PathKind.STRAIGHT
 
@@ -225,7 +218,7 @@ class StraightPath(object):
 
     def to_tuple(self):
         return self.p1.to_tuple() + self.p2.to_tuple()
-
+        
 class BezierPath(object):
     kind = PathKind.BEZIER
 
@@ -253,6 +246,7 @@ class SectorTrack(object):
         self.n2 = source.n2
 
         self.name = source.name
+        self.original = source
 
 class SectorSwitch(object):
     def __init__(self, source, offset): 
@@ -271,17 +265,7 @@ class SectorSwitch(object):
         self.n3 = source.n3
 
         self.name = source.name
-
-def _tracksGen(tracks, offset):
-    for track in tracks:
-        yield track.path.to_tuple()
-
-def _switchGen(switches, offset):
-    for switch in switches:
-        fmt = _switchFormats[switch.straight.kind + switch.diverted.kind * 2]
-        yield (fmt, (0 if switch.position == "STRAIGHT" else 1,) + \
-                    (switch.straight.kind,) + switch.straight.to_tuple() + \
-                    (switch.diverted.kind,) + switch.diverted.to_tuple())
+        self.original = source
 
 if __name__ == "__main__":
     class Track(object):
@@ -320,9 +304,6 @@ if __name__ == "__main__":
             self.position = position
             self.name = name
 
-    output = file("test.sct", "w+")
-    writer = SectorWriter(output, Vec3())
-
     zero = Vec3(0, 0, 0)
 
     tracks = [
@@ -330,12 +311,8 @@ if __name__ == "__main__":
 #        Track(Vec3(100, 100, 0), Vec3(0, 100, 0), Vec3(200, 200, 0), Vec3(0, -100, 0), "start"),
 #        Track(zero, Vec3(0, 100, 0), Vec3(100, 100, 0), Vec3(-100, 0, 0))]
 
-#    tracks[0].connect(Vec3(100, 100, 0), tracks[1])
-
-    for track in tracks:
-        writer.addTrack(track)
+    switches = []
 
     start = time.time()
-    writer.writeToFile()
-    writer.finalize()
+    write_sector(file("test.sct", "w+"), FastVec3(), tracks, switches)
     print "Time: %f ms" % ((time.time() - start) * 1000.0)
