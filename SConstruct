@@ -1,8 +1,11 @@
 import sys
+import os
 import os.path
 
 from SCons.Errors import UserError
 from build.support import GetPlatform
+
+print repr(Glob("*.cpp"))
 
 platform = GetPlatform()
 
@@ -23,7 +26,7 @@ vars.Add(EnumVariable('TEST_PRINTER', 'Unit tests error printer', 'Paren', ('Xml
 # DefaultEnvironment(toolpath='#/build/site_tools')
 
 # construct build environment
-env = Environment(variables = vars)
+env = Environment(variables = vars, toolpath=['#/build/tools'], tools=['default', 'findsources'], ENV = os.environ)
 
 # add command line options description
 Help(vars.GenerateHelpText(env))
@@ -63,11 +66,11 @@ Export('env')
 SConscript('src/SConscript', variant_dir = os.path.join(buildDir, 'lib'), duplicate = 0)
 
 # applications
-SConscript('applications/SConscript', variant_dir = os.path.join(buildDir, 'applications'), duplicate = 0)
+sptClient = SConscript('applications/spt/SConscript', variant_dir = os.path.join(buildDir, 'applications'), duplicate = 0)
 
 # python wrappers
 # if 'wrappers' in COMMAND_LINE_TARGETS:
-SConscript('wrappers/SConscript', variant_dir = os.path.join(buildDir, 'wrappers'), duplicate = 0)
+# SConscript('wrappers/SConscript', variant_dir = os.path.join(buildDir, 'wrappers'), duplicate = 0)
 
 # unit tests
 if 'check' in COMMAND_LINE_TARGETS:
@@ -77,4 +80,16 @@ if 'check' in COMMAND_LINE_TARGETS:
 if 'doc' in COMMAND_LINE_TARGETS:
     SConscript('doc/SConscript')
 
+sources, headers = env.FindAllSourceFiles(sptClient)
+
+prj = env.MSVSProject(
+    target = 'spt' + env['MSVSPROJECTSUFFIX'],
+    buildtarget = sptClient[0].path,
+    srcs = sources,
+    incs = headers,
+    variant = 'Debug')
+
 env.Alias('install', ['#/bin', '#/python'])
+env.Alias('msvs', prj)
+
+Default(sptClient)

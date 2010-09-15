@@ -2,7 +2,7 @@ Import('env')
 
 AddOption('--doxy-variant', dest="doxy_variant", type="string", action="store")
 
-env = env.Clone(toolpath=['#/build/doxygen'], tools=['default', 'doxygen'], variables=vars)
+env = env.Clone(tools=['default', 'doxygen'], variables=vars)
 
 option = GetOption("doxy_variant")
 

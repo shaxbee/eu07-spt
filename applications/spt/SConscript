@@ -15,7 +15,7 @@ objects = SConscript('src/SConscript')
 program = env.Program(
     'spt' if not env['DEBUG'] else 'sptd', 
     objects, 
-    LIBS=['osg', 'osgUtil', 'osgViewer', 'OpenThreads', 'sptGFX', 'sptDB', 'sptCore'])
+    LIBS=['osg', 'osgDB', 'osgUtil', 'osgViewer', 'OpenThreads', 'sptGFX', 'sptDB', 'sptCore'])
 
 # install it
 env.Install('#/bin', program)
@@ -23,3 +23,5 @@ env.Install('#/bin', program)
 # copy debugging symbols database
 if env['DEBUG'] and GetPlatform() == 'win32':
 	env.Install('#/bin', ['sptd.pdb', 'sptd.ilk'])
+	
+Return('program')
