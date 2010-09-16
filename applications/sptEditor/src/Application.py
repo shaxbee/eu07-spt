@@ -476,7 +476,7 @@ class MainWindow(wx.Frame):
         wx.BeginBusyCursor()
         try:
             writer = db.sctwriter.SectorWriter(file(filename, "w"), sptmath.Vec3())
-	    scenery = self.editor.GetScenery()
+            scenery = self.editor.GetScenery()
             for t in scenery.tracks.tracks():
                 writer.addTrack(t)
             writer.writeToFile()

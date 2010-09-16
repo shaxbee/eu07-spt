@@ -16,7 +16,7 @@ SECTOR_FILE_VERSION = "1.0"
 class SectorWriteError(RuntimeError):
     pass
     
-def write_sector(fout, position, tracks, switches):
+def writeSector(fout, position, tracks, switches):
     """
     Write sector data to file.
     
