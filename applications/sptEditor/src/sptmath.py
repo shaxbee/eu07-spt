@@ -10,63 +10,68 @@ from wx import Point
 
 THREE_POINTS = Decimal('1.000')
 
-
-class Vec3:
+class Vec3(object):
     """
     A vector in 3D world.
     It uses fixed decimal point coordinates. It stores three decimal places.
     """
 
     def __init__(self, x = 0, y = 0, z = 0):
+        self.__values = [None, None, None]
         self.x = Decimal(x)
         self.y = Decimal(y)
         self.z = Decimal(z)
+        
+    def __coord_property(index):
+        def getter(self):
+            return self.__values[index]
+            
+        def setter(self, value):
+            self.__values[index] = Decimal(value).quantize(THREE_POINTS)
+            
+        return property(getter, setter)
+        
+    x = __coord_property(0)
+    y = __coord_property(1)
+    z = __coord_property(2)
 
     def __repr__(self):
         return "(%.3f,%.3f,%.3f)" % self.to_tuple() 
 
     def __eq__(self, other):
-        if other == None:
+        if other is None:
             return False
-        if not isinstance(other, Vec3):
-            return False
+            
+        if type(other) is Vec3:
+            return self.to_tuple() == other.to_tuple()
+            
         return self.x == other.x and self.y == other.y and self.z == other.z
 
     def __hash__(self):
         return 37 + hash(self.x)*7 + hash(self.y)*11 + hash(self.z)*3
 
-    def __setattr__(self, name, arg):
-        """
-        Setting x,y,z causes to quantize the value
-        """
-        if arg is None:
-           raise ValueError()
-        if type(arg) == str:
-           arg = Decimal(arg)
-        self.__dict__[name] = arg.quantize(THREE_POINTS)
+    def __add__(self, other):
+        x = self.x + other.x
+        y = self.y + other.y
+        z = self.z + other.z
+        return Vec3(x, y, z)
 
-    def __add__(self, arg):
-       x = self.x + arg.x
-       y = self.y + arg.y
-       z = self.z + arg.z
-       return Vec3(x, y, z)
-
-    def __sub__(self, arg):
-       x = self.x - arg.x
-       y = self.y - arg.y
-       z = self.z - arg.z
-       return Vec3(x, y, z)
+    def __sub__(self, other):
+        x = self.x - other.x
+        y = self.y - other.y
+        z = self.z - other.z
+        return Vec3(x, y, z)
 
     def __neg__(self):
-       return Vec3(-self.x, -self.y, -self.z)
+        return Vec3(-self.x, -self.y, -self.z)
 
     def to_tuple(self):
-       return (self.x, self.y, self.z)
+        return tuple(self.__values)
 
     def moveBy(self, v):
-       self.x = self.x + v.x
-       self.y = self.y + v.y
-       self.z = self.z + v.z
+        self.x = self.x + v.x
+        self.y = self.y + v.y
+        self.z = self.z + v.z
 
     def length(self):
         """
@@ -96,7 +101,7 @@ class Vec3:
         >>> Vec3("-0.001", "-0.001", "0.001").normalize()
         (-0.577,-0.577,0.577)
         """
-        _length = Decimal(str(self.length()))
+        _length = Decimal(self.length())
         self.x = self.x / _length
         self.y = self.y / _length
         self.z = self.z / _length
@@ -131,8 +136,7 @@ class Vec3:
         else:
             return theta
 
-
-    def scale(self, s):
+    def scale(self, scale):
         """
         Scales the vector by scale s.
 
@@ -147,14 +151,11 @@ class Vec3:
         >>> Vec3("5", "0.45", "-0.002").scale(0)
         (0.000,0.000,-0.000)
         """
-        decScale = Decimal(str(s))
-        self.x = self.x * decScale
-        self.y = self.y * decScale
-        self.z = self.z * decScale
+        scale = Decimal(scale)
+        self.x = self.x * scale
+        self.y = self.y * scale
+        self.z = self.z * scale
         return self
-
-
-
 
 def dotProduct(a, b):
     """
