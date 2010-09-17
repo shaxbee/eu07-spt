@@ -642,4 +642,12 @@
       </object>
     </object>
   </object>
+  <object class="wxToolBar" name="toolbar">
+    <style>wxTB_FLAT|wxTB_DOCKABLE</style>
+    <margins>2,2</margins>
+    <object class="wxButton" name="toolbar_open">
+      <label>Open</label>
+      <tooltip>Open catalog</tooltip>
+    </object>
+  </object>
 </resource>
