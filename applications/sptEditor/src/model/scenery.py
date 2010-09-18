@@ -11,7 +11,7 @@ import tracks
 
 class Scenery:
     """ 
-    Scenery defines world begin simulated.
+    Scenery defines world being simulated.
     """
     
     def __init__(self):
@@ -20,6 +20,9 @@ class Scenery:
 
 
     def AddRailTracking(self, tracking):
+        """
+        Adds a new rail tracking to the scenery.
+        """
         self.tracks.insert(tracking)
         self.FireSceneryChange(SceneryEvent(self, CHANGE_ADD, tracking))
 

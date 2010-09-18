@@ -14,24 +14,6 @@ import model.scenery
 import sptmath
 import model.vd.axleCounter
 
-def configureYaml():
-    # Loader
-    loader = SceneryLoader()
-    yaml.add_constructor("Vec3", construct_Vec3)
-    yaml.add_constructor("Track", loader.construct_Track)
-    yaml.add_constructor("Switch", loader.construct_Switch)
-    yaml.add_constructor("RailContainer", loader.construct_RailContainer)
-    yaml.add_constructor("Scenery", loader.construct_Scenery)
-    yaml.add_constructor("AxleCounter", loader.construct_AxleCounter)
-    
-    # Dumper
-    yaml.add_representer(sptmath.Vec3, represent_Vec3)
-    yaml.add_representer(model.tracks.Track, represent_Track)
-    yaml.add_representer(model.tracks.Switch, represent_Switch)
-    yaml.add_representer(model.groups.RailContainer, represent_RailContainer)
-    yaml.add_representer(model.scenery.Scenery, represent_Scenery)
-    yaml.add_representer(model.vd.axleCounter.AxleCounter, represent_AxleCounter)
-
 
 def represent_Track(dumper, data):
     return dumper.represent_mapping("Track", \
@@ -39,8 +21,6 @@ def represent_Track(dumper, data):
          "v1": data.v1, \
          "v2": data.v2, \
          "p2": data.p2, \
-#         "n1": data.n1, \
-#         "n2": data.n2})
          "name": data.name, \
          })
 
@@ -54,9 +34,6 @@ def represent_Switch(dumper, data):
          "v2": data.v2,
          "vc1": data.vc1,
          "vc2": data.vc2,
-#         "nc": data.nc,
-#         "n1": data.n1,
-#         "n2": data.n2})
          "name": data.name
 	 })
 
@@ -64,9 +41,7 @@ def represent_Switch(dumper, data):
 def represent_RailContainer(dumper, data):
     return dumper.represent_mapping("RailContainer", \
         {"name": data.name,
-         "children": data.children,
-         "outline": data.outline_trackings,
-         "connections": data.connections})
+         "children": data.children})
 
 
 def represent_Scenery(dumper, data):
@@ -89,10 +64,25 @@ def represent_AxleCounter(dumper, data):
          "3dpoint": data.getGeometryPoint()})
 
 
-class SceneryLoader:
 
-    def __init__(self):
-        self.parent = None
+class SptLoader(yaml.Loader):
+    """
+    Base YAML loader for SPT model classes.
+    """
+
+    def __init__(self, stream):
+        yaml.Loader.__init__(self, stream)
+
+         # This is a stack for parent rail containers if any
+        self.__stack = []
+        
+        self.add_constructor("Vec3", construct_Vec3)
+        self.add_constructor("Track", self.construct_Track)
+        self.add_constructor("Switch", self.construct_Switch)
+        self.add_constructor("RailContainer", self.construct_RailContainer)
+        self.add_constructor("AxleCounter", self.construct_AxleCounter)
+        self.add_constructor("Scenery", self.construct_Scenery)
+
 
     def construct_Track(self, loader, node):
         map = loader.construct_mapping(node, deep=False)
@@ -101,11 +91,10 @@ class SceneryLoader:
         t.v1 = map["v1"]
         t.v2 = map["v2"]
         t.p2 = map["p2"]
-        t.name = map["name"]
-        if self.parent != None:
-            self.parent.insert(t)
-#        t.n1 = map["n1"]
-#        t.n2 = map["n2"]
+        if "name" in map:
+            t.name = map["name"]
+        if len(self.__stack) > 0:
+            self.__stack[-1].insert(t)
         return t
 
 
@@ -119,36 +108,35 @@ class SceneryLoader:
         s.vc2 = map["vc2"]
         s.v1 = map["v1"]
         s.v2 = map["v2"]
-        s.name = map["name"]
-        if self.parent != None:
-            self.parent.insert(s)
-#        s.nc = map["nc"]
-#        s.n1 = map["n1"]
-#        s.n2 = map["n2"]
+        if "name" in map:
+            s.name = map["name"]
+        if len(self.__stack) > 0:
+            self.__stack[-1].insert(s)
         return s
 
 
     def construct_RailContainer(self, loader, node):
-        map = loader.construct_mapping(node, deep=False)
         c = model.groups.RailContainer()
-        c.name = map["name"]
-        c.children = map["children"]
-        c.outline_trackings = map["outline"]
-        c.connections = map["connections"]
-        if self.parent != None:
-            self.parent.insert(c)
-        self.parent = c
+        self.__stack.append(c)
+
+        map = loader.construct_mapping(node, deep=True)
+        if "name" in map:
+            c.name = map["name"]
+
+        del self.__stack[-1]
+        if len(self.__stack) > 0:
+            self.__stack[-1].insert(c)
         return c
 
 
     def construct_Scenery(self, loader, node):
-        map = loader.construct_mapping(node)
         s = model.scenery.Scenery()
+        self.__stack = [s.tracks];
+        map = loader.construct_mapping(node, deep=False)
         s.tracks = map["tracks"]
-        self.parent = s.tracks
         return s
-    
-    
+
+
     def construct_AxleCounter(self, loader, node):
         map = loader.contruct_mapping(node, deep=False)
         a = model.vd.axleCounter.AxleCounter()
@@ -157,6 +145,14 @@ class SceneryLoader:
         a.setRailTracking(map["railtracking"])
 #        self.parent.insert(a)
         return a
-        
 
+
+
+# Dumper
+yaml.add_representer(sptmath.Vec3, represent_Vec3)
+yaml.add_representer(model.tracks.Track, represent_Track)
+yaml.add_representer(model.tracks.Switch, represent_Switch)
+yaml.add_representer(model.groups.RailContainer, represent_RailContainer)
+yaml.add_representer(model.scenery.Scenery, represent_Scenery)
+yaml.add_representer(model.vd.axleCounter.AxleCounter, represent_AxleCounter)
 

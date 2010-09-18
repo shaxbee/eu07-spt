@@ -4,6 +4,7 @@ Module containing definition of rails tracking elements' group.
 @author adammo
 """
 
+import collections
 import logging
 
 import tracks
@@ -16,9 +17,13 @@ class RailContainer:
     """
     
     def __init__(self, name = None):
+        # Contains all children
         self.children = []
+        # Outline trackings are at borders of this container and may attach
+        # to some external trackings.
         self.outline_trackings = []
-        self.connections = dict()
+        # A map containing points and external trackings
+        self.connections = ListDict()
 
         self.name = name
 
@@ -65,6 +70,75 @@ class RailContainer:
         return point in self.connections
 
 
+    def getNormalVector(self, point):
+        """
+        Returns the normal vector for given outline point.
+        """
+        if not self.containsPoint(point):
+            raise ValueError, "This point is not outline point"
+        # Get the tracking that has this outline point
+        internalTracking = None
+        for t in self.outline_trackings:
+            if t.containsPoint(point):
+                internalTracking = t
+        # And now compute normal vector on this track
+        return internalTracking.getNormalVector(point)
+
+
+    def getEndPoints(self):
+        """
+        Gets all points of all elements.
+
+        The name of is confusing as it doesn't return only outline points.
+        """      
+        points = []
+        for t in self.children:
+            points += t.getEndPoints()
+        return points
+
+
+    def getGeometry(self):
+        """
+        Get all geometry points for all children
+        """
+        geo = []
+        for t in self.children:
+            geo += t.getGeometry()
+        return geo
+
+
+    def point2tracking(self, point):
+        return self.connections.get(point, None)
+
+
+    def nextPoint(self, point):
+        """
+        Compute next point for this rail tracking.
+        """
+        if not self.containsPoint(point):
+            raise ValueError, "This point is not outline point"
+
+        nextPoint = None
+
+        # Get the first child from this container
+        currentTracking = None
+        for t in self.outline_trackings:
+            if t.containsPoint(point):
+                currentTracking = t
+
+        if currentTracking is None:
+            raise ValueError, "Current tracking not found in container"
+        nextPoint = currentTracking.nextPoint(point)
+
+        # Iterate though children
+        while currentTracking in self.children \
+                and currentTracking.point2tracking(nextPoint) is not None:            
+            currentTracking = currentTracking.point2tracking(nextPoint)
+            nextPoint = currentTracking.nextPoint(nextPoint)
+
+        return nextPoint
+            
+        
     def insert(self, tracking):
         """
         Inserts given rail tracking into group.
@@ -224,6 +298,14 @@ class RailContainer:
         _logger.debug(self)
 
 
+    def setTracking(self, point, tracking):
+        """
+        Sets the connection to external tracking at specified point.
+        """
+
+        self.connections[point] = tracking
+
+
     def isOutlineNow(self, tracking):
         geometry = tracking.getEndPoints()
         for p in geometry:
@@ -234,15 +316,29 @@ class RailContainer:
 
     def tracks(self):
         """
-        Iterates over tracks in this rail container.
+        Iterates over tracks in this rail container and descendants.
         """
         for c in self.children:
-            if type(c) is tracks.Track:
+            if isinstance(c, tracks.Track):
                 yield c
-            elif type(c) is RailContainer:
+            elif isinstance(c, RailContainer):
                 for c in c.tracks():
                     yield c
-            
+
+
+    def switches(self):
+        """
+        Iterates over switches in this rail container and descendants.
+        """
+        for c in self.children:
+            if isinstance(c, tracks.Switch):
+                yield c
+            elif isinstance(c, RailContainer):
+                for c in c.switches():
+                    yield c
+          
+
+  
 
 class RailGroup(RailContainer):
     """
@@ -291,4 +387,45 @@ class RailGroup(RailContainer):
             + "]";
 
 
+
+
+class ListDict(collections.MutableMapping):
+    """
+    Dictionary based on two lists of keys and values.
+    """
+
+    def __init__(self):
+        self.__keys = []
+        self.__values = []
+        self.__size = 0
+
+    def __len__(self):
+        return self.__size
+
+    def __getitem__(self, key):
+        for i in range(len(self.__keys)):
+            if self.__keys[i] == key:
+                return self.__values[i]
+        raise KeyError, key
+
+    def __setitem__(self, key, value):
+        for i in range(len(self.__keys)):
+            if self.__keys[i] == key:
+                self.__values[i] = value
+                return
+        self.__keys.append(key)
+        self.__values.append(value)
+        self.__size += 1
+
+    def __delitem__(self, key):
+        for i in range(len(self.__keys)):
+            if self.__keys[i] == key:
+                del self.__keys[i]
+                del self.__values[i]
+                self.__size -= 1
+                return
+        raise KeyError, key
+
+    def __iter__(self):
+        return iter(self.__keys)
 

@@ -29,7 +29,7 @@ import sptmath
 # Stock items
 ID_CENTER_AT = wx.ID_HIGHEST          + 1
 ID_BASEPOINT_EDIT = wx.ID_HIGHEST     + 2
-ID_TRACK_PALETTE = wx.ID_HIGHEST   + 3
+ID_TRACK_PALETTE = wx.ID_HIGHEST      + 3
 ID_EDITOR = wx.ID_HIGHEST             + 4
 ID_MAIN_FRAME = wx.ID_HIGHEST         + 5
 ID_MODE_TRACK_NORMAL = wx.ID_HIGHEST  + 6
@@ -43,7 +43,6 @@ class Application(wx.App):
     
     def __init__(self):
         wx.App.__init__(self) 
-        sptyaml.configureYaml()
 
     
     def OnInit(self):
@@ -301,8 +300,9 @@ class MainWindow(wx.Frame):
 
             try:
                 wx.BeginBusyCursor()
-                try:
-                    scenery = yaml.load(file(path, "r"))
+                sceneryFile = file(path, "r")
+                try:                    
+                    scenery = yaml.load(sceneryFile, sptyaml.SptLoader)
                     if not isinstance(scenery, model.scenery.Scenery):
                         raise Exception("Input file is not scenery")
                     self.editor.SetScenery(scenery)
@@ -310,6 +310,7 @@ class MainWindow(wx.Frame):
                     self.path = path
                     self.UpdateTitle()
                 finally:
+                    sceneryFile.close()
                     wx.EndBusyCursor()
             except yaml.YAMLError, inst:
                 logging.warning("Error while parsing scenery file: ", exc_info=inst)
@@ -350,14 +351,14 @@ class MainWindow(wx.Frame):
         """
         try:
             wx.BeginBusyCursor()
+            scenery_file = open(path, "w")            
             try:
-                scenery_file = open(path, "w")
                 scenery_file.write(yaml.dump(self.editor.scenery))
-                scenery_file.close()
                 self.path = path
                 self.modified = False
                 self.UpdateTitle()
             finally:
+                scenery_file.close()              
                 wx.EndBusyCursor()            
 
             return True
@@ -479,6 +480,8 @@ class MainWindow(wx.Frame):
 	    scenery = self.editor.GetScenery()
             for t in scenery.tracks.tracks():
                 writer.addTrack(t)
+            for s in scenery.tracks.switches():
+                writer.addSwitch(s)
             writer.writeToFile()
         finally:
             wx.EndBusyCursor()

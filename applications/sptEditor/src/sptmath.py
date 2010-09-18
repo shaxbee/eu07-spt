@@ -28,7 +28,9 @@ class Vec3:
 
     def __eq__(self, other):
         """
-        Returns True if two Vec3 are equal
+        Returns True if two Vec3 are equal.
+
+        Note that Decimal -0.000 is equal with 0.000
 
         Examples:
         >>> Vec3("0.000", "-0.000", "0.000") == Vec3("-0.0", "0", "-0")
@@ -103,7 +105,7 @@ class Vec3:
 
     def moveBy(self, v):
        """
-       Moves this vector by given another v vector.
+       Moves this vector by given other v vector.
 
        Example:
        >>> a = Vec3('5.67', '34.43', '-898')
