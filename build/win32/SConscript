@@ -2,14 +2,9 @@ import sys
 import os.path
 import SCons.Util
 
-# import user environment configuration
-import build_config
-
 Import('env')
 
-# configure additional include and library paths according to user environment config
-# paths = ['OPENSCENEGRAPH', 'OPENSCENEGRAPH_DEP']
-
+# use libraries from ext/
 env.AppendUnique(CPPPATH = ['#/ext/include'])
 env.AppendUnique(LIBPATH = ['#/ext/lib'])
 
