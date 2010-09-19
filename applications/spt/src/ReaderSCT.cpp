@@ -1,13 +1,14 @@
-#include <fstream>
-
 #include <osgDB/Registry>
 #include <osgDB/ReaderWriter>
 #include <osgDB/FileNameUtils>
+#include <osgDB/fstream>
 
 #include "SectorNode.h"
 #include "SceneryAccess.h"
 
 #include <sptDB/SceneryReader.h>
+
+#include <iostream>
 
 class ReaderSCT: public osgDB::ReaderWriter
 {
@@ -23,10 +24,12 @@ public:
 
     virtual ReadResult readNode(const std::string& fileName, const Options* options = NULL) const
     {
-        std::ifstream input(fileName.c_str(), std::ios::binary);
+        osgDB::ifstream input(fileName.c_str(), std::ios::binary);
 
         if(input.fail())
             return ReadResult::FILE_NOT_FOUND;
+
+		std::cout << "Open succeeded" << std::endl;
 
         return readNode(input, options);
     }; // sptDB::ReaderSCT::readNode
