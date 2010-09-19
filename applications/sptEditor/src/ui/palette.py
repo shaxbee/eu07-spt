@@ -22,6 +22,8 @@ class TrackPalette(wx.Panel):
     def __init__(self, parent, id = wx.ID_ANY, w=400, h=400):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,wx.Size(w,h),style = wx.WANTS_CHARS | wx.FULL_REPAINT_ON_RESIZE)
 
+        self.SetSize(wx.Size(w,h))
+        
         self.LoadPrefabs()
         self.VerifyPrefabs()
 

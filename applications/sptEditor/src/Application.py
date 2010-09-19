@@ -37,7 +37,7 @@ ID_MODE_TRACK_CLOSURE = wx.ID_HIGHEST + 7
 
 NAME_TRACK_PALETTE = "Track palette"
 NAME_TRACTION_PALETTE = "Traction palette"
-
+NAME_MAIN_EDITOR_TOP_VIEW = "Main Window"
 
 class Application(wx.App):
     """
@@ -190,13 +190,15 @@ class MainWindow(wx.Frame):
         self.PrepareTrackPalettePaneInfo()
 
         # Create palette
-        self.trackPaletteFrame = ui.palette.TrackPalette(self,ID_TRACK_PALETTE,300,400)
+        self.trackPaletteFrame = ui.palette.TrackPalette(self,ID_TRACK_PALETTE,250,400)
 
         # Adding palette pane to manager as child
         self._paneManager.AddPane(self.trackPaletteFrame,self._trackPalettePaneInfo)
-
+        self.trackPaletteMenuEntry.Check(True)
         self._paneManager.Update()
         
+        # Bypass bug in wxWidgets, that initiated size is wrong
+        self._paneManager.GetPane(self.trackPaletteFrame).MinSize(wx.Size(0,0))
         # bind close event for panes
         self.Bind(wx.aui.EVT_AUI_PANE_CLOSE, self.OnPaneClose)
 
@@ -217,8 +219,8 @@ class MainWindow(wx.Frame):
 
     def PrepareEditorPaneInfo(self):
         self._editorPaneInfo = wx.aui.AuiPaneInfo()
-        self._editorPaneInfo.Name("Editor")
-        self._editorPaneInfo.Caption("Main Window")
+        self._editorPaneInfo.Name(NAME_MAIN_EDITOR_TOP_VIEW)
+        self._editorPaneInfo.Caption(NAME_MAIN_EDITOR_TOP_VIEW)
         self._editorPaneInfo.Center()
         self._editorPaneInfo.CenterPane()
 
@@ -236,7 +238,7 @@ class MainWindow(wx.Frame):
         #self._palettePaneInfo.GripperTop()
         #self._palettePaneInfo.ToolbarPane()
         self._trackPalettePaneInfo.FloatingSize(wx.Size(300, 300))
-        #self._trackPalettePaneInfo.BestSize(wx.Size(300,300))
+        self._trackPalettePaneInfo.MinSize(wx.Size(250,80))
         self._trackPalettePaneInfo.CaptionVisible()
         self._trackPalettePaneInfo.Caption(NAME_TRACK_PALETTE)
         self._trackPalettePaneInfo.Name(NAME_TRACK_PALETTE)
@@ -260,6 +262,9 @@ class MainWindow(wx.Frame):
         pass
 
     def OnPaneClose(self, event):
+        dp = self._paneManager.GetPane(self.trackPaletteFrame).dock_proportion
+        print "dock proportion"
+        print dp
 
         name = event.GetPane().name
 
