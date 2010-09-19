@@ -75,6 +75,8 @@ class TrackPalette(wx.Panel):
         self.SetSizer(sizerRoot)
         sizerRoot.Fit(self)
 
+#        self.Bind(wx.EVT_CLOSE, self.OnClose)
+#        self.Bind(wx.EVT_DESTROY, self.OnClose)
 
     def OnClose(self):
         self.Parent.miTogglePalette.Check(False)
