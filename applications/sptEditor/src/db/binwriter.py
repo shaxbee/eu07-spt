@@ -23,6 +23,7 @@ class BinaryWriter(object):
         self.__input.write(str(self.__currentChunk.data))
 
     def beginChunk(self, name):
+        print "begin chunk %s" % name
         if len(name) != 4:
             raise ValueError("Invalid chunk identifier")
 
@@ -30,7 +31,7 @@ class BinaryWriter(object):
         self.__currentChunk = self.__chunks[-1] 
 
     def endChunk(self, name):
-        print "chunk %s %d" % (name, len(self.__currentChunk.data))
+        print "end chunk %s %d" % (name, len(self.__currentChunk.data))
         if not len(self.__chunks):
             raise ValueError("No chunk to finish")
         if name != self.__currentChunk.name:

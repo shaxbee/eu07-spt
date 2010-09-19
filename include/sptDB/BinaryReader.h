@@ -32,6 +32,12 @@ private:
     ChunkStack _chunks;
 };
 
+class Version
+{
+    unsigned char major;
+    unsigned char minor;
+};
+
 class BinaryReader
 {
 public:
@@ -46,14 +52,18 @@ public:
     void read(std::string& output);
     void read(osg::Vec3f& output);
     void read(osg::Vec3d& output);
+    void readVersion();
 
     std::string readChunk();
     bool expectChunk(const std::string& type);
     void endChunk(const std::string& type);
 
+    const Version& getVersion() const;
+
 private:
     std::istream& _input;
     ChunkWatcher _watcher;
+    Version _version;
 
     template <typename T>
     void readOsgVec(T& output);

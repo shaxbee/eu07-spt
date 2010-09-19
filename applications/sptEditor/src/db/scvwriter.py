@@ -1,3 +1,5 @@
+import struct
+
 from binwriter import BinaryWriter
 from sctwriter import SECTOR_SIZE
 

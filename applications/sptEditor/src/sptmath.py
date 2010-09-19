@@ -18,16 +18,16 @@ class Vec3(object):
 
     def __init__(self, x = 0, y = 0, z = 0):
         self.__values = [None, None, None]
-        self.x = Decimal(x)
-        self.y = Decimal(y)
-        self.z = Decimal(z)
+        self.x = x
+        self.y = y
+        self.z = z
         
     def __coord_property(index):
         def getter(self):
             return self.__values[index]
             
         def setter(self, value):
-            self.__values[index] = Decimal(value).quantize(THREE_POINTS)
+            self.__values[index] = Decimal(str(value)).quantize(THREE_POINTS)
             
         return property(getter, setter)
         
@@ -44,6 +44,9 @@ class Vec3(object):
             
         if type(other) is Vec3:
             return self.to_tuple() == other.to_tuple()
+            
+        if type(other) is tuple:
+            return self.to_tuple() == other
             
         return self.x == other.x and self.y == other.y and self.z == other.z
 

@@ -28,6 +28,8 @@ def writeSector(fout, position, tracks, switches):
     """
     writer = BinaryWriter(fout)
     
+    print repr(tracks)
+    
     # transform tracks and switches
     tracks = [SectorTrack(track, position) for track in tracks]
     switches = [SectorSwitch(switch, position) for switch in switches]
@@ -73,7 +75,7 @@ def __writeHeader(writer, position):
     writer.endChunk("HEAD")
     
 def __writeTrackList(writer, tracks):
-    def write_kind(kind, recordSize):
+    def writeKind(kind, recordSize):
         # get list of floats representing points of each track path
         source = itertools.chain.from_iterable(track.path.to_tuple() for track in tracks if track.path.kind == kind)
         data = array.array("f", source)
@@ -84,8 +86,8 @@ def __writeTrackList(writer, tracks):
         writer.write(data.tostring())
         
     writer.beginChunk("TRLS")                
-    write_kind(PathKind.STRAIGHT, 6)
-    write_kind(PathKind.BEZIER, 12)
+    writeKind(PathKind.STRAIGHT, 6)
+    writeKind(PathKind.BEZIER, 12)
     writer.endChunk("TRLS")    
     
 def __writeSwitchList(writer, switches):
@@ -128,17 +130,17 @@ def __collectConnections(tracks, switches, index):
         
     for track in tracks:
         if track.n1 is not None:
-            addConnection(track.p1, track, track.n1)
+            addConnection(track.p1, track.original, track.n1)
         if track.n2 is not None:
-            addConnection(track.p2, track, track.n2)
+            addConnection(track.p2, track.original, track.n2)
 
     for switch in switches:
         if switch.n1 is not None:
-            addConnection(switch.p1, switch, switch.n1)
+            addConnection(switch.p1, switch.original, switch.n1)
         if switch.n2 is not None:
-            addConnection(switch.p2, switch, switch.n2)
+            addConnection(switch.p2, switch,original, switch.n2)
         if switch.n3 is not None:
-            addConnection(switch.p3, switch, switch.n3)
+            addConnection(switch.p3, switch.original, switch.n3)
                 
     # sort connections by position
     internal = sorted(internal.iteritems(), key=operator.itemgetter(0))

@@ -46,6 +46,7 @@ BinaryReader::BinaryReader(std::istream& stream):
     _input(stream)
 { 
     _input.exceptions(std::ios::badbit | std::ios::failbit | std::ios::eofbit);
+    _version = {0xFF, 0xFF};
 };
 
 std::string BinaryReader::readChunk()
@@ -95,4 +96,18 @@ void BinaryReader::read(std::string& output)
 
     output = std::string(buffer, length);
     delete[] buffer;
+};
+
+void BinaryReader::readVersion()
+{
+    read(_version.major);
+    read(_version.minor);
+};
+
+const Version& BinaryReader::getVersion() const
+{
+    if(_version.major == 0xFF && _version.minor == 0xFF)
+        throw std::logic_error("Trying to access version before reading");
+    
+    return _version;
 };

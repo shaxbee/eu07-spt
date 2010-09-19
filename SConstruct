@@ -67,7 +67,7 @@ SConscript('applications/SConscript', variant_dir = os.path.join(buildDir, 'appl
 
 # python wrappers
 # if 'wrappers' in COMMAND_LINE_TARGETS:
-SConscript('wrappers/SConscript', variant_dir = os.path.join(buildDir, 'wrappers'), duplicate = 0)
+#SConscript('wrappers/SConscript', variant_dir = os.path.join(buildDir, 'wrappers'), duplicate = 0)
 
 # unit tests
 if 'check' in COMMAND_LINE_TARGETS:
