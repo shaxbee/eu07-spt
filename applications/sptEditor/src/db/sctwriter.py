@@ -28,8 +28,6 @@ def writeSector(fout, position, tracks, switches):
     """
     writer = BinaryWriter(fout)
     
-    print repr(tracks)
-    
     # transform tracks and switches
     tracks = [SectorTrack(track, position) for track in tracks]
     switches = [SectorSwitch(switch, position) for switch in switches]
@@ -59,7 +57,7 @@ def __buildTrackingIndex(*args):
         # extract tracking.original
         keys = itertools.imap(operator.attrgetter('original'), source)
         # create list of ids
-        values = xrange(len(index), len(source) + 1)
+        values = xrange(len(index), len(index) + len(source) + 1)
         # update index with tracking.original -> id pairs
         index.update(itertools.izip(keys, values))        
             
@@ -77,13 +75,12 @@ def __writeHeader(writer, position):
 def __writeTrackList(writer, tracks):
     def writeKind(kind, recordSize):
         # get list of floats representing points of each track path
-        source = itertools.chain.from_iterable(track.path.to_tuple() for track in tracks if track.path.kind == kind)
-        data = array.array("f", source)
-           
+        source = list(track.path.to_tuple() for track in tracks if track.path.kind == kind)
+            
         # write tracks count
-        writer.writeUInt(len(data) / recordSize)
+        writer.writeUInt(len(source))
         # write points
-        writer.write(data.tostring())
+        writer.writeArray(struct.Struct("<%df" % recordSize), source, len(source))
         
     writer.beginChunk("TRLS")                
     writeKind(PathKind.STRAIGHT, 6)

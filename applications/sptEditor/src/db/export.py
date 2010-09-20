@@ -18,10 +18,10 @@ def exportScenery(path, trackings):
         print "exportScenery"
         print repr(sector.tracks)
         sector_name = "%d_%d.sct" % (sector.position.x, sector.position.y)
-        with file(os.path.abspath(os.path.join(path, sector_name)), "w") as fout:
+        with file(os.path.abspath(os.path.join(path, sector_name)), "wb") as fout:
             writeSector(fout, sector.position, sector.tracks, sector.switches)
             
-    with file(os.path.join(path, "default.scv"), "w+") as fout:
+    with file(os.path.join(path, "default.scv"), "wb") as fout:
         writeVariant(fout, 0, sectors.values())
     
 class SectorData(object):

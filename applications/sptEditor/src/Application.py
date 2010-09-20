@@ -26,6 +26,8 @@ import ui.palette
 import sptyaml
 import sptmath
 
+from db.export import exportScenery
+
 # Stock items
 ID_CENTER_AT = wx.ID_HIGHEST          + 1
 ID_BASEPOINT_EDIT = wx.ID_HIGHEST     + 2
@@ -522,7 +524,7 @@ class MainWindow(wx.Frame):
         """
         wx.BeginBusyCursor()
         try:
-            exportScenery(path, scenery.tracks)
+            exportScenery(path, self.editor.GetScenery().tracks.tracks())
 #            writer = db.sctwriter.SectorWriter(file(filename, "w"), sptmath.Vec3())
 #            scenery = self.editor.GetScenery()
 #            for t in scenery.tracks.tracks():

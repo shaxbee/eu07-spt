@@ -15,6 +15,33 @@ class Vec3(object):
     """
     A vector in 3D world.
     It uses fixed decimal point coordinates. It stores three decimal places.
+    
+    Setting x, y, z causes to quantize the value to one millimetre.
+
+    Examples:
+    >>> Vec3('0.001', '-0.001', '0.000')
+    (0.001,-0.001,0.000)
+    >>> a = Vec3('0.0001', '-0.0001', '0.000')
+    >>> a
+    (0.000,-0.000,0.000)
+    >>> Vec3('0.999', '-0.999', '1.000')
+    (0.999,-0.999,1.000)
+    >>> b = Vec3('0.0005', '-0.0006', '-0.0004')
+    >>> str(b.x)
+    '0.001'
+    >>> str(b.y)
+    '-0.001'
+    >>> str(b.z)
+    '-0.000'
+    >>> a + b
+    (0.001,-0.001,0.000)
+    >>> Vec3('0.9999', '-0.9999', '0.000')
+    (1.000,-1.000,0.000)
+    >>> Vec3('1.0001', '0.000', '-1.0001')
+    (1.000,0.000,-1.000)
+    >>> c = Vec3('0.0004', '-0.0004', '0.000')
+    >>> c + c
+    (0.000,-0.000,0.000)
     """
 
     def __init__(self, x = 0, y = 0, z = 0):
@@ -89,18 +116,18 @@ class Vec3(object):
         return tuple(self.__values)
 
     def moveBy(self, v):
-       """
-       Moves this vector by given other v vector.
+        """
+        Moves this vector by given other v vector.
 
-       Example:
-       >>> a = Vec3('5.67', '34.43', '-898')
-       >>> v = Vec3('-6', '34.44', '0.0004')
-       >>> a.moveBy(-v)
-       >>> a
-       (11.670,-0.010,-898.000)
-       >>> str(a.z)
-       '-898.000'
-       """
+        Example:
+        >>> a = Vec3('5.67', '34.43', '-898')
+        >>> v = Vec3('-6', '34.44', '0.0004')
+        >>> a.moveBy(-v)
+        >>> a
+        (11.670,-0.010,-898.000)
+        >>> str(a.z)
+        '-898.000'
+        """
         self.x = self.x + v.x
         self.y = self.y + v.y
         self.z = self.z + v.z
