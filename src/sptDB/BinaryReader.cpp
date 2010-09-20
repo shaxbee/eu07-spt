@@ -46,7 +46,8 @@ BinaryReader::BinaryReader(std::istream& stream):
     _input(stream)
 { 
     _input.exceptions(std::ios::badbit | std::ios::failbit | std::ios::eofbit);
-    _version = {0xFF, 0xFF};
+    _version.major = 0xFF;
+	_version.minor = 0xFF;
 };
 
 std::string BinaryReader::readChunk()

@@ -32,7 +32,7 @@ private:
     ChunkStack _chunks;
 };
 
-class Version
+struct Version
 {
     unsigned char major;
     unsigned char minor;
