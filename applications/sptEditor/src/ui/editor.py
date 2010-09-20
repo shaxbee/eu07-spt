@@ -194,8 +194,8 @@ class PlanePart(wx.ScrolledWindow):
             oldRect = oldView.GetRepaintBounds()
             oldRect.x -= vx * ux 
             oldRect.y -= vy * uy 
-            self.RefreshRect(oldRect, False)
-        needed = self.ComputeMinMax(False)        
+            self.RefreshRect(oldRect)
+        needed = self.ComputeMinMax(False)
         if needed:            
             size = self.ComputePreferredSize()
             self.SetVirtualSize(size)            
@@ -207,7 +207,7 @@ class PlanePart(wx.ScrolledWindow):
             newRect = self.basePointView.GetRepaintBounds()
             newRect.x -= vx * ux
             newRect.y -= vy * uy
-            self.RefreshRect(newRect, False)
+            self.RefreshRect(newRect)
 
         if follow:
             p = self.basePointView.point
@@ -245,7 +245,7 @@ class PlanePart(wx.ScrolledWindow):
             oldRect = oldView.GetRepaintBounds()
             oldRect.x -= vx * ux
             oldRect.y -= vy * uy
-            self.RefreshRect(oldRect, False)
+            self.RefreshRect(oldRect)
         if selection != None:
             view = self.FindView(selection)
             if view == None:
@@ -254,7 +254,7 @@ class PlanePart(wx.ScrolledWindow):
             newRect = view.GetRepaintBounds()
             newRect.x -= vx * ux
             newRect.y -= vy * uy           
-            self.RefreshRect(newRect, False)            
+            self.RefreshRect(newRect)            
         else:
             self.selectedView = None
 
@@ -599,10 +599,11 @@ class PlanePart(wx.ScrolledWindow):
     def PaintSnapPoint(self, dc, clip):
         if self.snapData != None:
              index = ui.views.getImageIndexByAngle(self.snapData.alpha)
+             snapImage = ui.views.SNAP_BASEPOINT_IMAGES[index]
 
-             dc.DrawBitmap(wx.BitmapFromImage(ui.views.SNAP_BASEPOINT_IMAGES[index]), \
-                 self.snapData.p2d.x - ui.views.SNAP_BASEPOINT_IMAGES[index].GetWidth()/2, \
-                 self.snapData.p2d.y - ui.views.SNAP_BASEPOINT_IMAGES[index].GetHeight()/2)
+             dc.DrawBitmap(wx.BitmapFromImage(snapImage), \
+                 self.snapData.p2d.x - snapImage.GetWidth()/2, \
+                 self.snapData.p2d.y - snapImage.GetHeight()/2)
 
 
     def OnMoveUpdateStatusBar(self, event):
@@ -851,7 +852,9 @@ class BasePointMover:
             point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
 
             foundSnapData = None
-           
+            updateScreen = False
+            
+            # This may be optimised by using scenery outline points
             for v in self.editorPart.trackCache + self.editorPart.switchCache:
                 foundSnapData = v.GetSnapData(point)
                 if foundSnapData != None:
@@ -862,12 +865,14 @@ class BasePointMover:
                 self.editorPart.snapData = None
             if oldSnapData != None:
                 self.editorPart.RefreshRect( \
-                    wx.Rect(oldSnapData.p2d.x-10, oldSnapData.p2d.y-10, 20, 20), \
-                    False)
+                    wx.Rect(oldSnapData.p2d.x-10, oldSnapData.p2d.y-10, 20, 20))
+                updateScreen = True
             if foundSnapData != None:
                 self.editorPart.RefreshRect( \
-                    wx.Rect(foundSnapData.p2d.x-10, foundSnapData.p2d.y-10, 20, 20), \
-                    False)
+                    wx.Rect(foundSnapData.p2d.x-10, foundSnapData.p2d.y-10, 20, 20))
+                updateScreen = True
+            if updateScreen:
+                self.editorPart.Update()
 
 
 
@@ -1107,7 +1112,7 @@ class SceneryListener(model.scenery.SceneryListener):
             repaintRect = view.GetRepaintBounds()
             repaintRect.x -= vx * ux
             repaintRect.y -= vy * uy
-            part.RefreshRect(repaintRect, False)
+            part.RefreshRect(repaintRect)
     
 
     def sceneryRemove(self, element):
@@ -1130,7 +1135,7 @@ class SceneryListener(model.scenery.SceneryListener):
             repaintRect = view.GetRepaintBounds()
             repaintRect.x -= vx * ux
             repaintRect.y -= vy * uy
-            part.RefreshRect(repaintRect, False)
+            part.RefreshRect(repaintRect)
 
 
     def sceneryAddGroup(self, group):
@@ -1159,5 +1164,5 @@ class SceneryListener(model.scenery.SceneryListener):
 
             repaintRect.x -= vx * ux
             repaintRect.y -= vy * uy
-            part.RefreshRect(repaintRect, False)
+            part.RefreshRect(repaintRect)
 
