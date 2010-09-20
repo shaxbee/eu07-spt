@@ -1,11 +1,11 @@
 #ifndef SECTORNODE_H
 #define SECTORNODE_H 1
 
-#include <osg/Node>
+#include <osg/Geode>
 #include <osg/NodeVisitor>
 #include <sptCore/Sector.h>
 
-class SectorNode: public osg::Node
+class SectorNode: public osg::Geode
 {
 
 public:

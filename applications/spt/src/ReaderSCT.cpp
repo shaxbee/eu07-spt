@@ -6,7 +6,7 @@
 #include "SectorNode.h"
 #include "SceneryAccess.h"
 
-#include <sptDB/SceneryReader.h>
+#include <sptDB/SectorReader.h>
 
 #include <iostream>
 

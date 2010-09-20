@@ -1,4 +1,4 @@
-#include "sptDB/SceneryReader.h"
+#include "sptDB/SectorReader.h"
 
 #include <string>
 #include <vector>

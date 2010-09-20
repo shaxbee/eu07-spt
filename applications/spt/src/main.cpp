@@ -4,6 +4,7 @@
 #include <osg/Geode>
 #include <osg/PolygonMode>
 #include <osg/LineWidth>
+#include <osgDB/fstream>
 
 #include <osgUtil/SmoothingVisitor>
 #include <osgDB/ReadFile>
@@ -12,8 +13,7 @@
 #include <sptCore/Path.h>
 #include <sptGFX/Extruder.h>
 
-#include "SectorNode.h"
-#include "SectorView.h"
+#include <sptDB/VariantReader.h>
 
 using namespace sptCore;
 using namespace sptGFX;
@@ -22,31 +22,6 @@ void print_vec(const osg::Vec3& vec)
 {
     std::cout << vec.x() << " " << vec.y() << " " << vec.z() << std::endl;
 }
-
-osg::Geometry* createProfile()
-{
-
-    osg::Geometry* geometry = new osg::Geometry;
-
-    osg::Vec3Array* vertices = new osg::Vec3Array;
-    vertices->push_back(osg::Vec3(-1.2f, 0.0f, 0.0f));
-    vertices->push_back(osg::Vec3(-0.8f, 0.0f, 0.5f));
-    vertices->push_back(osg::Vec3( 0.8f, 0.0f, 0.5f));
-    vertices->push_back(osg::Vec3( 1.2f, 0.0f, 0.0f));
-    vertices->push_back(osg::Vec3(-1.2f, 0.0f, 0.0f));
-    geometry->setVertexArray(vertices);
-
-    osg::Vec2Array* texCoords = new osg::Vec2Array;
-    texCoords->push_back(osg::Vec2(0.0f, 0.0f));
-    texCoords->push_back(osg::Vec2(0.7f / 3.0f, 0.0f));
-    texCoords->push_back(osg::Vec2(2.3f / 3.0f, 0.0f));
-    texCoords->push_back(osg::Vec2(1.0f, 0.0f));
-    texCoords->push_back(osg::Vec2(0.0f, 0.0f));
-    geometry->setTexCoordArray(0, texCoords);
-
-    return geometry;
-
-};
 
 osg::Geode* createAxes(osg::Geode* geode)
 {
@@ -110,16 +85,19 @@ osg::Geode* createAxes(osg::Geode* geode)
 int main()
 {
 
-    osg::ref_ptr<osg::Group> root = new osg::Group;
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+	osg::ref_ptr<osg::Group> root;
 
-    osg::ref_ptr<SectorNode> sectorNode = dynamic_cast<SectorNode*>(osgDB::readNodeFile("scenery/test123/0_0.sct"));
+	try
+	{
+		osgDB::ifstream fin("scenery/test123/default.scv", std::ios::binary | std::ios::in);
+		root = sptDB::readVariant(fin);
+	} catch (std::exception& exc) {
+		std::cout << exc.what() << std::endl;
+		std::cout.flush();
+	};
+//    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
 
-    osg::ref_ptr<osg::Geometry> profile(createProfile());
-    createSectorGeometry(geode.get(), profile.get(), sectorNode->getSector());
-
-    root->addChild(geode.get());
-    root->addChild(createAxes(geode.get()));
+//    root->addChild(createAxes(geode.get()));
 
     osgViewer::Viewer viewer;
     

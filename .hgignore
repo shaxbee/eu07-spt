@@ -24,3 +24,10 @@ glob:*UpgradeLog*
 glob:*Upgrade*
 glob:build/win32/debug
 glob:ext/
+glob:scenery/*
+glob:*.ncb
+glob:*.suo
+glob:*.sln
+glob:*.old
+glob:*vcproj*
+glob:*.pdb
