@@ -438,9 +438,7 @@ class MainWindow(wx.Frame):
                     return False
 
             self.exportDirectory = exportDialog.GetDirectory()
-            self.Export(path)
-
-
+            self.Export(self.exportDirectory)
 
     def NewScenery(self):
         """
@@ -518,19 +516,18 @@ class MainWindow(wx.Frame):
             return self.SaveScenery(self.path)
 
     
-    def Export(self, filename):
+    def Export(self, path):
         """
         Do the right export.
         """
         wx.BeginBusyCursor()
         try:
-            writer = db.sctwriter.SectorWriter(file(filename, "w"), sptmath.Vec3())
-	    scenery = self.editor.GetScenery()
-            for t in scenery.tracks.tracks():
-                writer.addTrack(t)
-            for s in scenery.tracks.switches():
-                writer.addSwitch(s)
-            writer.writeToFile()
+            exportScenery(path, scenery.tracks)
+#            writer = db.sctwriter.SectorWriter(file(filename, "w"), sptmath.Vec3())
+#            scenery = self.editor.GetScenery()
+#            for t in scenery.tracks.tracks():
+#                writer.addTrack(t)
+#            writer.writeToFile()
         finally:
             wx.EndBusyCursor()
 

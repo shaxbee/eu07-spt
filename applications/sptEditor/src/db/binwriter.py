@@ -9,6 +9,7 @@ class BinaryWriter(object):
     uIntFormat = Struct("<I")
     vec3fFormat = Struct("<fff")
     vec3dFormat = Struct("<ddd")
+    versionFormat = Struct("<BB")
 
     def __init__(self, ifile):
         self.__input = ifile
@@ -22,6 +23,7 @@ class BinaryWriter(object):
         self.__input.write(str(self.__currentChunk.data))
 
     def beginChunk(self, name):
+        print "begin chunk %s" % name
         if len(name) != 4:
             raise ValueError("Invalid chunk identifier")
 
@@ -29,7 +31,7 @@ class BinaryWriter(object):
         self.__currentChunk = self.__chunks[-1] 
 
     def endChunk(self, name):
-        print "chunk %s %d" % (name, len(self.__currentChunk.data))
+        print "end chunk %s %d" % (name, len(self.__currentChunk.data))
         if not len(self.__chunks):
             raise ValueError("No chunk to finish")
         if name != self.__currentChunk.name:
@@ -69,6 +71,11 @@ class BinaryWriter(object):
 
     def writeUInt(self, value):
         self.write(BinaryWriter.uIntFormat.pack(value))
+
+    def writeVersion(self, version):
+        major, minor = version.split('.')
+        # write sector version
+        self.writeFmt(BinaryWriter.versionFormat, (int(major), int(minor)))
 
     def finalize(self):
         self.__input.close()

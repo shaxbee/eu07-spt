@@ -113,7 +113,7 @@ int main()
     osg::ref_ptr<osg::Group> root = new osg::Group;
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
 
-    osg::ref_ptr<SectorNode> sectorNode = dynamic_cast<SectorNode*>(osgDB::readNodeFile("test.sct"));
+    osg::ref_ptr<SectorNode> sectorNode = dynamic_cast<SectorNode*>(osgDB::readNodeFile("../scenery/test123/0_0.sct"));
 
     osg::ref_ptr<osg::Geometry> profile(createProfile());
     createSectorGeometry(geode.get(), profile.get(), sectorNode->getSector());
