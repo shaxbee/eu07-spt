@@ -55,7 +55,7 @@ class Vec3(object):
             return self.__values[index]
             
         def setter(self, value):
-            self.__values[index] = Decimal(str(value)).quantize(THREE_POINTS)
+            self.__values[index] = Decimal(str(value)).quantize(THREE_POINTS, decimal.ROUND_HALF_UP)
             
         return property(getter, setter)
         
@@ -97,9 +97,9 @@ class Vec3(object):
         return 37 + hash(self.x)*7 + hash(self.y)*11 + hash(self.z)*3
 
     def __add__(self, other):
-       x = self.x + arg.x
-       y = self.y + arg.y
-       z = self.z + arg.z
+       x = self.x + other.x
+       y = self.y + other.y
+       z = self.z + other.z
        return Vec3(x, y, z)
 
 
@@ -160,7 +160,7 @@ class Vec3(object):
         >>> Vec3("-0.001", "-0.001", "0.001").normalize()
         (-0.577,-0.577,0.577)
         """
-        _length = Decimal(self.length())
+        _length = Decimal(str(self.length()))
         self.x = self.x / _length
         self.y = self.y / _length
         self.z = self.z / _length
@@ -210,7 +210,7 @@ class Vec3(object):
         >>> Vec3("5", "0.45", "-0.002").scale(0)
         (0.000,0.000,-0.000)
         """
-        scale = Decimal(scale)
+        scale = Decimal(str(scale))
         self.x = self.x * scale
         self.y = self.y * scale
         self.z = self.z * scale
