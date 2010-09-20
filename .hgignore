@@ -19,3 +19,8 @@ build/linux/debug
 build/linux/release
 
 doc/html
+glob:Debug/
+glob:*UpgradeLog*
+glob:*Upgrade*
+glob:build/win32/debug
+glob:ext/
