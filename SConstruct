@@ -36,16 +36,17 @@ env = SConscript(os.path.join(buildDir, 'SConscript'), exports=['env', 'buildDir
 
 # performance tuning
 env.Decider('MD5-timestamp')
+env.SetOption('max_drift', 1)
 
 conf = Configure(env)
 
-#if not conf.CheckLibWithHeader('osg', 'osg/Node', 'c++'):
-#	print 'OpenSceneGraph library not found'
-#	exit(1);
+if not conf.CheckLibWithHeader('osg', 'osg/Node', 'c++'):
+	print 'OpenSceneGraph library not found'
+	exit(1);
 	
-#if not conf.CheckCXXHeader('boost/exception.hpp'):
-#	print 'Boost library not found'
-#	exit(1);
+if not conf.CheckCXXHeader('boost/exception.hpp'):
+	print 'Boost library not found'
+	exit(1);
 
 env = conf.Finish();
 

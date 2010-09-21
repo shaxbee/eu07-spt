@@ -13,8 +13,8 @@ env.AppendUnique(LIBPATH = os.path.join(sys.prefix, 'lib'))
 #env.AppendUnique(LINKFLAGS = ['/EXPORT'])
     
 # add WIN32 define and exception handling flags
-env.Append(CXXFLAGS = ['/GR', '/EHsc'])
-env.Append(CPPDEFINES = ['WIN32'])
+env.AppendUnique(CXXFLAGS = ['/GR', '/EHsc', '/MD'])
+env.AppendUnique(CPPDEFINES = ['WIN32'])
 
 # debug / release flags
 if env['DEBUG']:

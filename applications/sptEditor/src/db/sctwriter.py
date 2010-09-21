@@ -57,8 +57,9 @@ def __buildTrackingIndex(*args):
         # extract tracking.original
         keys = itertools.imap(operator.attrgetter('original'), source)
         # create list of ids
-        values = xrange(len(index), len(index) + len(source) + 1)
+        values = range(len(index), len(index) + len(source) + 1)
         # update index with tracking.original -> id pairs
+        
         index.update(itertools.izip(keys, values))        
             
     return index
@@ -118,12 +119,15 @@ def __collectConnections(tracks, switches, index):
         
     def addConnection(position, left, right):
         position = position.to_tuple()
-        if position[0] < 0 or position[0] > SECTOR_SIZE or position[1] < 0 or position[1] > SECTOR_SIZE:
+        if (position[0] < 0) or (position[0] > SECTOR_SIZE) or (position[1] < 0) or (position[1] > SECTOR_SIZE):
             if position not in external:
                 external[position] = index[left]
         else:
             if position not in internal:
-                internal[position] = (index[left], index[right])
+                if right in index:
+                    internal[position] = (index[left], index[right])
+                else:
+                    external[position] = index[left]
         
     for track in tracks:
         if track.n1 is not None:
