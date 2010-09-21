@@ -76,7 +76,7 @@
         <accel>Delete</accel>
         <help>Deletes selected scenery element.</help>
       </object>
-      <object class="separator" />
+      <object class="separator"/>
       <object class="wxMenuItem" name="ID_MODE_TRACK_NORMAL">
         <label>Mode &amp;Normal</label>
         <help>Normal mode of inserting track.</help>
@@ -604,7 +604,7 @@
             </object>
             <object class="sizeritem">
               <object class="wxTextCtrl" name="name">
-                <value></value>
+                <value/>
               </object>
               <option>1</option>
               <flag>wxEXPAND</flag>
@@ -613,6 +613,83 @@
             <rows>1</rows>
             <vgap>5</vgap>
             <hgap>5</hgap>
+          </object>
+        </object>
+        <flag>wxTOP|wxBOTTOM|wxLEFT|wxRIGHT</flag>
+        <border>2</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <object class="sizeritem">
+            <object class="wxButton" name="wxID_OK">
+              <label>Ok</label>
+              <default>1</default>
+            </object>
+            <option>1</option>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="wxID_CANCEL">
+              <label>Cancel</label>
+            </object>
+            <option>1</option>
+            <flag>wxLEFT</flag>
+            <border>5</border>
+          </object>
+          <orient>wxHORIZONTAL</orient>
+        </object>
+        <flag>wxTOP|wxBOTTOM|wxLEFT|wxRIGHT</flag>
+        <border>10</border>
+      </object>
+    </object>
+  </object>
+  <object class="wxDialog" name="ExportDialog">
+    <size>200, 200</size>
+    <title>Export scenery</title>
+    <centered>1</centered>
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxPanel">
+          <object class="wxGridBagSizer">
+            <object class="sizeritem">
+              <object class="wxStaticText">
+                <label>* Name:</label>
+              </object>
+              <option>0</option>
+              <cellpos>0, 0</cellpos>
+            </object>
+            <object class="sizeritem">
+              <object class="wxTextCtrl" name="name"/>
+              <option>1</option>
+              <flag>wxGROW</flag>
+              <cellpos>0, 1</cellpos>
+              <cellspan>1, 2</cellspan>
+            </object>
+            <object class="sizeritem">
+              <object class="wxStaticText">
+                <label>* Directory:</label>
+              </object>
+              <option>0</option>
+              <cellpos>1, 0</cellpos>
+            </object>
+            <object class="sizeritem">
+              <object class="wxTextCtrl" name="directory"/>
+              <option>1</option>
+              <flag>wxEXPAND</flag>
+              <minsize>200, -1</minsize>
+              <cellpos>1,1</cellpos>
+            </object>
+            <object class="sizeritem">
+              <object class="wxButton" name="directorySelect">
+                <label>Select</label>
+              </object>
+              <option>0</option>
+              <cellpos>1,2</cellpos>
+            </object>
+            <vgap>5</vgap>
+            <hgap>5</hgap>
+            <growablecols>3</growablecols>
+            <growablerows>2</growablerows>
           </object>
         </object>
         <flag>wxTOP|wxBOTTOM|wxLEFT|wxRIGHT</flag>

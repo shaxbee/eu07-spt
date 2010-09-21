@@ -9,11 +9,14 @@ import wx
 import wx.xrc
 import yaml
 from decimal import Decimal
+import os.path
 
 from model.tracks import Track, Switch
 import ui.editor
 import ui.trackfc
 from sptmath import Vec3
+import sptyaml
+import db.export
 
 
 
@@ -272,7 +275,7 @@ class InsertRailSwitch(wx.Dialog):
 
 
     def PrepareList(self):
-        pd_types = yaml.load(file("prefabric.yaml", "r"))        
+        pd_types = yaml.load(file("prefabric.yaml", "r"), Loader=sptyaml.SptLoader)        
         self.predefined = pd_types['right_switches'] + pd_types['left_switches']
 
 
@@ -360,4 +363,91 @@ class NameDialog(wx.Dialog):
 
     def GetName(self):
         return self.nameCtrl.GetValue().strip()
+
+
+
+
+class ExportDialog(wx.Dialog):
+    """
+    Export dialog that contains the name of scenery to export and
+    the directory to export.
+    """
+
+    def __init__(self, parent):
+        w = parent.xRes.LoadDialog(parent, "ExportDialog")
+        self.PostCreate(w)
+
+        self.FillContent()
+
+        print 
+
+        self.Bind(wx.EVT_BUTTON, self.OnButton, id=wx.ID_OK)
+        self.Bind(wx.EVT_BUTTON, self.OnSelect, id=wx.xrc.XRCID("directorySelect"))
+
+        self.Fit()
+        self.Centre()
+
+
+    def FillContent(self):
+        self.nameCtrl = wx.xrc.XRCCTRL(self, "name")
+        self.dirCtrl = wx.xrc.XRCCTRL(self, "directory")
+
+        config = wx.FileConfig.Get()
+        lastName = config.Read("/ExportDialog/name", "untitled")
+        self.lastDir = config.Read("/ExportDialog/dir", wx.GetHomeDir())
+        self.nameCtrl.SetValue(lastName)
+        self.dirCtrl.SetValue(self.lastDir)
+
+
+    def OnButton(self, event):
+        name = self.nameCtrl.GetValue()
+        if name.strip() == "":
+            wx.MessageBox("Missing scenery name.", \
+                self.GetTitle(), wx.OK | wx.ICON_ERROR, self)
+            return
+        dir = self.dirCtrl.GetValue()
+        if dir.strip() == "":
+            wx.MessageBox("Missing directory.", \
+                self.GetTitle(), wx.OK | wx.ICON_ERROR, self)
+            return
+        if not os.path.isdir(dir):
+            wx.MessageBox("Invalid directory.", \
+                self.GetTitle(), wx.OK | wx.ICON_ERROR, self)
+            return
+
+        self.Export(dir, name)
+
+        config = wx.FileConfig.Get()
+        config.Write("/ExportDialog/name", name)
+        config.Write("/ExportDialog/dir", dir)
+
+        self.Destroy()
+
+
+    def OnSelect(self, event):
+        defaultPath = self.dirCtrl.GetValue()
+        if not os.path.isdir(defaultPath):
+            defaultPath = self.lastDir
+        dirDialog = wx.DirDialog(self, defaultPath=defaultPath)
+        ret = dirDialog.ShowModal()
+        if ret == wx.ID_OK:
+            self.dirCtrl.SetValue(dirDialog.GetPath())
+            self.lastPath = dirDialog.GetPath()
+
+
+    def Export(self, dir, name):
+        """
+        Do the right export.
+        """
+        wx.BeginBusyCursor()
+        try:
+            editor = self.GetParent().editor
+            db.export.exportScenery(dir, editor.GetScenery().tracks.tracks())
+#            writer = db.sctwriter.SectorWriter(file(filename, "w"), sptmath.Vec3())
+#            scenery = self.editor.GetScenery()
+#            for t in scenery.tracks.tracks():
+#                writer.addTrack(t)
+#            writer.writeToFile()
+        finally:
+            wx.EndBusyCursor()
 

@@ -16,7 +16,6 @@ import os.path
 import sys
 import optparse
 
-import db.sctwriter
 import model.tracks
 import model.groups
 import model.scenery
@@ -26,7 +25,6 @@ import ui.palette
 import sptyaml
 import sptmath
 
-from db.export import exportScenery
 
 # Stock items
 ID_CENTER_AT = wx.ID_HIGHEST          + 1
@@ -425,22 +423,9 @@ class MainWindow(wx.Frame):
         """
         Exports scenery to binary format
         """
-        exportDialog = wx.FileDialog(self, "Choose binary scenery file", \
-            self.exportDirectory, "", \
-            "Binary format (*.sct)|*.sct", wx.FD_SAVE)
-        exportDialog.CentreOnParent()
-        
-        if exportDialog.ShowModal() == wx.ID_OK: 
-            path = exportDialog.GetPath()
+        dialog = ui.dialog.ExportDialog(self)
+        dialog.Show(True)
 
-            if os.path.exists(path):
-                answer = wx.MessageBox("Overwrite existing file?", "Confirm", \
-                    wx.YES_NO | wx.ICON_QUESTION, self)
-                if answer == wx.NO:
-                    return False
-
-            self.exportDirectory = exportDialog.GetDirectory()
-            self.Export(self.exportDirectory)
 
     def NewScenery(self):
         """
@@ -518,20 +503,6 @@ class MainWindow(wx.Frame):
             return self.SaveScenery(self.path)
 
     
-    def Export(self, path):
-        """
-        Do the right export.
-        """
-        wx.BeginBusyCursor()
-        try:
-            exportScenery(path, self.editor.GetScenery().tracks.tracks())
-#            writer = db.sctwriter.SectorWriter(file(filename, "w"), sptmath.Vec3())
-#            scenery = self.editor.GetScenery()
-#            for t in scenery.tracks.tracks():
-#                writer.addTrack(t)
-#            writer.writeToFile()
-        finally:
-            wx.EndBusyCursor()
 
 
     def UpdateTitle(self):
