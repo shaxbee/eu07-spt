@@ -7,6 +7,7 @@ class Chunk(object):
 
 class BinaryWriter(object):
     uIntFormat = Struct("<I")
+    uShortFormat = Struct("<H")
     vec3fFormat = Struct("<fff")
     vec3dFormat = Struct("<ddd")
     versionFormat = Struct("<BB")
@@ -71,6 +72,9 @@ class BinaryWriter(object):
 
     def writeUInt(self, value):
         self.write(BinaryWriter.uIntFormat.pack(value))
+        
+    def writeUShort(self, value):
+        self.write(BinaryWriter.uShortFormat.pack(value))
 
     def writeVersion(self, version):
         major, minor = version.split('.')

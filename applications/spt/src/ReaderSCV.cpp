@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <osgDB/Registry>
 #include <osgDB/ReaderWriter>
 #include <osgDB/FileNameUtils>
@@ -7,9 +9,7 @@
 #include "SectorNode.h"
 #include "SceneryAccess.h"
 
-#include <sptDB/SectorReader.h>
-
-#include <iostream>
+#include <sptDB/VariantReader.h>
 
 class ReaderSCT: public osgDB::ReaderWriter
 {
@@ -20,7 +20,7 @@ public:
 
     virtual bool acceptsExtension(const std::string& extension) const
     {
-        return osgDB::equalCaseInsensitive(extension, "sct");
+        return osgDB::equalCaseInsensitive(extension, "scv");
     };
 
     virtual ReadResult readNode(const std::string& fileName, const Options* options = NULL) const
@@ -35,7 +35,7 @@ public:
 
 		osgDB::ifstream input(fullFileName.c_str(), std::ios::binary);
         return readNode(input, options);
-    }; // sptDB::ReaderSCT::readNode
+    }; // ReaderSCV::readNode
 
     virtual ReadResult readNode(std::istream& fin, const Options* options = NULL) const
     {
@@ -52,6 +52,6 @@ public:
 		return ReadResult::ERROR_IN_READING_FILE;
     };
 
-}; // class ReaderSCT
+}; // class ReaderSCV
 
-REGISTER_OSGPLUGIN(sct, ReaderSCT)
+REGISTER_OSGPLUGIN(sct, ReaderSCV)
