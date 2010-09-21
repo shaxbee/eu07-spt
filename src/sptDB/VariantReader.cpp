@@ -14,11 +14,6 @@ namespace
 
 boost::format sectorFileNameFormat("%+05d%+05d.sct");
 
-std::string getSectorFileName(int x, int y, unsigned int variantId)
-{
-	return boost::str(sectorFileNameFormat % x % y);
-};
-
 void readSectors(BinaryReader& reader, VariantSectors& sectors, unsigned short id)
 {
 	unsigned int count;
@@ -32,14 +27,22 @@ void readSectors(BinaryReader& reader, VariantSectors& sectors, unsigned short i
 		int y;
 		reader.read(y);
 
-		VariantSector sector = {x * Sector::SIZE, y * Sector::SIZE, id};
-		sectors.push_back(sector)
+		VariantSector sector = {x * sptCore::Sector::SIZE, y * sptCore::Sector::SIZE, id};
+		sectors.push_back(sector);
 	};
 };
 
 }; // anonymous namespace
 
-std::auto_ptr<Variant> sptDB::readVariant(std::istream& fin)
+namespace sptDB
+{
+
+std::string getSectorFileName(const VariantSector& sector)
+{
+	return boost::str(sectorFileNameFormat % sector.x % sector.y);
+};
+
+std::auto_ptr<Variant> readVariant(std::istream& fin)
 {
 	BinaryReader reader(fin);
 	reader.expectChunk("VRNT");
@@ -47,7 +50,7 @@ std::auto_ptr<Variant> sptDB::readVariant(std::istream& fin)
 	reader.expectChunk("HEAD");
 	reader.readVersion();
 
-	unsigned int id;
+	unsigned short id;
 	reader.read(id);
 
 	reader.endChunk("HEAD");
@@ -62,5 +65,7 @@ std::auto_ptr<Variant> sptDB::readVariant(std::istream& fin)
 
 	reader.endChunk("VRNT");
 
-	return new Variant(id, sectors);
+	return std::auto_ptr<Variant>(new Variant(id, sectors));
+};
+
 };

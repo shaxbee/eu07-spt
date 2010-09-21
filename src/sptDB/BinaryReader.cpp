@@ -42,10 +42,14 @@ void ChunkWatcher::pop(const std::string& name)
     }
 };
 
+const std::string& ChunkWatcher::current() const
+{
+	return _chunks.top().name;
+};
+
 BinaryReader::BinaryReader(std::istream& stream): 
     _input(stream)
 { 
-    _input.exceptions(std::ios::badbit | std::ios::failbit | std::ios::eofbit);
     _version.major = 0xFF;
 	_version.minor = 0xFF;
 };

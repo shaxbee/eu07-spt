@@ -100,12 +100,13 @@ int main(int argc, char** argv)
 	std::string sceneryPath = "scenery/" + std::string(arguments[1]) + "/";
 	osgDB::Registry::instance()->getDataFilePathList().push_back(sceneryPath);
 
-	osg::ref_ptr<osg::Group> root;
+	osg::ref_ptr<osg::Node> root;
 
 	try
 	{
-		std::ifstream fin(std::string(sceneryPath + "default.scv").c_str(), std::ios::binary | std::ios::in);
-		root = sptDB::readVariant(fin);
+		root = osgDB::readNodeFile("default.scv");
+		if(!root.valid())
+			return 0;
 	} catch (std::exception& exc) {
 		std::cout << exc.what() << std::endl;
 		std::cout.flush();
