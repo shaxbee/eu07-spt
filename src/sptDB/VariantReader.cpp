@@ -5,24 +5,18 @@
 
 #include <sptCore/Sector.h>
 
-#include <sstream>
+#include <boost/format.hpp>
 
 using namespace sptDB;
 
 namespace
 {
 
-std::string getSectorFileName(unsigned int x, unsigned int y, unsigned int variantId)
+boost::format sectorFileNameFormat("scenery/test123/%+05d%+05d.sct");
+
+std::string getSectorFileName(int x, int y, unsigned int variantId)
 {
-	std::stringstream output;
-	output << "scenery/test123/" << x << "_" << y;
-
-	if(variantId)
-		output << variantId;
-
-	output << ".sct";
-
-	return output.str();
+	return boost::str(sectorFileNameFormat % x % y);
 };
 
 }; // anonymous namespace
@@ -48,10 +42,10 @@ osg::ref_ptr<osg::Group> sptDB::readVariant(std::istream& fin)
 	osg::ref_ptr<osg::Group> output = new osg::Group;
 	while(count--)
 	{
-		unsigned int x;
+		int x;
 		reader.read(x);
 
-		unsigned int y;
+		int y;
 		reader.read(y);
 
 		output->addChild(osgDB::readNodeFile(getSectorFileName(x, y, id)));

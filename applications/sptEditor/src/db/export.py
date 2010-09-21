@@ -17,7 +17,7 @@ def exportScenery(path, trackings):
     for sector in sectors.itervalues():
         print "exportScenery"
         print repr(sector.tracks)
-        sector_name = "%d_%d.sct" % (sector.position.x, sector.position.y)
+        sector_name = "%+05d%+05d.sct" % (sector.position.x, sector.position.y)
         with file(os.path.abspath(os.path.join(path, sector_name)), "wb") as fout:
             writeSector(fout, sector.position, sector.tracks, sector.switches)
             

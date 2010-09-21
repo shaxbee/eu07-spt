@@ -27,7 +27,7 @@ def writeVariant(fout, id, sectors):
     writer.writeUInt(len(sectors))
     
     data = ((int(sector.position.x) / SECTOR_SIZE, int(sector.position.y) / SECTOR_SIZE) for sector in sectors)
-    writer.writeArray(struct.Struct("<II"), data, len(sectors))
+    writer.writeArray(struct.Struct("<ii"), data, len(sectors))
     
     writer.endChunk("STLS")
     
