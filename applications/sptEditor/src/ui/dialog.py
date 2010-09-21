@@ -401,28 +401,35 @@ class ExportDialog(wx.Dialog):
 
     def OnButton(self, event):
         name = self.nameCtrl.GetValue()
+        
         if name.strip() == "":
             wx.MessageBox("Missing scenery name.", \
                 self.GetTitle(), wx.OK | wx.ICON_ERROR, self)
             return
+            
         dir = self.dirCtrl.GetValue()
         if dir.strip() == "":
             wx.MessageBox("Missing directory.", \
                 self.GetTitle(), wx.OK | wx.ICON_ERROR, self)
             return
+            
         if not os.path.isdir(dir):
             wx.MessageBox("Invalid directory.", \
                 self.GetTitle(), wx.OK | wx.ICON_ERROR, self)
             return
+            
+        dest = os.path.join(dir, name)
+        if not os.path.exists(dest):
+            os.mkdir(dest)
 
-        self.Export(dir, name)
+        self.Export(dest)
 
         config = wx.FileConfig.Get()
         config.Write("/ExportDialog/name", name)
         config.Write("/ExportDialog/dir", dir)
 
         self.Destroy()
-
+        
 
     def OnSelect(self, event):
         defaultPath = self.dirCtrl.GetValue()
@@ -435,12 +442,13 @@ class ExportDialog(wx.Dialog):
             self.lastPath = dirDialog.GetPath()
 
 
-    def Export(self, dir, name):
+    def Export(self, dir):
         """
         Do the right export.
         """
         wx.BeginBusyCursor()
         try:
+            
             editor = self.GetParent().editor
             db.export.exportScenery(dir, editor.GetScenery().tracks.tracks())
 #            writer = db.sctwriter.SectorWriter(file(filename, "w"), sptmath.Vec3())
