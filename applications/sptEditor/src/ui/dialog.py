@@ -448,9 +448,11 @@ class ExportDialog(wx.Dialog):
         """
         wx.BeginBusyCursor()
         try:
+            def dummy(progress):
+                print "%d%%" % progress
             
-            editor = self.GetParent().editor
-            db.export.exportScenery(dir, editor.GetScenery().tracks.tracks())
+            trackings = self.GetParent().editor.GetScenery().tracks
+            db.export.exportScenery(dir, trackings.tracks(), trackings.switches(), dummy)
 #            writer = db.sctwriter.SectorWriter(file(filename, "w"), sptmath.Vec3())
 #            scenery = self.editor.GetScenery()
 #            for t in scenery.tracks.tracks():

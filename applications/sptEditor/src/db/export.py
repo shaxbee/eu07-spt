@@ -10,9 +10,15 @@ from scvwriter import writeVariant
 
 #SECTOR_CENTER = Vec3(SECTOR_SIZE / 2, SECTOR_SIZE / 2, 0)
 
-def exportScenery(path, trackings):
+def exportScenery(path, tracks, switches, callback):
     sectors = dict()
-    __sortTrackings(sectors, trackings)
+    
+    __sortTrackings(sectors, tracks, 'tracks')
+    __sortTrackings(sectors, switches, 'switches')
+    
+    progress = 0
+    percent = 0
+    callback(percent);
         
     for sector in sectors.itervalues():
         print "exportScenery"
@@ -20,6 +26,12 @@ def exportScenery(path, trackings):
         sector_name = "%+05d%+05d.sct" % (sector.position.x, sector.position.y)
         with file(os.path.abspath(os.path.join(path, sector_name)), "wb") as fout:
             writeSector(fout, sector.position, sector.tracks, sector.switches)
+        
+        progress += 1
+        newPercent = (progress * 100) / len(sectors)
+        if(newPercent > percent):
+            percent = newPercent
+            callback(percent)
             
     with file(os.path.join(path, "default.scv"), "wb") as fout:
         writeVariant(fout, 0, sectors.values())
@@ -31,7 +43,7 @@ class SectorData(object):
         self.switches = list()
         self.variant = variant
     
-def __sortTrackings(sectors, trackings):
+def __sortTrackings(sectors, trackings, dest):
     """
     Sort trackings by sector and type.
     
@@ -47,13 +59,7 @@ def __sortTrackings(sectors, trackings):
         if position not in sectors:
             sectors[position] = SectorData(position)
             
-        if type(tracking) is Track:
-            sectors[position].tracks.append(tracking)
-        elif type(tracking) is Switch:
-            sectors[position].switches.append(tracking)
-        elif type(tracking) is RailContainer:
-            print "RailContainer"
-            __sortTrackings(sectors, tracking.tracks())
+        getattr(sectors[position], dest).append(tracking)            
         
 if __name__ == "__main__":
     import yaml
