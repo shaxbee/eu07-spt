@@ -8,7 +8,7 @@ VARIANT_FILE_VERSION = "1.1"
 class VariantError(RuntimeError):
     pass
 
-def __writeVariantSectors(write,sectors):
+def __writeVariantSectors(writer, sectors):
     writer.writeUInt(len(sectors))
     
     data = ((int(sector.position.x) / SECTOR_SIZE, int(sector.position.y) / SECTOR_SIZE) for sector in sectors)

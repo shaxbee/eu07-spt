@@ -42,6 +42,11 @@ void ChunkWatcher::pop(const std::string& name)
     }
 };
 
+const std::string& ChunkWatcher::current() const
+{
+	return _chunks.top().name;
+};
+
 bool Version::operator<(const Version& other)
 {
     return (major < other.major) || ((minor == other.minor) && (minor < other.minor));
@@ -60,9 +65,8 @@ bool Version::operator>(const Version& other)
 BinaryReader::BinaryReader(std::istream& stream): 
     _input(stream)
 { 
-//    _input.exceptions(std::ios::badbit | std::ios::failbit | std::ios::eofbit);
     _version.major = 0xFF;
-	_version.minor = 0xFF;
+    _version.minor = 0xFF;
 };
 
 std::string BinaryReader::readChunk()

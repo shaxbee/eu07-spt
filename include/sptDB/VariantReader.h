@@ -34,6 +34,7 @@ private:
 	VariantSectors _sectors;
 };
 
+std::string getSectorFileName(const VariantSector& sector);
 std::auto_ptr<Variant> readVariant(std::istream& fin);
 
 }; // namespace sptDB

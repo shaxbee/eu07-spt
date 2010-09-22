@@ -1,22 +1,26 @@
 #include <iostream>
 
+#include <osg/Group>
 #include <osgDB/Registry>
 #include <osgDB/ReaderWriter>
 #include <osgDB/FileNameUtils>
 #include <osgDB/FileUtils>
+#include <osgDB/ReadFile>
 #include <osgDB/fstream>
 
 #include "SectorNode.h"
-#include "SceneryAccess.h"
+#include "SectorView.h"
 
 #include <sptDB/VariantReader.h>
 
-class ReaderSCT: public osgDB::ReaderWriter
+using namespace sptDB;
+
+class ReaderSCV: public osgDB::ReaderWriter
 {
 
 public:
-    ReaderSCT() { }
-    virtual ~ReaderSCT() { }
+    ReaderSCV() { }
+    virtual ~ReaderSCV() { }
 
     virtual bool acceptsExtension(const std::string& extension) const
     {
@@ -39,10 +43,20 @@ public:
 
     virtual ReadResult readNode(std::istream& fin, const Options* options = NULL) const
     {
+		osg::ref_ptr<osg::Group> result = new osg::Group;
+
 		try
 		{
-			sptCore::Sector& sector = sptDB::readSector(fin, getSceneryInstance());
-			return ReadResult(new SectorNode(sector));
+			std::auto_ptr<Variant> variant(readVariant(fin));
+
+			for(sptDB::VariantSectors::const_iterator iter = variant->getSectors().begin(); iter != variant->getSectors().end(); iter++)
+			{
+				osg::ref_ptr<osg::Node> sector = osgDB::readNodeFile(getSectorFileName(*iter));
+				if(sector.valid())
+					result->addChild(sector);
+			};
+
+			return ReadResult(result);
 		}
 		catch(std::exception& exc)	
 		{
@@ -54,4 +68,4 @@ public:
 
 }; // class ReaderSCV
 
-REGISTER_OSGPLUGIN(sct, ReaderSCV)
+REGISTER_OSGPLUGIN(scv, ReaderSCV)
