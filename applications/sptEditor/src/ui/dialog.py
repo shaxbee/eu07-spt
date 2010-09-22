@@ -446,18 +446,17 @@ class ExportDialog(wx.Dialog):
         """
         Do the right export.
         """
-        wx.BeginBusyCursor()
+        progress = wx.ProgressDialog("Scenery export", \
+            "Exporting scenery to binary format", parent=self)
         try:
-            def dummy(progress):
-                print "%d%%" % progress
             
             trackings = self.GetParent().editor.GetScenery().tracks
-            db.export.exportScenery(dir, trackings.tracks(), trackings.switches(), dummy)
+            db.export.exportScenery(dir, trackings.tracks(), trackings.switches(), progress.Update)
 #            writer = db.sctwriter.SectorWriter(file(filename, "w"), sptmath.Vec3())
 #            scenery = self.editor.GetScenery()
 #            for t in scenery.tracks.tracks():
 #                writer.addTrack(t)
 #            writer.writeToFile()
         finally:
-            wx.EndBusyCursor()
+            progress.Update(100)
 
