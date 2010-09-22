@@ -3,7 +3,7 @@ import struct
 from binwriter import BinaryWriter
 from sctwriter import SECTOR_SIZE
 
-VARIANT_FILE_VERSION = "1.0"
+VARIANT_FILE_VERSION = "1.1"
 
 class VariantError(RuntimeError):
     pass
