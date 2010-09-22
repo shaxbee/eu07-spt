@@ -39,7 +39,7 @@ namespace sptDB
 
 std::string getSectorFileName(const VariantSector& sector)
 {
-    return boost::str(sectorFileNameFormat % (sector.x / sptCore::Sector::SIZE) % (sector.y / sptCore::Sector::SIZE));
+	return boost::str(sectorFileNameFormat % sector.x % sector.y);
 };
 
 std::auto_ptr<Variant> readVariant(std::istream& fin)
