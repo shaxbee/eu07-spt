@@ -4,7 +4,10 @@
 #include <osg/Geode>
 #include <osg/PolygonMode>
 #include <osg/LineWidth>
-#include <osgDB/fstream>
+#include <osgDB/Registry>
+#include <fstream>
+
+#include <osg/ArgumentParser>
 
 #include <osgUtil/SmoothingVisitor>
 #include <osgDB/ReadFile>
@@ -82,18 +85,31 @@ osg::Geode* createAxes(osg::Geode* geode)
     return result;
 };
 
-int main()
+int main(int argc, char** argv)
 {
+
+	osg::ArgumentParser arguments(&argc, argv);
+	arguments.getApplicationUsage()->setCommandLineUsage(arguments.getApplicationName() + " scenery");
+
+	if(arguments.argc() != 2)
+	{
+		arguments.getApplicationUsage()->write(std::cout);
+		return 1;
+	}
+
+	std::string sceneryPath = "scenery/" + std::string(arguments[1]) + "/";
+	osgDB::Registry::instance()->getDataFilePathList().push_back(sceneryPath);
 
 	osg::ref_ptr<osg::Group> root;
 
 	try
 	{
-		osgDB::ifstream fin("scenery/test123/default.scv", std::ios::binary | std::ios::in);
+		std::ifstream fin(std::string(sceneryPath + "default.scv").c_str(), std::ios::binary | std::ios::in);
 		root = sptDB::readVariant(fin);
 	} catch (std::exception& exc) {
 		std::cout << exc.what() << std::endl;
 		std::cout.flush();
+		return 0;
 	};
 //    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
 
@@ -104,6 +120,6 @@ int main()
     viewer.setSceneData(root.get());
     viewer.run();
     
-    return 0;
+    return 1;
     
 }

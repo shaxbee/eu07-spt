@@ -5,8 +5,6 @@ import os.path
 from SCons.Errors import UserError
 from build.support import GetPlatform
 
-print repr(Glob("*.cpp"))
-
 platform = GetPlatform()
 
 if not platform:

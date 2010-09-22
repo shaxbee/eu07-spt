@@ -42,10 +42,25 @@ void ChunkWatcher::pop(const std::string& name)
     }
 };
 
+bool Version::operator<(const Version& other)
+{
+    return (major < other.major) || ((minor == other.minor) && (minor < other.minor));
+};
+
+bool Version::operator==(const Version& other)
+{
+    return (major == other.major) && (minor == other.minor);
+};
+
+bool Version::operator>(const Version& other)
+{
+    return (major > other.major) || ((major == other.major) && (minor > other.minor));
+};
+
 BinaryReader::BinaryReader(std::istream& stream): 
     _input(stream)
 { 
-    _input.exceptions(std::ios::badbit | std::ios::failbit | std::ios::eofbit);
+//    _input.exceptions(std::ios::badbit | std::ios::failbit | std::ios::eofbit);
     _version.major = 0xFF;
 	_version.minor = 0xFF;
 };

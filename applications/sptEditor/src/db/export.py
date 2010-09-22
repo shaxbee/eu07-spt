@@ -25,10 +25,11 @@ def exportScenery(path, trackings):
         writeVariant(fout, 0, sectors.values())
     
 class SectorData(object):
-    def __init__(self, position):
+    def __init__(self, position, variant = 0):
         self.position = position
         self.tracks = list()
         self.switches = list()
+        self.variant = variant
     
 def __sortTrackings(sectors, trackings):
     """
