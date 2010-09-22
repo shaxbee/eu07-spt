@@ -60,7 +60,7 @@ public:
 		}
 		catch(std::exception& exc)	
 		{
-			osg::notify(osg::FATAL) << "Sector loading failed. " << exc.what();
+			osg::notify(osg::FATAL) << "Variant loading failed. " << exc.what();
 		};
 
 		return ReadResult::ERROR_IN_READING_FILE;
