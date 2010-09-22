@@ -13,7 +13,6 @@
 namespace sptCore
 {
 
-
 //! Container for rail trackings located in square part of Scenery
 //! \author Zbigniew "ShaXbee" Mandziejewicz
 class Sector
@@ -22,14 +21,14 @@ class Sector
 public:
     Sector(const osg::Vec3d& position);
 
-    const osg::Vec3d& getPosition() const { return _position; };
+    const osg::Vec3f& getPosition() const { return _position; };
    
     template <typename RailTrackingContainerT, typename ConnectionContainerT>
     void setData(RailTrackingContainerT& trackings, const ConnectionContainerT& connections);
 
     //! \brief Get other track connected at given position.
     //! \throw UnknownConnectionException if there is no connection at given position
-    const RailTracking& getNextTrack(const osg::Vec3& position, const RailTracking& from) const;
+    const RailTracking& getNextTrack(const osg::Vec3f& position, const RailTracking& from) const;
 
     const RailTracking& getRailTracking(size_t index) const;
 
@@ -39,6 +38,10 @@ public:
     //! \param connections Container of ConnectionUpdate
     template <typename ContainerT>
     void updateConnections(const ContainerT& connections); 
+
+    //! \brief Update single connection.
+    //! param position Connection position
+    void updateConnection(const osg::Vec3f& position, const RailTracking* previous, const RailTracking* current = NULL);
 
     struct Connection
     {
@@ -54,16 +57,19 @@ public:
         const RailTracking* current;
     };
 
+    typedef std::vector<Connection> Connections;
+    const Connections& getConnections() const { return _connections; };
+
     typedef boost::error_info<struct tag_position, osg::Vec3f> PositionInfo;
     class UnknownConnectionException: public boost::exception { };
 
     static float SIZE;
 
 private:
-    typedef std::vector<Connection> Connections;
+
     typedef boost::ptr_vector<RailTracking> RailTrackings;
 
-    const osg::Vec3d _position;
+    const osg::Vec3f _position;
 
     Connections _connections;
     RailTrackings _trackings;

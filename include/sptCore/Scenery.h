@@ -28,8 +28,10 @@ class Scenery
 public:
     ~Scenery() { };
 
-    const Sector& getSector(const osg::Vec3d& position) const;
-    bool hasSector(const osg::Vec3d& position) const;
+    const Sector& getSector(const osg::Vec3f& position) const;
+    Sector& getSector(const osg::Vec3f& position);
+
+    bool hasSector(const osg::Vec3f& position) const;
 
     Track& getTrack(const std::string& name);
 //    EventedTrack& getEventedTrack(const std::string& name) const;
@@ -43,7 +45,7 @@ public:
 
     //! \brief Remove sector from scenery and return ownership 
     //! \throw SceneryException if Sector with same name exists
-    std::auto_ptr<Sector> removeSector(const osg::Vec3d& position);
+    std::auto_ptr<Sector> removeSector(const osg::Vec3f& position);
 
     //! \brief Add named Track
     //! \throw SceneryException if Track with same name exists
@@ -65,7 +67,7 @@ public:
     void removeSwitch(const std::string& name);
 
 private:
-    typedef boost::ptr_map<osg::Vec3d, Sector> Sectors;
+    typedef boost::ptr_map<osg::Vec3f, Sector> Sectors;
     typedef std::map<std::string, Track*> Tracks;
     typedef std::map<std::string, SwitchableTracking*> Switches;
 
