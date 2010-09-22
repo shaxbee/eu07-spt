@@ -38,12 +38,14 @@ private:
 
 struct Version
 {
+	Version(unsigned char major_, unsigned char minor_): major(major_), minor(minor_) { };
+
     unsigned char major;
     unsigned char minor;
     
-    bool operator<(const Version& other);
-    bool operator==(const Version& other);
-    bool operator>(const Version& other);
+    bool operator<(const Version& other) const;
+    bool operator==(const Version& other) const;
+    bool operator>(const Version& other) const;
 };
 
 class BinaryReader
@@ -70,7 +72,6 @@ public:
 
 private:
     std::istream& _input;
-    std::istringstream _buffer;
 
     ChunkWatcher _watcher;
     Version _version;
@@ -87,7 +88,6 @@ private:
 
 		_position += bytes;
 	};
-
 };
 
 template <typename T>

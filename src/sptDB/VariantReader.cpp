@@ -50,6 +50,9 @@ std::auto_ptr<Variant> readVariant(std::istream& fin)
 	reader.expectChunk("HEAD");
 	reader.readVersion();
 
+	if(reader.getVersion() < Version(1, 1))
+		throw std::runtime_error("Incompatible variant file version.");
+
 	unsigned short id;
 	reader.read(id);
 

@@ -47,26 +47,24 @@ const std::string& ChunkWatcher::current() const
 	return _chunks.top().name;
 };
 
-bool Version::operator<(const Version& other)
+bool Version::operator<(const Version& other) const
 {
-    return (major < other.major) || ((minor == other.minor) && (minor < other.minor));
+    return (major < other.major) || ((major == other.major) && (minor < other.minor));
 };
 
-bool Version::operator==(const Version& other)
+bool Version::operator==(const Version& other) const
 {
     return (major == other.major) && (minor == other.minor);
 };
 
-bool Version::operator>(const Version& other)
+bool Version::operator>(const Version& other) const
 {
     return (major > other.major) || ((major == other.major) && (minor > other.minor));
 };
 
 BinaryReader::BinaryReader(std::istream& stream): 
-    _input(stream)
+    _input(stream), _version(0xFF, 0xFF)
 { 
-    _version.major = 0xFF;
-    _version.minor = 0xFF;
 };
 
 std::string BinaryReader::readChunk()

@@ -12,6 +12,7 @@
 #include <osgUtil/SmoothingVisitor>
 #include <osgDB/ReadFile>
 #include <osgViewer/Viewer>
+#include <osgViewer/ViewerEventHandlers>
 
 #include <sptCore/Path.h>
 #include <sptGFX/Extruder.h>
@@ -117,6 +118,9 @@ int main(int argc, char** argv)
 //    root->addChild(createAxes(geode.get()));
 
     osgViewer::Viewer viewer;
+
+	// add stats
+    viewer.addEventHandler(new osgViewer::StatsHandler());
     
     viewer.setSceneData(root.get());
     viewer.run();
