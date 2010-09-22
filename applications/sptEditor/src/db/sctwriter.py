@@ -136,12 +136,12 @@ def __collectConnections(tracks, switches, index):
             addConnection(track.p2, track.original, track.n2)
 
     for switch in switches:
+        if switch.nc is not None:
+            addConnection(switch.pc, switch.original, switch.nc)
         if switch.n1 is not None:
             addConnection(switch.p1, switch.original, switch.n1)
         if switch.n2 is not None:
-            addConnection(switch.p2, switch,original, switch.n2)
-        if switch.n3 is not None:
-            addConnection(switch.p3, switch.original, switch.n3)
+            addConnection(switch.p2, switch.original, switch.n2)
                 
     # sort connections by position
     internal = sorted(internal.iteritems(), key=operator.itemgetter(0))
@@ -252,19 +252,20 @@ class SectorTrack(object):
 
 class SectorSwitch(object):
     def __init__(self, source, offset): 
+        self.pc = _translate(source.pc, offset)
+        self.vc1 = _translate(source.vc1, offset) + self.pc
+        self.vc2 = _translate(source.vc2, offset) + self.pc
         self.p1 = _translate(source.p1, offset)
-        self.v1 = _translate(source.v1, offset) + self.p1 
+        self.v1 = _translate(source.v1, offset) + self.p1
         self.p2 = _translate(source.p2, offset)
         self.v2 = _translate(source.v2, offset) + self.p2
-        self.p3 = _translate(source.p3, offset)
-        self.v3 = _translate(source.v3, offset) + self.p3
 
-        self.straight = _getPath(self.p1, self.v1, self.p2, self.v2)
-        self.diverted = _getPath(self.p1, self.v1, self.p3, self.v3)
+        self.straight = _getPath(self.pc, self.vc1, self.p1, self.v1)
+        self.diverted = _getPath(self.pc, self.vc2, self.p2, self.v2)
 
+        self.nc = source.nc
         self.n1 = source.n1
         self.n2 = source.n2
-        self.n3 = source.n3
 
         self.name = source.name
         self.original = source
