@@ -5,6 +5,8 @@ from sptmath import Vec3
 from model.tracks import Track, Switch
 from model.groups import RailContainer
 
+from time import sleep
+
 from sctwriter import writeSector, SECTOR_SIZE
 from scvwriter import writeVariant
 
@@ -21,8 +23,6 @@ def exportScenery(path, tracks, switches, callback):
     callback(percent);
         
     for sector in sectors.itervalues():
-        print "exportScenery"
-        print repr(sector.tracks)
         sector_name = "%+05d%+05d.sct" % (sector.position.x, sector.position.y)
         with file(os.path.abspath(os.path.join(path, sector_name)), "wb") as fout:
             writeSector(fout, sector.position, sector.tracks, sector.switches)

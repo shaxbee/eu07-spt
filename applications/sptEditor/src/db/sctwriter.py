@@ -268,6 +268,8 @@ class SectorSwitch(object):
         self.n2 = source.n2
 
         self.name = source.name
+        self.position = "STRAIGHT"
+        
         self.original = source
 
 if __name__ == "__main__":
