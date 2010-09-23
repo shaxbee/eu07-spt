@@ -38,7 +38,7 @@ void print_vec(const osg::Vec3f& vec)
 
 std::auto_ptr<sptCore::Path> readStraightPath(BinaryReader& reader)
 {
-    std::cout << "STRAIGHT ";
+//    std::cout << "STRAIGHT ";
 
     osg::Vec3f begin;
     osg::Vec3f end;
@@ -46,15 +46,15 @@ std::auto_ptr<sptCore::Path> readStraightPath(BinaryReader& reader)
     reader.read(begin);
     reader.read(end);
 
-    print_vec(begin);
-    print_vec(end);
+//    print_vec(begin);
+//    print_vec(end);
 
     return std::auto_ptr<sptCore::Path>(new sptCore::StraightPath(begin, end));
 }
 
 std::auto_ptr<sptCore::Path> readBezierPath(BinaryReader& reader)
 {
-    std::cout << "BEZIER ";
+//    std::cout << "BEZIER ";
 
     osg::Vec3f begin;
     osg::Vec3f cpBegin;
@@ -66,10 +66,10 @@ std::auto_ptr<sptCore::Path> readBezierPath(BinaryReader& reader)
     reader.read(end);
     reader.read(cpEnd);
 
-    print_vec(begin);
-    print_vec(cpBegin);
-    print_vec(end);
-    print_vec(cpEnd);
+//    print_vec(begin);
+//    print_vec(cpBegin);
+//    print_vec(end);
+//    print_vec(cpEnd);
 
     return std::auto_ptr<sptCore::Path>(new sptCore::BezierPath(begin, cpBegin, end, cpEnd));
 };
@@ -114,12 +114,12 @@ void readTracks(sptCore::Sector& sector, BinaryReader& reader, Tracks& output)
 
         while(count--)
         {
-            std::cout << "TRACK ";
+//            std::cout << "TRACK ";
             std::auto_ptr<sptCore::Path> path = readStraightPath(reader);
             std::auto_ptr<sptCore::Track> track(new sptCore::Track(sector, path));
 
             output.push_back(track);
-            std::cout << std::endl;
+//            std::cout << std::endl;
         };
     };
 
@@ -130,12 +130,12 @@ void readTracks(sptCore::Sector& sector, BinaryReader& reader, Tracks& output)
 
         while(count--)
         {
-            std::cout << "TRACK ";
+//            std::cout << "TRACK ";
             std::auto_ptr<sptCore::Path> path = readBezierPath(reader);
             std::auto_ptr<sptCore::Track> track(new sptCore::Track(sector, path));
 
             output.push_back(track);
-            std::cout << std::endl;
+//            std::cout << std::endl;
         };
     };
 
@@ -150,12 +150,12 @@ void readSwitches(sptCore::Sector& sector, BinaryReader& reader, Switches& outpu
 
     while(count--)
     {
-        std::cout << "SWITCH ";
+//        std::cout << "SWITCH ";
 
         unsigned char position;
         reader.read(position);
         std::string position_str(position ? "DIVERTED" : "STRAIGHT");
-        std::cout << "POS_" << position_str << " ";
+//        std::cout << "POS_" << position_str << " ";
 
         std::auto_ptr<sptCore::Path> straight = readPath(reader);
         std::auto_ptr<sptCore::Path> diverted = readPath(reader);
@@ -163,7 +163,7 @@ void readSwitches(sptCore::Sector& sector, BinaryReader& reader, Switches& outpu
         std::auto_ptr<sptCore::Switch> switch_(new sptCore::Switch(sector, straight, diverted, position_str));
 
         output.push_back(switch_);
-        std::cout << std::endl;
+//        std::cout << std::endl;
     };
 
     reader.endChunk("SWLS");

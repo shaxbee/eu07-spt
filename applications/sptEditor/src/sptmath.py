@@ -55,7 +55,9 @@ class Vec3(object):
             return self.__values[index]
             
         def setter(self, value):
-            self.__values[index] = Decimal(str(value)).quantize(THREE_POINTS, decimal.ROUND_HALF_UP)
+            if type(value) is not Decimal:
+                value = Decimal(str(value))
+            self.__values[index] = value.quantize(THREE_POINTS, decimal.ROUND_HALF_UP)
             
         return property(getter, setter)
         

@@ -51,6 +51,7 @@ env = conf.Finish();
 # setup defines and paths depending on DEBUG flag
 if env['DEBUG']:
     defines = ['DEBUG']
+    env.Prepend(LIBSUFFIX = 'd', SHLIBSUFFIX = 'd')
     buildDir = os.path.join(buildDir, 'debug')
 else:
     defines = ['NDEBUG']
