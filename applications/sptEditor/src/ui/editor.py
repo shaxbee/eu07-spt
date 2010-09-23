@@ -21,7 +21,9 @@ from sptmath import Vec3
 
 
 # Constants here
-SCALE_FACTOR = 1000.0
+SCALE_MIN = 0.004 # It gives 800px/200km
+SCALE_MAX = 2000.0 # It gives 2000px/m
+SCALE_DEFAULT = 1.0 # It gives 1px/m
 BASE_POINT_MARGIN = 50
 
 # Modes of editor
@@ -150,8 +152,8 @@ class PlanePart(wx.ScrolledWindow):
 
         self.logger = logging.getLogger('Paint')
 
-        self.scale = 1600.0
-        self.GetParent().GetParent().SetStatusText("%.2f px/m" % self.scale, 2)
+        self.scale = SCALE_DEFAULT
+        self.GetParent().GetParent().SetStatusText("%.3f px/m" % self.scale, 2)
 
         self.minX = -1000.0
         self.minY = -1000.0
@@ -344,7 +346,7 @@ class PlanePart(wx.ScrolledWindow):
         Scale preserves the center view.
         """
         # Set limits to the scale
-        if scale >= 100000.0 or scale <= 0.1:
+        if scale > SCALE_MAX + 0.001 or scale < SCALE_MIN - 0.001:
             return
 
         # 1) Get the center point of editor
@@ -368,7 +370,7 @@ class PlanePart(wx.ScrolledWindow):
         self.Refresh()
         self.GetParent().topRuler.Refresh()
         self.GetParent().leftRuler.Refresh()
-        self.GetParent().GetParent().SetStatusText("%.2f px/m" % scale, 2)
+        self.GetParent().GetParent().SetStatusText("%.3f px/m" % scale, 2)
         
         
     def __ScaleAll(self, scale):
@@ -385,8 +387,8 @@ class PlanePart(wx.ScrolledWindow):
         Converts 2D point of UI editor coordinates into 3D point
         of scenery coordinates.
         """
-        p3d = Vec3(Decimal(str((point[0]-100)/self.scale * SCALE_FACTOR + self.minX)), \
-            Decimal(str(-((point[1]-100)/self.scale * SCALE_FACTOR - self.maxY))), \
+        p3d = Vec3(Decimal(str((point[0]-100)/self.scale + self.minX)), \
+            Decimal(str(-((point[1]-100)/self.scale - self.maxY))), \
             Decimal(0))
         return p3d
 
@@ -396,8 +398,8 @@ class PlanePart(wx.ScrolledWindow):
         Converts 3D point of scenery coordiante into 2D point of
         UI editor coordinates.
         """        
-        p2d = (int((float(point.x) - self.minX) * self.scale / SCALE_FACTOR + 100), \
-            int((-float(point.y) + self.maxY) * self.scale / SCALE_FACTOR + 100))
+        p2d = (int((float(point.x) - self.minX) * self.scale + 100), \
+            int((-float(point.y) + self.maxY) * self.scale + 100))
         return p2d
 
 
@@ -422,16 +424,18 @@ class PlanePart(wx.ScrolledWindow):
 
     def OnSize(self, event):
         self.Refresh()
+        self.GetParent().leftRuler.Refresh()
+        self.GetParent().topRuler.Refresh()
         self.Layout()
 
 
     def ComputePreferredSize(self):
         (w, h) = self.GetSize()
         
-        return (max(w, int(self.scale * (self.maxX - self.minX) \
-                / SCALE_FACTOR) + 200) + self.extentX,
-            max(h + self.extentY, int(self.scale * (self.maxY - self.minY) \
-               / SCALE_FACTOR) + 200) + self.extentY)
+        return (max(w, int(self.scale * (self.maxX - self.minX)) \
+                + 200) + self.extentX,
+            max(h + self.extentY, int(self.scale * (self.maxY - self.minY)) \
+               + 200) + self.extentY)
 
 
     def SetupScrolling(self):
@@ -519,8 +523,8 @@ class PlanePart(wx.ScrolledWindow):
         """
         Paints the borders around min/max.
         """
-        x = int((self.maxX - self.minX) * self.scale / SCALE_FACTOR) + 100
-        y = int((self.maxY - self.minY) * self.scale / SCALE_FACTOR) + 100
+        x = int((self.maxX - self.minX) * self.scale) + 100
+        y = int((self.maxY - self.minY) * self.scale) + 100
 
         oldPen = dc.GetPen()
         dc.SetPen(wx.Pen("#999999"))
@@ -554,7 +558,7 @@ class PlanePart(wx.ScrolledWindow):
         oldPen = dc.GetPen()
         try:
             dc.SetPen(wx.Pen((34, 139, 34), \
-                3 if self.scale >= 1000.0 else 1))
+                3 if self.scale > 1.0 else 1))
             for v in self.trackCache:
                 if v != self.selectedView:
                     v.Draw(dc, clip)
@@ -569,7 +573,7 @@ class PlanePart(wx.ScrolledWindow):
         oldPen = dc.GetPen()
         try:
             dc.SetPen(wx.Pen((173, 255, 47), \
-                3 if self.scale >= 1000.0 else 1))
+                3 if self.scale > 1.0 else 1))
             for v in self.switchCache:
                 if v != self.selectedView:
                     v.Draw(dc, clip)
@@ -586,7 +590,7 @@ class PlanePart(wx.ScrolledWindow):
         oldPen = dc.GetPen()
         try:
             dc.SetPen(wx.Pen((255, 0, 0), \
-                3 if self.scale >= 1000.0 else 1))
+                3 if self.scale > 1.0 else 1))
             self.selectedView.Draw(dc, clip)
         finally:
             dc.SetPen(oldPen)
@@ -694,7 +698,7 @@ class Ruler(wx.Control):
                 while y < h:
                     p3d = part.ViewToModel((p2x, \
                         y + self.offset * unitY))
-                    label = "%d" % p3d.y
+                    label = "%.2f" % p3d.y
                     (tw, th) = dc.GetTextExtent(label)
                     if y >= clip.y-tw/2-1 and y <= clip.y+clip.height+tw/2+1:
                         dc.DrawRotatedText(label, 15-th, y + tw/2, 90)
@@ -707,7 +711,7 @@ class Ruler(wx.Control):
                 while x < w:
                     p3d = part.ViewToModel( \
                          (x + self.offset*unitX, p2y))
-                    label = "%d" % p3d.x
+                    label = "%.2f" % p3d.x
                     (tw, th) = dc.GetTextExtent(label)
                     if x >= clip.x-tw/2-1 and x <= clip.x+clip.width+tw/2+1:
                         dc.DrawText(label, x - tw/2, 15 - th)
