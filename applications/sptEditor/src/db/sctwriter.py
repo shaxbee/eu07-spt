@@ -10,7 +10,7 @@ from sptmath import Vec3
 
 from binwriter import BinaryWriter
 
-SECTOR_SIZE = 8000
+SECTOR_SIZE = 2000
 SECTOR_FILE_VERSION = "1.0"
 
 class SectorWriteError(RuntimeError):
@@ -27,6 +27,8 @@ def writeSector(fout, position, tracks, switches):
     :raises: SectorWriteError
     """
     writer = BinaryWriter(fout)
+    
+    print "sector position:", repr(position.to_tuple())
     
     # transform tracks and switches
     tracks = [SectorTrack(track, position) for track in tracks]
@@ -201,6 +203,10 @@ class FastVec3(object):
 
     def __eq__(self, other):
         return other != None and (abs(self.x - other.x) < 1e-6 and abs(self.y - other.y) < 1e-6 and abs(self.z - other.z) < 1e-6)
+    
+    @classmethod
+    def from_vec3(cls, source):
+        return FastVec3(source.x, source.y, source.z)
 
     def to_tuple(self):
         return (self.x, self.y, self.z)
@@ -239,9 +245,9 @@ class BezierPath(object):
 class SectorTrack(object):
     def __init__(self, source, offset): 
         self.p1 = _translate(source.p1, offset)
-        self.v1 = _translate(source.v1, offset) + self.p1
+        self.v1 = self.p1 + FastVec3.from_vec3(source.v1)
         self.p2 = _translate(source.p2, offset)
-        self.v2 = _translate(source.v2, offset) + self.p2
+        self.v2 = self.p2 + FastVec3.from_vec3(source.v2)
 
         self.path = _getPath(self.p1, self.v1, self.p2, self.v2)
         self.n1 = source.n1
@@ -253,12 +259,12 @@ class SectorTrack(object):
 class SectorSwitch(object):
     def __init__(self, source, offset): 
         self.pc = _translate(source.pc, offset)
-        self.vc1 = _translate(source.vc1, offset) + self.pc
-        self.vc2 = _translate(source.vc2, offset) + self.pc
+        self.vc1 = self.pc + FastVec3.from_vec3(source.vc1)
+        self.vc2 = self.pc + FastVec3.from_vec3(source.vc2)
         self.p1 = _translate(source.p1, offset)
-        self.v1 = _translate(source.v1, offset) + self.p1
+        self.v1 = self.p1 + FastVec3.from_vec3(source.v1)
         self.p2 = _translate(source.p2, offset)
-        self.v2 = _translate(source.v2, offset) + self.p2
+        self.v2 = self.p2 + FastVec3.from_vec3(source.v2)
 
         self.straight = _getPath(self.pc, self.vc1, self.p1, self.v1)
         self.diverted = _getPath(self.pc, self.vc2, self.p2, self.v2)

@@ -25,7 +25,8 @@ def exportScenery(path, tracks, switches, callback):
     for sector in sectors.itervalues():
         sector_name = "%+05d%+05d.sct" % (sector.position.x, sector.position.y)
         with file(os.path.abspath(os.path.join(path, sector_name)), "wb") as fout:
-            writeSector(fout, sector.position, sector.tracks, sector.switches)
+            position = Vec3(sector.position.x * SECTOR_SIZE, sector.position.y * SECTOR_SIZE, 0)
+            writeSector(fout, position, sector.tracks, sector.switches)
         
         progress += 1
         newPercent = (progress * 100) / len(sectors)
