@@ -1,32 +1,18 @@
 #include <iostream>
-#include <fstream>
 
 #include <osg/Geode>
-#include <osg/PolygonMode>
-#include <osg/LineWidth>
-#include <osgDB/Registry>
-#include <fstream>
 
 #include <osg/ArgumentParser>
 
-#include <osgUtil/SmoothingVisitor>
 #include <osgDB/ReadFile>
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
-
-#include <sptCore/Path.h>
-#include <sptGFX/Extruder.h>
-
-#include <sptDB/VariantReader.h>
-
-using namespace sptCore;
-using namespace sptGFX;
 
 void print_vec(const osg::Vec3& vec)
 {
     std::cout << vec.x() << " " << vec.y() << " " << vec.z() << std::endl;
 }
-
+/*
 osg::Geode* createAxes(osg::Geode* geode)
 {
 
@@ -85,6 +71,7 @@ osg::Geode* createAxes(osg::Geode* geode)
 
     return result;
 };
+*/
 
 int main(int argc, char** argv)
 {

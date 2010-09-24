@@ -4,9 +4,8 @@ from build.support import GetPlatform
 Import('env')
 
 # construct buildDir and set include path
-applicationDir = 'applications/spt/'
-env.Append(CPPPATH = [os.path.join('#', applicationDir, 'include'), '#/include'])
-env.Append(LIBPATH = ['#/lib'])
+env.AppendUnique(CPPPATH = ['#/include'])
+env.AppendUnique(LIBPATH = ['#/lib'])
 
 # build
 objects = SConscript('src/SConscript')
