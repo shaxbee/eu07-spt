@@ -20,7 +20,7 @@ float Trainset::update(float time)
     for(Vehicles::iterator iter = _vehicles.begin(); iter != _vehicles.end(); iter++)
     {
         totalForce += iter->update(time);
-        totalMass += iter->getTotalMass();
+        totalMass += iter->state.getTotalMass();
     };
     
     double acceleration = totalForce / totalMass;

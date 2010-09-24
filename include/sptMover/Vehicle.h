@@ -10,6 +10,7 @@ namespace sptMover
 {
 
 class Trainset;
+class Vehicle;
     
 struct VehicleAxleTraits
 {
@@ -23,10 +24,11 @@ struct VehicleBoogeyTraits
 {
     // distance from front of vehicle
     float distance;
-    // length of boogey - distance between first and last axle
+    // distance between first and last axle - calculated automagically
     float length;
     // axles traits
-    std::vector<VehicleAxleTraits> axles;
+    typedef std::vector<VehicleAxleTraits> Axles;
+    Axles axles;
 };
 
 struct VehicleTraits
@@ -42,6 +44,29 @@ struct VehicleTraits
     Boogeys boogeys;
 };
 
+class VehicleState
+{
+public:
+    VehicleState();
+
+    void setLoad(float load);
+    float getLoad() const { return _load; }
+    
+    float getTotalMass() const;
+
+    float getAxleSpeed(size_t index) const { return _axleSpeeds.at(index); }
+    void setAxleSpeed(size_t index, float speed) { _axleSpeeds.at(index) = speed; }
+
+private:
+    Vehicle& owner();
+    const Vehicle& owner() const;
+
+    float _load;
+
+    typedef std::vector<float> AxleSpeeds;
+    AxleSpeeds _axleSpeeds;
+};
+
 //! Vehicle represents Trainset element
 class Vehicle
 {
@@ -54,33 +79,21 @@ public:
     //! \brief Update vehicle state
     //! \param time period since last update
     //! \return force
-    float update(float time);
-    
+    float update(float time);   
     void move(float distance);
     
-    void setLoad(float load);
-    float getLoad() const { return _load; }
-    
-    float getTotalMass() const;
-
-    //! \brief Get trainset containing Vehicle
-//    Trainset& getTrainset() { return *_trainset; }
-//    const Trainset& getTrainset() const { return *_trainset; }
-    
-//    void setTrainset(Trainset& trainset) { _trainset = trainset; }
-
     //! \brief Get physical traits
     const VehicleTraits& getTraits() const { return _traits; }
     
-	typedef boost::ptr_vector<sptCore::Follower> Followers;
-    
+	typedef boost::ptr_vector<sptCore::Follower> Followers;    
     const Followers& getFollowers() const { return _followers; }
+
+    VehicleState state;
 
 private:
 //    Trainset* _trainset;
 	std::string _name;
     const VehicleTraits _traits;
-    float _load;
 
     Followers _followers;
 
