@@ -1,16 +1,17 @@
 #ifndef SPT_VEHICLEVIEW_H
 #define SPT_VEHICLEVIEW_H 1
 
-#include <vector>
+#include <osg/Node>
 #include <osg/Group>
 #include <osg/MatrixTransform>
 
+#include <sptUtil/Math.h>
 #include <sptMover/Vehicle.h>
 
 namespace spt
 {
 
-class VehicleView
+class VehicleView: public osg::Node
 {
 
 public:
@@ -20,16 +21,14 @@ public:
     void update();
 
 private:
-    typedef std::vector<osg::ref_ptr<osg::MatrixTransform> > Nodes;
-
     //! \brief Clone model and gather transforms
     virtual void setModel(osg::Group* model);
 
     const sptMover::Vehicle& _vehicle;
 
-    osg::ref_ptr<osg::MatrixTransform> _body;
-    Nodes _boogeys;
-    Nodes _axles;
+    osg::ref_ptr<osg::MatrixTransform> _model;
+    osg::ref_ptr<osg::Group> _boogeys;
+    osg::ref_ptr<osg::Group> _axles;
 
 }; // class spt::VehicleView
 

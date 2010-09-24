@@ -79,22 +79,19 @@ public:
     //! \brief Update vehicle state
     //! \param time period since last update
     //! \return force
-    float update(float time);   
+    float update(float time);
+
+    //! \brief Move vehicle by given distance
     void move(float distance);
-    
-    //! \brief Get physical traits
-    const VehicleTraits& getTraits() const { return _traits; }
-    
+        
 	typedef boost::ptr_vector<sptCore::Follower> Followers;    
     const Followers& getFollowers() const { return _followers; }
 
+    const VehicleTraits traits;
     VehicleState state;
 
 private:
-//    Trainset* _trainset;
 	std::string _name;
-    const VehicleTraits _traits;
-
     Followers _followers;
 
 }; // class sptMover::Vehicle

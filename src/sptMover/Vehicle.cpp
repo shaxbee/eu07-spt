@@ -10,15 +10,15 @@ namespace sptMover
 
 void VehicleState::setLoad(float load)
 {
-    if(load > owner().getTraits().maxLoad)
-        throw std::runtime_error(str(format("Trying to load %d on vehicle \"%s\" when only %d is allowed.") % load % owner().getName() % owner().getTraits().maxLoad));
+    if(load > owner().traits.maxLoad)
+        throw std::runtime_error(str(format("Trying to load %d on vehicle \"%s\" when only %d is allowed.") % load % owner().getName() % owner().traits.maxLoad));
 
     _load = load;
 }; // sptMover::Vehicle::setLoad
 
 float VehicleState::getTotalMass() const
 {
-    return owner().getTraits().mass + _load;
+    return owner().traits.mass + _load;
 }; // sptMover::Vehicle::getTotalMass
 
 Vehicle& VehicleState::owner() { 
@@ -29,10 +29,10 @@ const Vehicle& VehicleState::owner() const {
     return reinterpret_cast<const Vehicle&>(*(this - offsetof(Vehicle, state))); 
 };
 
-Vehicle::Vehicle(const std::string& name, const VehicleTraits& traits, Track& track, float distance): 
-    _name(name), _traits(traits)
+Vehicle::Vehicle(const std::string& name, const VehicleTraits& traits_, Track& track, float distance): 
+    _name(name), traits(traits_)
 {
-    for(VehicleTraits::Boogeys::const_iterator iter = getTraits().boogeys.begin(); iter != getTraits().boogeys.end(); iter++)
+    for(VehicleTraits::Boogeys::const_iterator iter = traits.boogeys.begin(); iter != traits.boogeys.end(); iter++)
     {
         // put follower on track
         std::auto_ptr<Follower> follower(new Follower(track, distance + iter->distance));
