@@ -3,13 +3,13 @@
 #include <boost/format.hpp>
 
 using namespace boost;
-using namespace sptCore::
+using namespace sptCore;
 
 namespace sptMover
 {
     
-Vehicle::Vehicle(const Traits& traits, Track& track, float distance): 
-    _traits(traits)
+Vehicle::Vehicle(const std::string& name, const VehicleTraits& traits, Track& track, float distance): 
+    _name(name), _traits(traits)
 {
     for(VehicleTraits::Boogeys::const_iterator iter = getTraits().boogeys.begin(); iter != getTraits().boogeys.end(); iter++)
     {
@@ -22,8 +22,9 @@ Vehicle::Vehicle(const Traits& traits, Track& track, float distance):
 
 void Vehicle::setLoad(float load)
 {
-    if(load > getTraits().maxLoad())
-        throw std::runtime_error(str(format("Trying to load %d on vehicle \"%s\" when only %d is allowed." % load % getName() % getTraits().maxLoad)))
+    if(load > getTraits().maxLoad)
+        throw std::runtime_error(str(format("Trying to load %d on vehicle \"%s\" when only %d is allowed.") % load % getName() % getTraits().maxLoad));
+
     _load = load;
 }; // sptMover::Vehicle::setLoad
 
@@ -34,7 +35,7 @@ float Vehicle::getTotalMass() const
 
 void Vehicle::move(float distance)
 {
-    for(Followers::iterator iter = _followers.begin(); _followers.end(); _followers++)
+    for(Followers::iterator iter = _followers.begin(); iter != _followers.end(); iter++)
     {
         iter->move(distance);
     };

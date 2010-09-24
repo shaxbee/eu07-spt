@@ -7,12 +7,12 @@ env = env.Clone()
 env.Append(CPPPATH = '#/include')
 
 # build libraries
-libraries = ['sptCore', 'sptGFX', 'sptDB']
+libraries = ['sptCore', 'sptGFX', 'sptDB', 'sptMover']
 
 for library in libraries:
     SConscript(
         os.path.join(library, 'SConscript'), 
         exports=['env']
-	)
+    )
 
 env.Alias('install', '#/lib')

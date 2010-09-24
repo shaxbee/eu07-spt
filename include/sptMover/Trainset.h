@@ -1,7 +1,11 @@
 #ifndef SPTMOVER_TRAINSET_H
 #define SPTMOVER_TRAINSET_H 1
 
-#include <boost/ptr_deque/ptr_vector.hpp>
+#include <string>
+#include <boost/ptr_container/ptr_deque.hpp>
+
+#include <osg/Vec3>
+#include <osg/BoundingBox>
 
 #include <sptCore/RailTracking.h>
 #include <sptMover/Vehicle.h>
@@ -13,12 +17,14 @@ class Trainset
 {
 
 public:
-    Trainset(sptCore::RailTracking& track, float position = 0.0f);
+	Trainset(const std::string& name, sptCore::RailTracking& track, float position = 0.0f);
 
     //! \brief Update trainset vehicles
     //! \param time Time passed since last update
     //! \return Distance travelled
     float update(float time);
+
+	const std::string& getName() const { return _name; };
 
     //! \brief Get first occupied tracking 
     const sptCore::RailTracking& getFirstTracking() const;
@@ -38,9 +44,9 @@ public:
     //! \brief Get trainset speed
     float getSpeed() const;
 
-    typedef boost::ptr_deque<Vehicle> Vehicles;
+	typedef boost::ptr_deque<Vehicle> Vehicles;
     Vehicles& getVehicles() { return _vehicles; }
-    const Vehicles& getVehicles() { return _vehicles; }
+    const Vehicles& getVehicles() const { return _vehicles; }
     
     //! \brief Split trainset into two trainsets
     //! \param index Index of Vehicle from which split starts
@@ -51,6 +57,7 @@ public:
     void join(std::auto_ptr<Trainset> other);
 
 private:
+	std::string _name;
     Vehicles _vehicles;
     float _speed;
 

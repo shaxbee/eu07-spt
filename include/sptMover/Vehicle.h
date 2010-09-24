@@ -2,6 +2,7 @@
 #define SPTMOVER_VEHICLE_H 1
 
 #include <vector>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 #include <sptCore/Follower.h>
 
@@ -46,9 +47,11 @@ class Vehicle
 {
 
 public:
-    Vehicle(const Traits& traits, sptCore::Track& track, float distance);
+	Vehicle(const std::string& name, const VehicleTraits& traits, sptCore::Track& track, float distance = 0.0f);
 
-    //! \brief Update Vehicle state
+	const std::string& getName() const { return _name; }
+
+    //! \brief Update vehicle state
     //! \param time period since last update
     //! \return force
     float update(float time);
@@ -67,14 +70,15 @@ public:
 //    void setTrainset(Trainset& trainset) { _trainset = trainset; }
 
     //! \brief Get physical traits
-    const VehicleTraits& getTraits() { return _traits; }
+    const VehicleTraits& getTraits() const { return _traits; }
     
-    typedef boost::ptr_vector<sptCore::Follower> Followers;
+	typedef boost::ptr_vector<sptCore::Follower> Followers;
     
     const Followers& getFollowers() const { return _followers; }
 
 private:
 //    Trainset* _trainset;
+	std::string _name;
     const VehicleTraits _traits;
     float _load;
 
