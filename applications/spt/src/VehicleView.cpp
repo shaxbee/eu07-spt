@@ -70,7 +70,7 @@ osg::ref_ptr<osg::MatrixTransform> makeTransform(osg::Node* root, const std::str
 
 }; // anonymous namespace
 
-VehicleView::VehicleView(const sptMover::Vehicle& vehicle, osg::Group* model):
+VehicleView::VehicleView(sptMover::Vehicle& vehicle, osg::Group* model):
     _vehicle(vehicle) 
 { 
     setModel(model); 

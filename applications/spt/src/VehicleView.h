@@ -18,11 +18,12 @@ public:
         ANIMATE_NOTHING = 0,
         ANIMATE_BODY = 1,
         ANIMATE_BOOGEYS = 2,
-        ANIMATE_AXLES = 4
+        ANIMATE_AXLES = 4,
+        ANIMATE_ALL = 0xFFFF
     };
 
-    Vehicle& getVehicle() { return _vehicle; };
-    const Vehicle& getVehicle() const { return _vehicle; };
+    sptMover::Vehicle& getVehicle() { return _vehicle; };
+    const sptMover::Vehicle& getVehicle() const { return _vehicle; };
 
     size_t getAnimatedElements() const { return _elements; };
     void setAnimatedElements(size_t elements) { _elements = elements; };

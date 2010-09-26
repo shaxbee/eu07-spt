@@ -43,7 +43,7 @@ struct VehicleTraits
 class VehicleState
 {
 public:
-    VehicleState();
+//    VehicleState();
 
     void setLoad(float load);
     float getLoad() const { return _load; }
