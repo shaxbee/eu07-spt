@@ -10,7 +10,7 @@ import logging
 import logging.config
 import wx
 import wx.xrc
-import wx.aui
+import wx.aui as AUI
 import yaml
 import os.path
 import sys
@@ -21,7 +21,7 @@ import model.groups
 import model.scenery
 import ui.editor
 import ui.dialog
-import ui.palette
+#import ui.palette
 import sptyaml
 import sptmath
 import ui.ribbon
@@ -85,26 +85,24 @@ class MainWindow(wx.Frame):
 
         self.UpdateTitle()
 
-        self.ribbon = RB.RibbonBar(self, wx.ID_ANY)
-        home_page = RB.RibbonPage(self.ribbon,wx.ID_ANY,"Home")
-        toolbar_panel = RB.RibbonPanel(home_page, wx.ID_ANY, "Toolbar", wx.NullBitmap, wx.DefaultPosition,
-                                       wx.DefaultSize, agwStyle=RB.RIBBON_PANEL_NO_AUTO_MINIMISE)
-        s = wx.BoxSizer(wx.VERTICAL)
-        self.panel = wx.Window(self,wx.ID_ANY)
-        s.Add(self.ribbon, 0, wx.EXPAND)
-        #s.Add(self._logwindow, 1, wx.EXPAND)
-        s.Add(self.panel,2,wx.EXPAND)
-        self.SetSizer(s)
+        self.ribbon = ui.ribbon.RibbonPanel(self)
+        self.main_content_panel = wx.Panel(self,wx.ID_ANY)
+
+        main_sizer = wx.BoxSizer(wx.VERTICAL)
+
+        main_sizer.Add(self.ribbon, 0, wx.EXPAND)
+        main_sizer.Add(self.main_content_panel,1,wx.EXPAND)
+
+        self.SetSizer(main_sizer)
         
         '''Prepare pane manager'''
-        self._paneManager = wx.aui.AuiManager(self.panel)
+        self._paneManager = AUI.AuiManager(self.main_content_panel)
 
-        self.CreateMenu()
+        #self.CreateMenu()
         self.CreateStatusBar()
-        #self.CreateToolbars()
         self.CreateContent()
-        self.CreatePalette()
-#        self.RestorePerspective()
+        #self.CreatePalette()
+        #self.RestorePerspective()
 
 
         config = wx.FileConfig.Get()
@@ -180,36 +178,6 @@ class MainWindow(wx.Frame):
         # Creating palette with track making tools
         self.trackPaletteMenuEntry = mainMenu.FindItemById(wx.xrc.XRCID('ID_TRACK_PALETTE'))
 
-    def CreateToolbars(self):
-        #pass
-        #ui.ribbon.CreateRibbonBar()
-        #mainToolBar = self.xRes.LoadToolBar(self,"toolbar")
-        #mainToolBar = ui.ribbon.CreateRibbonBar(self)
-        #self.PrepareMainToolBarPaneInfo()
-        #mainToolBar = wx.ToolBar(self)
-        #self.SetToolBar(mainToolBar)
-        #self._paneManager.AddPane(mainToolBar, self._mainToolbarPaneInfo)
-        self.ribbon = ui.ribbon.RibbonFrame(self)
-        self._paneManager.AddPane(self.ribbon,wx.aui.AuiPaneInfo().
-                          Name("ribbon").Caption("ribbon").
-                          Top().Fixed().CloseButton(False).MaximizeButton(False))
-        # creating home page
-        #home_page = RB.RibbonPage(ribbon,wx.ID_ANY,"Home")
-
-        # creating panels for home page
-        #main_panel = RB.RibbonPanel(home_page,wx.ID_ANY,"Main", \
-        #agwStyle=RB.RIBBON_PANEL_NO_AUTO_MINIMISE)
-
-        #adding icons
-        #main_panel.AddSimpleButton(wx.ID_ANY,"New",wx.Nullbitmap,"")
-        #main_panel.AddSimpleButton(wx.ID_ANY,"Open",wx.Nullbitmap,"")
-        #main_panel.AddSimpleButton(wx.ID_ANY,"Save",wx.Nullbitmap,"")
-        #main_panel.AddSimpleButton(wx.ID_ANY,"Save as...",wx.Nullbitmap,"")
-
-        # create ribbon
-        #ribbon.Realize()
-        
-
     def CreateStatusBar(self):
 
         bar = wx.StatusBar(self)
@@ -219,12 +187,12 @@ class MainWindow(wx.Frame):
 
         self.SetStatusBar(bar)
 
-    def CreatePalette(self):
+    '''def CreatePalette(self):
         # Preparing pane infos for new panes
         self.PrepareTrackPalettePaneInfo()
 
         # Create palette
-        self.trackPaletteFrame = ui.palette.TrackPalette(self,ID_TRACK_PALETTE,250,400)
+        self.trackPaletteFrame = ui.palette.TrackPalette(self.main_content_panel,ID_TRACK_PALETTE,250,400)
 
         # Adding palette pane to manager as child
         self._paneManager.AddPane(self.trackPaletteFrame,self._trackPalettePaneInfo)
@@ -234,7 +202,7 @@ class MainWindow(wx.Frame):
         # Bypass bug in wxWidgets, that initiated size is wrong
         self._paneManager.GetPane(self.trackPaletteFrame).MinSize(wx.Size(0,0))
         # bind close event for panes
-        self.Bind(wx.aui.EVT_AUI_PANE_CLOSE, self.OnPaneClose)
+        self.Bind(AUI.EVT_AUI_PANE_CLOSE, self.OnPaneClose)'''
 
     def CreateContent(self):
         """
@@ -245,21 +213,21 @@ class MainWindow(wx.Frame):
         # Preparing pane infos for new panes
         self.PrepareEditorPaneInfo()
         # Creating new palette pane
-        self.editor = ui.editor.SceneryEditor(self, ID_EDITOR)
+        self.editor = ui.editor.SceneryEditor(self.main_content_panel, ID_EDITOR)
         #self._paneManager.AddPane(self.editor,self._editorPaneInfo)
         
         self._paneManager.Update()
         self.NewScenery()
 
     def PrepareEditorPaneInfo(self):
-        self._editorPaneInfo = wx.aui.AuiPaneInfo()
+        self._editorPaneInfo = AUI.AuiPaneInfo()
         self._editorPaneInfo.Name(NAME_MAIN_EDITOR_TOP_VIEW)
         self._editorPaneInfo.Caption(NAME_MAIN_EDITOR_TOP_VIEW)
         self._editorPaneInfo.Center()
         self._editorPaneInfo.CenterPane()
 
     def PrepareTrackPalettePaneInfo(self):
-        self._trackPalettePaneInfo = wx.aui.AuiPaneInfo()
+        self._trackPalettePaneInfo = AUI.AuiPaneInfo()
         #self._palettePaneInfo.Floatable()
         #self._palettePaneInfo.Dockable()
         self._trackPalettePaneInfo.CloseButton()
@@ -279,7 +247,7 @@ class MainWindow(wx.Frame):
 #        self._trackPalettePaneInfo.Hide()
 
     def PrepareMainToolBarPaneInfo(self):
-        self._mainToolbarPaneInfo = wx.aui.AuiPaneInfo()
+        self._mainToolbarPaneInfo = AUI.AuiPaneInfo()
         self._mainToolbarPaneInfo.ToolbarPane()
         self._mainToolbarPaneInfo.Name("Main Toolbar")
         self._mainToolbarPaneInfo.Gripper()
