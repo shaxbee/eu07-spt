@@ -2,6 +2,7 @@
 
 #include <boost/format.hpp>
 #include <osg/NodeVisitor>
+#include <osg/NodeCallback>
 
 #include <sptUtil/Math.h>
 
@@ -34,6 +35,17 @@ private:
     const std::string _search;
 
 };
+
+class VehicleViewUpdateCallback: public osg::NodeCallback
+{
+public:
+    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+    {
+        // we can use static cast because this class is placed 
+        // in anonymous namespace and used only in constructor
+        static_cast<VehicleView*>(node)->update();
+    };
+};
     
 osg::ref_ptr<osg::MatrixTransform> makeTransform(osg::Node* root, const std::string& name)
 {
@@ -57,6 +69,13 @@ osg::ref_ptr<osg::MatrixTransform> makeTransform(osg::Node* root, const std::str
 }; // makeTransform(root, name)
 
 }; // anonymous namespace
+
+VehicleView::VehicleView(const sptMover::Vehicle& vehicle, osg::Group* model):
+    _vehicle(vehicle) 
+{ 
+    setModel(model); 
+    setUpdateCallback(new VehicleViewUpdateCallback);
+}; // VehicleView::VehicleView(vehicle, model)
 
 void VehicleView::setModel(osg::Group* model)
 {
@@ -85,23 +104,35 @@ void VehicleView::update()
     const Vehicle::Followers& followers = _vehicle.getFollowers();
     
     // calculate vehicle position
+    // always update position because database paging 
+    // needs distance from viewer to object
     osg::Vec3f front = followers.front().getPosition();
     osg::Vec3f back = followers.back().getPosition();
-    osg::Matrix transform(osg::Matrix::translate((front + back) / 2));
-    
-    // calculate vehicle rotation
-    transform *= sptUtil::rotationMatrix(front - back);
-    
-    // update vehicle body transform
-    _model->setMatrix(transform);    
+    _model->setMatrix(osg::Matrix::translate((front + back) / 2));
 
-    // update boogeys transform
-    size_t axle = 0;
-    for(Vehicle::Followers::const_iterator iter = followers.begin(); iter != followers.end(); iter++, axle++)
+    // update vehicle body rotation
+    if(_elements & ANIMATE_BODY)
     {
-        osg::MatrixTransform* transform = static_cast<osg::MatrixTransform*>(_boogeys->getChild(axle));
-        transform->setMatrix(iter->getMatrix());
+        // calculate vehicle rotation
+        _model->setMatrix(_model->getMatrix() * sptUtil::rotationMatrix(front - back));
     };
-    
-    // TODO: axles rotation
+
+    if(_elements & ANIMATE_BOOGEYS)
+    {
+        // update boogeys transform
+        size_t boogey = 0;
+        for(Vehicle::Followers::const_iterator iter = followers.begin(); iter != followers.end(); iter++, boogey++)
+        {
+            osg::MatrixTransform* transform = static_cast<osg::MatrixTransform*>(_boogeys->getChild(boogey));
+            transform->setMatrix(iter->getMatrix());
+        };
+    };
+
+    if(_elements & ANIMATE_AXLES)
+    {
+        // TODO: axles rotation
+        // posible solutions: 
+        //   * manualy rotating MatrixTransforms of axles
+        //   * using osgAnimation and setDuration()
+    };
 };

@@ -14,18 +14,14 @@ class Vehicle;
     
 struct VehicleAxleTraits
 {
-    // distance from first axle
-    float distance;
     // diameter of axle wheels
     float diameter;
 };
 
 struct VehicleBoogeyTraits
 {
-    // distance from front of vehicle
-    float distance;
-    // distance between first and last axle - calculated automagically
-    float length;
+    // distance from center of boogey to buffers
+//    float bufferDistance;
     // axles traits
     typedef std::vector<VehicleAxleTraits> Axles;
     Axles axles;
@@ -33,8 +29,8 @@ struct VehicleBoogeyTraits
 
 struct VehicleTraits
 {
-    // length of vehicle from front to back buffer
-    float length;
+    // dimensions of vehicle: length, width, height
+    osg::Vec3f dimensions;
     // mass of empty vehicle
     float mass;
     // maximal mass of load

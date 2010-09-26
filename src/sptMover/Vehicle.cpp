@@ -21,11 +21,13 @@ float VehicleState::getTotalMass() const
     return owner().traits.mass + _load;
 }; // sptMover::Vehicle::getTotalMass
 
-Vehicle& VehicleState::owner() { 
+Vehicle& VehicleState::owner() 
+{ 
     return reinterpret_cast<Vehicle&>(*(this - offsetof(Vehicle, state))); 
 };
 
-const Vehicle& VehicleState::owner() const { 
+const Vehicle& VehicleState::owner() const 
+{ 
     return reinterpret_cast<const Vehicle&>(*(this - offsetof(Vehicle, state))); 
 };
 
@@ -35,7 +37,7 @@ Vehicle::Vehicle(const std::string& name, const VehicleTraits& traits_, Track& t
     for(VehicleTraits::Boogeys::const_iterator iter = traits.boogeys.begin(); iter != traits.boogeys.end(); iter++)
     {
         // put follower on track
-        std::auto_ptr<Follower> follower(new Follower(track, distance + iter->distance));
+        std::auto_ptr<Follower> follower(new Follower(track, distance));
         // register
         _followers.push_back(follower);
     };
