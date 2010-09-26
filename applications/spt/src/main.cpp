@@ -93,6 +93,7 @@ int main(int argc, char** argv)
 	try
 	{
 		root = osgDB::readNodeFile("default.scv");
+        // if loading failed exit program
 		if(!root.valid())
 			return 0;
 	} catch (std::exception& exc) {
@@ -101,7 +102,6 @@ int main(int argc, char** argv)
 		return 0;
 	};
 //    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-
 //    root->addChild(createAxes(geode.get()));
 
     osgViewer::Viewer viewer;

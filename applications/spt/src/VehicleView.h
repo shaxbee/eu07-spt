@@ -4,12 +4,7 @@
 #include <osg/Node>
 #include <osg/Group>
 #include <osg/MatrixTransform>
-
-#include <sptUtil/Math.h>
 #include <sptMover/Vehicle.h>
-
-namespace spt
-{
 
 class VehicleView: public osg::Node
 {
@@ -17,7 +12,7 @@ class VehicleView: public osg::Node
 public:
     VehicleView(const sptMover::Vehicle& vehicle, osg::Group* model): _vehicle(vehicle) { setModel(model); }
 
-    osg::MatrixTransform* getNode() const { return _body.get(); }
+    osg::MatrixTransform* getNode() const { return _model.get(); }
     void update();
 
 private:
@@ -31,7 +26,5 @@ private:
     osg::ref_ptr<osg::Group> _axles;
 
 }; // class spt::VehicleView
-
-}; // namespace spt
 
 #endif // header guard
