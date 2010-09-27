@@ -1,12 +1,17 @@
 #include "VehicleView.h"
 
 #include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
+
 #include <osg/NodeVisitor>
 #include <osg/NodeCallback>
 
 #include <sptUtil/Math.h>
 
+#include <iostream>
+
 using namespace boost;
+using namespace boost::algorithm;
 using namespace sptMover;
 
 namespace 
@@ -15,24 +20,28 @@ namespace
 class FindNodeVisitor: public osg::NodeVisitor
 {
 public:
-    FindNodeVisitor(const std::string& search): _search(search) { };
+    FindNodeVisitor(const std::string& search):
+        _search(to_lower_copy(search)), _result(NULL)
+    { 
+        setTraversalMode(TRAVERSE_ALL_CHILDREN);
+    };
 
     virtual void apply(osg::Node& node)
     {
-        // if node was found stop traversing
-        if(node.getName() == _search)
-            setTraversalMode(TRAVERSE_NONE);
-        traverse(node);
+        if(to_lower_copy(node.getName()) == _search)
+            _result = &node;
+        else
+            traverse(node);
     };
 
     osg::Node* result() const
     {
-        osg::Node* node = getNodePath().back();
-        return (node->getName() == _search ? node : NULL);
+        return _result;
     };
 
 private:
-    const std::string _search;
+    std::string _search;
+    osg::Node* _result;
 
 };
 
@@ -43,7 +52,9 @@ public:
     {
         // we can use static cast because this class is placed 
         // in anonymous namespace and used only in constructor
-        static_cast<VehicleView*>(node)->update();
+        VehicleView* view = static_cast<VehicleView*>(node);
+        view->getVehicle().move(-0.8);
+        view->update();
     };
 };
     
@@ -56,7 +67,8 @@ osg::ref_ptr<osg::MatrixTransform> makeTransform(osg::Node* root, const std::str
     // if node was not found throw exception
     osg::Node* node = visitor.result();
     if(!node)
-        throw std::runtime_error(str(format("Node \"%s\" not found under node \"%s\"") % name % root->getName()));
+        return osg::ref_ptr<osg::MatrixTransform>(NULL);
+//        throw std::runtime_error(str(format("Node \"%s\" not found under node \"%s\"") % name % root->getName()));
 
     osg::ref_ptr<osg::MatrixTransform> result = new osg::MatrixTransform;
     osg::Group* parent = node->getParent(0);
@@ -70,32 +82,33 @@ osg::ref_ptr<osg::MatrixTransform> makeTransform(osg::Node* root, const std::str
 
 }; // anonymous namespace
 
-VehicleView::VehicleView(sptMover::Vehicle& vehicle, osg::Group* model):
-    _vehicle(vehicle) 
+VehicleView::VehicleView(sptMover::Vehicle& vehicle, osg::Node* model):
+    _vehicle(vehicle), _bogies(new osg::Group), _axles(new osg::Group)
 { 
-    setModel(model); 
+    setModel(static_cast<osg::Group*>(model)); 
     setUpdateCallback(new VehicleViewUpdateCallback);
 }; // VehicleView::VehicleView(vehicle, model)
 
 void VehicleView::setModel(osg::Group* model)
 {
-    _model = new osg::MatrixTransform();
-    
+   
     // clone model nodes (geometry remains shared)
-    _model->addChild(static_cast<osg::Node*>(model->clone(osg::CopyOp::SHALLOW_COPY)));
+    addChild(static_cast<osg::Node*>(model->clone(osg::CopyOp::SHALLOW_COPY)));
     
-    const VehicleTraits::Boogeys& boogeys = _vehicle.traits.boogeys;    
+    const VehicleTraits::Bogies& bogies = _vehicle.traits.bogies;
 
-    // find and store boogey nodes
-    for(size_t index=1; index <= boogeys.size(); index++)
+    // find and store bogie nodes
+    for(size_t index=1; index <= bogies.size(); index++)
     {
-        // add boogeys
-        osg::Node* boogey = makeTransform(_model.get(), str(format("boogey%02d") % index));
-        _boogeys->addChild(boogey);
+        // add bogie
+        osg::Node* bogie = makeTransform(this, str(format("bogie%02d") % index));
+        if(!bogie)
+            bogie = makeTransform(this, str(format("bogie%d") % index));
+        _bogies->addChild(bogie);
 
-        // add boogey axles
-        for(size_t axle=1; axle <= boogeys[index-1].axles.size(); axle++)
-            _axles->addChild(makeTransform(boogey, str(format("axle%02d") % axle)));
+        // add bogie axles
+        //for(size_t axle=1; axle <= bogies[index-1].axles.size(); axle++)
+        //    _axles->addChild(makeTransform(bogie, str(format("axle%02d") % axle)));
     };
 };
 
@@ -108,22 +121,22 @@ void VehicleView::update()
     // needs distance from viewer to object
     osg::Vec3f front = followers.front().getPosition();
     osg::Vec3f back = followers.back().getPosition();
-    _model->setMatrix(osg::Matrix::translate((front + back) / 2));
+    setMatrix(osg::Matrix::translate((front + back) / 2));
 
     // update vehicle body rotation
     if(_elements & ANIMATE_BODY)
     {
         // calculate vehicle rotation
-        _model->setMatrix(_model->getMatrix() * sptUtil::rotationMatrix(front - back));
+        setMatrix(getMatrix() * sptUtil::rotationMatrix(front - back));
     };
 
-    if(_elements & ANIMATE_BOOGEYS)
+    if(_elements & ANIMATE_BOGIES)
     {
-        // update boogeys transform
-        size_t boogey = 0;
-        for(Vehicle::Followers::const_iterator iter = followers.begin(); iter != followers.end(); iter++, boogey++)
+        // update bogies transform
+        size_t bogie = 0;
+        for(Vehicle::Followers::const_iterator iter = followers.begin(); iter != followers.end(); iter++, bogie++)
         {
-            osg::MatrixTransform* transform = static_cast<osg::MatrixTransform*>(_boogeys->getChild(boogey));
+            osg::MatrixTransform* transform = static_cast<osg::MatrixTransform*>(_bogies->getChild(bogie));
             transform->setMatrix(iter->getMatrix());
         };
     };

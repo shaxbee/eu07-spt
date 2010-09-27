@@ -15,7 +15,7 @@ const RailTracking& Sector::getNextTrack(const osg::Vec3f& position, const RailT
 
     Connections::const_iterator iter = std::lower_bound(_connections.begin(), _connections.end(), search, ConnectionLess());
 
-    if(iter->position != position || (iter->first != &from && iter->second != &from))
+    if(iter == _connections.end() || iter->position != position || (iter->first != &from && iter->second != &from))
         throw UnknownConnectionException() << PositionInfo(position);
 
     const RailTracking* result = iter->first == &from ? iter->second : iter->first;

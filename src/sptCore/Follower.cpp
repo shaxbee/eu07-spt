@@ -62,7 +62,8 @@ void Follower::findPosition(osg::ref_ptr<osg::Vec3Array> points, osg::Vec3Array:
 osg::Vec3 Follower::getPosition() const
 {
     osg::ref_ptr<osg::Vec3Array> points(_path->points());
-    osg::Vec3Array::const_iterator iter;
+    osg::Vec3Array::const_iterator iter = points->begin();
+    iter++;
     float ratio;
 
     findPosition(points, iter, ratio);

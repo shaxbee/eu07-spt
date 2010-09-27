@@ -18,9 +18,10 @@ struct VehicleAxleTraits
     float diameter;
 };
 
-struct VehicleBoogeyTraits
+struct VehicleBogieTraits
 {
-    // distance from center of boogey to buffers
+    float distance;
+    // distance from center of bogie to buffers
 //    float bufferDistance;
     // axles traits
     typedef std::vector<VehicleAxleTraits> Axles;
@@ -35,15 +36,15 @@ struct VehicleTraits
     float mass;
     // maximal mass of load
     float maxLoad;
-    // boogeys traits
-    typedef std::vector<VehicleBoogeyTraits> Boogeys;
-    Boogeys boogeys;
+    // bogies traits
+    typedef std::vector<VehicleBogieTraits> Bogies;
+    Bogies bogies;
 };
 
 class VehicleState
 {
 public:
-//    VehicleState();
+//F    VehicleState();
 
     void setLoad(float load);
     float getLoad() const { return _load; }

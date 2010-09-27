@@ -34,10 +34,10 @@ const Vehicle& VehicleState::owner() const
 Vehicle::Vehicle(const std::string& name, const VehicleTraits& traits_, Track& track, float distance): 
     _name(name), traits(traits_)
 {
-    for(VehicleTraits::Boogeys::const_iterator iter = traits.boogeys.begin(); iter != traits.boogeys.end(); iter++)
+    for(VehicleTraits::Bogies::const_iterator iter = traits.bogies.begin(); iter != traits.bogies.end(); iter++)
     {
         // put follower on track
-        std::auto_ptr<Follower> follower(new Follower(track, distance));
+        std::auto_ptr<Follower> follower(new Follower(track, distance + iter->distance));
         // register
         _followers.push_back(follower);
     };
