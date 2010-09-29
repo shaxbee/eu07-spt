@@ -90,6 +90,6 @@ prj = env.MSVSProject(
     variant = 'Debug')
 
 env.Alias('install', ['#/bin', '#/python'])
-env.Alias('msvs', prj)
+env.Alias('msvc', prj)
 
 Default(sptClient)

@@ -3,4 +3,4 @@ Import('env')
 
 # include osg types output for cxxtest
 #env.Prepend(CXXTEST_OPTS = "--include=tests/OsgTypeTraits.h")
-env.CxxTest('sptUtil', Glob('*.t.h'))
+env.GTest('sptUtil', Glob('*.t.h'))
