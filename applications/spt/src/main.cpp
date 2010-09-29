@@ -11,6 +11,7 @@
 #include <sptMover/Vehicle.h>
 
 #include "SceneryAccess.h"
+#include "VehicleView.h"
 
 using namespace sptMover;
 
@@ -21,14 +22,16 @@ std::auto_ptr<Vehicle> createSampleVehicle(sptCore::Track& track)
     traits.mass = 114000;
     traits.maxLoad = 0;
 
-    VehicleBoogeyTraits boogey;
+    VehicleBogieTraits bogie;
     VehicleAxleTraits axle;
     axle.diameter = 1.25f;
-    boogey.axles.push_back(axle);
-    boogey.axles.push_back(axle);
+    bogie.axles.push_back(axle);
+    bogie.axles.push_back(axle);
 
-    traits.boogeys.push_back(boogey);
-    traits.boogeys.push_back(boogey);
+    bogie.distance = 0.0f;
+    traits.bogies.push_back(bogie);
+    bogie.distance = 16.81f;
+    traits.bogies.push_back(bogie);
 
     std::auto_ptr<Vehicle> vehicle(new Vehicle("test", traits, track));
     return vehicle;
@@ -54,11 +57,12 @@ int main(int argc, char** argv)
 	std::string sceneryPath = "scenery/" + std::string(arguments[1]) + "/";
 	osgDB::Registry::instance()->getDataFilePathList().push_back(sceneryPath);
 
-	osg::ref_ptr<osg::Node> root;
+    osg::ref_ptr<osg::Group> root(new osg::Group);
+    osg::ref_ptr<osg::Node> scenery;
 
 	try
 	{
-		root = osgDB::readNodeFile("default.scv");
+		scenery = osgDB::readNodeFile("default.scv");
         // if loading failed exit program
 		if(!root.valid())
 			return 0;
@@ -70,7 +74,10 @@ int main(int argc, char** argv)
 //    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
 //    root->addChild(createAxes(geode.get()));
 
-    createSampleVehicle(getSceneryInstance().getTrack("start"));
+    std::auto_ptr<sptMover::Vehicle> vehicle = createSampleVehicle(getSceneryInstance().getTrack("start"));
+    root->addChild(new VehicleView(*vehicle, osgDB::readNodeFile("e186_profeta.ive")));
+    root->addChild(scenery);
+//    root->addChild(osgDB::readNodeFile("e186_profeta.ive"));
 
     osgViewer::Viewer viewer;
 

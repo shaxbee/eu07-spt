@@ -7,17 +7,17 @@
 
 #include <sptMover/Vehicle.h>
 
-class VehicleView: public osg::Node
+class VehicleView: public osg::MatrixTransform
 {
 
 public:
-    VehicleView(sptMover::Vehicle& vehicle, osg::Group* model);
+    VehicleView(sptMover::Vehicle& vehicle, osg::Node* model);
 
     enum AnimatedElements
     {
         ANIMATE_NOTHING = 0,
         ANIMATE_BODY = 1,
-        ANIMATE_BOOGEYS = 2,
+        ANIMATE_BOGIES = 2,
         ANIMATE_AXLES = 4,
         ANIMATE_ALL = 0xFFFF
     };
@@ -40,7 +40,7 @@ private:
     sptMover::Vehicle& _vehicle;
 
     osg::ref_ptr<osg::MatrixTransform> _model;
-    osg::ref_ptr<osg::Group> _boogeys;
+    osg::ref_ptr<osg::Group> _bogies;
     osg::ref_ptr<osg::Group> _axles;
 
 }; // class spt::VehicleView
