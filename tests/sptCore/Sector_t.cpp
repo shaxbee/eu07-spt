@@ -16,7 +16,7 @@ class SectorTest: public ::testing::Test
 {
 
 public:
-    SectorTestSuite(): 
+    SectorTest(): 
         pointA(0, 0, 0),
         pointB(100, 0, 0),
         pointC(200, 0, 0),
@@ -31,8 +31,8 @@ public:
 
         boost::array<RailTracking*, 2> tracks =
         {{
-            new Track(*sector, path1),
-            new Track(*sector, path2)
+            new Track(sector, path1),
+            new Track(sector, path2)
         }};
 
         boost::array<Sector::Connection, 2> connections =

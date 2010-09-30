@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 
-#include <sptCore/switch_.h>
+#include <osg/io_utils>
+
+#include <sptCore/Switch.h>
 #include <sptCore/Sector.h>
 
 using namespace sptCore;
@@ -9,7 +11,7 @@ class SwitchTest: public ::testing::Test
 {
     
 public:
-    switch_TestSuite():
+    SwitchTest():
         sector(osg::Vec3()),
         begin(0.0f, 0.0f, 0.0f), 
         straight(10.0f, 0.0f, 0.0f), 
@@ -28,7 +30,7 @@ protected:
     
 }; // SwitchTest
 
-TEST_F(TrackTest, SetPosition)
+TEST_F(SwitchTest, SetPosition)
 {
     switch_.setPosition("STRAIGHT");
     ASSERT_EQ(switch_.getPosition(), "STRAIGHT");
@@ -36,10 +38,10 @@ TEST_F(TrackTest, SetPosition)
     switch_.setPosition("DIVERTED");
     ASSERT_EQ(switch_.getPosition(), "DIVERTED");
 
-    ASSERT_THROW(switch_.setPosition("INVALID"), switch_::InvalidPositionException);
+    ASSERT_THROW(switch_.setPosition("INVALID"), Switch::InvalidPositionException);
 };
 
-TEST_F(TrackTest, GetExit)
+TEST_F(SwitchTest, GetExit)
 {
     switch_.setPosition("STRAIGHT");        
     
@@ -58,7 +60,7 @@ TEST_F(TrackTest, GetExit)
     ASSERT_THROW(switch_.getExit(osg::Vec3f(0.0f, 0.0f, 1.0f)), RailTracking::UnknownEntryException);    
 };
   
-TEST_F(TrackTest, GetPath)
+TEST_F(SwitchTest, GetPath)
 {
     switch_.setPosition("STRAIGHT");
 
