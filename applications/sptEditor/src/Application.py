@@ -15,13 +15,14 @@ import yaml
 import os.path
 import sys
 import optparse
+#import run
 
 import model.tracks
 import model.groups
 import model.scenery
 import ui.editor
 import ui.dialog
-#import ui.palette
+import ui.palette
 import sptyaml
 import sptmath
 import ui.ribbon
@@ -85,23 +86,25 @@ class MainWindow(wx.Frame):
 
         self.UpdateTitle()
 
+        #self.CreateMenu()
         self.ribbon = ui.ribbon.RibbonPanel(self)
+        
+        # Ribbon need panel wich can be managed by AUIManager
         self.main_content_panel = wx.Panel(self,wx.ID_ANY)
 
+        # creating and setting sizer for ribbon and content
         main_sizer = wx.BoxSizer(wx.VERTICAL)
-
         main_sizer.Add(self.ribbon, 0, wx.EXPAND)
         main_sizer.Add(self.main_content_panel,1,wx.EXPAND)
-
         self.SetSizer(main_sizer)
         
-        '''Prepare pane manager'''
+        # Prepare pane manager
         self._paneManager = AUI.AuiManager(self.main_content_panel)
 
-        #self.CreateMenu()
+
         self.CreateStatusBar()
         self.CreateContent()
-        #self.CreatePalette()
+        self.CreatePalette()
         #self.RestorePerspective()
 
 
@@ -187,7 +190,7 @@ class MainWindow(wx.Frame):
 
         self.SetStatusBar(bar)
 
-    '''def CreatePalette(self):
+    def CreatePalette(self):
         # Preparing pane infos for new panes
         self.PrepareTrackPalettePaneInfo()
 
@@ -196,13 +199,13 @@ class MainWindow(wx.Frame):
 
         # Adding palette pane to manager as child
         self._paneManager.AddPane(self.trackPaletteFrame,self._trackPalettePaneInfo)
-        self.trackPaletteMenuEntry.Check(True)
+        #self.trackPaletteMenuEntry.Check(True)
         self._paneManager.Update()
         
-        # Bypass bug in wxWidgets, that initiated size is wrong
+        # Bypass bug in wxWidgets, that initialization size is wrong
         self._paneManager.GetPane(self.trackPaletteFrame).MinSize(wx.Size(0,0))
         # bind close event for panes
-        self.Bind(AUI.EVT_AUI_PANE_CLOSE, self.OnPaneClose)'''
+        #self.Bind(AUI.EVT_AUI_PANE_CLOSE, self.OnPaneClose)
 
     def CreateContent(self):
         """
@@ -213,8 +216,8 @@ class MainWindow(wx.Frame):
         # Preparing pane infos for new panes
         self.PrepareEditorPaneInfo()
         # Creating new palette pane
-        self.editor = ui.editor.SceneryEditor(self.main_content_panel, ID_EDITOR)
-        #self._paneManager.AddPane(self.editor,self._editorPaneInfo)
+        self.editor = ui.editor.SceneryEditor(self.main_content_panel, self, ID_EDITOR)
+        self._paneManager.AddPane(self.editor,self._editorPaneInfo)
         
         self._paneManager.Update()
         self.NewScenery()
@@ -638,3 +641,37 @@ if __name__ == "__main__":
     frame = MainWindow(None, ID_MAIN_FRAME)
     app.MainLoop()
 
+
+#----------------------------------------------------------------------
+# ONLY FOR TESTS PURPOSES, DO NOT DELETE
+#----------------------------------------------------------------------
+'''class TestPanel(wx.Panel):
+    def __init__(self, parent, log):
+        self.log = log
+        wx.Panel.__init__(self, parent, -1)
+
+        b1 = wx.Button(self, -1, " Pure-Python RibbonBar ", (50,50))
+        self.Bind(wx.EVT_BUTTON, self.OnButton1, b1)
+
+
+    def OnButton1(self, event):
+        self.win = MainWindow(self, -1)
+
+
+#----------------------------------------------------------------------
+
+def runTest(frame, nb, log):
+
+    win = TestPanel(nb, log)
+    return win
+
+#----------------------------------------------------------------------
+
+
+overview = RB.__doc__
+
+
+if __name__ == '__main__':
+    import sys,os
+    import run
+    run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])'''
