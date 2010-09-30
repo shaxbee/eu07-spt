@@ -8,16 +8,13 @@ env = env.Clone()
 
 def gtest(source, target, env, for_signature):
     result = list()
-    for src in source:
-        libs = env['LIBS'] if 'LIBS' in env else []
-        target = target[0].abspath + env['PROGSUFFIX']
-        prog = env.Program(target, source, LIBS=libs+['gtest'], CXXFLAGS=env['CXXFLAGS'])
-        action = env.Action(prog[0].abspath)
-        result.append(action)
-        env.Alias('check', prog, action)
-
+    libs = env['LIBS'] if 'LIBS' in env else []
+    target = target[0].abspath + env['PROGSUFFIX']
+    prog = env.Program(target, source, LIBS=libs+['gtest'], CXXFLAGS=env['CXXFLAGS'])
+    action = env.Action(prog[0].abspath)
+    env.Alias('check', prog, action)
     env.AlwaysBuild('check')
-    return result    
+    return action
     
 env.AppendUnique(BUILDERS = {'GTest': Builder(generator = gtest)})
 env.AppendENVPath('PATH', '#/bin')
