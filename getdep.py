@@ -129,9 +129,21 @@ def install_osg():
 		
 	shutil.rmtree(download_dir)
 
+def install_gtest():
+    if os.path.exists('ext/include/gtest'):
+        print "Google Test already installed"
+        return
+        
+    gtest_url = 'http://shaxbee.eu07.pl/spt-dep/'
+    
+    print "Installing Google Test"
+    
+    download_and_extract(gtest_url, 'gtest-%s.zip' % GTEST_VERSION, 'ext')
+
 init_ext()
 install_scons()
 install_boost()
 install_osg()
+install_gtest()
 
 raw_input("Installation complete, press Enter to continue")

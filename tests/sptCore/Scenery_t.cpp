@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <osg/io_utils>
+
 #include <sptCore/Scenery.h>
 
 #include <sptCore/Track.h>
@@ -26,8 +28,8 @@ TEST_F(SceneryTest, TrackAccess)
 
     scenery.addTrack("track1", *testTrack);
 
-    ASSERT_EQ(&_scenery.getTrack("track1"), testTrack.get());
-    ASSERT_THROW(&_scenery.getTrack("track2"), SceneryException);
+    ASSERT_EQ(&scenery.getTrack("track1"), testTrack.get());
+    ASSERT_THROW(&scenery.getTrack("track2"), SceneryException);
 };
 
 TEST_F(SceneryTest, SwitchAccess)
@@ -36,6 +38,6 @@ TEST_F(SceneryTest, SwitchAccess)
 
     scenery.addSwitch("switch1", *testSwitch);
     
-    TS_ASSERT_EQS(&_scenery->getSwitch("switch1"), testSwitch.get());
-    TS_ASSERT_THROWS(&_scenery->getSwitch("switch2"), SceneryException);
+    ASSERT_EQ(&scenery.getSwitch("switch1"), testSwitch.get());
+    ASSERT_THROW(&scenery.getSwitch("switch2"), SceneryException);
 };

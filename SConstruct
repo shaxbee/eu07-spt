@@ -60,5 +60,6 @@ if 'doc' in COMMAND_LINE_TARGETS:
 SConscript('build/msvs/SConscript')
 
 env.Alias('install', ['#/bin', '#/python'])
+env.Alias('msvc', prj)
 
 Default(sptClient)

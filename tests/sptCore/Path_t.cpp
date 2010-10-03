@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <osg/io_utils>
 #include <sptCore/Path.h>
 
 using namespace sptCore;
@@ -24,8 +25,8 @@ TEST(PathTest, Bezier)
 
     BezierPath path(begin, osg::Vec3(100.0f, 0.0f, 10.0f), end, osg::Vec3(100.0f, 0.0f, 0.0f));
 
-    ASSERT_EQS(path.front(), begin);
-    ASSERT_EQS(path.back(), end);
+    ASSERT_EQ(path.front(), begin);
+    ASSERT_EQ(path.back(), end);
     ASSERT_NEAR(path.length(), 114.0f, 0.5f);
 
     ASSERT_NEAR(path.frontDir().x(), 1.0f, 0.01f);

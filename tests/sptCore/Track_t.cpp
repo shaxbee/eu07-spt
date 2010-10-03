@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <osg/io_utils>
+
 #include <sptCore/Track.h>
 #include <sptCore/Sector.h>
 
@@ -8,7 +10,7 @@ using namespace sptCore;
 class TrackTest: public ::testing::Test
 {
 public:
-    TrackTestSuite():
+    TrackTest():
         begin(0.0f, 0.0f, 0.0f), 
         end(10.0f, 10.0f, 10.0f), 
         sector(osg::Vec3()),
