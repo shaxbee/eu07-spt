@@ -16,12 +16,17 @@ env.AppendUnique(LIBPATH = os.path.join(sys.prefix, 'lib'))
 env.AppendUnique(CXXFLAGS = ['/GR', '/EHsc'])
 env.AppendUnique(CPPDEFINES = ['WIN32'])
 
-# debug / release flags
-if env['DEBUG']:
-	env.Append(CXXFLAGS = ['/Zi', '/Od', '/MDd'])
-	env.Append(LINKFLAGS = ['/DEBUG'])
-else:
-	env.Append(CXXFLAGS = ['/O2', '/MD'])
+debug_env = env.Clone()
+debug_env.AppendUnique(CXXFLAGS = ['/Zi', '/Od', '/MDd'])
+debug_env.Append(LINKFLAGS = ['/DEBUG'])
+debug_env.Prepend(LIBSUFFIX = 'd', SHLIBSUFFIX = 'd')
+debug_env.AppendUnique(CPPDEFINES = ['DEBUG'])
+debug_env['BUILD_DIR'] = '#/build/win32/debug'
+
+release_env = env.Clone()
+release_env.AppendUnique(CXXFLAGS = ['/O2', '/MD'])
+release_env.AppendUnique(CPPDEFINES = ['NDEBUG'])
+release_env['BUILD_DIR'] = '#/build/win32/release'
 	
 # return modified environment
-Return('env')
+Return('debug_env', 'release_env')

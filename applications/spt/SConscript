@@ -12,7 +12,7 @@ objects = SConscript('src/SConscript')
 
 # link application
 program = env.Program(
-    'spt' if not env['DEBUG'] else 'sptd', 
+    'spt',
     objects, 
     LIBS=['osg', 'osgDB', 'osgGA', 'osgUtil', 'osgViewer', 'OpenThreads', 'sptGFX', 'sptDB', 'sptCore', 'sptMover'])
 

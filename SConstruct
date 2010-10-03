@@ -26,70 +26,39 @@ vars.Add(EnumVariable('TEST_PRINTER', 'Unit tests error printer', 'Paren', ('Xml
 # construct build environment
 env = Environment(variables = vars, toolpath=['#/build/tools'], tools=['default', 'findsources'], ENV = os.environ)
 
-# add command line options description
-Help(vars.GenerateHelpText(env))
-
-# configure environment and check dependencies platform-wise
-env = SConscript(os.path.join(buildDir, 'SConscript'), exports=['env', 'buildDir'])
-
 # performance tuning
 env.Decider('MD5-timestamp')
 env.SetOption('max_drift', 1)
 
-conf = Configure(env)
+# add command line options description
+Help(vars.GenerateHelpText(env))
 
-#if not conf.CheckLibWithHeader('osg', 'osg/Node', 'c++'):
-#	print 'OpenSceneGraph library not found'
-#	exit(1);
-	
-#if not conf.CheckCXXHeader('boost/exception.hpp'):
-#	print 'Boost library not found'
-#	exit(1);
+# configure environment for platform
+debug_env, release_env = SConscript(os.path.join(buildDir, 'SConscript'), exports=['env', 'buildDir'])
 
-env = conf.Finish();
-
-# setup defines and paths depending on DEBUG flag
-if env['DEBUG']:
-    defines = ['DEBUG']
-    env.Prepend(LIBSUFFIX = 'd', SHLIBSUFFIX = 'd')
-    buildDir = os.path.join(buildDir, 'debug')
-else:
-    defines = ['NDEBUG']
-    buildDir = os.path.join(buildDir, 'release')
-
-env.Append(CPPDEFINES = defines)
-
-# export environment and build dir for other scripts    
-Export('env')
-
+targets = {'spt': list()}
 # common library
-SConscript('src/SConscript', variant_dir = os.path.join(buildDir, 'lib'), duplicate = 0)
-
-# applications
-sptClient = SConscript('applications/spt/SConscript', variant_dir = os.path.join(buildDir, 'applications'), duplicate = 0)
+for env in [debug_env, release_env]:
+    # export environment and build dir for other scripts    
+    Export('env')
+    SConscript('src/SConscript', variant_dir = os.path.join(env['BUILD_DIR']), duplicate = 0)
+    targets['spt'].append(SConscript('applications/spt/SConscript', variant_dir = os.path.join(env['BUILD_DIR'], 'applications/spt'), duplicate = 0))
 
 # python wrappers
 # if 'wrappers' in COMMAND_LINE_TARGETS:
 # SConscript('wrappers/SConscript', variant_dir = os.path.join(buildDir, 'wrappers'), duplicate = 0)
 
 # unit tests
-if 'check' in COMMAND_LINE_TARGETS:
-	SConscript('tests/SConscript', variant_dir = os.path.join(buildDir, 'tests'), duplicate = 0)
+env = debug_env
+Export('env')
+tests = SConscript('tests/SConscript', variant_dir = os.path.join(buildDir, 'tests'), duplicate = 0)
 
 # documentation
 if 'doc' in COMMAND_LINE_TARGETS:
     SConscript('doc/SConscript')
-
-sources, headers = env.FindAllSourceFiles(sptClient)
-
-prj = env.MSVSProject(
-    target = 'spt' + env['MSVSPROJECTSUFFIX'],
-    buildtarget = sptClient[0].path,
-    srcs = sources,
-    incs = headers,
-    variant = 'Debug')
+    
+SConscript('build/msvs/SConscript')
 
 env.Alias('install', ['#/bin', '#/python'])
-env.Alias('msvs', prj)
 
 Default(sptClient)
