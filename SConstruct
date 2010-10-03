@@ -51,15 +51,17 @@ for env in [debug_env, release_env]:
 # unit tests
 env = debug_env
 Export('env')
-tests = SConscript('tests/SConscript', variant_dir = os.path.join(buildDir, 'tests'), duplicate = 0)
+tests = SConscript('tests/SConscript', variant_dir = os.path.join(env['BUILD_DIR'], 'tests'), duplicate = 0)
+
+print repr(tests);
 
 # documentation
 if 'doc' in COMMAND_LINE_TARGETS:
     SConscript('doc/SConscript')
     
+Export('targets', 'tests')
 SConscript('build/msvs/SConscript')
 
 env.Alias('install', ['#/bin', '#/python'])
-env.Alias('msvc', prj)
 
-Default(sptClient)
+Default(targets['spt'][0])

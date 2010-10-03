@@ -2,9 +2,7 @@ import os.path
 
 Import('env')
 
-cxxflags = env['CXXFLAGS']
-
-env = env.Clone()
+#env = env.Clone()
 
 def gtest(source, target, env, for_signature):
     result = list()
@@ -19,5 +17,9 @@ def gtest(source, target, env, for_signature):
 env.AppendUnique(BUILDERS = {'GTest': Builder(generator = gtest)})
 env.AppendENVPath('PATH', '#/bin')
 
+tests = dict()
+
 for library in ['sptCore']:
-    env.SConscript(os.path.join(library, 'SConscript'), exports = ['env'], duplicate = 0)
+    tests[library] = env.SConscript(os.path.join(library, 'SConscript'), exports = ['env'], duplicate = 0)
+    
+Return('tests')

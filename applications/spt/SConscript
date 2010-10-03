@@ -20,7 +20,7 @@ program = env.Program(
 env.Install('#/bin', program)
 
 # copy debugging symbols database
-if env['DEBUG'] and GetPlatform() == 'win32':
-	env.Install('#/bin', ['sptd.pdb', 'sptd.ilk'])
+#if env['DEBUG'] and GetPlatform() == 'win32':
+#	env.Install('#/bin', ['sptd.pdb', 'sptd.ilk'])
 	
 Return('program')

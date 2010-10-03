@@ -19,7 +19,13 @@ env.AppendUnique(CPPDEFINES = ['WIN32'])
 debug_env = env.Clone()
 debug_env.AppendUnique(CXXFLAGS = ['/Zi', '/Od', '/MDd'])
 debug_env.Append(LINKFLAGS = ['/DEBUG'])
-debug_env.Prepend(LIBSUFFIX = 'd', SHLIBSUFFIX = 'd')
+
+debug_env.Prepend(
+    LIBSUFFIX = 'd', 
+    SHLIBSUFFIX = 'd',
+    PROGSUFFIX = 'd',
+    OBJSUFFIX = 'd')
+    
 debug_env.AppendUnique(CPPDEFINES = ['DEBUG'])
 debug_env['BUILD_DIR'] = '#/build/win32/debug'
 

@@ -2,4 +2,6 @@ import os.path
 
 Import('env')
 
-env.GTest('sptCore', Glob('*_t.cpp'), LIBS=['osg', 'sptCore'])
+target = env.GTest('sptCore', Glob('*_t.cpp'), LIBS=['osg', 'sptCore'])
+
+Return('target')
