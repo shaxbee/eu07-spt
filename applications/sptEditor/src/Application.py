@@ -86,7 +86,7 @@ class MainWindow(wx.Frame):
 
         self.UpdateTitle()
 
-        #self.CreateMenu()
+        self.CreateMenu()
         self.ribbon = ui.ribbon.RibbonPanel(self)
         
         # Ribbon need panel wich can be managed by AUIManager
@@ -627,7 +627,7 @@ class MainWindow(wx.Frame):
         self.trackPaletteMenuEntry.Check(False)
 
 
-'''if __name__ == "__main__":
+if __name__ == "__main__":
     usage = "Usage: %prog [options]"
     parser = optparse.OptionParser(usage=usage)
     parser.add_option("-l", "--logging", action="store", type="string", \
@@ -639,9 +639,9 @@ class MainWindow(wx.Frame):
     
     app = Application()
     frame = MainWindow(None, ID_MAIN_FRAME)
-    app.MainLoop()'''
+    app.MainLoop()
 
-
+'''
 #----------------------------------------------------------------------
 # ONLY FOR TESTS PURPOSES, DO NOT DELETE
 #----------------------------------------------------------------------
@@ -674,4 +674,4 @@ overview = RB.__doc__
 if __name__ == '__main__':
     import sys,os
     import run
-    run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])
+    run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])'''
