@@ -41,7 +41,7 @@ public:
 
     //! \brief Update single connection.
     //! param position Connection position
-    void updateConnection(const osg::Vec3f& position, const RailTracking* previous, const RailTracking* current = NULL);
+    const RailTracking* updateConnection(const osg::Vec3f& position, const RailTracking* previous, const RailTracking* current = NULL);
 
     struct Connection
     {

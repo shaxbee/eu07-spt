@@ -36,7 +36,7 @@ size_t Sector::getRailTrackingCount() const
     return _trackings.size();
 }; // Sector::getRailTrackingCount()
 
-void Sector::updateConnection(const osg::Vec3f& position, const RailTracking* previous, const RailTracking* current)
+const RailTracking* Sector::updateConnection(const osg::Vec3f& position, const RailTracking* previous, const RailTracking* current)
 {
     Connection search = {position, NULL, NULL};
     Connections::iterator iter = std::lower_bound(_connections.begin(), _connections.end(), search, ConnectionLess());
@@ -45,9 +45,15 @@ void Sector::updateConnection(const osg::Vec3f& position, const RailTracking* pr
         throw UnknownConnectionException() << PositionInfo(position);
 
     if(iter->first == previous)
+    {
         iter->first = current;
+        return iter->second;
+    }
     else if(iter->second == previous)
+    {
         iter->second = current;
-    else
-        throw UnknownConnectionException() << PositionInfo(position);  
+        return iter->first;
+    };
+
+    return NULL;  
 };

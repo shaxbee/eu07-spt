@@ -1,6 +1,0 @@
-Import('env')
-
-sources = Split('SectorReader.cpp VariantReader.cpp BinaryReader.cpp')
-library = env.StaticLibrary('sptDB', sources, LIBS=['sptCore', 'osg']);
-
-env.Install('#/lib', library)

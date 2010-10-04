@@ -1,6 +1,0 @@
-Import('env')
-
-sources = Split('Trainset.cpp Vehicle.cpp')
-library = env.StaticLibrary('sptMover', sources, LIBS=['sptCore', 'osg']);
-
-env.Install('#/lib', library)

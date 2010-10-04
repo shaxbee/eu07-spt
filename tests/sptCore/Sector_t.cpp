@@ -24,7 +24,7 @@ public:
     { 
     };
 
-    void setUp()
+    void SetUp()
     {
         std::auto_ptr<Path> path1(new StraightPath(pointA, pointB));
         std::auto_ptr<Path> path2(new StraightPath(pointB, pointC));

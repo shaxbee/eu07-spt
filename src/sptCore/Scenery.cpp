@@ -45,7 +45,14 @@ void registerExternalConnections(Scenery* scenery, Sector* sector)
         if(iter->second == NULL && getSectorOffset(iter->position) != osg::Vec3f(0.0f, 0.0f, 0.0f))
         {
             osg::Vec3f offset = getSectorOffset(iter->position) * Sector::SIZE;
-            scenery->getSector(sector->getPosition() - offset).updateConnection(iter->position - offset, NULL, iter->second);
+            osg::Vec3f sectorPos = sector->getPosition() + offset;
+
+            if(scenery->hasSector(sectorPos))
+            {
+                const RailTracking* other = scenery->getSector(sectorPos).updateConnection(iter->position - offset, NULL, iter->first);
+                if(other)
+                    sector->updateConnection(iter->position, NULL, other);
+            }
         };
     }
 };

@@ -48,7 +48,7 @@ class FollowerTest: public ::testing::Test
 {
 
 public:
-    void setUp()
+    void SetUp()
     {
         point1 = osg::Vec3(Sector::SIZE / 2, Sector::SIZE /2, 0);
         point2 = osg::Vec3(Sector::SIZE * 1.5, Sector::SIZE / 2, 0);

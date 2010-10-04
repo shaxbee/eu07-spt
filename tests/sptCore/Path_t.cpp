@@ -27,7 +27,7 @@ TEST(PathTest, Bezier)
 
     ASSERT_EQ(path.front(), begin);
     ASSERT_EQ(path.back(), end);
-    ASSERT_NEAR(path.length(), 114.0f, 0.5f);
+    ASSERT_NEAR(path.length(), 180.0f, 1.0f);
 
     ASSERT_NEAR(path.frontDir().x(), 1.0f, 0.01f);
     ASSERT_NEAR(path.backDir().y(), 1.0f, 0.01f);
