@@ -31,3 +31,10 @@ glob:*.sln
 glob:*.old
 glob:*vcproj*
 glob:*.pdb
+glob:build/CMakeCache.txt
+glob:build/CMakeFiles
+glob:build/applications
+glob:build/src
+glob:build/tests
+glob:build/cmake_install.cmake
+glob:build/install_manifest.txt

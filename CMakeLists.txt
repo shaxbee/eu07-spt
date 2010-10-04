@@ -13,6 +13,9 @@ include_directories(include)
 IF(WIN32)
     include_directories(SYSTEM ${spt_SOURCE_DIR}/ext/include)
     link_directories(${spt_SOURCE_DIR}/ext/lib)
+    
+    #disable MSVC safety warning triggered in boost
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996")
 ENDIF(WIN32)
 
 add_subdirectory(src)
