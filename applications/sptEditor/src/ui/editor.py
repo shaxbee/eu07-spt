@@ -38,7 +38,7 @@ class SceneryEditor(wx.Panel):
     Scenery editor control.
     """
 
-    def __init__(self, parent, id = wx.ID_ANY):
+    def __init__(self, parent, main_window, id = wx.ID_ANY):
         wx.Panel.__init__(self, parent, id, style = wx.BORDER_SUNKEN)
         
         sizer = wx.FlexGridSizer(2, 2, 1, 1)
@@ -49,7 +49,7 @@ class SceneryEditor(wx.Panel):
             name = "Left ruler")
         self.topRuler = Ruler(self, orientation = wx.HORIZONTAL, \
             name = "Top ruler")
-        self.parts = [PlanePart(self)]
+        self.parts = [PlanePart(self, main_window)]
 
         self.scenery = None        
         self.sceneryListener = SceneryListener(self)
@@ -121,10 +121,11 @@ class PlanePart(wx.ScrolledWindow):
     Editor Part displaying XY view of scenery.
     """
 
-    def __init__(self, parent, id = wx.ID_ANY):
+    def __init__(self, parent, main_window, id = wx.ID_ANY):
         wx.ScrolledWindow.__init__(self, parent, id, \
             style = wx.VSCROLL | wx.HSCROLL)
 
+        self.main_window = main_window
         self.snapData = None
         self.basePointMover = BasePointMover(self)
 
@@ -153,7 +154,7 @@ class PlanePart(wx.ScrolledWindow):
         self.logger = logging.getLogger('Paint')
 
         self.scale = SCALE_DEFAULT
-        self.GetParent().GetParent().SetStatusText("%.3f px/m" % self.scale, 2)
+        self.main_window.SetStatusText("%.3f px/m" % self.scale, 2)
 
         self.minX = -1000.0
         self.minY = -1000.0
@@ -370,7 +371,7 @@ class PlanePart(wx.ScrolledWindow):
         self.Refresh()
         self.GetParent().topRuler.Refresh()
         self.GetParent().leftRuler.Refresh()
-        self.GetParent().GetParent().SetStatusText("%.3f px/m" % scale, 2)
+        self.main_window.SetStatusText("%.3f px/m" % scale, 2)
         
         
     def __ScaleAll(self, scale):
@@ -618,8 +619,8 @@ class PlanePart(wx.ScrolledWindow):
         point = self.CalcUnscrolledPosition(event.GetPosition())
         p3d = self.ViewToModel(point)
 
-        bar = self.GetParent().GetParent().GetStatusBar()
-        bar.SetStatusText("%.3f, %.3f, %.3f" % (p3d.x, p3d.y, p3d.z), 1)
+        #bar = self.GetParent().GetParent().GetStatusBar()
+        self.main_window.SetStatusText("%.3f, %.3f, %.3f" % (p3d.x, p3d.y, p3d.z), 1)
 
         self.GetParent().topRuler.UpdateMousePointer(opoint)
         self.GetParent().leftRuler.UpdateMousePointer(opoint)
