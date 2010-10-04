@@ -1,9 +1,0 @@
-Import('env')
-
-AddOption('--doxy-variant', dest="doxy_variant", type="string", action="store")
-
-env = env.Clone(tools=['default', 'doxygen'], variables=vars)
-
-option = GetOption("doxy_variant")
-
-env.Doxygen('Doxyfile' if not option else 'Doxyfile-' + option);
