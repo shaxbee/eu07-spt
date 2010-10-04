@@ -1,4 +1,4 @@
 Import('env')
 
-objects = env.Object(source = Split('main.cpp ReaderSCT.cpp ReaderSCV.cpp SectorNode.cpp SectorView.cpp SceneryAccess.cpp'))
+objects = env.Object(source = Split('main.cpp ReaderSCT.cpp ReaderSCV.cpp SectorNode.cpp SectorView.cpp SceneryAccess.cpp VehicleView.cpp'))
 Return('objects')

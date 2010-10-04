@@ -1,7 +1,7 @@
 #ifndef SPTCORE_FOLLOWER_H
 #define SPTCORE_FOLLOWER_H 1
 
-#include <boost/exception.hpp>
+#include <stdexcept>
 #include <osg/Matrix>
 
 #include <sptCore/Track.h>
@@ -36,7 +36,7 @@ public:
     osg::Matrix getMatrix() const;
    
     //! \brief Indicator of Follower exiting tracks 
-    class NullTrackException: public boost::exception { };
+    class NullTrackException: public std::runtime_error { };
     
 private:
     void changeTrack(osg::Vec3 position);

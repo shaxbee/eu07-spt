@@ -4,24 +4,23 @@ from build.support import GetPlatform
 Import('env')
 
 # construct buildDir and set include path
-applicationDir = 'applications/spt/'
-env.Append(CPPPATH = [os.path.join('#', applicationDir, 'include'), '#/include'])
-env.Append(LIBPATH = ['#/lib'])
+env.AppendUnique(CPPPATH = ['#/include'])
+env.AppendUnique(LIBPATH = ['#/lib'])
 
 # build
 objects = SConscript('src/SConscript')
 
 # link application
 program = env.Program(
-    'spt' if not env['DEBUG'] else 'sptd', 
+    'spt',
     objects, 
-    LIBS=['osg', 'osgDB', 'osgGA', 'osgUtil', 'osgViewer', 'OpenThreads', 'sptGFX', 'sptDB', 'sptCore'])
+    LIBS=['osg', 'osgDB', 'osgGA', 'osgUtil', 'osgViewer', 'OpenThreads', 'sptGFX', 'sptDB', 'sptCore', 'sptMover'])
 
 # install it
 env.Install('#/bin', program)
 
 # copy debugging symbols database
-if env['DEBUG'] and GetPlatform() == 'win32':
-	env.Install('#/bin', ['sptd.pdb', 'sptd.ilk'])
+#if env['DEBUG'] and GetPlatform() == 'win32':
+#	env.Install('#/bin', ['sptd.pdb', 'sptd.ilk'])
 	
 Return('program')

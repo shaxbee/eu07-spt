@@ -62,7 +62,8 @@ void Follower::findPosition(osg::ref_ptr<osg::Vec3Array> points, osg::Vec3Array:
 osg::Vec3 Follower::getPosition() const
 {
     osg::ref_ptr<osg::Vec3Array> points(_path->points());
-    osg::Vec3Array::const_iterator iter;
+    osg::Vec3Array::const_iterator iter = points->begin() + 1;
+
     float ratio;
 
     findPosition(points, iter, ratio);
@@ -73,7 +74,7 @@ osg::Vec3 Follower::getPosition() const
 osg::Matrix Follower::getMatrix() const
 {
     osg::ref_ptr<osg::Vec3Array> points(_path->points());
-    osg::Vec3Array::const_iterator iter;
+    osg::Vec3Array::const_iterator iter = points->begin() + 1;
     float ratio;
 
     // find current segment and position in it expressed in (0, 1) range

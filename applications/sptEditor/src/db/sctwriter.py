@@ -10,7 +10,7 @@ from sptmath import Vec3
 
 from binwriter import BinaryWriter
 
-SECTOR_SIZE = 8000
+SECTOR_SIZE = 2000
 SECTOR_FILE_VERSION = "1.0"
 
 class SectorWriteError(RuntimeError):
@@ -27,6 +27,8 @@ def writeSector(fout, position, tracks, switches):
     :raises: SectorWriteError
     """
     writer = BinaryWriter(fout)
+    
+    print "sector position:", repr(position.to_tuple())
     
     # transform tracks and switches
     tracks = [SectorTrack(track, position) for track in tracks]
@@ -136,12 +138,12 @@ def __collectConnections(tracks, switches, index):
             addConnection(track.p2, track.original, track.n2)
 
     for switch in switches:
+        if switch.nc is not None:
+            addConnection(switch.pc, switch.original, switch.nc)
         if switch.n1 is not None:
             addConnection(switch.p1, switch.original, switch.n1)
         if switch.n2 is not None:
-            addConnection(switch.p2, switch,original, switch.n2)
-        if switch.n3 is not None:
-            addConnection(switch.p3, switch.original, switch.n3)
+            addConnection(switch.p2, switch.original, switch.n2)
                 
     # sort connections by position
     internal = sorted(internal.iteritems(), key=operator.itemgetter(0))
@@ -201,6 +203,10 @@ class FastVec3(object):
 
     def __eq__(self, other):
         return other != None and (abs(self.x - other.x) < 1e-6 and abs(self.y - other.y) < 1e-6 and abs(self.z - other.z) < 1e-6)
+    
+    @classmethod
+    def from_vec3(cls, source):
+        return FastVec3(source.x, source.y, source.z)
 
     def to_tuple(self):
         return (self.x, self.y, self.z)
@@ -239,9 +245,9 @@ class BezierPath(object):
 class SectorTrack(object):
     def __init__(self, source, offset): 
         self.p1 = _translate(source.p1, offset)
-        self.v1 = _translate(source.v1, offset) + self.p1
+        self.v1 = self.p1 + FastVec3.from_vec3(source.v1)
         self.p2 = _translate(source.p2, offset)
-        self.v2 = _translate(source.v2, offset) + self.p2
+        self.v2 = self.p2 + FastVec3.from_vec3(source.v2)
 
         self.path = _getPath(self.p1, self.v1, self.p2, self.v2)
         self.n1 = source.n1
@@ -252,21 +258,24 @@ class SectorTrack(object):
 
 class SectorSwitch(object):
     def __init__(self, source, offset): 
+        self.pc = _translate(source.pc, offset)
+        self.vc1 = self.pc + FastVec3.from_vec3(source.vc1)
+        self.vc2 = self.pc + FastVec3.from_vec3(source.vc2)
         self.p1 = _translate(source.p1, offset)
-        self.v1 = _translate(source.v1, offset) + self.p1 
+        self.v1 = self.p1 + FastVec3.from_vec3(source.v1)
         self.p2 = _translate(source.p2, offset)
-        self.v2 = _translate(source.v2, offset) + self.p2
-        self.p3 = _translate(source.p3, offset)
-        self.v3 = _translate(source.v3, offset) + self.p3
+        self.v2 = self.p2 + FastVec3.from_vec3(source.v2)
 
-        self.straight = _getPath(self.p1, self.v1, self.p2, self.v2)
-        self.diverted = _getPath(self.p1, self.v1, self.p3, self.v3)
+        self.straight = _getPath(self.pc, self.vc1, self.p1, self.v1)
+        self.diverted = _getPath(self.pc, self.vc2, self.p2, self.v2)
 
+        self.nc = source.nc
         self.n1 = source.n1
         self.n2 = source.n2
-        self.n3 = source.n3
 
         self.name = source.name
+        self.position = "STRAIGHT"
+        
         self.original = source
 
 if __name__ == "__main__":
