@@ -17,3 +17,4 @@ ENDIF(WIN32)
 
 add_subdirectory(src)
 add_subdirectory(applications)
+add_subdirectory(tests)
