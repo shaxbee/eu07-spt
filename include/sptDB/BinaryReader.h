@@ -12,6 +12,9 @@
 #include <osg/Vec3f>
 #include <osg/Vec3d>
 
+#undef minor
+#undef major
+
 namespace sptDB
 {
 
