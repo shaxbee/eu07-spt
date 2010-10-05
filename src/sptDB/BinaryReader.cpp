@@ -5,7 +5,7 @@
 using namespace boost;
 using namespace sptDB;
 
-void ChunkWatcher::check(unsigned int bytes)
+void ChunkWatcher::check(uint32_t bytes)
 {
     if(_chunks.empty())
         return;
@@ -17,7 +17,7 @@ void ChunkWatcher::check(unsigned int bytes)
         throw std::runtime_error(str(format("Unexpected end in chunk %s, tried to read %d bytes, %d bytes available") % chunk.name % bytes % (chunk.left + bytes)));
 };
 
-void ChunkWatcher::push(const std::string& name, unsigned int size)
+void ChunkWatcher::push(const std::string& name, uint32_t size)
 {
     Chunk chunk = {name, size, size};
     _chunks.push(chunk);
@@ -73,7 +73,7 @@ std::string BinaryReader::readChunk()
     _watcher.check(4);
     _input.read(chunk, 4);
 
-    unsigned int size;
+    uint32_t size;
     read(size);
 
     std::string name(chunk, 4);
@@ -104,7 +104,7 @@ void BinaryReader::read(osg::Vec3d& output)
 
 void BinaryReader::read(std::string& output)
 {
-    unsigned int length;
+    uint32_t length;
     read(length);
 
     char* buffer = new char[length];

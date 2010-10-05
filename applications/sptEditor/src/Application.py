@@ -15,7 +15,7 @@ import yaml
 import os.path
 import sys
 import optparse
-import run
+#import run
 
 import model.tracks
 import model.groups
