@@ -203,7 +203,7 @@ class RailContainer:
                                 + "outline points " \
                                 + tracks.coord2str(gpoint))
                             del self.connections[gpoint]
-                            break # Exit from for loop
+                        break # Exit from for loop
                     else:
                         _logger.debug("At specified point " \
                             + tracks.coord2str(gpoint) + " vectors aren't " \
@@ -226,7 +226,7 @@ class RailContainer:
             self.outline_trackings.append(tracking)
 
         # Add to children
-        self.children.append(tracking)
+        self.children[0:0] = [tracking]
 
         _logger.debug("Rail tracking " + str(tracking) + " has successfully " \
             + "inserted into group")

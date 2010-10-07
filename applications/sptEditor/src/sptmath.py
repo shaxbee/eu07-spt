@@ -85,9 +85,9 @@ class Vec3(object):
 
         if other is None:
             return False
-            
-        if type(other) is Vec3:
-            return self.to_tuple() == other.to_tuple()
+
+        if other is self:
+            return True
             
         if type(other) is tuple:
             return self.to_tuple() == other
