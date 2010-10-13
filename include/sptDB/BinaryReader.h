@@ -49,7 +49,8 @@ struct Version
     
     bool operator<(const Version& other) const;
     bool operator==(const Version& other) const;
-    bool operator>(const Version& other) const;
+    bool operator!=(const Version& other) const { return !(*this == other); }
+    bool operator>(const Version& other) const { return !(*this < other) && (*this != other); }
 };
 
 class BinaryReader
@@ -69,9 +70,10 @@ public:
     void readVersion();
 
     std::string readChunk();
-    bool expectChunk(const std::string& type);
+    void expectChunk(const std::string& type);
     void endChunk(const std::string& type);
 
+    void expectVersion(const Version& version);
     const Version& getVersion() const;
 
 private:

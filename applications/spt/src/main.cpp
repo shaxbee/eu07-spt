@@ -1,8 +1,8 @@
 #include <iostream>
 
 #include <osg/Geode>
-
 #include <osg/ArgumentParser>
+#include <osg/Notify>
 
 #include <osgDB/ReadFile>
 #include <osgViewer/Viewer>
@@ -44,7 +44,6 @@ void print_vec(const osg::Vec3& vec)
 
 int main(int argc, char** argv)
 {
-
 	osg::ArgumentParser arguments(&argc, argv);
 	arguments.getApplicationUsage()->setCommandLineUsage(arguments.getApplicationName() + " scenery");
 
@@ -74,8 +73,17 @@ int main(int argc, char** argv)
 //    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
 //    root->addChild(createAxes(geode.get()));
 
-    std::auto_ptr<sptMover::Vehicle> vehicle = createSampleVehicle(getSceneryInstance().getTrack("start"));
-    root->addChild(new VehicleView(*vehicle, osgDB::readNodeFile("e186_profeta.ive")));
+    try
+    {
+        Vehicle* vehicle = createSampleVehicle(getSceneryInstance().getTrack("start")).release();
+        root->addChild(new VehicleView(*vehicle, osgDB::readNodeFile("e186_profeta.ive")));
+    }
+    catch(std::runtime_error& exc)
+    {
+        std::cout << exc.what() << std::endl;
+        return 1;
+    };
+    
     root->addChild(scenery);
 //    root->addChild(osgDB::readNodeFile("e186_profeta.ive"));
 

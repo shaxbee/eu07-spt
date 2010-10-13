@@ -57,11 +57,6 @@ bool Version::operator==(const Version& other) const
     return (major == other.major) && (minor == other.minor);
 };
 
-bool Version::operator>(const Version& other) const
-{
-    return (major > other.major) || ((major == other.major) && (minor > other.minor));
-};
-
 BinaryReader::BinaryReader(std::istream& stream): 
     _input(stream), _version(0xFF, 0xFF)
 { 
@@ -82,9 +77,11 @@ std::string BinaryReader::readChunk()
     return name;
 };
 
-bool BinaryReader::expectChunk(const std::string& type)
+void BinaryReader::expectChunk(const std::string& type)
 {
-    return readChunk() == type;
+    std::string chunk = readChunk();
+    if(chunk != type)
+        throw std::runtime_error(str(format("Unexpected chunk. Expected %s got %s") % type % chunk));
 };
 
 void BinaryReader::endChunk(const std::string& type)
@@ -120,6 +117,17 @@ void BinaryReader::readVersion()
 {
     read(_version.major);
     read(_version.minor);
+};
+
+void BinaryReader::expectVersion(const sptDB::Version& version)
+{
+    readVersion();
+    if(getVersion() != version)
+        throw std::runtime_error(str(format("Invalid file version. Expected %d.%d got %d.%d") %
+            version.major %
+            version.minor %
+            getVersion().major %
+            getVersion().minor));
 };
 
 const Version& BinaryReader::getVersion() const
