@@ -12,6 +12,13 @@ using namespace boost;
 namespace
 {
 
+class ExternalConnectionsManager
+{
+public:
+
+
+};
+
 void unregisterIfExternal(const Sector* source, const osg::Vec3f& position, const RailTracking* first, const RailTracking* second)
 {
     if(&(first->getSector()) != source)
