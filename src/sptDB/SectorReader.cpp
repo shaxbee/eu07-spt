@@ -200,7 +200,7 @@ void readConnections(BinaryReader& reader, const RailTrackings& trackings, Conne
         uint32_t right;
         reader.read(right);
         
-        if(right != std::numeric_limits<size_t>::max())
+        if(right != std::numeric_limits<uint32_t>::max())
         {
             sptCore::Sector::Connection connection =
             {
