@@ -627,7 +627,7 @@ class MainWindow(wx.Frame):
         self.trackPaletteMenuEntry.Check(False)
 
 
-if __name__ == "__main__":
+'''if __name__ == "__main__":
     usage = "Usage: %prog [options]"
     parser = optparse.OptionParser(usage=usage)
     parser.add_option("-l", "--logging", action="store", type="string", \
@@ -674,4 +674,4 @@ overview = RB.__doc__
 if __name__ == '__main__':
     import sys,os
     import run
-    run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])'''
+    run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])
