@@ -19,12 +19,11 @@ class RailContainer:
     def __init__(self, name = None):
         # Contains all children
         self.children = []
-        #self.children = pyrtree.RTree()
         # Outline trackings are at borders of this container and may attach
         # to some external trackings.
         self.outline_trackings = []
         # A map containing points and external trackings
-        self.connections = ListDict()
+        self.connections = {}
 
         self.name = name
 
@@ -181,7 +180,7 @@ class RailContainer:
 
                         # Check if connection to next rail tracking is empty
                         connInside = child.point2tracking(gpoint)
-                        connOutside = self.connections[gpoint]
+                        connOutside = self.connections.get(gpoint, None)
 
                         if connInside != None or connOutside != None:
                             # Connection in use, an error
@@ -203,7 +202,7 @@ class RailContainer:
                             if isDebug:
                                 logger.debug("Child found in outline " \
                                     + "collections however it is inline now so " \
-                                    + "removing it form outlines")
+                                    + "removing it from outlines")
                             self.outline_trackings.remove(child)
 
                         # Check geometry and remove outline point
@@ -242,7 +241,7 @@ class RailContainer:
         self.children.insert(0, tracking)
 
         if isDebug:
-            logger.debug("Rail tracking " + str(tracking) + " has successfully " \
+            logger.debug("Rail tracking " + str(tracking) + " has been successfully " \
                 + "inserted into group")
 
             logger.debug(self)
@@ -361,6 +360,14 @@ class RailContainer:
             elif isinstance(c, RailContainer):
                 for c in c.switches():
                     yield c
+
+
+    def rebuild(self):
+        """
+        Rebuilds the internal structures after applying transformations.
+        """
+        items = self.connections.items()
+        self.connections = dict(items)
           
 
   
@@ -410,49 +417,6 @@ class RailGroup(RailContainer):
             + ", children=" + str(self.children) \
             + ", outlinePoints=" + str(self.connections.keys()) \
             + "]";
-
-
-
-
-class ListDict(collections.MutableMapping):
-    """
-    Dictionary based on two lists of keys and values.
-    """
-
-    def __init__(self):
-        self.__keys = []
-        self.__values = []
-        self.__size = 0
-
-    def __len__(self):
-        return self.__size
-
-    def __getitem__(self, key):
-        for i in range(len(self.__keys)):
-            if self.__keys[i] == key:
-                return self.__values[i]
-        raise KeyError, key
-
-    def __setitem__(self, key, value):
-        for i in range(len(self.__keys)):
-            if self.__keys[i] == key:
-                self.__values[i] = value
-                return
-        self.__keys.append(key)
-        self.__values.append(value)
-        self.__size += 1
-
-    def __delitem__(self, key):
-        for i in range(len(self.__keys)):
-            if self.__keys[i] == key:
-                del self.__keys[i]
-                del self.__values[i]
-                self.__size -= 1
-                return
-        raise KeyError, key
-
-    def __iter__(self):
-        return iter(self.__keys)
 
 
 
