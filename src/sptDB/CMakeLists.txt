@@ -1,6 +1,6 @@
 set(LIB_NAME sptDB)
 
-set(HEADER_PATH ${spt_SOURCE_DIR}/include/${LIB_NAME})
+set(HEADER_PATH ${SPT_SOURCE_DIR}/include/${LIB_NAME})
 
 set(LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/BinaryReader.h

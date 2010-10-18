@@ -13,11 +13,43 @@
 namespace sptMover
 {
 
+class TrainsetState
+{
+public:
+    typedef boost::ptr_deque<Vehicle> Vehicles;
+    Vehicles vehicles;
+
+    float speed;
+    float acceleration;
+
+    float length;
+};
+
+class TrainsetUpdateCallback
+{
+public:
+    TrainsetUpdateCallback(Trainset& trainset): _trainset(trainset) { };
+    virtual ~TrainsetUpdateCallback() { };
+
+    virtual void update(float time, TrainsetState& trainset) = 0;
+    const Trainset& getTrainset() const { return _trainset; }
+
+private:
+    Trainset& _trainset;
+
+}; // sptMover::TrainsetUpdateCallback
+
 class Trainset
 {
 
 public:
-	Trainset(const std::string& name, sptCore::RailTracking& track, float position = 0.0f);
+	Trainset(const std::string& name);
+
+    void setPlacement(sptCore::Track& track, float distance);
+    bool isPlaced() const;
+
+    const TrainsetUpdateCallback& getUpdateCallback() const { return *_update; }
+    void setUpdateCallback(std::auto_ptr<TrainsetUpdateCallback> update) { _update = update; }
 
     //! \brief Update trainset vehicles
     //! \param time Time passed since last update
@@ -32,8 +64,16 @@ public:
     //! \brief Get last occupied tracking
     const sptCore::RailTracking& getLastTracking() const;
 
+    float getLength() const { return _state.length; }
+
     //! \brief Get trainset distance realtive to first tracking
     float getDistance() const;
+
+    //! \brief Get trainset speed from last update
+    float getSpeed() const { return _state.speed; }
+
+    //! \brief Get trainset acceleration from last update
+    float getAcceleration() const { return _state.acceleration; }
 
     //! \brief Get trainset middle position
     osg::Vec3f getPosition() const;
@@ -41,25 +81,21 @@ public:
     //! \brief Get box bounding all trainset vehicles;
     osg::BoundingBox getBoundingBox() const;
 
-    //! \brief Get trainset speed
-    float getSpeed() const;
+    void addVehicle(std::auto_ptr<Vehicle> vehicle);
 
-	typedef boost::ptr_deque<Vehicle> Vehicles;
-    Vehicles& getVehicles() { return _vehicles; }
-    const Vehicles& getVehicles() const { return _vehicles; }
-    
     //! \brief Split trainset into two trainsets
     //! \param index Index of Vehicle from which split starts
     std::auto_ptr<Trainset> split(size_t index);
     
     //! \brief Join with other trainset
-    //! \param other Other trainset - will be deleted after joinf
+    //! \param other Other trainset - will be deleted after join
     void join(std::auto_ptr<Trainset> other);
 
 private:
 	std::string _name;
-    Vehicles _vehicles;
-    float _speed;
+    TrainsetState _state;
+
+    std::auto_ptr<TrainsetUpdateCallback> _update;
 
     const sptCore::Follower& getFirstFollower() const;
     const sptCore::Follower& getLastFollower() const;
