@@ -9,63 +9,6 @@
 using namespace sptCore;
 using namespace boost;
 
-namespace
-{
-
-class ExternalConnectionsManager
-{
-public:
-
-
-};
-
-void unregisterIfExternal(const Sector* source, const osg::Vec3f& position, const RailTracking* first, const RailTracking* second)
-{
-    if(&(first->getSector()) != source)
-    {
-        first->getSector().updateConnection(
-            position + source->getPosition() - first->getSector().getPosition(), // position in sector space
-            second);
-    }
-};
-
-void unregisterExternalConnections(const Sector* sector)
-{
-    const Sector::Connections& connections = sector->getConnections();
-    for(Sector::Connections::const_iterator iter = connections.begin(); iter != connections.end(); iter++)
-    {
-        unregisterIfExternal(sector, iter->position, iter->first, iter->second);
-        unregisterIfExternal(sector, iter->position, iter->second, iter->second);
-    };
-};
-
-osg::Vec3f getSectorOffset(const osg::Vec3f& position)
-{
-    return osg::Vec3f(floor(position.x() / Sector::SIZE), floor(position.y() / Sector::SIZE), 0.0f);
-};
-
-void registerExternalConnections(Scenery* scenery, Sector* sector)
-{
-    const Sector::Connections& connections = sector->getConnections();
-    for(Sector::Connections::const_iterator iter = connections.begin(); iter != connections.end(); iter++)
-    {
-        if(iter->second == NULL && getSectorOffset(iter->position) != osg::Vec3f(0.0f, 0.0f, 0.0f))
-        {
-            osg::Vec3f offset = getSectorOffset(iter->position) * Sector::SIZE;
-            osg::Vec3f sectorPos = sector->getPosition() + offset;
-
-            if(scenery->hasSector(sectorPos))
-            {
-                const RailTracking* other = scenery->getSector(sectorPos).updateConnection(iter->position - offset, NULL, iter->first);
-                if(other)
-                    sector->updateConnection(iter->position, NULL, other);
-            }
-        };
-    }
-};
-
-}; // anonymous namespace
-
 ExternalsManager::ExternalsManager(Scenery& scenery): 
     _scenery(scenery)
 {
