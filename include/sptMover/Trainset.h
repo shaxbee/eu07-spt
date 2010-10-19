@@ -31,7 +31,7 @@ public:
     TrainsetUpdateCallback(Trainset& trainset): _trainset(trainset) { };
     virtual ~TrainsetUpdateCallback() { };
 
-    virtual void update(float time, TrainsetState& trainset) = 0;
+    virtual float update(float time, TrainsetState& trainset) = 0;
     const Trainset& getTrainset() const { return _trainset; }
 
 private:

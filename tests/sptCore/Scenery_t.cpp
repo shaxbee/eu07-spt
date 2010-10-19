@@ -57,17 +57,19 @@ TEST_F(SceneryTest, AddSector)
         std::auto_ptr<Sector> left(new Sector(leftPos));
         {
             boost::array<RailTracking*, 1> tracks = {{ new Track(*left, new StraightPath(beginInternal, endInternal)) }};
-            boost::array<Sector::Connection, 1> connections = {{ {endInternal, tracks[0], NULL} }};
+            boost::array<Connection, 1> connections = {{ {endInternal, tracks[0], NULL} }};
+            boost::array<ExternalConnection, 1> externals = {{ {leftPos, endInternal, 0} }};
 
-            left->setData(tracks, connections);
+            left->setData(tracks, connections, externals);
         };
 
         std::auto_ptr<Sector> right(new Sector(rightPos));
         {
             boost::array<RailTracking*, 1> tracks = {{ new Track(*right, new StraightPath(beginExternal, endExternal)) }};
-            boost::array<Sector::Connection, 1> connections = {{ {beginExternal, tracks[0], NULL} }};
+            boost::array<Connection, 1> connections = {{ {beginExternal, tracks[0], NULL} }};
+            boost::array<ExternalConnection, 1> externals = {{ {rightPos, beginExternal, 0} }};
 
-            right->setData(tracks, connections);
+            right->setData(tracks, connections, externals);
         }
 
         scenery.addSector(left);

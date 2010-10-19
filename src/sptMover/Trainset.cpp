@@ -8,16 +8,16 @@ namespace sptMover
 {
 
 Trainset::Trainset(const std::string& name):
-	_name(name), _speed(0.0f), _acceleration(0.0f), _length(0.0f)
+	_name(name) 
 {
 };
 
 void Trainset::setPlacement(sptCore::Track& track, float distance)
 {
-    for(Vehicles::iterator iter = _state.vehicles.rbegin(); iter != _state.vehicles.rend(); iter++)
+    for(TrainsetState::Vehicles::reverse_iterator iter = _state.vehicles.rbegin(); iter != _state.vehicles.rend(); iter++)
     {
         iter->setPlacement(track, distance);
-        distance += iter->getTraits().dimensions.x;
+        distance += iter->getTraits().dimensions.x();
     };
 };
 
@@ -28,10 +28,18 @@ bool Trainset::isPlaced() const
 
 float Trainset::update(float time)
 {
+    if(!_update.get())
+        return 0.0f;
+
+    return _update->update(time, _state);
+
+};
+
+# if 0
     double totalForce = 0.0f;
     double totalMass = 0.0f;
     
-    for(Vehicles::iterator iter = _state.vehicles.begin(); iter != _state.vehicles.end(); iter++)
+    for(TrainsetState::Vehicles::iterator iter = _state.vehicles.begin(); iter != _state.vehicles.end(); iter++)
     {
         totalForce += iter->update(time);
         totalMass += iter->getState().getLoad() + iter->getTraits().mass;
@@ -48,6 +56,7 @@ float Trainset::update(float time)
 
 	return distance;
 }; // sptMover::Trainset::update
+#endif
 
 float Trainset::getDistance() const
 {
@@ -79,7 +88,7 @@ const sptCore::Follower& Trainset::getLastFollower() const
 
 void Trainset::addVehicle(std::auto_ptr<sptMover::Vehicle> vehicle)
 {
-    _state.length += vehicle->getTraits().dimensions.x;
+    _state.length += vehicle->getTraits().dimensions.x();
     _state.vehicles.push_back(vehicle);
 };
     

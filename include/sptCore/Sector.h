@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include <boost/cstdint.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <osg/Vec3f>
@@ -12,6 +13,31 @@
 
 namespace sptCore
 {
+
+struct Connection
+{
+    osg::Vec3f position;
+    const RailTracking* first;
+    const RailTracking* second;
+};
+
+struct ConnectionUpdate
+{
+    osg::Vec3f position;
+    const RailTracking* previous;
+    const RailTracking* current;
+};
+
+typedef std::vector<Connection> Connections;
+
+struct ExternalConnection
+{
+    osg::Vec3f offset;
+    osg::Vec3f position;
+    boost::uint32_t index;
+};
+
+typedef std::vector<ExternalConnection> ExternalConnections;
 
 //! Container for rail trackings located in square part of Scenery
 //! \author Zbigniew "ShaXbee" Mandziejewicz
@@ -23,8 +49,8 @@ public:
 
     const osg::Vec3f& getPosition() const { return _position; };
    
-    template <typename RailTrackingContainerT, typename ConnectionContainerT>
-    void setData(RailTrackingContainerT& trackings, const ConnectionContainerT& connections);
+    template <typename RailTrackingContainerT, typename ConnectionContainerT, typename ExternalsContainerT>
+    void setData(RailTrackingContainerT& trackings, ConnectionContainerT& connections, ExternalsContainerT& externals);
 
     //! \brief Get other track connected at given position.
     //! \throw UnknownConnectionException if there is no connection at given position
@@ -43,22 +69,8 @@ public:
     //! param position Connection position
     const RailTracking* updateConnection(const osg::Vec3f& position, const RailTracking* previous, const RailTracking* current = NULL);
 
-    struct Connection
-    {
-        osg::Vec3f position;
-        const RailTracking* first;
-        const RailTracking* second;
-    };
-
-    struct ConnectionUpdate
-    {
-        osg::Vec3f position;
-        const RailTracking* previous;
-        const RailTracking* current;
-    };
-
-    typedef std::vector<Connection> Connections;
     const Connections& getConnections() const { return _connections; };
+    const ExternalConnections& getExternals() const { return _externals; };
 
     typedef boost::error_info<struct tag_position, osg::Vec3f> PositionInfo;
     class UnknownConnectionException: public boost::exception { };
@@ -72,6 +84,7 @@ private:
     const osg::Vec3f _position;
 
     Connections _connections;
+    ExternalConnections _externals;
     RailTrackings _trackings;
 
 }; // class sptCore::Sector
@@ -81,12 +94,12 @@ namespace
 
     struct ConnectionLess
     {
-        bool operator()(const Sector::Connection& left, const Sector::Connection& right) const { return left.position < right.position; }
+        bool operator()(const Connection& left, const Connection& right) const { return left.position < right.position; }
     }; // struct sptCore::ConnectionLess
 
     struct ConnectionGreater
     {
-        bool operator()(const Sector::Connection& left, const Sector::Connection& right) const { return right.position < left.position; }
+        bool operator()(const Connection& left, const Connection& right) const { return right.position < left.position; }
     }; // struct ::ConnectionGreater
 
     template <typename RailTrackingContainerT>
@@ -104,8 +117,8 @@ namespace
 
 }; // anonymous namespace
 
-template <typename RailTrackingContainerT, typename ConnectionContainerT>
-void Sector::setData(RailTrackingContainerT& trackings, const ConnectionContainerT& connections)
+template <typename RailTrackingContainerT, typename ConnectionContainerT, typename ExternalsContainerT>
+void Sector::setData(RailTrackingContainerT& trackings, ConnectionContainerT& connections, ExternalsContainerT& externals)
 {
     assert(_trackings.empty() && _connections.empty() && "Data already set");
 
@@ -114,8 +127,13 @@ void Sector::setData(RailTrackingContainerT& trackings, const ConnectionContaine
 
 //    assert(std::adjacent_find(connections.begin(), connections.end(), ConnectionGreater()) == connections.end() && "Invalid connections order");
 
+    using std::swap;
+
     _connections.reserve(connections.size());
     std::copy(connections.begin(), connections.end(), std::back_inserter(_connections));
+
+    _externals.reserve(externals.size());
+    std::copy(externals.begin(), externals.end(), std::back_inserter(_externals));
 }; // Sector::Sector(tracking, connections)
 
 template <typename ContainerT>
