@@ -9,55 +9,35 @@
 using namespace sptCore;
 using namespace boost;
 
-namespace
+ExternalsManager::ExternalsManager(Scenery& scenery): 
+    _scenery(scenery)
 {
-
-void unregisterIfExternal(const Sector* source, const osg::Vec3f& position, const RailTracking* first, const RailTracking* second)
+};
+    
+void ExternalsManager::addExternals(const Sector& sector, const ExternalConnections& externals)
 {
-    if(&(first->getSector()) != source)
+    for(ExternalConnections::const_iterator iter = externals.begin(); iter != externals.end(); iter++)
     {
-        first->getSector().updateConnection(
-            position + source->getPosition() - first->getSector().getPosition(), // position in sector space
-            second);
-    }
+        ExternalConnectionsSet::const_iterator match = _externals.find(*iter);
+        if(match != _externals.end())
+            _scenery.getSector(match->offset).updateConnection(match->position, NULL, &sector.getRailTracking(match->index));
+    };
+
+    _externals.insert(externals.begin(), externals.end());
 };
 
-void unregisterExternalConnections(const Sector* sector)
+void ExternalsManager::removeExternals(const osg::Vec3f& offset)
 {
-    const Sector::Connections& connections = sector->getConnections();
-    for(Sector::Connections::const_iterator iter = connections.begin(); iter != connections.end(); iter++)
+    for(ExternalConnectionsSet::iterator iter = _externals.begin(); iter != _externals.end(); iter++)
     {
-        unregisterIfExternal(sector, iter->position, iter->first, iter->second);
-        unregisterIfExternal(sector, iter->position, iter->second, iter->second);
+        if(iter->offset == offset)
+        {
+            ExternalConnectionsSet::iterator current = iter;
+            iter++;
+            _externals.erase(current);
+        }
     };
 };
-
-osg::Vec3f getSectorOffset(const osg::Vec3f& position)
-{
-    return osg::Vec3f(floor(position.x() / Sector::SIZE), floor(position.y() / Sector::SIZE), 0.0f);
-};
-
-void registerExternalConnections(Scenery* scenery, Sector* sector)
-{
-    const Sector::Connections& connections = sector->getConnections();
-    for(Sector::Connections::const_iterator iter = connections.begin(); iter != connections.end(); iter++)
-    {
-        if(iter->second == NULL && getSectorOffset(iter->position) != osg::Vec3f(0.0f, 0.0f, 0.0f))
-        {
-            osg::Vec3f offset = getSectorOffset(iter->position) * Sector::SIZE;
-            osg::Vec3f sectorPos = sector->getPosition() + offset;
-
-            if(scenery->hasSector(sectorPos))
-            {
-                const RailTracking* other = scenery->getSector(sectorPos).updateConnection(iter->position - offset, NULL, iter->first);
-                if(other)
-                    sector->updateConnection(iter->position, NULL, other);
-            }
-        };
-    }
-};
-
-}; // anonymous namespace
 
 Sector& Scenery::getSector(const osg::Vec3f& position)
 {

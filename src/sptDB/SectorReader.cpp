@@ -95,7 +95,7 @@ osg::Vec3d readHeader(BinaryReader& reader)
 {
     reader.expectChunk("HEAD");
 
-    reader.readVersion();
+    reader.expectVersion(Version(1, 1));
     osg::Vec3f result;
     reader.read(result);
 
@@ -186,22 +186,22 @@ void readConnections(BinaryReader& reader, const RailTrackings& trackings, Conne
 {
     reader.expectChunk("CNLS");
 
-    // read internal connections
-    {
         uint32_t count;
-        reader.read(count);
+    reader.read(count);
 
-        while(count--)
+    while(count--)
+    {
+        osg::Vec3f position;
+        reader.read(position);
+
+        uint32_t left;
+        reader.read(left);
+
+        uint32_t right;
+        reader.read(right);
+        
+        if(right != std::numeric_limits<size_t>::max())
         {
-            osg::Vec3f position;
-            reader.read(position);
-
-            uint32_t left;
-            reader.read(left);
-
-            uint32_t right;
-            reader.read(right);
-
             sptCore::Sector::Connection connection =
             {
                 position,
@@ -210,31 +210,17 @@ void readConnections(BinaryReader& reader, const RailTrackings& trackings, Conne
             };
 
             connections.push_back(connection);
-
-        };
-
-    };
-
-    // read external connections
-    {
-        uint32_t count;
-        reader.read(count);
-
-        while(count--)
+        }
+        else
         {
-            osg::Vec3f position;
-            reader.read(position);
-
-            uint32_t index;
-            reader.read(index);
-
-            sptCore::Sector::Connection connection = 
+            sptCore::Sector::Connection connection =
             {
                 position,
-                &trackings.at(index),
+                &trackings.at(left),
                 NULL
             };
 
+            connections.push_back(connection);
             externals.push_back(connection);
         };
     };
@@ -336,6 +322,8 @@ sptCore::Sector& readSector(std::istream& input, sptCore::Scenery& scenery)
     Connections connections;
     Connections externals;
     readConnections(reader, trackings, connections, externals);
+
+//    connections.insert(connections.end(), externals.begin(), externals.end());
 
     sector->setData(trackings, connections);
 

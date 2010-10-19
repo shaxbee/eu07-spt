@@ -12,5 +12,8 @@ add_executable(${TEST_NAME} ${TEST_SRC})
 link_internal(${TEST_NAME} osg OpenThreads)
 target_link_libraries(${TEST_NAME} ${GTEST_BOTH_LIBRARIES} sptCore)
 
+copy_dep(ot11 OpenThreads)
+copy_dep(osg55 osg)
+
 enable_testing()
 gtest_add_tests(${TEST_NAME} "" ${TEST_SRC})

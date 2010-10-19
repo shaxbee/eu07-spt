@@ -11,7 +11,7 @@ from sptmath import Vec3
 from binwriter import BinaryWriter
 
 SECTOR_SIZE = 2000
-SECTOR_FILE_VERSION = "1.0"
+SECTOR_FILE_VERSION = "1.1"
 
 class SectorWriteError(RuntimeError):
     pass

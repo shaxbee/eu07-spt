@@ -53,7 +53,7 @@ public:
         // we can use static cast because this class is placed 
         // in anonymous namespace and used only in constructor
         VehicleView* view = static_cast<VehicleView*>(node);
-        view->getVehicle().move(-0.8);
+        view->getVehicle().move(-0.8f);
         view->update();
     };
 };
@@ -95,7 +95,7 @@ void VehicleView::setModel(osg::Group* model)
     // clone model nodes (geometry remains shared)
     addChild(static_cast<osg::Node*>(model->clone(osg::CopyOp::SHALLOW_COPY)));
     
-    const VehicleTraits::Bogies& bogies = _vehicle.traits.bogies;
+    const VehicleTraits::Bogies& bogies = _vehicle.getTraits().bogies;
 
     // find and store bogie nodes
     for(size_t index=1; index <= bogies.size(); index++)
