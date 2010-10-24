@@ -1,4 +1,4 @@
-set(GTEST_ROOT ${spt_SOURCE_DIR}/ext)
+set(GTEST_ROOT ${SPT_SOURCE_DIR}/ext)
 
 find_package(GTest REQUIRED)
 

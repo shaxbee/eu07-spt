@@ -16,7 +16,7 @@ static osg::Vec3f tolerance(0.001f, 0.001f, 0.001f);
 
 struct ExternalConnectionOrdering: public std::binary_function<sptCore::ExternalConnection, sptCore::ExternalConnection, bool>
 {
-    result_type operator()(first_argument_type const& lhs, second_argument_type const& rhs)
+    result_type operator()(first_argument_type const& lhs, second_argument_type const& rhs) const
     {
         osg::Vec3f diff = lhs.offset - rhs.offset + lhs.position - rhs.position;
         return diff < -tolerance;
