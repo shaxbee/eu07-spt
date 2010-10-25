@@ -30,7 +30,7 @@ public:
 
 	FastDec operator/(const FastDec& other) const
 	{
-		return FastDec((_value * 1000) / _other.value);
+		return FastDec((_value * 1000) / other._value);
 	};
 
 	bool operator==(const FastDec& other) const
@@ -38,7 +38,21 @@ public:
 		return _value == other._value;
 	};
 
-    explicit operator float() const
+    FastDec& operator*=(const FastDec& other)
+    {
+        _value *= other._value;
+        _value /= 1000;
+        return *this;
+    };
+
+    FastDec& operator/=(const FastDec& other)
+    {
+        _value *= 1000;
+        _value /= other._value;
+        return *this;
+    };
+
+    operator float() const
 	{
 		return float(_value / 1000) + (float(_value % 1000) / 1000);
 	};

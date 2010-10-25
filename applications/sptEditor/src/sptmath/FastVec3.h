@@ -1,5 +1,5 @@
-#ifndef SPTEDITOR_FASTDEC_H
-#define SPTEDITOR_FASTDEC_H
+#ifndef SPTEDITOR_FASTVEC3_H
+#define SPTEDITOR_FASTVEC3_H
 
 #include "FastDec.h"
 
@@ -18,25 +18,23 @@ public:
 		return FastVec3(_x - other._x, _y - other._y, _z - other._z);
 	};
 
-	FastVec3& operator+=(const FastVec3& other)
+	void moveBy(const FastVec3& other)
 	{
 		_x += other._x;
 		_y += other._y;
 		_z += other._z;
-		return *this;
 	};
 
-	FastVec3& operator*=(const FastVec3& other)
+	void scale(const FastVec3& other)
 	{
 		_x *= other._x;
 		_y *= other._y;
 		_z *= other._z;
-		return *this;
 	};
 
-	const FastDec& getX() const { return _x; }
-	const FastDec& getY() const { return _y; }
-	const FastDec& getZ() const { return _z; }
+	FastDec getX() const { return _x; }
+	FastDec getY() const { return _y; }
+	FastDec getZ() const { return _z; }
 
 	void setX(const FastDec& x) { _x = x; }
 	void setY(const FastDec& y) { _y = y; }

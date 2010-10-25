@@ -1,3 +1,5 @@
+#include "FastVec3.h"
+
 #define _USE_MATH_DEFINES // we need M_PI 
 #include <cmath>
 
