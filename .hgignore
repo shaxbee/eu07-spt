@@ -31,3 +31,6 @@ glob:*.old
 glob:*vcproj*
 glob:*.pdb
 glob:CMakeCache.txt
+glob:Release/*
+glob:*.dir/
+glob:*.pyd
