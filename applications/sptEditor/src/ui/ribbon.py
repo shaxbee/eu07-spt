@@ -14,6 +14,9 @@ import wx.lib.agw.ribbon as RB
 
 ID_EXPORT = wx.ID_HIGHEST
 ID_CENTER_AT = ID_EXPORT +1
+ID_INSERT_TRACK = ID_CENTER_AT +1
+ID_INSERT_SWITCH = ID_INSERT_TRACK +1
+ID_INSERT_CURVE = ID_INSERT_SWITCH +1
 
 class RibbonPanel(wx.Panel):
     def __init__(self, parent):
@@ -95,7 +98,7 @@ class RibbonPanel(wx.Panel):
         # drugi panel
         edit = RB.RibbonPage(self._ribbon, wx.ID_ANY, "Edit", wx.NullBitmap)
 
-        # w panelu Home tworzymy nowe pole
+        # w panelu Edit tworzymy pole wstawiania
         insert_panel = RB.RibbonPanel(edit, wx.ID_ANY, "Insert", wx.NullBitmap, wx.DefaultPosition,
                                        wx.DefaultSize, agwStyle=RB.RIBBON_PANEL_NO_AUTO_MINIMISE)
                                        
@@ -106,11 +109,15 @@ class RibbonPanel(wx.Panel):
         #icon_saveas = wx.Bitmap(os.path.join(self.bitmap_action_dir, "media-floppy.png"), wx.BITMAP_TYPE_PNG)
         #icon_export = wx.Bitmap(os.path.join(self.bitmap_action_dir, "application-x-bittorrent.png"), wx.BITMAP_TYPE_PNG)
 
-        insert.AddSimpleButton(wx.ID_ANY, "Track", icon_insert_track, "")
-        insert.AddSimpleButton(wx.ID_ANY, "Curve", icon_insert_track, "")
-        insert.AddSimpleButton(wx.ID_ANY, "Switch", icon_insert_track, "")
+        insert.AddSimpleButton(ID_INSERT_TRACK, "Track", icon_insert_track, "")
+        insert.AddSimpleButton(ID_INSERT_CURVE, "Curve", icon_insert_track, "")
+        insert.AddSimpleButton(ID_INSERT_SWITCH, "Switch", icon_insert_track, "")
                 
+        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnInsertStraightTrack, id=ID_INSERT_TRACK)
+        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnInsertCurveTrack, id=ID_INSERT_CURVE)
+        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnInsertRailSwitch, id=ID_INSERT_SWITCH)
         
+        #pole usuwania
         delete_panel = RB.RibbonPanel(edit, wx.ID_ANY, "Delete", wx.NullBitmap, wx.DefaultPosition,
                                        wx.DefaultSize, agwStyle=RB.RIBBON_PANEL_NO_AUTO_MINIMISE)
                                        
@@ -121,6 +128,7 @@ class RibbonPanel(wx.Panel):
         icon_redo = wx.Bitmap(os.path.join(self.bitmap_action_dir, "edit-redo.png"), wx.BITMAP_TYPE_PNG)
         
         delete_bb.AddSimpleButton(wx.ID_DELETE, "Delete", icon_delete, "")
-        delete_bb.AddSimpleButton(wx.ID_ANY, "Undo", icon_undo, "")
-        delete_bb.AddSimpleButton(wx.ID_ANY, "Redo", icon_redo, "")
+        delete_bb.AddSimpleButton(wx.ID_UNDO, "Undo", icon_undo, "")
+        delete_bb.AddSimpleButton(wx.ID_REDO, "Redo", icon_redo, "")
         
+        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnDelete, id=wx.ID_DELETE)
