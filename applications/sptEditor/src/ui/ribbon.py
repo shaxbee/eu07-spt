@@ -100,7 +100,7 @@ class RibbonPanel(wx.Panel):
                                        wx.DefaultSize, agwStyle=RB.RIBBON_PANEL_NO_AUTO_MINIMISE)
                                        
         insert = RB.RibbonButtonBar(insert_panel, wx.ID_ANY)
-        icon_insert_track = wx.Bitmap(os.path.join(self.bitmap_action_dir, "applications-drawing.png"), wx.BITMAP_TYPE_PNG)
+        icon_insert_track = wx.Bitmap(os.path.join(self.bitmap_action_dir, "editor-switch.png"), wx.BITMAP_TYPE_PNG)
         #icon_insert_curve = wx.Bitmap(os.path.join(self.bitmap_action_dir, "document-new.png"), wx.BITMAP_TYPE_PNG)
         #icon_save = wx.Bitmap(os.path.join(self.bitmap_action_dir, "document-save.png"), wx.BITMAP_TYPE_PNG)
         #icon_saveas = wx.Bitmap(os.path.join(self.bitmap_action_dir, "media-floppy.png"), wx.BITMAP_TYPE_PNG)
@@ -117,6 +117,10 @@ class RibbonPanel(wx.Panel):
         delete_bb = RB.RibbonButtonBar(delete_panel, wx.ID_ANY)
         
         icon_delete = wx.Bitmap(os.path.join(self.bitmap_action_dir, "edit-delete.png"), wx.BITMAP_TYPE_PNG)
+        icon_undo = wx.Bitmap(os.path.join(self.bitmap_action_dir, "edit-undo.png"), wx.BITMAP_TYPE_PNG)
+        icon_redo = wx.Bitmap(os.path.join(self.bitmap_action_dir, "edit-redo.png"), wx.BITMAP_TYPE_PNG)
         
-        delete_bb.AddSimpleButton(wx.ID_ANY, "Delete", icon_delete, "")
+        delete_bb.AddSimpleButton(wx.ID_DELETE, "Delete", icon_delete, "")
+        delete_bb.AddSimpleButton(wx.ID_ANY, "Undo", icon_undo, "")
+        delete_bb.AddSimpleButton(wx.ID_ANY, "Redo", icon_redo, "")
         
