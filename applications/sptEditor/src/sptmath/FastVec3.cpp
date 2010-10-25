@@ -1,7 +1,7 @@
 #include "FastVec3.h"
 
 #define _USE_MATH_DEFINES // we need M_PI 
-#include <cmath>
+#include <math.h>
 
 #include <boost/format.hpp>
 
@@ -10,24 +10,24 @@ using namespace boost;
 
 void FastVec3::normalize()
 {
-	float length = length();
-	_x /= length;
-	_y /= length;
-	_z /= length;
+	float len = length();
+	_x /= FastDec(len);
+	_y /= FastDec(len);
+	_z /= FastDec(len);
 };
 
 float FastVec3::angleToJUnit() const
 {
-	float div = float(_y) / self.length();
-	float theta = div <= -1.0 ? M_PI : acos(div);
+	float div = float(_y) / length();
+	float theta = div <= -1.0 ? float(M_PI) : acos(div);
 
-	if float(self.x) < -0.0:
-		return 2 * M_PI - theta;
+	if(float(_x) < -0.0)
+		return 2 * float(M_PI) - theta;
 
 	return theta;
 };
 
 std::string FastVec3::repr() const
 {
-	return str(format("FastVec3(\"%s\", \"%s\", \"%s\")") % _x.str(), _y.str(), _z.str());
+	return str(format("FastVec3(\"%s\", \"%s\", \"%s\")") % _x.str() % _y.str() % _z.str());
 };

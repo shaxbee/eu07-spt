@@ -1,11 +1,19 @@
 #ifndef SPTMATH_FASTDEC_H
 #define SPTMATH_FASTDEC_H 1
 
+#include <string>
+#include <boost/cstdint.hpp>
+
 class FastDec
 {
 public:
 	FastDec(const FastDec& other): _value(other._value) { };
 	explicit FastDec(const std::string& value);
+    explicit FastDec(float value)
+    {
+        boost::int64_t integral = boost::int64_t(value);
+        _value = integral * 1000 + boost::int64_t((value - integral)* 1000);
+    };
 
 	FastDec operator+(const FastDec& other) const
 	{

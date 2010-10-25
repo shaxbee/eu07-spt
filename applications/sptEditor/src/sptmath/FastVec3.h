@@ -42,7 +42,7 @@ public:
 
 	float length() const
 	{
-		std::sqrt(_x * _x + _y * _y + _z * _z);
+		return std::sqrt(_x * _x + _y * _y + _z * _z);
 	};
 
 	void normalize();

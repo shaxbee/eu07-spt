@@ -9,6 +9,7 @@ set(CMAKE_RELWITHDEBINFO_POSTFIX "rd" CACHE STRING "add a postfix, usually empty
 set(CMAKE_MINSIZEREL_POSTFIX "s" CACHE STRING "add a postfix, usually empty on windows")
 
 include(build/SptUtils.cmake)
+include(build/PythonUtils.cmake)
 
 include_directories(include)
 
