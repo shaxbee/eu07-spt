@@ -12,7 +12,7 @@ public:
     explicit FastDec(float value)
     {
         boost::int64_t integral = boost::int64_t(value);
-        _value = integral * 1000 + boost::int64_t((value - integral)* 1000);
+        _value = integral * 1000 + boost::int64_t((value - integral) * 1000);
     };
 
 	FastDec operator+(const FastDec& other) const
@@ -65,8 +65,8 @@ public:
 		return float(_value / 1000) + (float(_value % 1000) / 1000);
 	};
 
-	std::string str() const;
-	std::string repr() const;
+	std::string __repr__() const;
+    std::string __str__() const;
 
 private:
 	boost::int64_t _value;

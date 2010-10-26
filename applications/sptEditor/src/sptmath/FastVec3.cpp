@@ -27,7 +27,7 @@ float FastVec3::angleToJUnit() const
 	return theta;
 };
 
-std::string FastVec3::repr() const
+std::string FastVec3::__repr__() const
 {
-	return str(format("FastVec3(\"%s\", \"%s\", \"%s\")") % _x.str() % _y.str() % _z.str());
+    return str(format("(%s,%s,%s)") % _x.__str__() % _y.__str__() % _z.__str__());
 };

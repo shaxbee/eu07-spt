@@ -6,7 +6,8 @@
 class FastVec3
 {
 public:
-	explicit FastVec3(FastDec x, FastDec y, FastDec z): _x(x), _y(y), _z(z) { };
+//	explicit ;
+    FastVec3(const std::string& x, const std::string& y, const std::string& z): _x(x), _y(y), _z(z) { };
 	
 	FastVec3 operator+(const FastVec3& other) const
 	{
@@ -44,16 +45,23 @@ public:
 	{
 		return std::sqrt(_x * _x + _y * _y + _z * _z);
 	};
+    
+    float dotProduct(const FastVec3& other) const
+    {
+        return float(_x * other._x + _y * other._y + _z * other._z);
+    };
 
 	void normalize();
 	float angleToJUnit() const;
 
-	std::string repr() const;
+	std::string __repr__() const;
 
 private:
 	FastDec _x;
 	FastDec _y;
 	FastDec _z;
+
+    explicit FastVec3(FastDec x, FastDec y, FastDec z): _x(x), _y(y), _z(z) { };
 }; // class FastVec3
 
 #endif // header guard

@@ -1,5 +1,6 @@
 #include "FastDec.h"
 
+#include <iostream>
 #include <stdexcept>
 
 #include <boost/format.hpp>
@@ -15,29 +16,32 @@ FastDec::FastDec(const string& value)
 	try
 	{
 		// convert decimal part
-		uint64_t decimal = lexical_cast<uint64_t>(value.substr(0, separator));
+		int64_t decimal = lexical_cast<int64_t>(value.substr(0, separator));
 
 		// extract fractional part if present
 		string fractionalStr = separator != string::npos ? value.substr(separator + 1) : "0";
+        float fractional = lexical_cast<float>(fractionalStr) * pow(10.0f, -int(fractionalStr.size()) + 3);
 
-		// count number of zeros for proper base multiplication
-		size_t zeros = fractionalStr.find_first_not_of('0'); 
-		uint64_t fractional = lexical_cast<uint64_t>(fractionalStr) * uint64_t(pow(float(10), int(zeros != string::npos ? zeros + 1 : 0)));
+        _value = decimal * 1000 + int64_t(floor(fractional+0.5));
 
-		_value = decimal * 1000 + fractional;
+        if(value[0] == '-' && _value > 0)
+            _value = -_value;
 	}
 	catch(bad_lexical_cast&)
 	{
-        throw runtime_error(boost::str(format("FastDec::FastDec(value): Value \"%s\" cannot be converted to decimal number") % value));
+        throw runtime_error(str(format("FastDec::FastDec(value): Value \"%s\" cannot be converted to decimal number") % value));
 	};
 };
 
-std::string FastDec::str() const
+std::string FastDec::__repr__() const
 {
-    return boost::str(format("%d.%04d") % (_value / 1000) % (_value % 1000));
+    return str(format("Decimal(\"%s\")") % __str__());
 };
 
-std::string FastDec::repr() const
+std::string FastDec::__str__() const
 {
-    return boost::str(format("FastDec(\"%d.%04d\")") % (_value / 1000) % (_value % 1000));
+    int64_t fractional = _value % 1000;
+    int64_t decimal = (_value - fractional) / 1000;
+
+    return str(format("%s%d.%03d") % (decimal >= 0 && fractional < 0 ? "-" : "") % decimal % abs(int(fractional)));
 };

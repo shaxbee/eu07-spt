@@ -4,71 +4,49 @@ Module containing dedicated math operations.
 @author adammo
 '''
 
-import math
-import decimal
-from decimal import Decimal
+import _sptmath
+
 from wx import Point
 
-THREE_POINTS = Decimal('1.000')
+Vec3 = _sptmath.FastVec3
+Decimal = _sptmath.FastDec
+dotProduct = _sptmath.dotProduct
 
-class Vec3(object):
-    """
-    A vector in 3D world.
-    It uses fixed decimal point coordinates. It stores three decimal places.
-    
-    Setting x, y, z causes to quantize the value to one millimetre.
-
-    Examples:
-    >>> Vec3('0.001', '-0.001', '0.000')
-    (0.001,-0.001,0.000)
-    >>> a = Vec3('0.0001', '-0.0001', '0.000')
-    >>> a
-    (0.000,-0.000,0.000)
-    >>> Vec3('0.999', '-0.999', '1.000')
-    (0.999,-0.999,1.000)
-    >>> b = Vec3('0.0005', '-0.0006', '-0.0004')
-    >>> str(b.x)
-    '0.001'
-    >>> str(b.y)
-    '-0.001'
-    >>> str(b.z)
-    '-0.000'
-    >>> a + b
-    (0.001,-0.001,0.000)
-    >>> Vec3('0.9999', '-0.9999', '0.000')
-    (1.000,-1.000,0.000)
-    >>> Vec3('1.0001', '0.000', '-1.0001')
-    (1.000,0.000,-1.000)
-    >>> c = Vec3('0.0004', '-0.0004', '0.000')
-    >>> c + c
-    (0.000,-0.000,0.000)
-    """
-
-    def __init__(self, x = 0, y = 0, z = 0):
-        self.__values = [None, None, None]
-        self.x = x
-        self.y = y
-        self.z = z
+if False:
+    Vec3.__doc__ = \
+        """
+        A vector in 3D world.
+        It uses fixed decimal point coordinates. It stores three decimal places.
         
-    def __coord_property(index):
-        def getter(self):
-            return self.__values[index]
-            
-        def setter(self, value):
-            if type(value) is not Decimal:
-                value = Decimal(str(value))
-            self.__values[index] = value.quantize(THREE_POINTS, decimal.ROUND_HALF_UP)
-            
-        return property(getter, setter)
-        
-    x = __coord_property(0)
-    y = __coord_property(1)
-    z = __coord_property(2)
+        Setting x, y, z causes to quantize the value to one millimetre.
 
-    def __repr__(self):
-        return "(%.3f,%.3f,%.3f)" % self.to_tuple() 
+        Examples:
+        >>> Vec3('0.001', '-0.001', '0.000')
+        (0.001,-0.001,0.000)
+        >>> a = Vec3('0.0001', '-0.0001', '0.000')
+        >>> a
+        (0.000,-0.000,0.000)
+        >>> Vec3('0.999', '-0.999', '1.000')
+        (0.999,-0.999,1.000)
+        >>> b = Vec3('0.0005', '-0.0006', '-0.0004')
+        >>> str(b.x)
+        '0.001'
+        >>> str(b.y)
+        '-0.001'
+        >>> str(b.z)
+        '-0.000'
+        >>> a + b
+        (0.001,-0.001,0.000)
+        >>> Vec3('0.9999', '-0.9999', '0.000')
+        (1.000,-1.000,0.000)
+        >>> Vec3('1.0001', '0.000', '-1.0001')
+        (1.000,0.000,-1.000)
+        >>> c = Vec3('0.0004', '-0.0004', '0.000')
+        >>> c + c
+        (0.000,-0.000,0.000)
+        """
 
-    def __eq__(self, other):
+    Vec3.__eq__.__doc__ = \
         """
         Returns True if two Vec3 are equal.
 
@@ -82,42 +60,8 @@ class Vec3(object):
         >>> Vec3("2", "3", "-4.009") == Vec3("-2", "3.000", "-5")
         False
         """
-
-        if other is None:
-            return False
             
-        if type(other) is Vec3:
-            return self.to_tuple() == other.to_tuple()
-            
-        if type(other) is tuple:
-            return self.to_tuple() == other
-            
-        return self.x == other.x and self.y == other.y and self.z == other.z
-
-
-    def __hash__(self):
-        return 37 + hash(self.x)*7 + hash(self.y)*11 + hash(self.z)*3
-
-    def __add__(self, other):
-       x = self.x + other.x
-       y = self.y + other.y
-       z = self.z + other.z
-       return Vec3(x, y, z)
-
-
-    def __sub__(self, other):
-        x = self.x - other.x
-        y = self.y - other.y
-        z = self.z - other.z
-        return Vec3(x, y, z)
-
-    def __neg__(self):
-        return Vec3(-self.x, -self.y, -self.z)
-
-    def to_tuple(self):
-        return tuple(self.__values)
-
-    def moveBy(self, v):
+    Vec3.moveBy.__doc__ = \
         """
         Moves this vector by given other v vector.
 
@@ -130,23 +74,18 @@ class Vec3(object):
         >>> str(a.z)
         '-898.000'
         """
-        self.x = self.x + v.x
-        self.y = self.y + v.y
-        self.z = self.z + v.z
-
-    def length(self):
+        
+    Vec3.length.__doc__ = \
         """
         The length of the vector.
         """
-        return math.sqrt(self.x*self.x + self.y*self.y + self.z*self.z)
-
-    def dotProduct(self, other):
+        
+    Vec3.dotProduct.__doc__ = \
         """
         Dot product of this vector and another.
         """
-        return float(self.x*other.x + self.y*other.y + self.z*other.z)
 
-    def normalize(self):
+    Vec3.normalize.__doc__ = \
         """
         Normalizes the vector.
 
@@ -162,18 +101,12 @@ class Vec3(object):
         >>> Vec3("-0.001", "-0.001", "0.001").normalize()
         (-0.577,-0.577,0.577)
         """
-        _length = Decimal(str(self.length()))
-        self.x = self.x / _length
-        self.y = self.y / _length
-        self.z = self.z / _length
-        return self
 
-    def angleToJUnit(self):
+    Vec3.angleToJUnit.__doc__ = \
         """
         Returns the angle in radians to the unit vector J=(0, 1, 0).
 
         Examples:
-
         >>> str(Vec3("0", "1", "0").angleToJUnit())
         '0.0'
         >>> str(Vec3("1", "0", "0").angleToJUnit())
@@ -187,22 +120,12 @@ class Vec3(object):
         >>> str(Vec3("-1", "1", "0").angleToJUnit())
         '5.49778714378'
         """        
-        div = float(self.y) / self.length()
-        if div <= -1.0:
-            theta = math.pi
-        else:
-            theta = math.acos(div)
-        if float(self.x) < -0.0:
-            return 2*math.pi - theta
-        else:
-            return theta
 
-    def scale(self, scale):
+    Vec3.scale.__doc__ = \
         """
         Scales the vector by scale s.
 
         Examples:
-
         >>> Vec3("1", "3", "0.5").scale(2)
         (2.000,6.000,1.000)
         >>> Vec3("-4", "0.001", "-0.999").scale(0.5)
@@ -212,18 +135,11 @@ class Vec3(object):
         >>> Vec3("5", "0.45", "-0.002").scale(0)
         (0.000,0.000,-0.000)
         """
-        scale = Decimal(str(scale))
-        self.x = self.x * scale
-        self.y = self.y * scale
-        self.z = self.z * scale
-        return self
 
-def dotProduct(a, b):
-    """
-    Dot product of two vectors.
-    """
-    return float(a.x*b.x + a.y*b.y + a.z*b.z)
-
+    dotProduct.__doc__ = \
+        """
+        Dot product of two vectors.
+        """
 
 def isNegativeVector(a, b):
     """
