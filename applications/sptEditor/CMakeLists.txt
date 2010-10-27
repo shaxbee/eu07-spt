@@ -1,1 +1,1 @@
-add_subdirectory(src/sptmath)
+add_subdirectory(src)

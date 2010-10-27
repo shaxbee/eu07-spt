@@ -3,6 +3,6 @@ set(PYTHON_MODULE_SRC
     FastVec3.cpp
     sptmath.cpp)
     
-set(PYTHON_MODULE_COPY ../_sptmath)
+set(PYTHON_MODULE_COPY ${SPT_SOURCE_DIR}/applications/sptEditor/src/_sptmath)
     
 python_module(_sptmath)

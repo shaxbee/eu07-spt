@@ -19,6 +19,8 @@ macro(python_module TRGTNAME)
     set_target_properties(${TRGTNAME} PROPERTIES PREFIX "")
     if(WIN32)
         set_target_properties(${TRGTNAME} PROPERTIES SUFFIX ".pyd")
+    else(WIN32)
+        set_target_properties(${TRGTNAME} PROPERTIES SUFFIX ${CMAKE_SHARED_LIBRARY_SUFFIX})
     endif(WIN32)
     
     if(PYTHON_MODULE_COPY)            

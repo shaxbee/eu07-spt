@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <cmath>
 
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>

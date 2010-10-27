@@ -2,6 +2,7 @@
 #define SPTEDITOR_FASTVEC3_H
 
 #include "FastDec.h"
+#include <cmath>
 
 class FastVec3
 {
@@ -18,6 +19,11 @@ public:
 	{
 		return FastVec3(_x - other._x, _y - other._y, _z - other._z);
 	};
+
+    bool operator==(const FastVec3& other) const
+    {
+        return (_x == other._x) && (_y == other._y) && (_z == other._z);
+    };
 
 	void moveBy(const FastVec3& other)
 	{
