@@ -1,4 +1,4 @@
-#include "FastVec3.h"
+#include "Vec3.h"
 
 #define _USE_MATH_DEFINES // we need M_PI 
 #include <math.h>
@@ -8,15 +8,15 @@
 using namespace std;
 using namespace boost;
 
-void FastVec3::normalize()
+void Vec3::normalize()
 {
 	float len = length();
-	_x /= FastDec(len);
-	_y /= FastDec(len);
-	_z /= FastDec(len);
+	_x /= Decimal(len);
+	_y /= Decimal(len);
+	_z /= Decimal(len);
 };
 
-float FastVec3::angleToJUnit() const
+float Vec3::angleToJUnit() const
 {
 	float div = float(_y) / length();
 	float theta = div <= -1.0 ? float(M_PI) : acos(div);
@@ -27,7 +27,7 @@ float FastVec3::angleToJUnit() const
 	return theta;
 };
 
-std::string FastVec3::__repr__() const
+std::string Vec3::__repr__() const
 {
     return str(format("(%s,%s,%s)") % _x.__str__() % _y.__str__() % _z.__str__());
 };

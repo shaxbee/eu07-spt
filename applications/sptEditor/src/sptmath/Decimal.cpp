@@ -1,4 +1,4 @@
-#include "FastDec.h"
+#include "Decimal.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -10,7 +10,7 @@
 using namespace std;
 using namespace boost;
 
-FastDec::FastDec(const string& value)
+Decimal::Decimal(const string& value)
 {
 	size_t separator = value.find('.');
 
@@ -30,16 +30,16 @@ FastDec::FastDec(const string& value)
 	}
 	catch(bad_lexical_cast&)
 	{
-        throw runtime_error(str(format("FastDec::FastDec(value): Value \"%s\" cannot be converted to decimal number") % value));
+        throw runtime_error(str(format("Decimal::Decimal(value): Value \"%s\" cannot be converted to decimal number") % value));
 	};
 };
 
-std::string FastDec::__repr__() const
+std::string Decimal::__repr__() const
 {
     return str(format("Decimal(\"%s\")") % __str__());
 };
 
-std::string FastDec::__str__() const
+std::string Decimal::__str__() const
 {
     int64_t fractional = _value % 1000;
     int64_t decimal = (_value - fractional) / 1000;

@@ -1,7 +1,7 @@
 #include "boost/python.hpp"
 
-#include "FastDec.h"
-#include "FastVec3.h"
+#include "Decimal.h"
+#include "Vec3.h"
 
 namespace
 {
@@ -107,7 +107,7 @@ const char* doc_Vec3_scale = \
 ">>> Vec3('5', '0.45', '-0.002').scale(0)\n"
 "(0.000,0.000,-0.000)\n";
 
-float dotProduct(const FastVec3& left, const FastVec3& right)
+float dotProduct(const Vec3& left, const Vec3& right)
 {
     return left.dotProduct(right);
 };
@@ -121,33 +121,33 @@ BOOST_PYTHON_MODULE(_sptmath)
     // show user-defined docstrings and python signatures
     docstring_options doc_options(true, true, false);
 
-	class_<FastDec>("FastDec", init<std::string>())
-		.def("__add__",  &FastDec::operator+)
-		.def("__sub__",  &FastDec::operator-)
-		.def("__mul__",  &FastDec::operator*)
-		.def("__div__",  &FastDec::operator/)
-		.def("__eq__",   &FastDec::operator==)
+	class_<Decimal>("Decimal", init<std::string>())
+		.def("__add__",  &Decimal::operator+)
+		.def("__sub__",  &Decimal::operator-)
+		.def("__mul__",  &Decimal::operator*)
+		.def("__div__",  &Decimal::operator/)
+		.def("__eq__",   &Decimal::operator==)
 
-		.def("__repr__", &FastDec::__repr__)
-		.def("__str__", &FastDec::__str__);
+		.def("__repr__", &Decimal::__repr__)
+		.def("__str__",  &Decimal::__str__);
 
-    class_<FastVec3>("FastVec3", doc_Vec3, init<const std::string&, const std::string&, const std::string&>(args("x", "y", "z")))
-        .add_property("x",   &FastVec3::getX, &FastVec3::setX)
-        .add_property("y",   &FastVec3::getY, &FastVec3::setY)
-        .add_property("z",   &FastVec3::getZ, &FastVec3::setZ)
+    class_<Vec3>("Vec3", doc_Vec3, init<const std::string&, const std::string&, const std::string&>(args("x", "y", "z")))
+        .add_property("x",   &Vec3::getX, &Vec3::setX)
+        .add_property("y",   &Vec3::getY, &Vec3::setY)
+        .add_property("z",   &Vec3::getZ, &Vec3::setZ)
 
-        .def("__add__",      &FastVec3::operator+)
-        .def("__sub__",      &FastVec3::operator-)
-        .def("__eq__",       &FastVec3::operator==, arg("other"), doc_Vec3_eq)
+        .def("__add__",      &Vec3::operator+)
+        .def("__sub__",      &Vec3::operator-)
+        .def("__eq__",       &Vec3::operator==, arg("other"), doc_Vec3_eq)
 
-        .def("__repr__",     &FastVec3::__repr__)
+        .def("__repr__",     &Vec3::__repr__)
 
-        .def("moveBy",       &FastVec3::moveBy, arg("other"), doc_Vec3_moveBy)
-        .def("scale",        &FastVec3::scale, arg("s"), doc_Vec3_scale)
-        .def("length",       &FastVec3::length, "The length of the vector.")
-        .def("dotProduct",   &FastVec3::dotProduct, "Dot product of this vector and another.")
-        .def("normalize",    &FastVec3::normalize, doc_Vec3_normalize)
-        .def("angleToJUnit", &FastVec3::angleToJUnit, doc_Vec3_angleToJUnit);
+        .def("moveBy",       &Vec3::moveBy, arg("other"), doc_Vec3_moveBy)
+        .def("scale",        &Vec3::scale, arg("s"), doc_Vec3_scale)
+        .def("length",       &Vec3::length, "The length of the vector.")
+        .def("dotProduct",   &Vec3::dotProduct, "Dot product of this vector and another.")
+        .def("normalize",    &Vec3::normalize, doc_Vec3_normalize)
+        .def("angleToJUnit", &Vec3::angleToJUnit, doc_Vec3_angleToJUnit);
         
     def("dotProduct", &dotProduct, args("left", "right"), "Dot product of two vectors.");
 

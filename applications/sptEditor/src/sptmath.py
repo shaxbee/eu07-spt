@@ -4,19 +4,8 @@ Module containing dedicated math operations.
 @author adammo
 '''
 
-import _sptmath
-
+from _sptmath import *
 from wx import Point
-
-Vec3 = _sptmath.FastVec3
-Decimal = _sptmath.FastDec
-dotProduct = _sptmath.dotProduct
-
-if False:
-    dotProduct.__doc__ = \
-        """
-        Dot product of two vectors.
-        """
 
 def isNegativeVector(a, b):
     """
