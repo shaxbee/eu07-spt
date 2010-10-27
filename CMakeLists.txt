@@ -27,6 +27,7 @@ find_package(Boost 1.40.0 REQUIRED)
 find_package(OpenSceneGraph 2.8.0 REQUIRED osgDB osgUtil osgViewer)
 
 add_subdirectory(src)
+add_subdirectory(wrappers)
 add_subdirectory(applications)
 add_subdirectory(tests)
 
