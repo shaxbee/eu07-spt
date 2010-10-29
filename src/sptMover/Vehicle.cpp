@@ -18,14 +18,14 @@ Vehicle::Vehicle(const std::string& name, const VehicleTraits& traits):
 
 Vehicle::~Vehicle() { }
 
-void Vehicle::setPlacement(Track& track, float distance)
+void Vehicle::place(Track& track, float distance)
 {
     _followers.clear();
 
-    for(VehicleTraits::Bogies::const_iterator iter = getTraits().bogies.begin(); iter != getTraits().bogies.end(); iter++)
+    for(VehicleTraits::Bogies::const_iterator iter = getTraits().getBogies().begin(); iter != getTraits().getBogies().end(); iter++)
     {
         // put follower on track
-        std::auto_ptr<Follower> follower(new Follower(track, distance + iter->distance));
+        std::auto_ptr<Follower> follower(new Follower(track, distance + *iter));
         // register
         _followers.push_back(follower);
     };

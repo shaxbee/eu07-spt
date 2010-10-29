@@ -29,33 +29,40 @@ struct VehicleBogieTraits
     Axles axles;
 };
 
-struct VehicleTraits
+class VehicleTraits
 {
+public:
     // dimensions of vehicle: length, width, height
-    osg::Vec3f dimensions;
+    const osg::Vec3f& getDimensions() const { return _dimensions; }
+    void setDimensions(const osg::Vec3f& dimensions) { _dimensions = dimensions; }
+
     // mass of empty vehicle
-    float mass;
+    float getMass() const { return _mass; }
+    void setMass(float mass) { _mass = mass; }
+
     // maximal mass of load
-    float maxLoad;
-    // bogies traits
-    typedef std::vector<VehicleBogieTraits> Bogies;
-    Bogies bogies;
+    float getMaxLoad() const { return _maxLoad; }
+    void setMaxLoad(float maxLoad) { _maxLoad = maxLoad; }
+
+    // bogies distances 
+    typedef std::vector<float> Bogies;
+    const Bogies& getBogies() const { return _bogies; }
+    void setBogies(const Bogies& bogies) { _bogies = bogies; }
+
+private:
+    osg::Vec3f _dimensions;
+    float _mass;
+    float _maxLoad;
+    Bogies _bogies;
 };
 
 class VehicleState
 {
 public:
-    void setLoad(float load) { _load = load; }
     float getLoad() const { return _load; }
-
-    float getAxleSpeed(size_t index) const { return _axleSpeeds.at(index); }
-    void setAxleSpeed(size_t index, float speed) { _axleSpeeds.at(index) = speed; }
-
+    void setLoad(float load) { _load = load; }
 private:
     float _load;
-
-    typedef std::vector<float> AxleSpeeds;
-    AxleSpeeds _axleSpeeds;
 };
 
 class VehicleUpdateCallback
@@ -80,7 +87,7 @@ public:
 	Vehicle(const std::string& name, const VehicleTraits& traits);
     ~Vehicle();
 
-    void setPlacement(sptCore::Track& track, float distance = 0.0f);
+    void place(sptCore::Track& track, float distance = 0.0f);
     bool isPlaced() const { return !_followers.empty(); }
 
 	const std::string& getName() const { return _name; }

@@ -16,8 +16,8 @@ void Trainset::setPlacement(sptCore::Track& track, float distance)
 {
     for(TrainsetState::Vehicles::reverse_iterator iter = _state.vehicles.rbegin(); iter != _state.vehicles.rend(); iter++)
     {
-        iter->setPlacement(track, distance);
-        distance += iter->getTraits().dimensions.x();
+        iter->place(track, distance);
+        distance += iter->getTraits().getDimensions().x();
     };
 };
 
@@ -88,7 +88,7 @@ const sptCore::Follower& Trainset::getLastFollower() const
 
 void Trainset::addVehicle(std::auto_ptr<sptMover::Vehicle> vehicle)
 {
-    _state.length += vehicle->getTraits().dimensions.x();
+    _state.length += vehicle->getTraits().getDimensions().x();
     _state.vehicles.push_back(vehicle);
 };
     

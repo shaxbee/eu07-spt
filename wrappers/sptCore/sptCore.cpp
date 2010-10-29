@@ -4,6 +4,7 @@
 #include <sptCore/Track.h>
 #include <sptCore/Switch.h>
 #include <sptCore/Sector.h>
+#include <sptCore/Scenery.h>
 
 using namespace boost;
 using namespace boost::python;
@@ -11,14 +12,11 @@ using namespace sptCore;
 
 struct RailTrackingWrapper: RailTracking, wrapper<RailTracking>
 {
-
-public:
     RailTrackingWrapper(Sector& sector): RailTracking(sector) { }
 
     virtual const osg::Vec3& getExit(const osg::Vec3& entry) const { return get_override("getExit")(entry); };
     virtual const Path& getPath(const osg::Vec3& entry) const { return get_override("getPath")(entry); };
     virtual const Path& reversePath(const Path& path) const { return get_override("reversePath")(path); };
-
 };
 
 struct SwitchableTrackingWrapper: SwitchableTracking, wrapper<SwitchableTracking>
@@ -40,10 +38,8 @@ struct SwitchableTrackingWrapper: SwitchableTracking, wrapper<SwitchableTracking
     };
 };
 
-BOOST_PYTHON_MODULE(sptCore)
+BOOST_PYTHON_MODULE(_sptCore)
 {
-    class_<Sector, noncopyable>("Sector", no_init);
-
     class_<RailTrackingWrapper, noncopyable>("RailTracking", init<Sector&>())
         .def("getExit", &RailTrackingWrapper::getExit, return_value_policy<return_by_value>())
         .def("getPath", &RailTrackingWrapper::getPath, return_internal_reference<>());
@@ -56,15 +52,19 @@ BOOST_PYTHON_MODULE(sptCore)
         .def("isValidPosition", &SwitchableTracking::isValidPosition)
         .def("getValidPositions", &SwitchableTrackingWrapper::getValidPositions, return_value_policy<return_by_value>());
 
-    class_<Track, bases<RailTracking>, noncopyable >("Track", init<Sector&, std::auto_ptr<Path>& >())
+    class_<Track, bases<RailTracking>, noncopyable>("Track", no_init)
         .def("getExit", &Track::getExit, return_value_policy<return_by_value>())
         .def("getPath", &Track::getPath, return_internal_reference<>())
         .def("getDefaultPath", &Track::getDefaultPath, return_internal_reference<>());
 
-    class_<Switch, bases<SwitchableTracking>, noncopyable >("Switch", init<Sector&, std::auto_ptr<Path>&, std::auto_ptr<Path>& >())
+    class_<Switch, bases<SwitchableTracking>, noncopyable>("Switch", no_init)
         .def("getExit", &Switch::getExit, return_value_policy<return_by_value>())
         .def("getPath", &Switch::getPath, return_internal_reference<>())
         .def("getStraightPath", &Switch::getStraightPath, return_internal_reference<>())
         .def("getDivertedPath", &Switch::getDivertedPath, return_internal_reference<>())
         .def("getValidPositions", &Switch::getValidPositions, return_value_policy<return_by_value>());
+
+    class_<Scenery, noncopyable>("Scenery", no_init)
+        .def("getTrack", &Scenery::getTrack, return_internal_reference<>(), args("name"))
+        .def("getSwitch", &Scenery::getSwitch, return_internal_reference<>(), args("name"));
 };
