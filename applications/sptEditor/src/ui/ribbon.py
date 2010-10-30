@@ -11,6 +11,7 @@ import wx
 import sys
 
 import wx.lib.agw.ribbon as RB
+import art_ribbon as AR
 
 ID_EXPORT = wx.ID_HIGHEST
 ID_CENTER_AT = ID_EXPORT +1
@@ -34,7 +35,20 @@ class RibbonPanel(wx.Panel):
 
         self.AddHomePage()
         self.AddEditPage()
-        
+        self.AddViewPage()
+        self.BindButtons()
+
+        primary, secondary, tertiary = self._ribbon.GetArtProvider().GetColourScheme(0, 0, 0)
+        print primary
+        print secondary
+        print tertiary
+
+        art_provider = AR.RibbonArtProvider()
+        art_provider.SetColourScheme(wx.NamedColour("gray"),wx.NamedColour("orange"),wx.NamedColour("green"))
+        self._ribbon.SetArtProvider(art_provider)
+        #self._ribbon.GetArtProvider().SetColourScheme(wx.NamedColour("blue"),secondary,tertiary)
+        #self._ribbon.GetArtProvider().SetColourScheme(wx.NamedColour("gray"),wx.NamedColour("yellow"),wx.NamedColour("green"))
+
         self._ribbon.Realize()
         s = wx.BoxSizer(wx.VERTICAL)
 
@@ -52,8 +66,51 @@ class RibbonPanel(wx.Panel):
 
         home = RB.RibbonPage(self._ribbon, wx.ID_ANY, "Home", wx.NullBitmap)
 
+
+        self.AddFilePanel(home)
+
+        self.AddNavigationPanel(home)
+        
+
+    def AddEditPage(self):
+        # drugi panel
+        edit = RB.RibbonPage(self._ribbon, wx.ID_ANY, "Editor", wx.NullBitmap)
+
+        self.AddInsertPanel(edit)
+        
+        self.AddHistoryPanel(edit)
+
+        self.AddNavigationPanel(edit)
+
+    def AddViewPage(self):
+        view = RB.RibbonPage(self._ribbon, wx.ID_ANY, "View", wx.NullBitmap)
+
+        self.AddPerspectivePanel(view)
+
+    def BindButtons(self):
+        #InsertPanel
+        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnInsertStraightTrack, id=ID_INSERT_TRACK)
+        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnInsertCurveTrack, id=ID_INSERT_CURVE)
+        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnInsertRailSwitch, id=ID_INSERT_SWITCH)
+        
+        #HistoryPanel
+        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnDelete, id=wx.ID_DELETE)
+        
+        #FilePanel
+        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnNew, id=wx.ID_NEW)
+        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnOpen, id=wx.ID_OPEN)
+        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnSave, id=wx.ID_SAVE)
+        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnSaveAs, id=wx.ID_SAVEAS)
+        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnExport, id=ID_EXPORT)
+       
+        #NavigationPanel
+        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnCenterAt, id=ID_CENTER_AT)
+        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnZoomIn, id=wx.ID_ZOOM_IN)
+        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnZoomOut, id=wx.ID_ZOOM_OUT)
+
+    def AddFilePanel(self,home_panel):
         # w panelu Home tworzymy nowe pole
-        filetools_panel = RB.RibbonPanel(home, wx.ID_ANY, "File", wx.NullBitmap, wx.DefaultPosition,
+        filetools_panel = RB.RibbonPanel(home_panel, wx.ID_ANY, "File", wx.NullBitmap, wx.DefaultPosition,
                                        wx.DefaultSize, agwStyle=RB.RIBBON_PANEL_NO_AUTO_MINIMISE)
         file_tools = RB.RibbonButtonBar(filetools_panel, wx.ID_ANY)
 
@@ -71,15 +128,11 @@ class RibbonPanel(wx.Panel):
         file_tools.AddSimpleButton(wx.ID_SAVE, "Save", icon_save,"Save")
         file_tools.AddSimpleButton(wx.ID_SAVEAS, "Save as...", icon_saveas,"Save as...")
         file_tools.AddSimpleButton(ID_EXPORT, "Export", icon_export, "Export to binary file")
+     
 
-        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnNew, id=wx.ID_NEW)
-        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnOpen, id=wx.ID_OPEN)
-        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnSave, id=wx.ID_SAVE)
-        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnSaveAs, id=wx.ID_SAVEAS)
-        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnExport, id=ID_EXPORT)
-
+    def AddNavigationPanel(self,home_panel):
         #pole dla nawigacji
-        navi_panel = RB.RibbonPanel(home,wx.ID_ANY,"Navigtion",wx.NullBitmap)
+        navi_panel = RB.RibbonPanel(home_panel,wx.ID_ANY,"Navigtion",wx.NullBitmap)
         navi = RB.RibbonButtonBar(navi_panel, wx.ID_ANY)
 
         icon_centerat = wx.Bitmap(os.path.join(self.bitmap_action_dir, "view-restore.png"), wx.BITMAP_TYPE_PNG)
@@ -89,17 +142,25 @@ class RibbonPanel(wx.Panel):
         navi.AddSimpleButton(ID_CENTER_AT, "Center at", icon_centerat, "")
         navi.AddSimpleButton(wx.ID_ZOOM_IN, "Zoom in", icon_zoomin, "")
         navi.AddSimpleButton(wx.ID_ZOOM_OUT, "Zoom out", icon_zoomout, "")
+        
+    def AddHistoryPanel(self,home_panel):
+        #pole usuwania
+        delete_panel = RB.RibbonPanel(home_panel, wx.ID_ANY, "Edit", wx.NullBitmap, wx.DefaultPosition,
+                                       wx.DefaultSize, agwStyle=RB.RIBBON_PANEL_NO_AUTO_MINIMISE)
+                                       
+        delete_bb = RB.RibbonButtonBar(delete_panel, wx.ID_ANY)
+        
+        icon_delete = wx.Bitmap(os.path.join(self.bitmap_action_dir, "edit-delete.png"), wx.BITMAP_TYPE_PNG)
+        icon_undo = wx.Bitmap(os.path.join(self.bitmap_action_dir, "edit-undo.png"), wx.BITMAP_TYPE_PNG)
+        icon_redo = wx.Bitmap(os.path.join(self.bitmap_action_dir, "edit-redo.png"), wx.BITMAP_TYPE_PNG)
+        
+        delete_bb.AddSimpleButton(wx.ID_DELETE, "Delete", icon_delete, "")
+        delete_bb.AddSimpleButton(wx.ID_UNDO, "Undo", icon_undo, "")
+        delete_bb.AddSimpleButton(wx.ID_REDO, "Redo", icon_redo, "")
 
-        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnCenterAt, id=ID_CENTER_AT)
-        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnZoomIn, id=wx.ID_ZOOM_IN)
-        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnZoomOut, id=wx.ID_ZOOM_OUT)
-
-    def AddEditPage(self):
-        # drugi panel
-        edit = RB.RibbonPage(self._ribbon, wx.ID_ANY, "Edit", wx.NullBitmap)
-
+    def AddInsertPanel(self,home_panel):
         # w panelu Edit tworzymy pole wstawiania
-        insert_panel = RB.RibbonPanel(edit, wx.ID_ANY, "Insert", wx.NullBitmap, wx.DefaultPosition,
+        insert_panel = RB.RibbonPanel(home_panel, wx.ID_ANY, "Insert", wx.NullBitmap, wx.DefaultPosition,
                                        wx.DefaultSize, agwStyle=RB.RIBBON_PANEL_NO_AUTO_MINIMISE)
                                        
         insert = RB.RibbonButtonBar(insert_panel, wx.ID_ANY)
@@ -112,23 +173,8 @@ class RibbonPanel(wx.Panel):
         insert.AddSimpleButton(ID_INSERT_TRACK, "Track", icon_insert_track, "")
         insert.AddSimpleButton(ID_INSERT_CURVE, "Curve", icon_insert_track, "")
         insert.AddSimpleButton(ID_INSERT_SWITCH, "Switch", icon_insert_track, "")
-                
-        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnInsertStraightTrack, id=ID_INSERT_TRACK)
-        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnInsertCurveTrack, id=ID_INSERT_CURVE)
-        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnInsertRailSwitch, id=ID_INSERT_SWITCH)
-        
-        #pole usuwania
-        delete_panel = RB.RibbonPanel(edit, wx.ID_ANY, "Delete", wx.NullBitmap, wx.DefaultPosition,
+
+    def AddPerspectivePanel(self,home_page):
+        pers_panel = RB.RibbonPanel(home_page, wx.ID_ANY, "Perspectives", wx.NullBitmap, wx.DefaultPosition,
                                        wx.DefaultSize, agwStyle=RB.RIBBON_PANEL_NO_AUTO_MINIMISE)
                                        
-        delete_bb = RB.RibbonButtonBar(delete_panel, wx.ID_ANY)
-        
-        icon_delete = wx.Bitmap(os.path.join(self.bitmap_action_dir, "edit-delete.png"), wx.BITMAP_TYPE_PNG)
-        icon_undo = wx.Bitmap(os.path.join(self.bitmap_action_dir, "edit-undo.png"), wx.BITMAP_TYPE_PNG)
-        icon_redo = wx.Bitmap(os.path.join(self.bitmap_action_dir, "edit-redo.png"), wx.BITMAP_TYPE_PNG)
-        
-        delete_bb.AddSimpleButton(wx.ID_DELETE, "Delete", icon_delete, "")
-        delete_bb.AddSimpleButton(wx.ID_UNDO, "Undo", icon_undo, "")
-        delete_bb.AddSimpleButton(wx.ID_REDO, "Redo", icon_redo, "")
-        
-        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnDelete, id=wx.ID_DELETE)
