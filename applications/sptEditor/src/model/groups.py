@@ -9,6 +9,7 @@ import logging
 
 import tracks
 import sptmath
+import sptial
 
 
 class RailContainer:
@@ -18,7 +19,7 @@ class RailContainer:
     
     def __init__(self, name = None):
         # Contains all children
-        self.children = []
+        self.children = sptial.RTree()
         # Outline trackings are at borders of this container and may attach
         # to some external trackings.
         self.outline_trackings = []
@@ -31,7 +32,7 @@ class RailContainer:
     def __repr__(self):
         return "RailContainer[" \
             + "name=" + str(self.name) \
-            + ", children=" + str(self.children) \
+            + ", children=" + self.children.str() \
             + ", outlinePoints=" + str(self.connections.keys()) \
             + "]";
 
@@ -62,7 +63,10 @@ class RailContainer:
         """
         Checks if a group contains given rail tracking
         """
-        return tracking in self.children
+        geometry = tracking.getEndPoints()
+        cuboid = sptial.Cuboid.fromEndpoints(geometry)
+        found = self.children.query(cuboid)
+        return tracking in found
 
 
     def containsPoint(self, point):
@@ -150,14 +154,15 @@ class RailContainer:
         if isDebug:
             logger.debug("Trying to insert " + str(tracking))
 
+        geometry = tracking.getEndPoints()
+        cuboid = sptial.Cuboid.fromEndpoints(geometry)
+
         if self.contains(tracking):
             raise ValueError, "Rail tracking is already in group"
 
         if not tracks.isDisconnected(tracking):
             raise ValueError, "Connected rail tracking cannot " \
                 + "be inserted into group"
-
-        geometry = tracking.getEndPoints()
 
         i = 0
         founds = 0L
@@ -238,7 +243,7 @@ class RailContainer:
             self.outline_trackings.insert(0, tracking)
 
         # Add to children
-        self.children.insert(0, tracking)
+        self.children.insert(cuboid, tracking)
 
         if isDebug:
             logger.debug("Rail tracking " + str(tracking) + " has been successfully " \
@@ -260,6 +265,7 @@ class RailContainer:
             raise ValueError, "Rail tracking is not in this group"
 
         geometry = tracking.getEndPoints()
+        cuboid = sptial.Cuboid.fromEndpoints(geometry)
 
         # Check if the points don't make existing group connections
         for gpoint in geometry:
@@ -312,7 +318,7 @@ class RailContainer:
 
             self.outline_trackings.remove(tracking)
 
-        self.children.remove(tracking)
+        self.children.delete(cuboid, tracking)
 
         if isDebug:
             logger.debug("Tracking " + str(tracking) + " was removed from group")
@@ -364,10 +370,18 @@ class RailContainer:
 
     def rebuild(self):
         """
-        Rebuilds the internal structures after applying transformations.
+        Rebuilds the internal structures after applying 3D transformations.
         """
         items = self.connections.items()
         self.connections = dict(items)
+        
+        children = iter(self.children)
+        tree = sptial.RTree()
+        for c in children:
+            geometry = c.getEndPoints()
+            cuboid = sptial.Cuboid.fromEndpoints(geometry)
+            tree.insert(cuboid, c)
+        self.children = tree
           
 
   
@@ -414,7 +428,7 @@ class RailGroup(RailContainer):
     def __repr__(self):
         return "RailGroup[" \
             + "name=" + str(self.name) \
-            + ", children=" + str(self.children) \
+            + ", children=" + self.children.str() \
             + ", outlinePoints=" + str(self.connections.keys()) \
             + "]";
 

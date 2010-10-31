@@ -41,7 +41,7 @@ def represent_Switch(dumper, data):
 def represent_RailContainer(dumper, data):
     return dumper.represent_mapping("RailContainer", \
         {"name": data.name,
-         "children": data.children})
+         "children": list(data.children)})
 
 
 def represent_Scenery(dumper, data):
