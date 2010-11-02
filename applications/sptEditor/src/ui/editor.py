@@ -454,10 +454,13 @@ class PlanePart(wx.ScrolledWindow):
         clip = self.GetUpdateRegion().GetBox()
         (clip.x, clip.y) = self.CalcUnscrolledPosition(clip.x, clip.y)
 
+        context = ui.views.DCContext()
+        context.scale = self.scale
+
         startTime = datetime.datetime.now()
         try:
-            self.PaintBackground(dc, clip)
-            self.PaintForeground(dc, clip)
+            self.PaintBackground(dc, clip, context)
+            self.PaintForeground(dc, clip, context)
         finally:
             delta = datetime.datetime.now() - startTime
             idelta = delta.days * 86400 + delta.seconds * 1000000 \
@@ -465,7 +468,7 @@ class PlanePart(wx.ScrolledWindow):
             self.logger.debug(u"Paint lasted %d \u00b5s" % idelta)
 
 
-    def PaintBackground(self, dc, clip):
+    def PaintBackground(self, dc, clip, context):
         """
         Paints part background.
         """
@@ -541,18 +544,18 @@ class PlanePart(wx.ScrolledWindow):
             dc.SetPen(oldPen)
 
 
-    def PaintForeground(self, dc, clip):
+    def PaintForeground(self, dc, clip, context):
         """
         Paints foreground
         """
-        self.PaintTracks(dc, clip)
-        self.PaintSwitches(dc, clip)
-        self.PaintSelection(dc, clip)
-        self.PaintSnapPoint(dc, clip)
-        self.PaintBasePoint(dc, clip)
+        self.PaintTracks(dc, clip, context)
+        self.PaintSwitches(dc, clip, context)
+        self.PaintSelection(dc, clip, context)
+        self.PaintSnapPoint(dc, clip, context)
+        self.PaintBasePoint(dc, clip, context)
         
         
-    def PaintTracks(self, dc, clip):
+    def PaintTracks(self, dc, clip, context):
         """
         Paint rail tracks.
         """        
@@ -562,12 +565,12 @@ class PlanePart(wx.ScrolledWindow):
                 3 if self.scale > 1.0 else 1))
             for v in self.trackCache:
                 if v != self.selectedView:
-                    v.Draw(dc, clip)
+                    v.Draw(dc, clip, context)
         finally:
             dc.SetPen(oldPen)
             
             
-    def PaintSwitches(self, dc, clip):
+    def PaintSwitches(self, dc, clip, context):
         """
         Paints rail switches.
         """
@@ -577,12 +580,12 @@ class PlanePart(wx.ScrolledWindow):
                 3 if self.scale > 1.0 else 1))
             for v in self.switchCache:
                 if v != self.selectedView:
-                    v.Draw(dc, clip)
+                    v.Draw(dc, clip, context)
         finally:
             dc.SetPen(oldPen)
 
 
-    def PaintSelection(self, dc, clip):
+    def PaintSelection(self, dc, clip, context):
         """
         Paints rail switches.
         """
@@ -592,16 +595,16 @@ class PlanePart(wx.ScrolledWindow):
         try:
             dc.SetPen(wx.Pen((255, 0, 0), \
                 3 if self.scale > 1.0 else 1))
-            self.selectedView.Draw(dc, clip)
+            self.selectedView.Draw(dc, clip, context)
         finally:
             dc.SetPen(oldPen)
             
             
-    def PaintBasePoint(self, dc, clip):
-        self.basePointView.Draw(dc, clip)
+    def PaintBasePoint(self, dc, clip, context):
+        self.basePointView.Draw(dc, clip, context)
 
 
-    def PaintSnapPoint(self, dc, clip):
+    def PaintSnapPoint(self, dc, clip, context):
         if self.snapData != None:
              index = ui.views.getImageIndexByAngle(self.snapData.alpha)
              snapImage = ui.views.SNAP_BASEPOINT_IMAGES[index]

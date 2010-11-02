@@ -10,13 +10,13 @@ class Cuboid:
     Cuboid that is based on integer coordinates
     """
 
-    def __init__(self, minX, maxX, minY, maxY, minZ, maxZ):
-        self.minX = minX
-        self.maxX = maxX
-        self.minY = minY
-        self.maxY = maxY
-        self.minZ = minZ
-        self.maxZ = maxZ
+    def __init__(self, p1, p2):
+        self.minX = p1[0]
+        self.maxX = p2[0]
+        self.minY = p1[1]
+        self.maxY = p2[1]
+        self.minZ = p1[2]
+        self.maxZ = p2[2]
 
 
     def __repr__(self):
@@ -25,6 +25,7 @@ class Cuboid:
 
 
     def __eq__(self, o):
+        if self is o: return True
         return self.minX == o.minX \
             and self.maxX == o.maxX \
             and self.minY == o.minY \
@@ -40,7 +41,7 @@ class Cuboid:
         Examples:
         >>> NullCuboid.volume()
         0
-        >>> Cuboid(1, 2, -2, -1, -1, 1).volume()
+        >>> Cuboid((1, -2, -1), (2, -1, 1)).volume()
         2
         """
         w = self.maxX - self.minX
@@ -55,12 +56,12 @@ class Cuboid:
         this cuboid and another.
 
         Examples:
-        >>> c = Cuboid(0, 2, 0, 2, 0, 2)
+        >>> c = Cuboid((0, 0, 0), (2, 2, 2))
         >>> c.overlap(NullCuboid)
         0
-        >>> c.overlap(Cuboid(2, 3, -1, 0, 2, 4))
+        >>> c.overlap(Cuboid((2, -1, 2), (3, 0, 4)))
         0
-        >>> c.overlap(Cuboid(-1, 1, 1, 3, 0, 2))
+        >>> c.overlap(Cuboid((-1, 1, 0), (1, 3, 2)))
         2
         """
         return self.intersection(oc).volume()
@@ -76,7 +77,7 @@ class Cuboid:
         Returns True if this contains the point.
 
         Examples:
-        >>> c = Cuboid(-1, 2, -1, 2, 0, 3)
+        >>> c = Cuboid((-1, -1, 0), (2, 2, 3))
         >>> c.containsPoint(0, 0, 0)
         True
         >>> c.containsPoint(-1, -1, 0)
@@ -96,10 +97,10 @@ class Cuboid:
         Returns true if oc intersects this cuboid.
 
         Examples:
-        >>> a = Cuboid(-1, 2, 0, 0, -2, 1)
-        >>> b = Cuboid(-1, 2, 0, 0, -3, 1)
-        >>> c = Cuboid(-1, 2, 0, 1, -2, 1)
-        >>> d = Cuboid(-1, 2, -1, 0, -2, 1)        
+        >>> a = Cuboid((-1, 0, -2), (2, 0, 1))
+        >>> b = Cuboid((-1, 0, -3), (2, 0, 1))
+        >>> c = Cuboid((-1, 0, -2), (2, 1, 1))
+        >>> d = Cuboid((-1, -1, -2), (2, 0, 1))
         >>> a.intersects(b)
         True
         >>> c.intersects(a)
@@ -125,10 +126,10 @@ class Cuboid:
         Makes the intersection with given oc.
 
         Examples:
-        >>> a = Cuboid(-1, 2, -2, 0, 1, 3)
-        >>> b = Cuboid(0, 1, -1, 0, 2, 3)
-        >>> c = Cuboid(-2, 0, -3, -1, 2, 4)
-        >>> d = Cuboid(9, 10, 9, 10, 9, 10)
+        >>> a = Cuboid((-1, -2, 1), (2, 0, 3))
+        >>> b = Cuboid((0, -1, 2), (1, 0, 3))
+        >>> c = Cuboid((-2, -3, 2), (0, -1, 4))
+        >>> d = Cuboid((9, 9, 9), (10, 10, 10))
         >>> a.intersection(d)
         (0, 0, 0), (0, 0, 0)
         >>> a.intersection(b)
@@ -147,9 +148,7 @@ class Cuboid:
         if w < 0 or h < 0 or d < 0: return NullCuboid
         if w == 0 and h == 0 and d == 0: return NullCuboid
 
-        c = Cuboid(minX, maxX, minY, maxY, minZ, maxZ)
-        #print c
-        return c 
+        return Cuboid((minX, minY, minZ), (maxX, maxY, maxZ))
 
 
     def union(self, oc):
@@ -157,16 +156,16 @@ class Cuboid:
         Makes the union of this cuboid and another one and returns the union.
 
         Examples:
-        >>> a = Cuboid(-1, 3, -3, 2, -2, 3)
-        >>> b = Cuboid(0, 1, 0, 1, 0, 1)
+        >>> a = Cuboid((-1, -3, -2), (3, 2, 3))
+        >>> b = Cuboid((0, 0, 0), (1, 1, 1))
         >>> a.union(b) == a
         True
-        >>> c = Cuboid(9, 10, 9, 10, -10, -9)
+        >>> c = Cuboid((9, 10, -10), (10, 10, -9))
         >>> b.union(c)
         (0, 0, -10), (10, 10, 1)
         """
-        if oc is NullCuboid: return Cuboid(self.minX, self.maxX, self.minY, self.maxY, self.minZ, self.maxZ)
-        if self is NullCuboid: return Cuboid(oc.minX, oc.maxX, oc.minY, oc.maxY, oc.minZ, oc.maxZ)
+        if oc is NullCuboid: return Cuboid((self.minX, self.minY, self.minZ), (self.maxX, self.maxY, self.maxZ))
+        if self is NullCuboid: return Cuboid((oc.minX, oc.minY, oc.minZ), (oc.maxX, oc.maxY, oc.maxZ))
 
         nMinX = self.minX if self.minX < oc.minX else oc.minX
         nMaxX = self.maxX if self.maxX > oc.maxX else oc.maxX
@@ -175,11 +174,11 @@ class Cuboid:
         nMinZ = self.minZ if self.minZ < oc.minZ else oc.minZ
         nMaxZ = self.maxZ if self.maxZ > oc.maxZ else oc.maxZ
 
-        return Cuboid(nMinX, nMaxX, nMinY, nMaxY, nMinZ, nMaxZ)
+        return Cuboid((nMinX, nMinY, nMinZ), (nMaxX, nMaxY, nMaxZ))
 
 
     def unionPoint(self, x, y, z):
-        return self.union(Cuboid(x, x, y, y, z, z))
+        return self.union(Cuboid((x, y, z), (x, y, z)))
         
 
     @classmethod
@@ -204,7 +203,7 @@ class Cuboid:
         minZ = int(min(za).to_integral_value(decimal.ROUND_FLOOR))
         maxZ = int(max(za).to_integral_value(decimal.ROUND_CEILING))
 
-        return Cuboid(minX, maxX, minY, maxY, minZ, maxZ)
+        return Cuboid((minX, minY, minZ), (maxX, maxY, maxZ))
 
 
     @classmethod
@@ -215,7 +214,122 @@ class Cuboid:
         return r
 
 
-NullCuboid = Cuboid(0, 0, 0, 0, 0, 0)
+NullCuboid = Cuboid((0, 0, 0), (0, 0, 0))
+
+
+class Rect:
+    """
+    2D plane rectangle using integer coordinates.
+    """
+
+    def __init__(self, p1, p2):
+        self.minX = p1[0]
+        self.maxX = p2[0]
+        self.minY = p1[1]
+        self.maxY = p2[1]
+
+
+    def __repr__(self):
+        return "(%d, %d), (%d, %d)" % (self.minX, self.minY, self.maxX, self.maxY)
+
+
+    def __eq__(self, o):
+        if self is o:
+            return True
+        return self.minX == o.minX \
+            and self.maxX == o.maxX \
+            and self.minY == o.minY \
+            and self.maxY == o.maxY
+
+
+    def volume(self):
+        """
+        Returns the area (volume) of the rectangle.
+
+        Examples:
+        >>> Rect((1, -3), (5, 5)).volume()
+        32
+        >>> Rect((0, 4), (0, 5)).volume()
+        0
+        """
+        w = self.maxX - self.minX
+        h = self.maxY - self.minY
+        return w * h
+
+
+    def overlap(self, oc):
+        """
+        Returns the area of overlapping part of this rectangle and another one.
+
+        Examples:
+        TODO
+        """
+        return self.intersection(oc).volume()
+
+
+    def contains(self, oc):
+        return self.containsPoint(oc.minX, oc.minY) \
+            and self.containsPoint(oc.maxX, oc.maxY)
+    
+
+    def containsPoint(self, x, y):
+        return x >= self.minX and x <= self.maxX \
+            and y >= self.minY and y <= self.maxY
+
+
+    def intersects(self, oc):
+        if self == oc:
+            return True
+        inter = self.intersection(oc)
+        if inter.volume() > 0:
+            return True
+        elif inter != NullCuboid:
+            return True
+        else:
+            return False
+
+
+    def intersection(self, oc):
+        if self is NullRect: return NullRect
+        if oc is NullRect: return NullRect
+
+        minX, maxX = max(self.minX, oc.minX), min(self.maxX, oc.maxX)
+        minY, maxY = max(self.minY, oc.minY), min(self.maxY, oc.maxY)
+
+        w, h = maxX - minX, maxY, minY
+        if w < 0 or h < 0: return NullRect
+        if w == 0 and h == 0: return NullRect
+
+        return Rect((minX, minY), (maxX, maxY))
+
+
+    def union(self, oc):
+        if oc is NullRect: return Rect((self.minX, self.minY), (self.maxX, self.maxY))
+        if self is NullRect: return Rect((oc.minX, oc.minY), (oc.maxX, oc.maxY))
+
+        nMinX = self.minX if self.minX < oc.minX else oc.minX
+        nMaxX = self.maxX if self.maxX > oc.maxX else oc.maxX
+        nMinY = self.minY if self.minY < oc.minY else oc.minY
+        nMaxY = self.maxY if self.maxY > oc.maxY else oc.maxY
+
+        return Rect((nMinX, nMinY), (nMaxX, nMaxY))
+
+
+    def unionPoint(self, x, y):
+        return self.union(Rect((x, y), (x, y)))
+
+
+    @classmethod
+    def unionAll(cls, seq):
+        r = NullRect
+        for k in seq:
+            r = r.union(k)
+        return r
+
+
+NullRect = Rect((0, 0), (0, 0))
+
+
 
 
 class RTree:
@@ -426,8 +540,8 @@ class RTree:
         seedA = None
         seedB = None
         elen = len(entries)
-        for i in range(0, elen):
-            for j in range(i+1, elen):
+        for i in xrange(0, elen):
+            for j in xrange(i+1, elen):
                 e1 = entries[i]
                 e2 = entries[j]
                 jc = e1.cuboid.union(e2.cuboid)
@@ -493,11 +607,11 @@ class RTree:
         >>> l = [Vec3('-0.551', '-1.000', '-1.001'), Vec3('2.000', '3.999', '32.090'), Vec3('0.000', '4.001', '4.000')] 
         >>> cub1 = Cuboid.fromEndpoints(l)
         >>> rtree.insert(cub1, 'a')
-        >>> rtree.insert(Cuboid(1, 2, 1, 2, 1, 2), 'b')
-        >>> rtree.insert(Cuboid(3, 4, 3, 4, 3, 4), 'c')
+        >>> rtree.insert(Cuboid((1, 1, 1), (2, 2, 2)), 'b')
+        >>> rtree.insert(Cuboid((3, 3, 3), (4, 4, 4)), 'c')
         >>> len(rtree)
         3
-        >>> rtree.delete(Cuboid(1, 2, 1, 2, 1, 2), 'b')
+        >>> rtree.delete(Cuboid((1, 1, 1), (2, 2, 2)), 'b')
         True
         >>> len(rtree)
         2
@@ -575,10 +689,10 @@ class RTree:
 
         Example:
         >>> rtree = RTree()
-        >>> rtree.insert(Cuboid(-6, 7, 9, 14, 13, 14), 'bbb')
-        >>> list(rtree.query(Cuboid(-99, -98, -98, -7, 6, 7)))
+        >>> rtree.insert(Cuboid((-6, 9, 13), (7, 14, 14)), 'bbb')
+        >>> list(rtree.query(Cuboid((-99, -98, 6), (-98, -7, 7))))
         []
-        >>> list(rtree.query(Cuboid(0, 1, 10, 11, 13, 14)))
+        >>> list(rtree.query(Cuboid((0, 10, 13), (1, 11, 14))))
         ['bbb']
         """
         def p(o): return cuboid.intersects(o.cuboid)
@@ -604,7 +718,7 @@ class RTree:
 
         Examples:
         >>> rtree = RTree()
-        >>> rtree.insert(Cuboid(-6, 7, 9, 14, 13, 14), 'bbb')
+        >>> rtree.insert(Cuboid((-6, 9, 13), (7, 14, 14)), 'bbb')
         >>> list(rtree.queryPoint(-99, -98, -98))
         []
         >>> list(rtree.queryPoint(2, 14, 13))

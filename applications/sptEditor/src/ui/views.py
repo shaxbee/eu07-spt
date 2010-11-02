@@ -113,6 +113,12 @@ class Snapable:
 
 
 
+
+class DCContext:
+    pass
+
+
+
     
 class TrackView(View, Snapable):
     """
@@ -155,8 +161,12 @@ class TrackView(View, Snapable):
             * scale + 100;        
         
     
-    def Draw(self, dc, clip):
-        dc.DrawSpline(self.curve)
+    def Draw(self, dc, clip, context):
+        if context.scale < 1.0:
+            dc.DrawLine(self.curve[0].x, self.curve[0].y, \
+                self.curve[3].x, self.curve[3].y)
+        else:
+            dc.DrawSpline(self.curve)
 
 
     def GetRepaintBounds(self):
@@ -271,9 +281,15 @@ class RailSwitchView(View, Snapable):
             * scale + 100;
     
     
-    def Draw(self, dc, clip):
-        dc.DrawSpline(self.straight)
-        dc.DrawSpline(self.diverging)
+    def Draw(self, dc, clip, context):
+        if context.scale < 1.0:
+            dc.DrawLine(self.straight[0].x, self.straight[0].y, \
+                self.straight[3].x, self.straight[3].y)
+            dc.DrawLine(self.diverging[0].x, self.diverging[0].y, \
+                self.diverging[3].x, self.diverging[3].y)
+        else:
+            dc.DrawSpline(self.straight)
+            dc.DrawSpline(self.diverging)
         
         
     def GetRepaintBounds(self):
@@ -370,7 +386,7 @@ class BasePointView(View):
         self.point.y = int(((-float(self.basePoint.point.y) + oMaxY) * scale) + 100)
 
 
-    def Draw(self, dc, clip):
+    def Draw(self, dc, clip, context):
         index = getImageIndexByAngle(self.basePoint.alpha)
         dc.DrawBitmap(wx.BitmapFromImage(BASEPOINT_IMAGES[index]), \
                       self.point.x - BASEPOINT_IMAGES[index].GetWidth() / 2, \
