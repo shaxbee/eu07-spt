@@ -180,18 +180,22 @@ class RibbonArtProvider(object):
         self._page_background_gradient_colour = LikePrimary(primary_hsl, 0.0, 0.0, 0.45)
         self._page_hover_background_gradient_colour = LikePrimary(primary_hsl, 0.0, 0.0, 0.45)
 
-        self._tab_active_background_colour = LikePrimary(primary_hsl, -0.1, -0.31, 0.56)
-        self._tab_active_background_gradient_colour = LikePrimary(primary_hsl, -0.1, -0.03, 0.12)        
+        self._tab_active_background_colour = LikePrimary(primary_hsl, 0.0, 0.0, 0.56)
+        self._tab_active_background_gradient_colour = LikePrimary(primary_hsl, 0.0, 0.0, 0.12)
         self._tab_separator_colour = LikePrimary(primary_hsl, 0.1, 0.0, 0.4)
         #kolor paska przy tabach
-        self._tab_ctrl_background_brush = wx.Brush(primary)#LikePrimary(primary_hsl, 1.0, 0.39, 0.07))
-        self._tab_hover_background_colour = LikePrimary(primary_hsl, 1.3, 0.15, 0.10)
-        self._tab_hover_background_top_colour = LikePrimary(primary_hsl, 1.4, 0.36, 0.08)
+        self._tab_ctrl_background_brush = wx.Brush(LikePrimary(primary_hsl, 0.0, 0.0, -0.25))
+        #kolor taba na wstazce
+        self._tab_hover_background_colour = LikePrimary(primary_hsl, 0.0, 0.0, 0.16)
+        self._tab_hover_background_top_colour = LikePrimary(primary_hsl, 0.0, 0.0, 0.56)
+        self._tab_hover_background_gradient_colour = LikeSecondary(primary_hsl, 0.0, 0.0, 0.01)
+        self._tab_hover_background_top_gradient_colour = LikePrimary(primary_hsl, 0.0, 0.0, 0.16)
+        #obwodka panela
         self._tab_border_pen = wx.Pen(LikePrimary(primary_hsl, 1.4, 0.03, -0.05)  )
         self._tab_separator_gradient_colour = LikePrimary(primary_hsl, -1.7, -0.15, -0.18)
-        self._tab_hover_background_top_gradient_colour = LikePrimary(primary_hsl, 1.8, 0.34, 0.13)   
-        self._tab_label_colour = LikePrimary(primary_hsl, 4.3, 0.13, -0.49)
-        self._tab_hover_background_gradient_colour = LikeSecondary(primary_hsl, -1.5, -0.34, 0.01)
+        #kolor czcionki
+        self._tab_label_colour = LikePrimary(primary_hsl, 0.0, 0.0, -0.49)
+        self._tab_label_deactive_colour = LikePrimary(primary_hsl, 0.0, 0.0, 0.8)
 
         self._panel_minimised_border_gradient_pen = wx.Pen(LikePrimary(primary_hsl, -6.9, -0.17, -0.09))
         self._panel_minimised_border_pen = wx.Pen(LikePrimary(primary_hsl, -5.3, -0.24, -0.06))
@@ -981,7 +985,10 @@ class RibbonArtProvider(object):
             label = tab.page.GetLabel()
             if label.strip():            
                 dc.SetFont(self._tab_label_font)
-                dc.SetTextForeground(self._tab_label_colour)
+                if tab.active or tab.hovered:
+                    dc.SetTextForeground(self._tab_label_colour)
+                else:
+                    dc.SetTextForeground(self._tab_label_deactive_colour)
                 dc.SetBackgroundMode(wx.TRANSPARENT)
 
                 text_width, text_height = dc.GetTextExtent(label)
