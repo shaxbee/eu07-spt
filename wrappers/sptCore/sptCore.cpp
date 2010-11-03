@@ -1,4 +1,5 @@
 #include <boost/python.hpp>
+#include <boost/python/stl_iterator.hpp>
 
 #include <sptCore/Path.h>
 #include <sptCore/Track.h>
@@ -10,24 +11,39 @@ using namespace boost;
 using namespace boost::python;
 using namespace sptCore;
 
+
 struct RailTrackingWrapper: RailTracking, wrapper<RailTracking>
 {
     RailTrackingWrapper(Sector& sector): RailTracking(sector) { }
 
-    virtual const osg::Vec3& getExit(const osg::Vec3& entry) const { return get_override("getExit")(entry); };
-    virtual const Path& getPath(const osg::Vec3& entry) const { return get_override("getPath")(entry); };
-    virtual const Path& reversePath(const Path& path) const { return get_override("reversePath")(path); };
+    virtual const osg::Vec3& getExit(const osg::Vec3& entry) const { return extract<osg::Vec3&>(get_override("getExit")(entry)); }
+    virtual const Path& getPath(const osg::Vec3& entry) const { return extract<const Path&>(get_override("getPath")(entry)); };
+    virtual const Path& reversePath(const Path& path) const { return extract<const Path&>(get_override("reversePath")(path)); };
 };
 
-struct SwitchableTrackingWrapper: SwitchableTracking, wrapper<SwitchableTracking>
+class SwitchableTrackingWrapper: public SwitchableTracking, public wrapper<SwitchableTracking>
 {
+public:
     SwitchableTrackingWrapper(Sector& sector): SwitchableTracking(sector) { };
 
-    virtual const osg::Vec3& getExit(const osg::Vec3& entry) const { return get_override("getExit")(entry); };
-    virtual const Path& getPath(const osg::Vec3& entry) const { return get_override("getPath")(entry); };    
-    virtual const Path& reversePath(const Path& path) const { return get_override("reversePath")(path); };
+    virtual const osg::Vec3& getExit(const osg::Vec3& entry) const { return extract<osg::Vec3&>(get_override("getExit")(entry)); };
+    virtual const Path& getPath(const osg::Vec3& entry) const { return extract<const Path&>(get_override("getPath")(entry)); };    
+    virtual const Path& reversePath(const Path& path) const { return extract<const Path&>(get_override("reversePath")(path)); };
 
-    virtual const ValidPositions& getValidPositions() const { return get_override("getValidPositions")(); };
+    virtual const ValidPositions& getValidPositions() const 
+    { 
+        if(_initialized)
+            return _positions;
+
+        list result = extract<list>(get_override("getValidPositions")());
+
+        stl_input_iterator<std::string> begin(result), end;
+        _positions.assign(begin, end);
+        _initialized = true;
+
+        return _positions; 
+    };
+
     virtual void setPosition(const std::string& position) 
     { 
         override method = get_override("getValidPositions");
@@ -36,10 +52,15 @@ struct SwitchableTrackingWrapper: SwitchableTracking, wrapper<SwitchableTracking
         else
             SwitchableTracking::setPosition(position);
     };
+
+private:
+    mutable ValidPositions _positions;
+    mutable bool _initialized;
 };
 
 BOOST_PYTHON_MODULE(_sptCore)
 {
+
     class_<RailTrackingWrapper, noncopyable>("RailTracking", init<Sector&>())
         .def("getExit", &RailTrackingWrapper::getExit, return_value_policy<return_by_value>())
         .def("getPath", &RailTrackingWrapper::getPath, return_internal_reference<>());
