@@ -201,14 +201,18 @@ class RibbonArtProvider(object):
         self._panel_minimised_border_pen = wx.Pen(LikePrimary(primary_hsl, -5.3, -0.24, -0.06))
         self._panel_border_gradient_pen = wx.Pen(LikePrimary(primary_hsl, -5.2, -0.15, -0.06))
         self._panel_border_pen = wx.Pen(LikePrimary(primary_hsl, -2.8, -0.32, 0.02))
-        self._panel_label_background_brush = wx.Brush(LikePrimary(primary_hsl, -1.5, 0.03, 0.05))
+
         self._panel_active_background_gradient_colour = LikePrimary(primary_hsl, 0.5, 0.34, 0.05)
-        self._panel_hover_label_background_brush = wx.Brush(LikePrimary(primary_hsl, 1.0, 0.30, 0.09))
+        #nazwa panelu
+        self._panel_label_background_brush = wx.Brush(LikePrimary(primary_hsl, 0.0, 0.0, 0.15))
+        self._panel_hover_label_background_brush = wx.Brush(LikePrimary(primary_hsl, 0.0, 0.00, -0.25))
+
         self._panel_active_background_top_gradient_colour = LikePrimary(primary_hsl, 1.4, -0.17, -0.13)
         self._panel_active_background_colour = LikePrimary(primary_hsl, 1.6, -0.18, -0.18)
         self._panel_active_background_top_colour = LikePrimary(primary_hsl, 1.7, -0.20, -0.03)
+        #kolor czcionki opisu
         self._panel_label_colour = LikePrimary(primary_hsl, 2.8, -0.14, -0.35)
-        self._panel_hover_label_colour = self._panel_label_colour
+        self._panel_hover_label_colour = LikePrimary(primary_hsl, 0.0, 0.0, 0.8)#self._panel_label_colour
         self._panel_minimised_label_colour = self._tab_label_colour
 
         self._gallery_button_disabled_background_colour = LikePrimary(primary_hsl, -2.8, -0.46, 0.09)
