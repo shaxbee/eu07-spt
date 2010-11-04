@@ -186,16 +186,22 @@ class RibbonArtProvider(object):
         #kolor paska przy tabach
         self._tab_ctrl_background_brush = wx.Brush(LikePrimary(primary_hsl, 0.0, 0.0, -0.25))
         #kolor taba na wstazce
-        self._tab_hover_background_colour = LikePrimary(primary_hsl, 0.0, 0.0, 0.16)
-        self._tab_hover_background_top_colour = LikePrimary(primary_hsl, 0.0, 0.0, 0.56)
-        self._tab_hover_background_gradient_colour = LikeSecondary(primary_hsl, 0.0, 0.0, 0.01)
-        self._tab_hover_background_top_gradient_colour = LikePrimary(primary_hsl, 0.0, 0.0, 0.16)
+        #self._tab_hover_background_colour = LikePrimary(primary_hsl, 0.0, 0.0, 0.16)
+        #self._tab_hover_background_top_colour = LikePrimary(primary_hsl, 0.0, 0.0, 0.56)
+        #self._tab_hover_background_gradient_colour = LikeSecondary(primary_hsl, 0.0, 0.0, 0.01)
+        #self._tab_hover_background_top_gradient_colour = LikePrimary(primary_hsl, 0.0, 0.0, 0.16)
+        self._tab_hover_background_colour = LikePrimary(primary_hsl, 0.0, 0.0, -0.10)
+        self._tab_hover_background_top_colour = LikePrimary(primary_hsl, 0.0, 0.0, -0.10)
+        self._tab_hover_background_gradient_colour = LikeSecondary(primary_hsl, 0.0, 0.0, -0.10)
+        self._tab_hover_background_top_gradient_colour = LikePrimary(primary_hsl, 0.0, 0.0, -0.1)
         #obwodka panela
         self._tab_border_pen = wx.Pen(LikePrimary(primary_hsl, 1.4, 0.03, -0.05)  )
+        self._tab_hover_border_pen = wx.Pen(LikeSecondary(secondary_hsl, 0.0, 0.0, -0.15))
         self._tab_separator_gradient_colour = LikePrimary(primary_hsl, -1.7, -0.15, -0.18)
         #kolor czcionki
         self._tab_label_colour = LikePrimary(primary_hsl, 0.0, 0.0, -0.49)
         self._tab_label_deactive_colour = LikePrimary(primary_hsl, 0.0, 0.0, 0.8)
+        self._tab_label_hover_colour = self._tab_label_deactive_colour
 
         self._panel_minimised_border_gradient_pen = wx.Pen(LikePrimary(primary_hsl, -6.9, -0.17, -0.09))
         self._panel_minimised_border_pen = wx.Pen(LikePrimary(primary_hsl, -5.3, -0.24, -0.06))
@@ -206,6 +212,12 @@ class RibbonArtProvider(object):
         #nazwa panelu
         self._panel_label_background_brush = wx.Brush(LikePrimary(primary_hsl, 0.0, 0.0, 0.15))
         self._panel_hover_label_background_brush = wx.Brush(LikePrimary(primary_hsl, 0.0, 0.00, -0.25))
+
+        self._panel_top_label_background = LikePrimary(primary_hsl, 0.0, 0.0, 0.20)
+        self._panel_label_background = LikePrimary(primary_hsl, 0.0, 0.0, 0.15)
+        self._panel_hover_top_label_background = LikePrimary(primary_hsl, 0.0, 0.00, 0.15)
+        self._panel_hover_label_background =LikePrimary(primary_hsl, 0.0, 0.00, -0.25)
+
 
         self._panel_active_background_top_gradient_colour = LikePrimary(primary_hsl, 1.4, -0.17, -0.13)
         self._panel_active_background_colour = LikePrimary(primary_hsl, 1.6, -0.18, -0.18)
@@ -958,7 +970,10 @@ class RibbonArtProvider(object):
             border_points[4] = wx.Point(tab.rect.width - 2, 3)
             border_points[5] = wx.Point(tab.rect.width - 2, tab.rect.height - 1)
 
-            dc.SetPen(self._tab_border_pen)
+            if tab.hovered:
+                dc.SetPen(self._tab_hover_border_pen)
+            else:
+                dc.SetPen(self._tab_border_pen)
             dc.DrawLines(border_points, tab.rect.x, tab.rect.y)
 
             if tab.active:            
@@ -989,8 +1004,10 @@ class RibbonArtProvider(object):
             label = tab.page.GetLabel()
             if label.strip():            
                 dc.SetFont(self._tab_label_font)
-                if tab.active or tab.hovered:
+                if tab.active:
                     dc.SetTextForeground(self._tab_label_colour)
+                elif tab.hovered:
+                    dc.SetTextForeground(self._tab_label_hover_colour)
                 else:
                     dc.SetTextForeground(self._tab_label_deactive_colour)
                 dc.SetBackgroundMode(wx.TRANSPARENT)
@@ -1402,15 +1419,22 @@ class RibbonArtProvider(object):
         true_rect = wx.Rect(*rect)
         true_rect = self.RemovePanelPadding(true_rect)
 
+        label_top_color = None
+        label_bottom_color = None
+
         dc.SetFont(self._panel_label_font)
         dc.SetPen(wx.TRANSPARENT_PEN)
 
         if wnd.IsHovered():
-            dc.SetBrush(self._panel_hover_label_background_brush)
-            dc.SetTextForeground(self._panel_hover_label_colour)        
+            #dc.SetBrush(self._panel_hover_label_background_brush)
+            dc.SetTextForeground(self._panel_hover_label_colour) 
+            label_top_color = self._panel_hover_top_label_background
+            label_bottom_color = self._panel_hover_label_background
         else:        
-            dc.SetBrush(self._panel_label_background_brush)
+            #dc.SetBrush(self._panel_label_background_brush)
             dc.SetTextForeground(self._panel_label_colour)
+            label_top_color = self._panel_top_label_background
+            label_bottom_color = self._panel_label_background
         
         label_rect = wx.Rect(*true_rect)
         label = wnd.GetLabel().strip()
@@ -1442,7 +1466,9 @@ class RibbonArtProvider(object):
                         label = new_label
                         break
                     
-        dc.DrawRectangleRect(label_rect)
+        dc.GradientFillLinear(label_rect, label_top_color,
+                              label_bottom_color, wx.SOUTH)
+        #dc.DrawRectangleRect(label_rect)
         
         if clip_label:        
             clip = wx.DCClipper(dc, label_rect)
