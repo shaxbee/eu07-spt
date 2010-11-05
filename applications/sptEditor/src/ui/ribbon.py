@@ -44,7 +44,7 @@ class RibbonPanel(wx.Panel):
         print tertiary
 
         art_provider = AR.RibbonArtProvider()
-        art_provider.SetColourScheme(wx.NamedColour("gray"),wx.NamedColour("orange"),wx.NamedColour("green"))
+        art_provider.SetColourScheme(wx.NamedColour("gray"),wx.Colour(255, 223, 114),wx.NamedColour("green"))
         self._ribbon.SetArtProvider(art_provider)
         #self._ribbon.GetArtProvider().SetColourScheme(wx.NamedColour("blue"),secondary,tertiary)
         #self._ribbon.GetArtProvider().SetColourScheme(wx.NamedColour("gray"),wx.NamedColour("yellow"),wx.NamedColour("green"))
