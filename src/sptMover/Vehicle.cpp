@@ -18,6 +18,18 @@ Vehicle::Vehicle(const std::string& name, const VehicleTraits& traits):
 
 Vehicle::~Vehicle() { }
 
+VehicleUpdateCallback& Vehicle::getUpdateCallback()
+{
+    if(!hasUpdateCallback())
+        throw std::runtime_error(str(format("Update callback not set for vehicle \"%s\"") % getName()));
+    return *_update;
+};
+
+float Vehicle::update(float time)
+{
+    return getUpdateCallback().update(time, _state);
+};
+
 void Vehicle::place(Track& track, float distance)
 {
     _followers.clear();

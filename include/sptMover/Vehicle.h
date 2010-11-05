@@ -68,7 +68,7 @@ private:
 class VehicleUpdateCallback
 {
 public:
-    VehicleUpdateCallback(Vehicle& vehicle);
+    VehicleUpdateCallback(Vehicle& vehicle): _vehicle(vehicle) { };
     virtual ~VehicleUpdateCallback();
 
     virtual float update(float time, VehicleState& state) = 0;
@@ -92,7 +92,8 @@ public:
 
 	const std::string& getName() const { return _name; }
 
-    const VehicleUpdateCallback& getUpdateCallback() const { return *_update; }
+    bool hasUpdateCallback() const { return _update.get() != NULL; }
+    VehicleUpdateCallback& getUpdateCallback();
     void setUpdateCallback(std::auto_ptr<VehicleUpdateCallback> update) { _update = update; }
 
     //! \brief Update vehicle state

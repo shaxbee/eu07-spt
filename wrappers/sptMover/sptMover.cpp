@@ -13,7 +13,7 @@ struct VehicleUpdateCallbackWrapper: VehicleUpdateCallback, wrapper<VehicleUpdat
     VehicleUpdateCallbackWrapper(const VehicleUpdateCallback& source): VehicleUpdateCallback(source) { };
 
     virtual ~VehicleUpdateCallbackWrapper() { };
-    virtual float update(float time, VehicleState& state) { get_override("update")(time, state); }
+    virtual float update(float time, VehicleState& state) { return extract<const float&>(get_override("update")(time, state)); }
 };
 
 struct VehicleTraitsWrapper: VehicleTraits, wrapper<VehicleTraits>
@@ -46,7 +46,7 @@ BOOST_PYTHON_MODULE(_sptMover)
     class_<VehicleState>("VehicleState")
         .add_property("load", &VehicleState::getLoad, &VehicleState::setLoad);
 
-    class_<VehicleUpdateCallbackWrapper>("VehicleUpdateCallback", init<Vehicle&>())
+    class_<VehicleUpdateCallbackWrapper, noncopyable>("VehicleUpdateCallback", init<Vehicle&>())
         .def("update",     &VehicleUpdateCallbackWrapper::update, args("time", "state"))
         .def("getVehicle", &VehicleUpdateCallback::getVehicle, return_value_policy<reference_existing_object>());
 
