@@ -7,42 +7,105 @@
 
 #include <sptMover/Vehicle.h>
 
+/*
+if distance is lower than modelLoadDistance (default: ?) then model load is requested from osgDB.
+When model is loaded setModel(model) method is called which attaches nodes to VehicleViewComponent instances.
+
+Each VehicleViewComponent has updateLevel which defines when element will be updated. If element should be updated only on demand then PASSIVE level shall be used.
+
+There are two ways of attaching model to component:
+  * using getNodeNames() method - it must return list of node names which will be searched in model, found nodes are accessible via getNodes() method
+  * using attach(model) method - developer has to implement this method to define his custom attaching method, also useAttach method has to be defined and return true
+*/
+
+namespace
+{
+    
+};
+
+class VehicleViewComponent
+{
+public:
+    enum UpdateLevel
+    {
+        PASSIVE = 0,
+        NEAR = 1,
+        MEDIUM = 2,
+        FAR = 3
+    };    
+    
+    typedef std::vector<std::string> Names;
+
+    VehicleViewComponent(const Vehicle& vehicle, std::string name, UpdateLevel updateLevel);
+
+    UpdateLevel getUpdateLevel() const { return _updateLevel; }
+    virtual void update(float time) = 0;
+
+    virtual void attach(osg::Node* model) { };
+    virtual Names getNodeNames() const = 0;
+
+    void setNodes(osg::NodeList& nodes);
+    osg::NodeList& getNodes();
+    const osg::NodeList& getNodes() const;
+
+    osg::Node* getNode(std::string name)
+    {
+        osg::NodeList::iterator iter = std::lower_bound(_nodes.begin(), _nodes.end(), FindInNodeList(name));
+        if(iter != _nodes.end() && *iter->getName() == name)
+            return *iter;
+        
+        return NULL;
+    }
+    
+private:
+    const sptMover::Vehice& vehicle;
+    std::string _name;
+    UpdateLevel _updateLevel;
+
+    osg::NodeList _nodes;    
+};
+
 class VehicleView: public osg::MatrixTransform
 {
 
 public:
-    VehicleView(sptMover::Vehicle& vehicle, osg::Node* model);
+    VehicleView(sptMover::Vehicle& vehicle, const std::string& modelPath);
 
-    enum AnimatedElements
-    {
-        ANIMATE_NOTHING = 0,
-        ANIMATE_BODY = 1,
-        ANIMATE_BOGIES = 2,
-        ANIMATE_AXLES = 4,
-        ANIMATE_ALL = 0xFFFF
-    };
+    void addComponent(std::auto_ptr<VehicleViewComponent> component);
+    const VehicleViewComponent& getComponent(const std::string& name) const;
+    VehicleViewComponent& getComponent(const std::string& name);
+    bool hasComponent(const std::string& name) const;
 
-    sptMover::Vehicle& getVehicle() { return _vehicle; };
     const sptMover::Vehicle& getVehicle() const { return _vehicle; };
-
-    size_t getAnimatedElements() const { return _elements; };
-    void setAnimatedElements(size_t elements) { _elements = elements; };
+    sptMover::Vehicle& getVehicle() { return _vehicle; }
 
     osg::MatrixTransform* getNode() const { return _model.get(); }
-    void update();
+    
+    void update(float time, float distance);
 
 private:
     //! \brief Clone model and gather transforms
-    virtual void setModel(osg::Group* model);
-
-    // animated elements flags
-    size_t _elements;
+    void setModel(osg::Node* model);
+    
     sptMover::Vehicle& _vehicle;
+    std::string _modelPath;
 
     osg::ref_ptr<osg::MatrixTransform> _model;
-    osg::ref_ptr<osg::Group> _bogies;
-    osg::ref_ptr<osg::Group> _axles;
 
 }; // class spt::VehicleView
+
+class VehicleViewParameters
+{
+public:
+    float getModelLoadingDistance() const;
+
+private:
+    float _modelLoadingDistance;
+    float _farDistance;
+    float _mediumDistance;
+    float _closeDistance;
+};
+
+VehicleViewParameters& getVehicleViewParameters();
 
 #endif // header guard

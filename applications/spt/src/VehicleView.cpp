@@ -17,45 +17,63 @@ using namespace sptMover;
 namespace 
 {
 
-class FindNodeVisitor: public osg::NodeVisitor
+class FindNodesVisitor: public osg::NodeVisitor
 {
 public:
-    FindNodeVisitor(const std::string& search):
-        _search(to_lower_copy(search)), _result(NULL)
-    { 
+    template <typename NodeNamesT>
+    FindNodesVisitor(const NodeNamesT& search):
+        _search(search.begin(), search.end())
+    {
         setTraversalMode(TRAVERSE_ALL_CHILDREN);
     };
 
-    virtual void apply(osg::Node& node)
-    {
-        if(to_lower_copy(node.getName()) == _search)
-            _result = &node;
-        else
-            traverse(node);
-    };
+    virtual void apply(osg::Node& node);
 
-    osg::Node* result() const
+    const osg::NodeList& result() const
     {
         return _result;
     };
 
 private:
-    std::string _search;
-    osg::Node* _result;
+    typedef std::set<std::string> NamesSet;
+    NamesSet _search;
 
+    std::string _search;
+    osg::NodeList _result;
+
+};
+
+void FindNodesVisitor::apply(osg::Node& node)
+{
+    NamesSet::iterator iter = _search.find(to_lower_copy(node.getName()));
+    if(iter != _search.end())
+    {
+        _search.erase(iter);
+        _result.push_back(&node);
+    };
+    
+    traverse(node);
 };
 
 class VehicleViewUpdateCallback: public osg::NodeCallback
 {
 public:
+    VehicleViewUpdateCallback(): _lastUpdate(0.0f) { };
+    
     virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
     {
         // we can use static cast because this class is placed 
         // in anonymous namespace and used only in constructor
         VehicleView* view = static_cast<VehicleView*>(node);
-        view->getVehicle().move(-0.8f);
-        view->update();
+        
+        double time = nv->getFrameStamp()->getSimulationTime();
+        view->update(time - _lastUpdate);
+        
+        _lastUpdate = time;
     };
+    
+private:
+    double _lastUpdate;
 };
     
 osg::ref_ptr<osg::MatrixTransform> makeTransform(osg::Node* root, const std::string& name)
