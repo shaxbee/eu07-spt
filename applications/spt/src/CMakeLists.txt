@@ -20,4 +20,7 @@ setup_prog()
 link_internal(${TARGET_NAME} OpenThreads osg osgDB osgViewer osgUtil osgGA)
 target_link_libraries(${TARGET_NAME} sptDB sptGFX sptMover sptCore)
 
+copy_dep(osg55 osg osgDB osgViewer osgUtil osgGA)
+copy_dep(ot11 OpenThreads)
+
 install(TARGETS ${TARGET_NAME} RUNTIME DESTINATION ${spt_SOURCE_DIR}/bin)

@@ -53,7 +53,7 @@ public:
         // we can use static cast because this class is placed 
         // in anonymous namespace and used only in constructor
         VehicleView* view = static_cast<VehicleView*>(node);
-        view->getVehicle().move(-0.8);
+        view->getVehicle().move(-0.8f);
         view->update();
     };
 };

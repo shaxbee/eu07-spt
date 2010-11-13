@@ -15,6 +15,7 @@
 
 #include <iostream>
 
+using namespace boost;
 using namespace sptDB;
 
 namespace
@@ -76,7 +77,7 @@ std::auto_ptr<sptCore::Path> readBezierPath(BinaryReader& reader)
 
 std::auto_ptr<sptCore::Path> readPath(BinaryReader& reader)
 {
-    char type;
+    uint8_t type;
     reader.read(type);
     
     if(type == STRAIGHT)
@@ -94,7 +95,7 @@ osg::Vec3d readHeader(BinaryReader& reader)
 {
     reader.expectChunk("HEAD");
 
-    reader.readVersion();
+    reader.expectVersion(Version(1, 1));
     osg::Vec3f result;
     reader.read(result);
 
@@ -109,7 +110,7 @@ void readTracks(sptCore::Sector& sector, BinaryReader& reader, Tracks& output)
 
     // straight tracks
     {
-        size_t count;
+        uint32_t count;
         reader.read(count);
 
         while(count--)
@@ -125,7 +126,7 @@ void readTracks(sptCore::Sector& sector, BinaryReader& reader, Tracks& output)
 
     // bezier tracks
     {
-        size_t count;
+        uint32_t count;
         reader.read(count);
 
         while(count--)
@@ -145,14 +146,14 @@ void readTracks(sptCore::Sector& sector, BinaryReader& reader, Tracks& output)
 void readSwitches(sptCore::Sector& sector, BinaryReader& reader, Switches& output)
 {
     reader.expectChunk("SWLS");
-    size_t count;
+    uint32_t count;
     reader.read(count);
 
     while(count--)
     {
 //        std::cout << "SWITCH ";
 
-        unsigned char position;
+        uint8_t position;
         reader.read(position);
         std::string position_str(position ? "DIVERTED" : "STRAIGHT");
 //        std::cout << "POS_" << position_str << " ";
@@ -172,7 +173,7 @@ void readSwitches(sptCore::Sector& sector, BinaryReader& reader, Switches& outpu
 void readCustomTracking(sptCore::Sector& sector, BinaryReader& reader, Tracks& tracks, Switches& switches)
 {
     reader.expectChunk("RTLS");
-    size_t count;
+    uint32_t count;
     reader.read(count);
 
     if(count != 0)
@@ -185,22 +186,22 @@ void readConnections(BinaryReader& reader, const RailTrackings& trackings, Conne
 {
     reader.expectChunk("CNLS");
 
-    // read internal connections
+        uint32_t count;
+    reader.read(count);
+
+    while(count--)
     {
-        size_t count;
-        reader.read(count);
+        osg::Vec3f position;
+        reader.read(position);
 
-        while(count--)
+        uint32_t left;
+        reader.read(left);
+
+        uint32_t right;
+        reader.read(right);
+        
+        if(right != std::numeric_limits<uint32_t>::max())
         {
-            osg::Vec3f position;
-            reader.read(position);
-
-            size_t left;
-            reader.read(left);
-
-            size_t right;
-            reader.read(right);
-
             sptCore::Sector::Connection connection =
             {
                 position,
@@ -209,31 +210,17 @@ void readConnections(BinaryReader& reader, const RailTrackings& trackings, Conne
             };
 
             connections.push_back(connection);
-
-        };
-
-    };
-
-    // read external connections
-    {
-        size_t count;
-        reader.read(count);
-
-        while(count--)
+        }
+        else
         {
-            osg::Vec3f position;
-            reader.read(position);
-
-            size_t index;
-            reader.read(index);
-
-            sptCore::Sector::Connection connection = 
+            sptCore::Sector::Connection connection =
             {
                 position,
-                &trackings.at(index),
+                &trackings.at(left),
                 NULL
             };
 
+            connections.push_back(connection);
             externals.push_back(connection);
         };
     };
@@ -244,12 +231,12 @@ void readConnections(BinaryReader& reader, const RailTrackings& trackings, Conne
 void readTrackNames(sptCore::Scenery& scenery, BinaryReader& reader, Tracks& tracks)
 {
     reader.expectChunk("TRNM");
-    size_t count;
+    uint32_t count;
     reader.read(count);
 
     while(count--)
     {
-        size_t index;
+        uint32_t index;
         reader.read(index);
 
         std::string name;
@@ -268,12 +255,12 @@ void readSwitchNames(sptCore::Scenery& scenery, BinaryReader& reader, Switches& 
     // read named tracks
     {
         reader.expectChunk("SWNM");
-        size_t count;
+        uint32_t count;
         reader.read(count);
 
         while(count--)
         {
-            int index;
+            uint32_t index;
             reader.read(index);
 
             std::string name;
@@ -335,6 +322,8 @@ sptCore::Sector& readSector(std::istream& input, sptCore::Scenery& scenery)
     Connections connections;
     Connections externals;
     readConnections(reader, trackings, connections, externals);
+
+//    connections.insert(connections.end(), externals.begin(), externals.end());
 
     sector->setData(trackings, connections);
 

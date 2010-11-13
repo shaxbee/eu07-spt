@@ -12,6 +12,13 @@ using namespace boost;
 namespace
 {
 
+class ExternalConnectionsManager
+{
+public:
+
+
+};
+
 void unregisterIfExternal(const Sector* source, const osg::Vec3f& position, const RailTracking* first, const RailTracking* second)
 {
     if(&(first->getSector()) != source)
@@ -58,6 +65,36 @@ void registerExternalConnections(Scenery* scenery, Sector* sector)
 };
 
 }; // anonymous namespace
+
+ExternalsManager::ExternalsManager(Scenery& scenery): 
+    _scenery(scenery)
+{
+};
+    
+void ExternalsManager::addExternals(const Sector& sector, const ExternalConnections& externals)
+{
+    for(ExternalConnections::const_iterator iter = externals.begin(); iter != externals.end(); iter++)
+    {
+        ExternalConnectionsSet::const_iterator match = _externals.find(*iter);
+        if(match != _externals.end())
+            _scenery.getSector(match->offset).updateConnection(match->position, NULL, &sector.getRailTracking(match->index));
+    };
+
+    _externals.insert(externals.begin(), externals.end());
+};
+
+void ExternalsManager::removeExternals(const osg::Vec3f& offset)
+{
+    for(ExternalConnectionsSet::iterator iter = _externals.begin(); iter != _externals.end(); iter++)
+    {
+        if(iter->offset == offset)
+        {
+            ExternalConnectionsSet::iterator current = iter;
+            iter++;
+            _externals.erase(current);
+        }
+    };
+};
 
 Sector& Scenery::getSector(const osg::Vec3f& position)
 {

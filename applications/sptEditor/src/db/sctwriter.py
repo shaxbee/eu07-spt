@@ -11,7 +11,9 @@ from sptmath import Vec3
 from binwriter import BinaryWriter
 
 SECTOR_SIZE = 2000
-SECTOR_FILE_VERSION = "1.0"
+SECTOR_FILE_VERSION = "1.1"
+
+MAX_UINT32 = 2 ** 32 - 1
 
 class SectorWriteError(RuntimeError):
     pass
@@ -116,20 +118,14 @@ def __writeNames(writer, chunk, source, index):
     writer.endChunk(chunk)
     
 def __collectConnections(tracks, switches, index):
-    internal = dict()
-    external = dict()       
+    connections = dict()
         
     def addConnection(position, left, right):
-        position = position.to_tuple()
-        if (position[0] < 0) or (position[0] > SECTOR_SIZE) or (position[1] < 0) or (position[1] > SECTOR_SIZE):
-            if position not in external:
-                external[position] = index[left]
-        else:
-            if position not in internal:
-                if right in index:
-                    internal[position] = (index[left], index[right])
-                else:
-                    external[position] = index[left]
+        if (position.x < 0) or (position.x > SECTOR_SIZE) or (position.y < 0) or (position.y > SECTOR_SIZE):
+            rightId = MAX_UINT32
+        elif position not in internal:
+            rightId = index[right] if right in index else MAX_UINT32
+        connections[position] = (index[left], rightId)
         
     for track in tracks:
         if track.n1 is not None:
@@ -145,22 +141,16 @@ def __collectConnections(tracks, switches, index):
         if switch.n2 is not None:
             addConnection(switch.p2, switch.original, switch.n2)
                 
-    # sort connections by position
-    internal = sorted(internal.iteritems(), key=operator.itemgetter(0))
-    external = sorted(external.iteritems(), key=operator.itemgetter(0))
-        
-    return (internal, external)
+    # return connections sorted by position
+    return sorted(connections.iteritems(), key=operator.itemgetter(0))
 
 def __writeConnections(writer, tracks, switches, index):
     writer.beginChunk("CNLS")
         
-    internal, external = __collectConnections(tracks, switches, index)
+    connections = __collectConnections(tracks, switches, index)
 
-    writer.writeUInt(len(internal))
+    writer.writeUInt(len(connections))
     writer.writeArray(Struct("<3f I I"), (position + indexes for position, indexes in internal), len(internal))
-
-    writer.writeUInt(len(external))
-    writer.writeArray(Struct("<3f I"), (position + (index, ) for position, index in external), len(external))
 
     writer.endChunk("CNLS")
 

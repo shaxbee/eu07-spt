@@ -32,7 +32,7 @@ const Vehicle& VehicleState::owner() const
 };
 
 Vehicle::Vehicle(const std::string& name, const VehicleTraits& traits_, Track& track, float distance): 
-    _name(name), traits(traits_)
+    _name(name), traits(traits_), _followers()
 {
     for(VehicleTraits::Bogies::const_iterator iter = traits.bogies.begin(); iter != traits.bogies.end(); iter++)
     {

@@ -41,8 +41,8 @@ const RailTracking* Sector::updateConnection(const osg::Vec3f& position, const R
     Connection search = {position, NULL, NULL};
     Connections::iterator iter = std::lower_bound(_connections.begin(), _connections.end(), search, ConnectionLess());
 
-    if(iter->position != position)
-        throw UnknownConnectionException() << PositionInfo(position);
+    if(iter == _connections.end() ||iter->position != position)
+        return NULL;
 
     if(iter->first == previous)
     {
