@@ -79,6 +79,10 @@ class TrackPalette(wx.Panel):
 
 #        self.Bind(wx.EVT_CLOSE, self.OnClose)
 #        self.Bind(wx.EVT_DESTROY, self.OnClose)
+        self.Bind(wx.EVT_MOUSEWHEEL, self.OnMouse)
+
+    def OnMouse(self, event):
+        print "Track panel mouse wheel "+event.GetWheelRotation()
 
     def OnClose(self):
         self.Parent.miTogglePalette.Check(False)
