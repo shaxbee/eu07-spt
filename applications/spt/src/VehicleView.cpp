@@ -38,7 +38,6 @@ private:
     typedef std::set<std::string> NamesSet;
     NamesSet _search;
 
-    std::string _search;
     osg::NodeList _result;
 
 };
@@ -130,7 +129,7 @@ void VehicleView::setModel(osg::Group* model)
     };
 };
 
-void VehicleView::update()
+void VehicleView::update(float time)
 {
     const Vehicle::Followers& followers = _vehicle.getFollowers();
     

@@ -7,16 +7,14 @@
 
 #include <sptMover/Vehicle.h>
 
-/*
-if distance is lower than modelLoadDistance (default: ?) then model load is requested from osgDB.
-When model is loaded setModel(model) method is called which attaches nodes to VehicleViewComponent instances.
-
-Each VehicleViewComponent has updateLevel which defines when element will be updated. If element should be updated only on demand then PASSIVE level shall be used.
-
-There are two ways of attaching model to component:
-  * using getNodeNames() method - it must return list of node names which will be searched in model, found nodes are accessible via getNodes() method
-  * using attach(model) method - developer has to implement this method to define his custom attaching method, also useAttach method has to be defined and return true
-*/
+// if distance is lower than modelLoadDistance (default: ?) then model load is requested from osgDB.
+// When model is loaded setModel(model) method is called which attaches nodes to VehicleViewComponent instances.
+// 
+// Each VehicleViewComponent has updateLevel which defines when element will be updated. If element should be updated only on demand then PASSIVE level shall be used.
+//
+// There are two ways of attaching model to component:
+//   * using getNodeNames() method - it must return list of node names which will be searched in model, found nodes are accessible via getNodes() method
+//   * using attach(model) method - developer has to implement this method to define his custom attaching method, also useAttach method has to be defined and return true
 
 namespace
 {
@@ -36,7 +34,7 @@ public:
     
     typedef std::vector<std::string> Names;
 
-    VehicleViewComponent(const Vehicle& vehicle, std::string name, UpdateLevel updateLevel);
+    VehicleViewComponent(const sptMover::Vehicle& vehicle, std::string name, UpdateLevel updateLevel);
 
     UpdateLevel getUpdateLevel() const { return _updateLevel; }
     virtual void update(float time) = 0;
@@ -51,14 +49,14 @@ public:
     osg::Node* getNode(std::string name)
     {
         osg::NodeList::iterator iter = std::lower_bound(_nodes.begin(), _nodes.end(), FindInNodeList(name));
-        if(iter != _nodes.end() && *iter->getName() == name)
+        if(iter != _nodes.end() && (*iter)->getName() == name)
             return *iter;
         
         return NULL;
     }
     
 private:
-    const sptMover::Vehice& vehicle;
+    const sptMover::Vehicle& vehicle;
     std::string _name;
     UpdateLevel _updateLevel;
 
