@@ -33,7 +33,8 @@ struct SceneryException: public std::runtime_error
 class Scenery
 {
 public:
-    ~Scenery() { };
+    Scenery();
+    ~Scenery();
 
     const Sector& getSector(const osg::Vec3f& position) const;
     Sector& getSector(const osg::Vec3f& position);
@@ -41,7 +42,6 @@ public:
     bool hasSector(const osg::Vec3f& position) const;
 
     Track& getTrack(const std::string& name);
-//    EventedTrack& getEventedTrack(const std::string& name) const;
     SwitchableTracking& getSwitch(const std::string& name);
 
 //    const Statistics& getStatistics() const { return _statistics; };
@@ -62,9 +62,6 @@ public:
     //! \throw SceneryException when no Track with specified name is found
     void removeTrack(const std::string& name);
 
-//    //! \throw RailTrackingExistsException if EventedTrack with same name exists
-//    void addEventedTrack(const std::string& name, EventedTrack* track);
-
     //! \brief Add named SwitchableTracking
     //! \throw SceneryException if tracking with same name exists
     void addSwitch(const std::string& name, SwitchableTracking& track);
@@ -80,8 +77,6 @@ private:
 
     boost::scoped_ptr<ExternalsManager> _externals;
 
-//    typedef std::map<std::string, boost::shared_ptr<EventedTrack> > EventedTracks;
-//    EventedTracks _eventedTracks;
     Sectors _sectors;
     Tracks _tracks;
     Switches _switches;

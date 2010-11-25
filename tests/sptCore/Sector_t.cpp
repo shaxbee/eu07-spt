@@ -35,13 +35,15 @@ public:
             new Track(sector, path2)
         }};
 
-        boost::array<Sector::Connection, 2> connections =
+        boost::array<Connection, 2> connections =
         {{
             {pointA, NULL, tracks[0]},
             {pointB, tracks[0], tracks[1]}
         }};
 
-        sector.setData(tracks, connections);
+        boost::array<ExternalConnection, 0> externals;
+
+        sector.setData(tracks, connections, externals);
     };
     
 protected:
@@ -65,7 +67,7 @@ TEST_F(SectorTest, GetNextTrack)
 
 TEST_F(SectorTest, UpdateConnections)
 {
-    boost::array<Sector::ConnectionUpdate, 1> updates =
+    boost::array<ConnectionUpdate, 1> updates =
     {{
         {pointA, NULL, &sector.getRailTracking(1)}
     }};

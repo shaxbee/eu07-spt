@@ -95,7 +95,7 @@ void VehicleView::setModel(osg::Group* model)
     // clone model nodes (geometry remains shared)
     addChild(static_cast<osg::Node*>(model->clone(osg::CopyOp::SHALLOW_COPY)));
     
-    const VehicleTraits::Bogies& bogies = _vehicle.traits.bogies;
+    const VehicleTraits::Bogies& bogies = _vehicle.getTraits().getBogies();
 
     // find and store bogie nodes
     for(size_t index=1; index <= bogies.size(); index++)

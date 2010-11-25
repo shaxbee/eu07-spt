@@ -119,10 +119,23 @@ def install_gtest():
     print "Installing Google Test"
     
     download_and_extract(gtest_url, 'gtest-%s.zip' % GTEST_VERSION, 'ext')
+    
+def install_editor_libs():
+    if os.path.exists('applications/sptEditor/src/_sptmath.pyd'):
+        print "Editor libraries already installed"
+        return
+    
+    sptmath_url = 'http://shaxbee.eu07.pl/spt-dep/'
+    
+    print "Installing Editor libraries"
+    
+    download_and_extract(sptmath_url, 'sptmath.zip', 'applications/sptEditor/src')
+    
 
 init_ext()
 install_boost()
 install_osg()
 install_gtest()
+install_editor_libs()
 
 raw_input("Installation complete, press Enter to continue")
