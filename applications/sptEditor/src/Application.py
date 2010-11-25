@@ -125,13 +125,18 @@ class MainWindow(wx.Frame):
 
         self.Bind(wx.EVT_CLOSE, self.OnExit)
         self.Bind(wx.EVT_MAXIMIZE, self.OnMaximise)
+        self.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
 
         self.Layout()
         (x, y) = self.editor.ModelToView()
         self.editor.CenterViewAt(x, y)
         self.Show(True)
 
-        
+
+    def OnMouseWheel(self, event):
+        '''Tracks mouse wheel event trought many windows'''
+        self.editor.OnMouseWheel(event)
+
     def PrepareApplicationIcons(self):
         appIcons = wx.IconBundle()
         appIconDir = os.path.join(os.path.dirname(__file__), \
@@ -662,7 +667,8 @@ class TestPanel(wx.Panel):
 
 def runTest(frame, nb, log):
 
-    win = TestPanel(nb, log)
+    win = MainWindow(None,-1)
+    #win = TestPanel(nb, log)
     return win
 
 #----------------------------------------------------------------------

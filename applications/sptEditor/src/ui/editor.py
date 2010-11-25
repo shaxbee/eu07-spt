@@ -65,8 +65,7 @@ class SceneryEditor(wx.Panel):
         self.SetSizer(sizer)
 
         self.SetBasePoint(BasePoint(Vec3(), 0.0, 0.0))
-
-
+         
     def SetScenery(self, scenery):
         """
         Sets the scenery. Notify also active parts.
@@ -113,7 +112,10 @@ class SceneryEditor(wx.Panel):
     def SetMode(self, mode):
         self.parts[0].SetMode(mode)
 
-
+    def OnMouseWheel(self, event):
+        self.parts[0].OnMouseWheel(event)
+        #TODO
+        #For for all array self.parts
 
 
 class PlanePart(wx.ScrolledWindow):
@@ -138,17 +140,21 @@ class PlanePart(wx.ScrolledWindow):
 
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_SIZE, self.OnSize)
-        self.Bind(wx.EVT_SCROLLWIN, parent.topRuler.HandleOnScroll)
-        self.Bind(wx.EVT_SCROLLWIN, parent.leftRuler.HandleOnScroll)
+
+        self.mouse_in_window = False
+        self.Bind(wx.EVT_ENTER_WINDOW, self.OnMouseEnter)
+        self.Bind(wx.EVT_LEAVE_WINDOW, self.OnMouseLeave)
+        #self.Bind(wx.EVT_SCROLLWIN, parent.topRuler.HandleOnScroll)
+        #self.Bind(wx.EVT_SCROLLWIN, parent.leftRuler.HandleOnScroll)
         eventManager.Register(self.OnMoveUpdateStatusBar, wx.EVT_MOTION, self)
         eventManager.Register(self.basePointMover.OnMouseDrag, wx.EVT_MOTION, self)
         eventManager.Register(self.basePointMover.OnMousePress, wx.EVT_LEFT_DOWN, self)
         eventManager.Register(self.basePointMover.OnMouseRelease, wx.EVT_LEFT_UP, self)
         eventManager.Register(self.highlighter.OnMouseClick, wx.EVT_LEFT_DOWN, self)
-        eventManager.Register(self.wheelScaler.OnMouseWheel, wx.EVT_MOUSEWHEEL, self)
-        eventManager.Register(self.sceneryDragger.OnMousePress, wx.EVT_LEFT_DOWN, self)
+        #eventManager.Register(self.wheelScaler.OnMouseWheel, wx.EVT_MOUSEWHEEL, self)
+        eventManager.Register(self.sceneryDragger.OnMousePress, wx.EVT_MIDDLE_DOWN, self)
         eventManager.Register(self.sceneryDragger.OnDrag, wx.EVT_MOTION, self)
-        eventManager.Register(self.sceneryDragger.OnMouseRelease, wx.EVT_LEFT_UP, self)
+        eventManager.Register(self.sceneryDragger.OnMouseRelease, wx.EVT_MIDDLE_UP, self)
         eventManager.Register(self.trackClosurer.OnMouseClick, wx.EVT_LEFT_UP, self)
 
         self.logger = logging.getLogger('Paint')
@@ -173,8 +179,19 @@ class PlanePart(wx.ScrolledWindow):
         size = self.ComputePreferredSize()
         self.SetVirtualSize(size)
         self.SetupScrolling()       
-        
-        
+        #self.SetFocusIgnoringChildren()
+
+    def OnMouseEnter(self, event):
+        self.mouse_in_window = True
+
+    def OnMouseLeave(self, event):
+        self.mouse_in_window = False
+
+    def OnMouseWheel(self, event):
+        #print "Editor mouse event"
+        if self.mouse_in_window:
+            self.wheelScaler.OnMouseWheel(event)
+
     def SetScenery(self, scenery):
         self.trackCache = []
         self.switchCache = []
@@ -924,6 +941,8 @@ class SceneryDragger:
         if not event.Dragging():
             # It is not dragging so change the flag
             self.dragging = False
+        #else:
+        #    self.OnMouseRelease(event)
 
 
 
@@ -1064,17 +1083,15 @@ class WheelScaler:
 
 
     def OnMouseWheel(self, event):
-        if event.ControlDown():
-            delta = event.GetWheelRotation()
-            scale = self.editor.GetScale()
-            if delta < 0:
-                self.editor.SetScale(scale / 2)
-            else:
-                self.editor.SetScale(scale * 2)
+        print "Mouse event"
+        print "Wheel rotation:"
+        print event.GetWheelRotation()
+        delta = event.GetWheelRotation()
+        scale = self.editor.GetScale()
+        if delta < 0:
+            self.editor.SetScale(scale / 2)
         else:
-            event.Skip()
-
-
+            self.editor.SetScale(scale * 2)
 
 
 class SceneryListener(model.scenery.SceneryListener):
