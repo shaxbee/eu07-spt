@@ -155,7 +155,6 @@ class PlanePart(wx.ScrolledWindow):
         eventManager.Register(self.wheelScaler.OnMouseMove, wx.EVT_MOTION, self)
         eventManager.Register(self.sceneryDragger.OnMousePress, wx.EVT_MIDDLE_DOWN, self)
         eventManager.Register(self.sceneryDragger.MoveScenery, wx.EVT_MOTION, self)
-        eventManager.Register(self.sceneryDragger.OnMouseRelease, wx.EVT_LEFT_UP, self)
         eventManager.Register(self.trackClosurer.OnMouseClick, wx.EVT_LEFT_UP, self)
 
         self.logger = logging.getLogger('Paint')
@@ -352,7 +351,16 @@ class PlanePart(wx.ScrolledWindow):
         else:
             return False
 
-
+    def CalculateCenterPointOfEditor(self):
+         # 1) Get the center point of editor
+        (view_start_x, view_start_y) = self.GetViewStart()
+        (window_size_width, window_size_height) = self.GetSize()
+        (scroll_rate_x, scroll_rate_y) = self.GetScrollPixelsPerUnit()
+        
+        #return position we calc (position of center of the screen)
+        return wx.Point(view_start_x*scroll_rate_x + window_size_width / 2, \
+                view_start_y * scroll_rate_y + window_size_height / 2)
+        
     def GetScale(self):
         return self.scale
 
@@ -369,14 +377,9 @@ class PlanePart(wx.ScrolledWindow):
             return
 
         # 1) Get the center point of editor
-        (view_start_x, view_start_y) = self.GetViewStart()
-        (window_size_width, window_size_height) = self.GetSize()
-        (scroll_rate_x, scroll_rate_y) = self.GetScrollPixelsPerUnit()
-        
         #if it's not position we calc position of center of the screen
         if position == None:
-            position = (view_start_x*scroll_rate_x + window_size_width / 2, \
-                view_start_y * scroll_rate_y + window_size_height / 2)
+            position = self.CalculateCenterPointOfEditor()
         
         #recalculate point to model (in mm) because we cannot scale point directly
         p3d = self.ViewToModel(position)
@@ -909,54 +912,39 @@ class BasePointMover:
 
 class SceneryDragger:
     """
-    Dragger of scenery. This handles mouse drag with 'Ctrl' modifier
-    for movine scenery.
+    Dragger of scenery. This handles mouse drag with middle button pressed
+    modifier for move scenery.
     """
 
     def __init__(self, editor):
         self.editor = editor
-        self.dragging = False
         self.dragStart = None
 
 
     def OnMousePress(self, event):
         """
-        Change the status of scenery dragger.
-        gets the initial position
+        Gets the initial position of dragging.
         """
         if event.MiddleDown():
             self.dragStart = event.GetPosition()
-            self.dragging = True
-        
-
-    def OnMouseRelease(self, event):
-        """
-        If it is a drag movement, get the delta and scroll the scenery
-        within the editor.
-        """
-        #if self.dragging:
-        #    self.MoveScenery(event)
-        self.dragging = False
-
-
-    def OnDrag(self, event):
-        """
-        Reacts to mouse movement.
-        """
-        if not event.MiddleIsDown():
-            # It is not dragging so change the flag
-            self.dragging = False
-        else:
-            self.MoveScenery(event)
 
     def MoveScenery(self, event):
+        """
+        Move scenery by move of mouse.
+        """
+        #check if button is pressed
         if event.MiddleIsDown():
+            #calculate move of mouse, center of screen and scroll to new position
             delta = event.GetPosition() - self.dragStart
-            (vx, vy) = self.editor.GetViewStart()
-            (ux, uy) = self.editor.GetScrollPixelsPerUnit()
-            #self.editor.Scroll((vx*ux - delta.x) / ux, (vy*uy - delta.y) / uy)
-            self.editor.Scroll(delta.x, delta.y)
+            center_point = self.editor.CalculateCenterPointOfEditor()
+            self.editor.CenterViewAt(center_point - delta)
+            
+            #remember of position of mouse
             self.dragStart = event.GetPosition()
+            
+            #refresh rulers
+            self.editor.GetParent().leftRuler.Refresh()
+            self.editor.GetParent().topRuler.Refresh()
 
 
 class TrackClosurer:
