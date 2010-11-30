@@ -574,9 +574,9 @@ class MainWindow(wx.Frame):
         Menu event handler for changing mode of editor.
         """
         wid = event.GetId()
-        if wid == wx.xrc.XRCID('ID_MODE_TRACK_NORMAL'):
+        if wid == ui.ribbon.ID_CHANGE_TRACK_NORMAL:
             self.editor.SetMode(ui.editor.MODE_NORMAL)
-        elif wid == wx.xrc.XRCID('ID_MODE_TRACK_CLOSURE'):
+        elif wid == ui.ribbon.ID_MODE_TRACK_CLOSURE:
             self.editor.SetMode(ui.editor.MODE_CLOSURE)
 
 

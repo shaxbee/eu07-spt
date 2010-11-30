@@ -6,6 +6,7 @@ Created on 2010-09-22
 @author: gfirlejczyk
 """
 
+#from Application import OnChangeEditorMode
 import os.path
 import wx
 import sys
@@ -18,6 +19,8 @@ ID_CENTER_AT = ID_EXPORT +1
 ID_INSERT_TRACK = ID_CENTER_AT +1
 ID_INSERT_SWITCH = ID_INSERT_TRACK +1
 ID_INSERT_CURVE = ID_INSERT_SWITCH +1
+ID_MODE_TRACK_NORMAL = ID_INSERT_CURVE  + 1
+ID_MODE_TRACK_CLOSURE = ID_MODE_TRACK_NORMAL + 1
 
 class RibbonPanel(wx.Panel):
     def __init__(self, parent):
@@ -39,9 +42,9 @@ class RibbonPanel(wx.Panel):
         self.BindButtons()
 
         primary, secondary, tertiary = self._ribbon.GetArtProvider().GetColourScheme(0, 0, 0)
-        print primary
-        print secondary
-        print tertiary
+        #print primary
+        #print secondary
+        #print tertiary
 
         art_provider = AR.RibbonArtProvider()
         art_provider.SetColourScheme(wx.NamedColour("gray"),wx.Colour(255, 223, 114),wx.NamedColour("green"))
@@ -81,6 +84,8 @@ class RibbonPanel(wx.Panel):
         self.AddHistoryPanel(edit)
 
         self.AddNavigationPanel(edit)
+        
+        self.AddChangeModePanel(edit)
 
     def AddViewPage(self):
         view = RB.RibbonPage(self._ribbon, wx.ID_ANY, "View", wx.NullBitmap)
@@ -107,6 +112,10 @@ class RibbonPanel(wx.Panel):
         self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnCenterAt, id=ID_CENTER_AT)
         self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnZoomIn, id=wx.ID_ZOOM_IN)
         self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnZoomOut, id=wx.ID_ZOOM_OUT)
+        
+        #Editor mode
+        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnChangeEditorMode, id=ID_MODE_TRACK_NORMAL)
+        self.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.GetParent().OnChangeEditorMode, id=ID_MODE_TRACK_CLOSURE)
 
     def AddFilePanel(self,home_panel):
         # w panelu Home tworzymy nowe pole
@@ -177,4 +186,13 @@ class RibbonPanel(wx.Panel):
     def AddPerspectivePanel(self,home_page):
         pers_panel = RB.RibbonPanel(home_page, wx.ID_ANY, "Perspectives", wx.NullBitmap, wx.DefaultPosition,
                                        wx.DefaultSize, agwStyle=RB.RIBBON_PANEL_NO_AUTO_MINIMISE)
-                                       
+   
+    def AddChangeModePanel(self,home_page):
+        chmode_panel = RB.RibbonPanel(home_page, wx.ID_ANY, "Editor mode", wx.NullBitmap, wx.DefaultPosition,
+                                       wx.DefaultSize, agwStyle=RB.RIBBON_PANEL_NO_AUTO_MINIMISE)
+        chmode = RB.RibbonButtonBar(chmode_panel, wx.ID_ANY)
+        icon_normal = wx.Bitmap(os.path.join(self.bitmap_action_dir, "transform-crop-and-resize.png"), wx.BITMAP_TYPE_PNG)
+        icon_closure = wx.Bitmap(os.path.join(self.bitmap_action_dir, "transmission.png"), wx.BITMAP_TYPE_PNG)
+
+        chmode.AddSimpleButton(ID_MODE_TRACK_NORMAL, "Normal", icon_normal, "")
+        chmode.AddSimpleButton(ID_MODE_TRACK_CLOSURE, "Closure", icon_closure, "")

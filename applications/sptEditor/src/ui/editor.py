@@ -101,8 +101,8 @@ class SceneryEditor(wx.Panel):
         return self.selection
 
 
-    def CenterViewAt(self, cx, cy):
-        self.parts[0].CenterViewAt(cx, cy)
+    def CenterViewAt(self, x, y):
+        self.parts[0].CenterViewAt((x,y))
 
 
     def ModelToView(self, vec3 = Vec3()):
@@ -144,17 +144,18 @@ class PlanePart(wx.ScrolledWindow):
         self.mouse_in_window = False
         self.Bind(wx.EVT_ENTER_WINDOW, self.OnMouseEnter)
         self.Bind(wx.EVT_LEAVE_WINDOW, self.OnMouseLeave)
-        #self.Bind(wx.EVT_SCROLLWIN, parent.topRuler.HandleOnScroll)
-        #self.Bind(wx.EVT_SCROLLWIN, parent.leftRuler.HandleOnScroll)
+        self.Bind(wx.EVT_SCROLLWIN, parent.topRuler.HandleOnScroll)
+        self.Bind(wx.EVT_SCROLLWIN, parent.leftRuler.HandleOnScroll)
+        
         eventManager.Register(self.OnMoveUpdateStatusBar, wx.EVT_MOTION, self)
         eventManager.Register(self.basePointMover.OnMouseDrag, wx.EVT_MOTION, self)
         eventManager.Register(self.basePointMover.OnMousePress, wx.EVT_LEFT_DOWN, self)
         eventManager.Register(self.basePointMover.OnMouseRelease, wx.EVT_LEFT_UP, self)
         eventManager.Register(self.highlighter.OnMouseClick, wx.EVT_LEFT_DOWN, self)
-        #eventManager.Register(self.wheelScaler.OnMouseWheel, wx.EVT_MOUSEWHEEL, self)
+        eventManager.Register(self.wheelScaler.OnMouseMove, wx.EVT_MOTION, self)
         eventManager.Register(self.sceneryDragger.OnMousePress, wx.EVT_MIDDLE_DOWN, self)
-        eventManager.Register(self.sceneryDragger.OnDrag, wx.EVT_MOTION, self)
-        eventManager.Register(self.sceneryDragger.OnMouseRelease, wx.EVT_MIDDLE_UP, self)
+        eventManager.Register(self.sceneryDragger.MoveScenery, wx.EVT_MOTION, self)
+        eventManager.Register(self.sceneryDragger.OnMouseRelease, wx.EVT_LEFT_UP, self)
         eventManager.Register(self.trackClosurer.OnMouseClick, wx.EVT_LEFT_UP, self)
 
         self.logger = logging.getLogger('Paint')
@@ -356,7 +357,7 @@ class PlanePart(wx.ScrolledWindow):
         return self.scale
 
 
-    def SetScale(self, scale):
+    def SetScale(self, scale, position=None):
         """
         Sets the new scale, rescale all scenery elements
         and refreshes all rulers.
@@ -368,26 +369,33 @@ class PlanePart(wx.ScrolledWindow):
             return
 
         # 1) Get the center point of editor
-        (vx, vy) = self.GetViewStart()
-        (ux, uy) = self.GetScrollPixelsPerUnit()
-        (sx, sy) = self.GetSize()
-
-        p3d = self.ViewToModel((vx*ux + sx/2, vy*uy + sy/2))
-
-        # 2) do ther right scalling
+        (view_start_x, view_start_y) = self.GetViewStart()
+        (window_size_width, window_size_height) = self.GetSize()
+        (scroll_rate_x, scroll_rate_y) = self.GetScrollPixelsPerUnit()
+        
+        #if it's not position we calc position of center of the screen
+        if position == None:
+            position = (view_start_x*scroll_rate_x + window_size_width / 2, \
+                view_start_y * scroll_rate_y + window_size_height / 2)
+        
+        #recalculate point to model (in mm) because we cannot scale point directly
+        p3d = self.ViewToModel(position)
+        print "Center to point:"
+        print p3d
+        # 2) do scalling
         self.scale = scale
         self.SetVirtualSize(self.ComputePreferredSize())
         self.__ScaleAll(scale)
 
         # 3) Move to the center of editor component
-        (p2x, p2y) = self.ModelToView(p3d)
-        self.CenterViewAt(p2x, p2y)
+        new_position = self.ModelToView(p3d)
+        self.CenterViewAt(new_position)
 
         # 4) Refresh views
         self.Update()
         self.Refresh()
-        self.GetParent().topRuler.Refresh()
-        self.GetParent().leftRuler.Refresh()
+        #self.GetParent().topRuler.Refresh()
+        #self.GetParent().leftRuler.Refresh()
         self.main_window.SetStatusText("%.3f px/m" % scale, 2)
         
         
@@ -420,25 +428,26 @@ class PlanePart(wx.ScrolledWindow):
             int((-float(point.y) + self.maxY) * self.scale + 100))
         return p2d
 
+    def CenterViewAt(self, requiered_position = wx.Point()):
+        self.CenterViewAt((requiered_position.x, requiered_position.y))
 
-    def CenterViewAt(self, x, y):
+    def CenterViewAt(self, (requiered_position_x, requiered_position_y)):
         """
-        Centers the view on following component point.
+        Centers the view on following point in pixels.
         """
-        (pw, ph) = self.GetVirtualSize()
-        (vw, vh) = self.GetSize()
-        (ux, uy) = self.GetScrollPixelsPerUnit()
-        x = x - vw / 2
-        y = y - vh / 2
-        x = max(0, x)
-        x = min(x, pw - vw)
-        y = max(0, y)
-        y = min(y, ph - vh)
-        self.Scroll(x / ux, y / uy)
-        # Update rulers
+        #gaterring necessary information
+        (window_size_width, window_size_height) = self.GetSize()
+        (scroll_rate_x, scroll_rate_y) = self.GetScrollPixelsPerUnit()
+        
+        #calculate position of left upper corner to which we scroll
+        corner_x = max(0,requiered_position_x - (window_size_width / 2))
+        corner_y = max(0, requiered_position_y - (window_size_height / 2))
+        
+        #scroll to reqiered position
+        self.Scroll(corner_x / scroll_rate_x, corner_y / scroll_rate_y)
+        #refresh rulers
         self.GetParent().leftRuler.Refresh()
         self.GetParent().topRuler.Refresh()
-
 
     def OnSize(self, event):
         self.Refresh()
@@ -460,7 +469,7 @@ class PlanePart(wx.ScrolledWindow):
         """
         Sets up scrolling of the window.
         """
-        self.SetScrollRate(20, 20)
+        self.SetScrollRate(1, 1)
 
 
     def OnPaint(self, event):
@@ -635,7 +644,6 @@ class PlanePart(wx.ScrolledWindow):
         opoint = event.GetPosition()
         point = self.CalcUnscrolledPosition(event.GetPosition())
         p3d = self.ViewToModel(point)
-
         #bar = self.GetParent().GetParent().GetStatusBar()
         self.main_window.SetStatusText("%.3f, %.3f, %.3f" % (p3d.x, p3d.y, p3d.z), 1)
 
@@ -916,7 +924,7 @@ class SceneryDragger:
         Change the status of scenery dragger.
         gets the initial position
         """
-        if event.LeftDown() and not self.editor.basePointMover.pressed:
+        if event.MiddleDown():
             self.dragStart = event.GetPosition()
             self.dragging = True
         
@@ -926,11 +934,8 @@ class SceneryDragger:
         If it is a drag movement, get the delta and scroll the scenery
         within the editor.
         """
-        if self.dragging:
-            delta = event.GetPosition() - self.dragStart
-            (vx, vy) = self.editor.GetViewStart()
-            (ux, uy) = self.editor.GetScrollPixelsPerUnit()
-            self.editor.Scroll((vx*ux - delta.x) / ux, (vy*uy - delta.y) / uy)
+        #if self.dragging:
+        #    self.MoveScenery(event)
         self.dragging = False
 
 
@@ -938,13 +943,20 @@ class SceneryDragger:
         """
         Reacts to mouse movement.
         """
-        if not event.Dragging():
+        if not event.MiddleIsDown():
             # It is not dragging so change the flag
             self.dragging = False
-        #else:
-        #    self.OnMouseRelease(event)
+        else:
+            self.MoveScenery(event)
 
-
+    def MoveScenery(self, event):
+        if event.MiddleIsDown():
+            delta = event.GetPosition() - self.dragStart
+            (vx, vy) = self.editor.GetViewStart()
+            (ux, uy) = self.editor.GetScrollPixelsPerUnit()
+            #self.editor.Scroll((vx*ux - delta.x) / ux, (vy*uy - delta.y) / uy)
+            self.editor.Scroll(delta.x, delta.y)
+            self.dragStart = event.GetPosition()
 
 
 class TrackClosurer:
@@ -1081,17 +1093,23 @@ class WheelScaler:
     def __init__(self, editor):
         self.editor = editor
 
-
+    def OnMouseMove(self, event):
+        self.mouse_position = event.GetPosition()
+        
     def OnMouseWheel(self, event):
-        print "Mouse event"
-        print "Wheel rotation:"
-        print event.GetWheelRotation()
+        print "Mouse wheel event"
+        #print "Wheel rotation:"
+        #print event.GetWheelRotation()
         delta = event.GetWheelRotation()
+        #Logical position of mouse is retrieved in unscrolled values
+        mouse_logical_position_in_window = self.editor.CalcUnscrolledPosition(self.mouse_position)
+                
         scale = self.editor.GetScale()
         if delta < 0:
-            self.editor.SetScale(scale / 2)
+            self.editor.SetScale(scale / 2, mouse_logical_position_in_window)
         else:
-            self.editor.SetScale(scale * 2)
+            self.editor.SetScale(scale * 2, mouse_logical_position_in_window)
+
 
 
 class SceneryListener(model.scenery.SceneryListener):
