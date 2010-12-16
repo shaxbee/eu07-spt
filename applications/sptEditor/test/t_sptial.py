@@ -66,7 +66,7 @@ class RTreeTest(unittest.TestCase):
     def testSeven(self):
         """
         Tests the RTree with larger page size.
-        Configuration mineSiz=1, pageSize=3
+        Configuration mineSize=1, pageSize=3
         """
 
         tree = sptial.RTree(minSize = 1, pageSize = 3)
@@ -105,6 +105,50 @@ class RTreeTest(unittest.TestCase):
         self.assertEquals(3, len(tree))
         self.assertEquals(1, tree.level())
 
+
+    def testRect(self):
+        """
+        Tests the RTree with larger page size.
+        Configuration mineSize=1, pageSize=3
+        """
+
+        tree = sptial.RTree(minSize = 1, pageSize = 3, cuboidClass = sptial.Rect)
+        tree.insert(sptial.Rect((-1, 0), (0, 1)), 'a')
+        tree.insert(sptial.Rect((-6, 8), (-5, 10)), 'b')
+        tree.insert(sptial.Rect((-7, 6), (-4, 9)), 'c')
+        tree.insert(sptial.Rect((3, 9), (4, 10)), 'd')
+        tree.insert(sptial.Rect((-5, -7), (1, 1)), 'e')
+        tree.insert(sptial.Rect((-9, -24), (3, -8)), 'f')
+        tree.insert(sptial.Rect((-15, -1), (12, 0)), 'g')
+        tree.checkParents()
+
+        self.assertEquals(7, len(tree))
+        self.assertEquals(2, tree.level())
+
+        l = list(tree.query(sptial.Rect((-2, -1), (1, 2))))
+        self.assertEquals(3, len(l))
+        self.assertTrue('a' in l)
+        self.assertTrue('g' in l)
+        self.assertTrue('e' in l)
+
+        l = list(tree.query(sptial.Rect((-1, -1), (0, 0))))
+        self.assertEquals(3, len(l))
+        self.assertTrue('a' in l)
+        self.assertTrue('g' in l)
+        self.assertTrue('e' in l)
+
+        tree.delete(sptial.Rect((-7, 6), (-4, 9)), 'c')
+        tree.checkParents()
+
+        self.assertEquals(6, len(tree))
+
+        tree.delete(sptial.Rect((-9, -24), (3, -8)), 'f')
+        tree.delete(sptial.Rect((3, 9), (4, 10)), 'd')
+        tree.delete(sptial.Rect((-6, 8), (-5, 10)), 'b')
+        tree.checkParents()
+
+        self.assertEquals(3, len(tree))
+        self.assertEquals(2, tree.level())
 
 
 

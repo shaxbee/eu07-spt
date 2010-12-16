@@ -1038,9 +1038,11 @@ class Highlighter:
     def OnMouseClick(self, event):
         if self.__enabled and not self.editorPart.basePointMover.pressed:
             point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
+            p3d = self.ViewToModel(point)
 
             startTime = datetime.datetime.now()
             try:
+                # TODO: query scenery
                 found = None
                 for v in self.editorPart.trackCache + self.editorPart.switchCache:
                     if v.IsSelectionPossible(point):

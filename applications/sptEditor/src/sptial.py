@@ -262,7 +262,13 @@ class Rect:
         Returns the area of overlapping part of this rectangle and another one.
 
         Examples:
-        TODO
+        >>> c = Rect((0, 0), (3, 2))
+        >>> c.overlap(NullRect)
+        0
+        >>> c.overlap(Rect((5, -4), (8, -1)))
+        0
+        >>> c.overlap(Rect((1, 1), (2, 2)))
+        1
         """
         return self.intersection(oc).volume()
 
@@ -273,30 +279,79 @@ class Rect:
     
 
     def containsPoint(self, x, y):
+        """
+        Returns True if this contains the point.
+
+        Examples:
+        >>> c = Rect((-1, 2), (3, 3))
+        >>> c.containsPoint(0, 0)
+        False
+        >>> c.containsPoint(-1, 3)
+        True
+        >>> c.containsPoint(1, 2)
+        True
+        """
         return x >= self.minX and x <= self.maxX \
             and y >= self.minY and y <= self.maxY
 
 
     def intersects(self, oc):
+        """
+        Returns True if oc intersects this rectangle.
+
+        Examples:
+        >>> a = Rect((-1, 0), (2, 0))
+        >>> b = Rect((-1, -1), (-1, 1))
+        >>> c = Rect((-1, -1), (1, 1))
+        >>> d = Rect((-4, 2), (-2, 4))
+        >>> a.intersects(b)
+        False
+        >>> a.intersects(c)
+        True
+        >>> d.intersects(c)
+        False
+        >>> c.intersects(d)
+        False
+        """
         if self == oc:
             return True
         inter = self.intersection(oc)
         if inter.volume() > 0:
             return True
-        elif inter != NullCuboid:
+        elif inter != NullRect:
             return True
         else:
             return False
 
 
     def intersection(self, oc):
+        """
+        Makes the intersection with given oc.
+
+        Examples:
+        >>> a = Rect((-1, -2), (3, 1))
+        >>> b = Rect((0, 0), (2, 2))
+        >>> c = Rect((1, -1), (1, 1))
+        >>> d = Rect((2, -1), (2, 4))
+        >>> a.intersection(b)
+        (0, 0), (2, 1)
+        >>> a.intersection(c)
+        (1, -1), (1, 1)
+        >>> a.intersection(d)
+        (2, -1), (2, 1)
+        >>> b.intersection(d)
+        (2, 0), (2, 2)
+        >>> c.intersection(d)
+        (0, 0), (0, 0)
+        """
+
         if self is NullRect: return NullRect
         if oc is NullRect: return NullRect
 
         minX, maxX = max(self.minX, oc.minX), min(self.maxX, oc.maxX)
         minY, maxY = max(self.minY, oc.minY), min(self.maxY, oc.maxY)
 
-        w, h = maxX - minX, maxY, minY
+        w, h = maxX - minX, maxY - minY
         if w < 0 or h < 0: return NullRect
         if w == 0 and h == 0: return NullRect
 
@@ -304,6 +359,21 @@ class Rect:
 
 
     def union(self, oc):
+        """
+        Makes the union of this rectangle and another.
+
+        Examples:
+        >>> a = Rect((-1, -2), (3, 1))
+        >>> b = Rect((0, 0), (2, 2))
+        >>> c = Rect((1, -1), (1, 1))
+        >>> d = Rect((2, -1), (2, 4))
+        >>> a.union(b)
+        (-1, -2), (3, 2)
+        >>> a.union(c)
+        (-1, -2), (3, 1)
+        >>> c.union(d)
+        (1, -1), (2, 4)
+        """
         if oc is NullRect: return Rect((self.minX, self.minY), (self.maxX, self.maxY))
         if self is NullRect: return Rect((oc.minX, oc.minY), (oc.maxX, oc.maxY))
 
@@ -372,7 +442,8 @@ class RTree:
         It has also the parent unless a tree root.
         """
 
-        def __init__(self, parent = None, firstElem = None):
+        def __init__(self, cuboidClass, parent = None, firstElem = None):
+            self.cuboidClass = cuboidClass
             self.children = []
             if firstElem is not None:
                 self.addChild(firstElem)
@@ -398,7 +469,7 @@ class RTree:
             """
             Returns minimal bounding cuboid for this node.
             """
-            return Cuboid.unionAll(self.cuboids())
+            return self.cuboidClass.unionAll(self.cuboids())
 
 
         def findEntry(self, subnode):
@@ -426,12 +497,13 @@ class RTree:
                 self.addChild(e)
 
 
-    def __init__(self, pageSize = 20, minSize = 10):
+    def __init__(self, pageSize = 20, minSize = 10, cuboidClass = Cuboid):
         self.__size = 0
+        self.__cuboidClass = cuboidClass
         self.__level = 1
         self.__pageSize = pageSize
         self.__minSize = minSize
-        self.__root = self.Node()
+        self.__root = self.Node(self.__cuboidClass)
 
 
     def insert(self, cuboid, obj):
@@ -466,7 +538,7 @@ class RTree:
         node, splitNode = self.adjustTree(node, splitNode)
         # if node split propagation caused root to split
         if splitNode is not None:
-            root = self.Node()
+            root = self.Node(self.__cuboidClass)
             root.addChild(self.IndexEntry(node.mbc(), node))
             root.addChild(self.IndexEntry(splitNode.mbc(), splitNode))
             self.__level += 1
@@ -503,7 +575,7 @@ class RTree:
         ga = node
         ga.children = []
         ga.addChild(s1)
-        gb = self.Node(node.parent, s2)
+        gb = self.Node(self.__cuboidClass, node.parent, s2)
         while len(entries) > 0:
             # 3.5.2. if one group has so few entries...
             #if self.__pageSize + 1 - len(ga.children) == self.__minSize:
