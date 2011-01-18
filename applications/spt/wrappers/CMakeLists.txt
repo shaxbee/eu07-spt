@@ -1,0 +1,2 @@
+simple_python_module(_view)
+simple_python_module(_components sptCore sptMover sptClientView osg OpenThreads)

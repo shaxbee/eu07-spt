@@ -61,6 +61,7 @@ class VehicleState
 public:
     float getLoad() const { return _load; }
     void setLoad(float load) { _load = load; }
+
 private:
     float _load;
 };

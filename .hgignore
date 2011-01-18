@@ -34,3 +34,6 @@ glob:CMakeCache.txt
 glob:Release/*
 glob:*.dir/
 glob:*.pyd
+glob:*.dll
+glob:build/applications
+glob:build/src

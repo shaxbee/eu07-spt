@@ -1,4 +1,4 @@
-#include "SectorView.h"
+#include "view/SectorView.h"
 
 #include <typeinfo>
 

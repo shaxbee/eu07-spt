@@ -1,3 +1,6 @@
+# add_subdirectory(components)
+add_subdirectory(view)
+
 set(TARGET_NAME spt)
 
 set(TARGET_SRC
@@ -5,15 +8,11 @@ set(TARGET_SRC
     ReaderSCT.cpp
     ReaderSCV.cpp
     SceneryAccess.cpp
-    SectorNode.cpp
-    SectorView.cpp
-    VehicleView.cpp)
+    SectorNode.cpp)
     
 set(TARGET_H
     SceneryAccess.h   
-    SectorNode.h    
-    SectorView.h
-    VehicleView.h)
+    SectorNode.h)
     
 setup_prog()
 

@@ -11,7 +11,7 @@
 #include <sptMover/Vehicle.h>
 
 #include "SceneryAccess.h"
-#include "VehicleView.h"
+#include "view/VehicleView.h"
 
 void print_vec(const osg::Vec3& vec)
 {
