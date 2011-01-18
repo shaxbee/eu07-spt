@@ -1,5 +1,5 @@
 set(LIB_NAME sptClientView)
-set(HEADER_PATH ${SPT_SOURCE_DIR}/applications/spt/include/view)
+set(HEADER_PATH ${SPT_SOURCE_DIR}/applications/sptClient/include/view)
 
 set(LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/SectorView.h

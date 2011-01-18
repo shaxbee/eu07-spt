@@ -85,41 +85,6 @@ private:
 
 }; // class sptCore::Scenery
 
-struct ExternalConnection
-{
-    osg::Vec3f offset;
-    osg::Vec3f position;
-    boost::uint32_t index;
-    bool operator<(const ExternalConnection& other) const 
-    { 
-        return (position - other.position + offset - other.offset) < osg::Vec3f(0.001f, 0.001f, 0.001f); 
-    }
-
-    bool operator==(const ExternalConnection& other) const 
-    { 
-        osg::Vec3f diff(position - other.position + offset - other.offset);
-        osg::Vec3f tolerance(0.001f, 0.001f, 0.001f);
-        return -tolerance < diff && diff < tolerance;
-    };
-};
-
-typedef std::vector<ExternalConnection> ExternalConnections;
-
-class ExternalsManager
-{
-public:
-    ExternalsManager(Scenery& scenery);
-    ~ExternalsManager();
-    
-    void addExternals(const Sector& sector, const ExternalConnections& externals);
-    void removeExternals(const osg::Vec3f& offset);
-
-private:
-    typedef std::set<ExternalConnection> ExternalConnectionsSet;
-    Scenery& _scenery;
-    ExternalConnectionsSet _externals;
-}; // class sptCore::ExternalsManager
-
 } // namespace sptCore
 
 #endif // headerguard

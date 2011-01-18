@@ -11,7 +11,7 @@
 #include <osgDB/fstream>
 
 #include "SectorNode.h"
-#include "SectorView.h"
+#include <view/SectorView.h>
 
 #include <sptDB/VariantReader.h>
 

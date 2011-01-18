@@ -1,2 +1,2 @@
-add_subdirectory(spt)
+add_subdirectory(sptClient)
 add_subdirectory(sptEditor)

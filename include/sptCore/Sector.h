@@ -28,15 +28,25 @@ struct ConnectionUpdate
     const RailTracking* current;
 };
 
-typedef std::vector<Connection> Connections;
-
 struct ExternalConnection
 {
     osg::Vec3f offset;
     osg::Vec3f position;
     boost::uint32_t index;
+    bool operator<(const ExternalConnection& other) const 
+    { 
+        return (position - other.position + offset - other.offset) < osg::Vec3f(0.001f, 0.001f, 0.001f); 
+    }
+
+    bool operator==(const ExternalConnection& other) const 
+    { 
+        osg::Vec3f diff(position - other.position + offset - other.offset);
+        osg::Vec3f tolerance(0.001f, 0.001f, 0.001f);
+        return -tolerance < diff && diff < tolerance;
+    };
 };
 
+typedef std::vector<Connection> Connections;
 typedef std::vector<ExternalConnection> ExternalConnections;
 
 //! Container for rail trackings located in square part of Scenery

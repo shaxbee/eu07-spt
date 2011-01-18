@@ -46,18 +46,7 @@ int main(int argc, char** argv)
 		std::cout.flush();
 		return 0;
 	};
-    
-    try
-    {
-        Vehicle* vehicle = createSampleVehicle(getSceneryInstance().getTrack("start")).release();
-        root->addChild(new VehicleView(*vehicle, osgDB::readNodeFile("e186_profeta.ive")));
-    }
-    catch(std::runtime_error& exc)
-    {
-        std::cout << exc.what() << std::endl;
-        return 1;
-    };
-    
+        
     root->addChild(scenery);
 
     osgViewer::Viewer viewer;
