@@ -8,40 +8,40 @@ using namespace sptCore;
 namespace sptMover
 {
 
-void VehicleState::setLoad(float load)
+VehicleUpdateCallback::~VehicleUpdateCallback() { };
+
+Vehicle::Vehicle(const std::string& name, const VehicleTraits& traits): 
+    _name(name), _traits(traits)
 {
-    if(load > owner().traits.maxLoad)
-        throw std::runtime_error(str(format("Trying to load %d on vehicle \"%s\" when only %d is allowed.") % load % owner().getName() % owner().traits.maxLoad));
+  
+}; // sptMover::Vehicle::Vehicle
 
-    _load = load;
-}; // sptMover::Vehicle::setLoad
+Vehicle::~Vehicle() { }
 
-float VehicleState::getTotalMass() const
+VehicleUpdateCallback& Vehicle::getUpdateCallback()
 {
-    return owner().traits.mass + _load;
-}; // sptMover::Vehicle::getTotalMass
-
-Vehicle& VehicleState::owner() 
-{ 
-    return reinterpret_cast<Vehicle&>(*(this - offsetof(Vehicle, state))); 
+    if(!hasUpdateCallback())
+        throw std::runtime_error(str(format("Update callback not set for vehicle \"%s\"") % getName()));
+    return *_update;
 };
 
-const Vehicle& VehicleState::owner() const 
-{ 
-    return reinterpret_cast<const Vehicle&>(*(this - offsetof(Vehicle, state))); 
+float Vehicle::update(float time)
+{
+    return getUpdateCallback().update(time, _state);
 };
 
-Vehicle::Vehicle(const std::string& name, const VehicleTraits& traits_, Track& track, float distance): 
-    _name(name), traits(traits_)
+void Vehicle::place(Track& track, float distance)
 {
-    for(VehicleTraits::Bogies::const_iterator iter = traits.bogies.begin(); iter != traits.bogies.end(); iter++)
+    _followers.clear();
+
+    for(VehicleTraits::Bogies::const_iterator iter = getTraits().getBogies().begin(); iter != getTraits().getBogies().end(); iter++)
     {
         // put follower on track
-        std::auto_ptr<Follower> follower(new Follower(track, distance + iter->distance));
+        std::auto_ptr<Follower> follower(new Follower(track, distance + *iter));
         // register
         _followers.push_back(follower);
     };
-}; // sptMover::Vehicle::Vehicle
+};
 
 void Vehicle::move(float distance)
 {

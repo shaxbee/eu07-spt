@@ -1,5 +1,4 @@
-set(GTEST_ROOT ${spt_SOURCE_DIR}/ext)
-enable_testing()
+set(GTEST_ROOT ${SPT_SOURCE_DIR}/ext)
 
 find_package(GTest REQUIRED)
 

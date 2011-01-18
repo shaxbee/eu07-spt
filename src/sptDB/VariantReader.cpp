@@ -7,6 +7,7 @@
 
 #include <boost/format.hpp>
 
+using namespace boost;
 using namespace sptDB;
 
 namespace
@@ -16,15 +17,15 @@ boost::format sectorFileNameFormat("%+05d%+05d.sct");
 
 void readSectors(BinaryReader& reader, VariantSectors& sectors, unsigned short id)
 {
-	unsigned int count;
+	uint32_t count;
 	reader.read(count);
 
 	while(count--)
 	{
-		int x;
+		int32_t x;
 		reader.read(x);
 
-		int y;
+		int32_t y;
 		reader.read(y);
 
 		VariantSector sector = {x * sptCore::Sector::SIZE, y * sptCore::Sector::SIZE, id};
@@ -53,7 +54,7 @@ std::auto_ptr<Variant> readVariant(std::istream& fin)
 	if(reader.getVersion() < Version(1, 1))
 		throw std::runtime_error("Incompatible variant file version.");
 
-	unsigned short id;
+	uint16_t id;
 	reader.read(id);
 
 	reader.endChunk("HEAD");

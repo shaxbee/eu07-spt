@@ -31,7 +31,7 @@ void set_sector_data(Sector& sector, TracksContainerT& data, size_t index)
     osg::Vec3f front(center->getDefaultPath().front());
     osg::Vec3f back(center->getDefaultPath().back());
 
-    boost::array<Sector::Connection, 2> connections =
+    boost::array<Connection, 2> connections =
     {{
         {front, left, center},
         {back, center, right}
@@ -39,7 +39,9 @@ void set_sector_data(Sector& sector, TracksContainerT& data, size_t index)
 
     std::sort(connections.begin(), connections.end(), ConnectionLess());
 
-    sector.setData(trackings, connections);
+    boost::array<ExternalConnection, 0> externals;
+
+    sector.setData(trackings, connections, externals);
 };
 
 }
