@@ -16,17 +16,18 @@ struct VehicleViewUpdateLevel
 {
     enum UpdateLevel
     {
-        NEAR = 0,
-        MEDIUM = 1,
+        PASSIVE = 0,
+        INVISIBLE = 1,
         FAR = 2,
-        PASSIVE = 3
+        MEDIUM = 3,
+        NEAR = 4
     };    
 };
 
 class VehicleViewComponent
 {
 public:    
-    VehicleViewComponent(const sptMover::Vehicle& vehicle, std::string name, unsigned int updateLevel);
+    VehicleViewComponent(const sptMover::Vehicle& vehicle, const std::string& name, unsigned int updateLevel);
     virtual ~VehicleViewComponent() { };
 
     const std::string& getName() const { return _name; }
@@ -48,7 +49,7 @@ class VehicleView: public osg::Node
 {
 
 public:
-    VehicleView(sptMover::Vehicle& vehicle, osg::Node* model, unsigned int level);
+    VehicleView(sptMover::Vehicle& vehicle, osg::Node* model);
 
     void addComponent(std::auto_ptr<VehicleViewComponent> component);
     const VehicleViewComponent& getComponent(const std::string& name) const;
@@ -66,6 +67,7 @@ public:
     void setUpdateLevel(unsigned int updateLevel) { _updateLevel = updateLevel; };
     
     void update(float time);
+    void attach();
 
 private:
     unsigned int _updateLevel;

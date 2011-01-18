@@ -22,4 +22,4 @@ add_library(${LIB_NAME}
     SwitchableTracking.cpp 
     Track.cpp)
     
-install(TARGETS ${LIB_NAME} ARCHIVE DESTINATION ${spt_SOURCE_DIR}/lib)
+install(TARGETS ${LIB_NAME} ARCHIVE DESTINATION ${SPT_SOURCE_DIR}/lib)

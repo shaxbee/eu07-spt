@@ -5,6 +5,7 @@
 
 #include <sptUtil/Math.h>
 
+#include <view/Components.h>
 #include <view/VehicleView.h>
 #include <view/Util.h>
 
@@ -12,18 +13,6 @@ using namespace boost::python;
 
 namespace components
 {
-
-class Body: public view::VehicleViewComponent
-{
-public:
-    Body(const sptMover::Vehicle& vehicle, unsigned int updateLevel);
-
-    virtual void update(float time);
-    virtual void attach(osg::Node* model);
-
-private:
-    osg::ref_ptr<osg::MatrixTransform> _node;
-};
 
 Body::Body(const sptMover::Vehicle& vehicle, unsigned int updateLevel):
     VehicleViewComponent(vehicle, "body", updateLevel)
@@ -48,13 +37,6 @@ void Body::update(float time)
 void Body::attach(osg::Node* model)
 {
     _node = view::injectTransform(model, getName());
-};
-
-void export_body()
-{
-    class_<Body>("Body", init<const sptMover::Vehicle&, unsigned int>())
-        .def("update", &Body::update)
-        .def("attach", &Body::attach);
 };
 
 };

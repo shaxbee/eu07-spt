@@ -57,13 +57,18 @@ osg::MatrixTransform* injectTransform(osg::Node* root, const std::string& name)
     if(!node)
         return NULL;
 
+    osg::Group* parent = node->getParent(0);
+    if(!parent)
+        return NULL;
+
     osg::ref_ptr<osg::MatrixTransform> transform = visitor.getNodeAs<osg::MatrixTransform>();
     if(transform)
         return transform;
     
     transform = new osg::MatrixTransform;
     transform->addChild(node);
-    node->getParent(0)->replaceChild(node, transform);
+
+    parent->replaceChild(node, transform.get());
     
     return transform.get();
 };

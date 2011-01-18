@@ -1,4 +1,4 @@
-add_subdirectory(components)
+# add_subdirectory(components)
 add_subdirectory(view)
 
 set(TARGET_NAME spt)

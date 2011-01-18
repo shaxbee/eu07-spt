@@ -20,6 +20,14 @@ namespace view
 namespace 
 {
 
+struct ComponentsOrdering
+{
+    bool operator()(const VehicleViewComponent& left, const VehicleViewComponent& right)
+    {
+        return (left.getUpdateLevel() < right.getUpdateLevel()) && (left.getName() < right.getName());
+    };
+}; // ::ComponentsOrdering
+
 class FindComponentByName
 {
 public:
@@ -57,13 +65,13 @@ private:
 
 }; // anonymous namespace
 
-VehicleViewComponent::VehicleViewComponent(const sptMover::Vehicle& vehicle, std::string name, unsigned int updateLevel):
+VehicleViewComponent::VehicleViewComponent(const sptMover::Vehicle& vehicle, const std::string& name, unsigned int updateLevel):
     _vehicle(vehicle), _name(name), _updateLevel(updateLevel) { }
 
-VehicleView::VehicleView(sptMover::Vehicle& vehicle, osg::Node* model, unsigned int updateLevel):
+VehicleView::VehicleView(sptMover::Vehicle& vehicle, osg::Node* model):
     _vehicle(vehicle), 
     _model(static_cast<osg::Node*>(model->clone(osg::CopyOp::SHALLOW_COPY))), 
-    _updateLevel(updateLevel)
+    _updateLevel(VehicleViewUpdateLevel::INVISIBLE)
 {    
 }; // VehicleView::VehicleView(vehicle, model)
 
@@ -74,16 +82,20 @@ void VehicleView::traverse(osg::NodeVisitor& visitor)
 
 void VehicleView::update(float time)
 {
-    for(Components::iterator iter = _components.begin(); iter != _components.end(); iter++)
-    {
-        if(iter->getUpdateLevel() <= _updateLevel)
-            iter->update(time);
-    };
+    for(Components::iterator iter = _components.begin(); iter != _components.end() && iter->getUpdateLevel() <= _updateLevel; iter++)
+        iter->update(time);
 }; // VehicleView::update(time)
+
+void VehicleView::attach()
+{
+    for(Components::iterator iter = _components.begin(); iter != _components.end(); iter++)
+        iter->attach(getModel());
+};
 
 void VehicleView::addComponent(std::auto_ptr<VehicleViewComponent> component)
 {
-    _components.push_back(component);
+    Components::iterator iter = std::lower_bound(_components.begin(), _components.end(), *component, ComponentsOrdering());
+    _components.insert(iter, component);
 };
 
 const VehicleViewComponent& VehicleView::getComponent(const std::string& name) const
