@@ -98,14 +98,6 @@ void VehicleView::addComponent(std::auto_ptr<VehicleViewComponent> component)
     _components.insert(iter, component);
 };
 
-const VehicleViewComponent& VehicleView::getComponent(const std::string& name) const
-{
-    Components::const_iterator iter = std::find_if(_components.begin(), _components.end(), FindComponentByName(name));
-    if(iter == _components.end())
-        throw std::runtime_error(str(format("Component \"%s\" not found in vehicle \"%s\"") % name % getName()));
-    return *iter;
-};
-
 VehicleViewComponent& VehicleView::getComponent(const std::string& name)
 {
     Components::iterator iter = std::find_if(_components.begin(), _components.end(), FindComponentByName(name));
@@ -113,6 +105,16 @@ VehicleViewComponent& VehicleView::getComponent(const std::string& name)
         throw std::runtime_error(str(format("Component \"%s\" not found in vehicle \"%s\"") % name % getName()));
     return *iter;
 };
+
+/*
+const VehicleViewComponent& VehicleView::getComponent(const std::string& name) const
+{
+    Components::const_iterator iter = std::find_if(_components.begin(), _components.end(), FindComponentByName(name));
+    if(iter == _components.end())
+        throw std::runtime_error(str(format("Component \"%s\" not found in vehicle \"%s\"") % name % getName()));
+    return *iter;
+};
+*/
 
 bool VehicleView::hasComponent(const std::string& name) const
 {

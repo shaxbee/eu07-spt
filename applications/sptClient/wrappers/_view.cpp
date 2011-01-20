@@ -29,12 +29,12 @@ BOOST_PYTHON_MODULE(_view)
         .def("update", &VehicleViewComponentWrapper::update)
         .def("attach", &VehicleViewComponentWrapper::attach);
 
-    class_<Body, bases<VehicleViewComponent> >("Body", init<const Vehicle&, unsigned int>())
-        .def("update", &Body::update)
-        .def("attach", &Body::attach);
-
-    class_<Bogie, bases<VehicleViewComponent> >("Bogie", init<const Vehicle&, unsigned int, unsigned int>())
-        .def("update", &Bogie::update)
-        .def("attach", &Bogie::attach);
+    class_<VehicleView, boost::noncopyable>("VehicleView", no_init)
+        .def("addComponent", &VehicleView::addComponent)
+        .def("getComponent", &VehicleView::getComponent)
+        .def("hasComponent", &VehicleView::hasComponent)
+        .def("getModel", &VehicleView::getModel)
+        .def("getUpdateLevel", &VehicleView::getUpdateLevel)
+        .def("setUpdateLevel", &VehicleView::setUpdateLevel);
     
 }; // _view module

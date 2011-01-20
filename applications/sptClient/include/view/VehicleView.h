@@ -52,8 +52,10 @@ public:
     VehicleView(sptMover::Vehicle& vehicle, osg::Node* model);
 
     void addComponent(std::auto_ptr<VehicleViewComponent> component);
-    const VehicleViewComponent& getComponent(const std::string& name) const;
+
     VehicleViewComponent& getComponent(const std::string& name);
+//    const VehicleViewComponent& getComponent(const std::string& name) const;
+
     bool hasComponent(const std::string& name) const;
 
     virtual void traverse(osg::NodeVisitor& visitor);
