@@ -40,7 +40,7 @@ class RailContainer:
     def __eq__(self, other):
         if self is other:
             return True
-        if other == None:
+        if other is None:
             return False
         if not isinstance(other, RailContainer):
             return False
@@ -50,6 +50,14 @@ class RailContainer:
             if tracking not in other.children:
                 return False
         return True
+
+
+    def __hash__(self):
+        """Hash is only computed on outline points"""
+        value = 1
+        for point in self.connections.keys():
+            value += 37*hash(point)
+        return value
 
     
     def size(self):
