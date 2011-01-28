@@ -13,6 +13,7 @@ import wx
 from wx.lib.evtmgr import eventManager
 
 import Application
+import sptial
 import model.tracks
 import model.scenery
 import ui.views
@@ -45,9 +46,9 @@ class SceneryEditor(wx.Panel):
 
         corner = wx.Panel(self, name = "Corner")
         corner.SetBackgroundColour('WHITE')
-        self.leftRuler = Ruler(self, orientation = wx.VERTICAL, \
+        self.leftRuler = Ruler(self, orientation = wx.VERTICAL,
             name = "Left ruler")
-        self.topRuler = Ruler(self, orientation = wx.HORIZONTAL, \
+        self.topRuler = Ruler(self, orientation = wx.HORIZONTAL,
             name = "Top ruler")
         self.parts = [PlanePart(self, main_window)]
 
@@ -71,7 +72,7 @@ class SceneryEditor(wx.Panel):
         """
         Sets the scenery. Notify also active parts.
         """
-        if self.scenery != None:
+        if self.scenery is not None:
             self.scenery.UnregisterListener(self.sceneryListener)
         self.scenery = scenery
         self.SetSelection(None)
@@ -122,7 +123,7 @@ class PlanePart(wx.ScrolledWindow):
     """
 
     def __init__(self, parent, main_window, id = wx.ID_ANY):
-        wx.ScrolledWindow.__init__(self, parent, id, \
+        wx.ScrolledWindow.__init__(self, parent, id,
             style = wx.VSCROLL | wx.HSCROLL)
 
         self.main_window = main_window
@@ -190,11 +191,13 @@ class PlanePart(wx.ScrolledWindow):
     def SetBasePoint(self, basePoint, follow = False):
         (vx, vy) = self.GetViewStart()
         (ux, uy) = self.GetScrollPixelsPerUnit()
+
+        context = ui.views.DCContext()
         
         oldView = self.basePointView
         self.basePointView = ui.views.BasePointView(basePoint)
         if oldView != None:
-            oldRect = oldView.GetRepaintBounds()
+            oldRect = oldView.GetRepaintBounds(context)
             oldRect.x -= vx * ux 
             oldRect.y -= vy * uy 
             self.RefreshRect(oldRect)
@@ -205,9 +208,9 @@ class PlanePart(wx.ScrolledWindow):
             self.Refresh()
         else:
             # Scale base point view
-            self.basePointView.Scale(self.scale, self.minX, self.maxX, \
+            self.basePointView.Scale(self.scale, self.minX, self.maxX,
                                      self.minY, self.maxY)
-            newRect = self.basePointView.GetRepaintBounds()
+            newRect = self.basePointView.GetRepaintBounds(context)
             newRect.x -= vx * ux
             newRect.y -= vy * uy
             self.RefreshRect(newRect)
@@ -215,9 +218,9 @@ class PlanePart(wx.ScrolledWindow):
         if follow:
             p = self.basePointView.point
             (wx, wy) = self.GetSize()
-            if wx > 2*BASE_POINT_MARGIN and wy > 2*BASE_POINT_MARGIN:
-                if p.x < vx*ux + BASE_POINT_MARGIN or p.x > vx*ux + wx - BASE_POINT_MARGIN \
-                        or p.y < vy*uy + BASE_POINT_MARGIN or p.y > vy*uy + wy - BASE_POINT_MARGIN:
+            if (wx > 2*BASE_POINT_MARGIN and wy > 2*BASE_POINT_MARGIN):
+                if (p.x < vx*ux + BASE_POINT_MARGIN or p.x > vx*ux + wx - BASE_POINT_MARGIN
+                        or p.y < vy*uy + BASE_POINT_MARGIN or p.y > vy*uy + wy - BASE_POINT_MARGIN):
                     self.CenterViewAt(p.x, p.y)
             else:
                 self.CenterViewAt(p.x, p.y)
@@ -244,14 +247,14 @@ class PlanePart(wx.ScrolledWindow):
         (ux, uy) = self.GetScrollPixelsPerUnit()
 
         oldView = self.selectedView
-        if oldView != None:
+        if oldView is not None:
             oldRect = oldView.GetRepaintBounds()
             oldRect.x -= vx * ux
             oldRect.y -= vy * uy
             self.RefreshRect(oldRect)
-        if selection != None:
+        if selection is not None:
             view = self.FindView(selection)
-            if view == None:
+            if view is None:
                 raise TransitionError, "Cannot find view in cache"
             self.selectedView = view
             newRect = view.GetRepaintBounds()
@@ -272,6 +275,7 @@ class PlanePart(wx.ScrolledWindow):
             self.switchCache.append(view)
         else:
             raise ValueError("Unsupported element: " + str(type(element)))
+
         return view
 
 
@@ -321,8 +325,8 @@ class PlanePart(wx.ScrolledWindow):
         nMaxY = max(vMaxY, nMaxY)
 
         # Changes
-        if doScaling or nMinX < self.minX or nMinY < self.minY \
-            or nMaxX > self.maxX or nMaxY > self.maxY:
+        if (doScaling or nMinX < self.minX or nMinY < self.minY
+            or nMaxX > self.maxX or nMaxY > self.maxY):
             self.minX = min(self.minX, nMinX)
             self.minY = min(self.minY, nMinY)
             self.maxX = max(self.maxX, nMaxX)
@@ -379,7 +383,7 @@ class PlanePart(wx.ScrolledWindow):
             v.Scale(scale, self.minX, self.maxX, self.minY, self.maxY)
         for v in self.switchCache:
             v.Scale(scale, self.minX, self.maxX, self.minY, self.maxY)
-        self.basePointView.Scale(scale, self.minX, self.maxX, self.minY, \
+        self.basePointView.Scale(scale, self.minX, self.maxX, self.minY,
                                  self.maxY)
 
 
@@ -388,8 +392,8 @@ class PlanePart(wx.ScrolledWindow):
         Converts 2D point of UI editor coordinates into 3D point
         of scenery coordinates.
         """
-        p3d = Vec3(Decimal(str((point[0]-100)/self.scale + self.minX)), \
-            Decimal(str(-((point[1]-100)/self.scale - self.maxY))), \
+        p3d = Vec3(Decimal(str((point[0]-100)/self.scale + self.minX)),
+            Decimal(str(-((point[1]-100)/self.scale - self.maxY))),
             Decimal(0))
         return p3d
 
@@ -399,7 +403,7 @@ class PlanePart(wx.ScrolledWindow):
         Converts 3D point of scenery coordiante into 2D point of
         UI editor coordinates.
         """        
-        p2d = (int((float(point.x) - self.minX) * self.scale + 100), \
+        p2d = (int((float(point.x) - self.minX) * self.scale + 100),
             int((-float(point.y) + self.maxY) * self.scale + 100))
         return p2d
 
@@ -433,9 +437,9 @@ class PlanePart(wx.ScrolledWindow):
     def ComputePreferredSize(self):
         (w, h) = self.GetSize()
         
-        return (max(w, int(self.scale * (self.maxX - self.minX)) \
+        return (max(w, int(self.scale * (self.maxX - self.minX))
                 + 200) + self.extentX,
-            max(h + self.extentY, int(self.scale * (self.maxY - self.minY)) \
+            max(h + self.extentY, int(self.scale * (self.maxY - self.minY))
                + 200) + self.extentY)
 
 
@@ -456,6 +460,10 @@ class PlanePart(wx.ScrolledWindow):
 
         context = ui.views.DCContext()
         context.scale = self.scale
+        context.minX = self.minX
+        context.maxX = self.maxX
+        context.minY = self.minY
+        context.maxY = self.maxY
 
         startTime = datetime.datetime.now()
         try:
@@ -549,7 +557,7 @@ class PlanePart(wx.ScrolledWindow):
         Paints foreground
         """
         self.PaintTracks(dc, clip, context)
-        self.PaintSwitches(dc, clip, context)
+        #self.PaintSwitches(dc, clip, context)
         self.PaintSelection(dc, clip, context)
         self.PaintSnapPoint(dc, clip, context)
         self.PaintBasePoint(dc, clip, context)
@@ -558,14 +566,40 @@ class PlanePart(wx.ScrolledWindow):
     def PaintTracks(self, dc, clip, context):
         """
         Paint rail tracks.
-        """        
+        """
+
+        (vx, vy) = self.GetViewStart()
+        (ux, uy) = self.GetScrollPixelsPerUnit()
+        (sx, sy) = self.GetSize()
+
+        p3a = self.ViewToModel((vx*ux, vy*uy))
+        p3b = self.ViewToModel((vx*ux + sx, vy*uy + sy))
+        
+        viewport = sptial.Cuboid.fromEndpoints([p3a, p3b])
+
+        tracks = self.GetParent().scenery.tracks.children.queryView(viewport)
+
+        views = []
+        for t in tracks:
+            if (isinstance(t, model.groups.RailContainer)):
+                st = t.tracks()
+                for stt in st:
+                    views.append( ui.views.CreateView(stt) )
+                st = t.switches()
+                for stt in st:
+                    views.append( ui.views.CreateView(stt) )
+            else:
+                views.append( ui.views.CreateView(t) )
+
+        self.logger.debug("%d trackings to display" % len(views))
+
         oldPen = dc.GetPen()
         try:
-            dc.SetPen(wx.Pen((34, 139, 34), \
+            dc.SetPen(wx.Pen((34, 139, 34),
                 3 if self.scale > 1.0 else 1))
-            for v in self.trackCache:
-                if v != self.selectedView:
-                    v.Draw(dc, clip, context)
+
+            for v in views:
+                v.Draw(dc, clip, context)
         finally:
             dc.SetPen(oldPen)
             
@@ -576,7 +610,7 @@ class PlanePart(wx.ScrolledWindow):
         """
         oldPen = dc.GetPen()
         try:
-            dc.SetPen(wx.Pen((173, 255, 47), \
+            dc.SetPen(wx.Pen((173, 255, 47),
                 3 if self.scale > 1.0 else 1))
             for v in self.switchCache:
                 if v != self.selectedView:
@@ -589,11 +623,11 @@ class PlanePart(wx.ScrolledWindow):
         """
         Paints rail switches.
         """
-        if self.selectedView == None:
+        if self.selectedView is None:
             return
         oldPen = dc.GetPen()
         try:
-            dc.SetPen(wx.Pen((255, 0, 0), \
+            dc.SetPen(wx.Pen((255, 0, 0),
                 3 if self.scale > 1.0 else 1))
             self.selectedView.Draw(dc, clip, context)
         finally:
@@ -605,12 +639,12 @@ class PlanePart(wx.ScrolledWindow):
 
 
     def PaintSnapPoint(self, dc, clip, context):
-        if self.snapData != None:
+        if self.snapData is not None:
              index = ui.views.getImageIndexByAngle(self.snapData.alpha)
              snapImage = ui.views.SNAP_BASEPOINT_IMAGES[index]
 
-             dc.DrawBitmap(wx.BitmapFromImage(snapImage), \
-                 self.snapData.p2d.x - snapImage.GetWidth()/2, \
+             dc.DrawBitmap(wx.BitmapFromImage(snapImage),
+                 self.snapData.p2d.x - snapImage.GetWidth()/2,
                  self.snapData.p2d.y - snapImage.GetHeight()/2)
 
 
@@ -682,7 +716,7 @@ class Ruler(wx.Control):
         try:
             dc.SetPen(wx.Pen((0, 51, 153)))
             dc.SetTextForeground((0, 51, 153))
-            dc.SetFont(wx.Font(8, wx.SWISS, wx.FONTSTYLE_NORMAL, \
+            dc.SetFont(wx.Font(8, wx.SWISS, wx.FONTSTYLE_NORMAL,
                 wx.FONTWEIGHT_NORMAL))
 
             part = self.GetParent().parts[0]
@@ -700,7 +734,7 @@ class Ruler(wx.Control):
 
                 y = -(self.offset * unitY % 100)
                 while y < h:
-                    p3d = part.ViewToModel((p2x, \
+                    p3d = part.ViewToModel((p2x,
                         y + self.offset * unitY))
                     label = "%.2f" % p3d.y
                     (tw, th) = dc.GetTextExtent(label)
@@ -713,7 +747,7 @@ class Ruler(wx.Control):
 
                 x = -(self.offset * unitX % 100)
                 while x < w:
-                    p3d = part.ViewToModel( \
+                    p3d = part.ViewToModel(
                          (x + self.offset*unitX, p2y))
                     label = "%.2f" % p3d.x
                     (tw, th) = dc.GetTextExtent(label)
@@ -735,9 +769,9 @@ class Ruler(wx.Control):
         oldPen = dc.GetPen()
         try:
             dc.SetPen(wx.Pen('BLACK'))
-            if self.orientation == wx.HORIZONTAL and self.pick != None: 
+            if self.orientation == wx.HORIZONTAL and self.pick is not None: 
                 dc.DrawLine(self.pick, 8, self.pick, 24)
-            elif self.orientation == wx.VERTICAL and self.pick != None:
+            elif self.orientation == wx.VERTICAL and self.pick is not None:
                 dc.DrawLine(8, self.pick, 24, self.pick)
         finally:
             dc.SetPen(oldPen)
@@ -763,7 +797,7 @@ class Ruler(wx.Control):
             else:
                 oldPick = self.pick
                 self.pick = point.x
-                self.RefreshRect(wx.Rect(min(self.pick, oldPick), 0, \
+                self.RefreshRect(wx.Rect(min(self.pick, oldPick), 0,
                     abs(self.pick - oldPick)+1, 24))
 
         elif self.orientation == wx.VERTICAL:
@@ -773,7 +807,7 @@ class Ruler(wx.Control):
             else:
                 oldPick = self.pick
                 self.pick = point.y
-                self.RefreshRect(wx.Rect(0, min(self.pick, oldPick), 24, \
+                self.RefreshRect(wx.Rect(0, min(self.pick, oldPick), 24,
                     abs(self.pick - oldPick)+1))
 
         
@@ -796,7 +830,7 @@ class BasePoint:
     
     def __repr__(self):
         return u"BasePoint[point=(%.3f, %.3f, %.3f),alpha=%.2f,gradient=%.2f\u2030]" % \
-           (self.point.x, self.point.y, self.point.z, \
+           (self.point.x, self.point.y, self.point.z,
             self.alpha, self.gradient)
     
     
@@ -805,8 +839,8 @@ class BasePoint:
             return True
         if not isinstance(other, BasePoint):
             return False
-        return self.point == other.point and self.alpha == other.alpha and \
-            self.gradient == other.gradient
+        return (self.point == other.point and self.alpha == other.alpha
+                and self.gradient == other.gradient)
 
 
 
@@ -825,10 +859,17 @@ class BasePointMover:
     def OnMousePress(self, event):
         if not self.enabled:
             return
-        
+
         point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
+
+        context = ui.views.DCContext()
+        context.scale = self.editorPart.scale
+        context.minX = self.editorPart.minX
+        context.maxX = self.editorPart.maxX
+        context.minY = self.editorPart.minY
+        context.maxY = self.editorPart.maxY
         
-        if self.editorPart.basePointView.IsSelectionPossible(point):
+        if self.editorPart.basePointView.IsSelectionPossible(point, context):
             self.pressed = True
     
     
@@ -840,14 +881,14 @@ class BasePointMover:
         point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
         
         if self.pressed:
-            if snapData != None:
+            if snapData is not None:
                 self.editorPart.GetParent().basePoint.point = snapData.p3d
                 self.editorPart.GetParent().basePoint.alpha = snapData.alpha
                 self.editorPart.GetParent().basePoint.gradient = snapData.gradient
             else:
                 p3d = self.editorPart.ViewToModel(point)
                 self.editorPart.GetParent().basePoint.point = p3d
-            self.editorPart.GetParent().SetBasePoint( \
+            self.editorPart.GetParent().SetBasePoint(
                 self.editorPart.GetParent().basePoint)
             
         self.pressed = False
@@ -865,18 +906,18 @@ class BasePointMover:
             # This may be optimised by using scenery outline points
             for v in self.editorPart.trackCache + self.editorPart.switchCache:
                 foundSnapData = v.GetSnapData(point)
-                if foundSnapData != None:
+                if foundSnapData is not None:
                     self.editorPart.snapData = foundSnapData
                     break
  
-            if foundSnapData == None:
+            if foundSnapData is None:
                 self.editorPart.snapData = None
-            if oldSnapData != None:
-                self.editorPart.RefreshRect( \
+            if oldSnapData is not None:
+                self.editorPart.RefreshRect(
                     wx.Rect(oldSnapData.p2d.x-10, oldSnapData.p2d.y-10, 20, 20))
                 updateScreen = True
-            if foundSnapData != None:
-                self.editorPart.RefreshRect( \
+            if foundSnapData is not None:
+                self.editorPart.RefreshRect(
                     wx.Rect(foundSnapData.p2d.x-10, foundSnapData.p2d.y-10, 20, 20))
                 updateScreen = True
             if updateScreen:
@@ -1038,7 +1079,7 @@ class Highlighter:
     def OnMouseClick(self, event):
         if self.__enabled and not self.editorPart.basePointMover.pressed:
             point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
-            p3d = self.ViewToModel(point)
+            p3d = self.editorPart.ViewToModel(point)
 
             startTime = datetime.datetime.now()
             try:

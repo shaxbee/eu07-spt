@@ -151,6 +151,36 @@ class Cuboid:
         return Cuboid((minX, minY, minZ), (maxX, maxY, maxZ))
 
 
+    def viewIntersection(self, oc):
+        """
+        View intersection.
+        """
+        if self is NullCuboid: return NullCuboid
+        if oc is NullCuboid: return NullCuboid
+
+        minX, maxX = max(self.minX, oc.minX), min(self.maxX, oc.maxX)
+        minY, maxY = max(self.minY, oc.minY), min(self.maxY, oc.maxY)
+
+        w, h = maxX - minX, maxY - minY
+        if w < 0 or h < 0: return NullCuboid
+        if w == 0 and h == 0: return NullCuboid
+
+        return Cuboid((minX, minY, 0), (maxX, maxY, 0))
+
+
+    def viewIntersects(self, oc):
+        """
+        Returns True if this cuboid intersects another oc in view.
+        """
+        if self == oc:
+            return True
+        inter = self.viewIntersection(oc)
+        if inter != NullCuboid:
+            return True
+        else:
+            return False
+
+
     def union(self, oc):
         """
         Makes the union of this cuboid and another one and returns the union.
@@ -771,6 +801,14 @@ class RTree:
         return self._query(self.__root, p)
 
 
+    def queryView(self, cuboid):
+        """
+        Finds all records that predicate is met.
+        """
+        def p(o): return cuboid.viewIntersects(o.cuboid)
+        return self._query(self.__root, p)
+
+
     def _query(self, node, pred):
         if not node.isLeaf():
             for c in node.children:
@@ -781,7 +819,6 @@ class RTree:
             for c in node.children:
                 if pred(c):
                     yield c.obj
-                     
 
 
     def queryPoint(self, x, y, z):
@@ -857,4 +894,5 @@ class RTree:
 
     def getRoot(self):
         return self.__root
+
 

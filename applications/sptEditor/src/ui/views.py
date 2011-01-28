@@ -76,21 +76,21 @@ class View:
         pass # Implement it
     
     
-    def Draw(self, dc, clip):
+    def Draw(self, dc, clip, context):
         """
         Draws the view on given DeviceContext and clipping by clip rectangle.
         """
         pass # Implement it
     
     
-    def GetRepaintBounds(self):
+    def GetRepaintBounds(self, context):
         """
         Returns the bounds (rectangle) that this view occupies.
         """
         pass # Implement it
 
 
-    def IsSelectionPossible(self, point):
+    def IsSelectionPossible(self, point, context):
         """
         Returns True if view can be selected.
         """
@@ -104,7 +104,7 @@ class Snapable:
     An interface telling that view is snappable.
     """
     
-    def GetSnapData(self, point):
+    def GetSnapData(self, point, context):
         """
         For given editor point returns snap data object if snap is possible
         for the point or not.
@@ -115,7 +115,15 @@ class Snapable:
 
 
 class DCContext:
-    pass
+    
+    scale = 1
+    minX = -1000.0
+    maxX = 1000.0
+    minY = -1000.0
+    maxY = 1000.0
+
+    def __init__(self):
+        pass
 
 
 
@@ -127,9 +135,8 @@ class TrackView(View, Snapable):
     
     def __init__(self, track):
         self.track = track
-        self.curve = [wx.Point(0.0, 0.0), wx.Point(0.0, 0.0), \
-                      wx.Point(0.0, 0.0), wx.Point(0.0, 0.0)]
-        
+        self.curve = None 
+      
         
     def GetElement(self):
         return self.track
@@ -146,30 +153,45 @@ class TrackView(View, Snapable):
     
     
     def Scale(self, scale, oMinX, oMaxX, oMinY, oMaxY):
-        self.curve[0].x = (float(self.track.p1.x) - oMinX) * scale + 100
-        self.curve[0].y = (-float(self.track.p1.y) + oMaxY) * scale + 100
-        self.curve[3].x = (float(self.track.p2.x) - oMinX) * scale + 100
-        self.curve[3].y = (-float(self.track.p2.y) + oMaxY) * scale + 100
+         self.curve = None
+
+
+    def __ComputeCache(self, context):
+        self.curve = [wx.Point() for i in range(4)]
+
+        self.curve[0].x = (float(self.track.p1.x) - context.minX) * context.scale + 100
+        self.curve[0].y = (-float(self.track.p1.y) + context.maxY) * context.scale + 100
+        self.curve[3].x = (float(self.track.p2.x) - context.minX) * context.scale + 100
+        self.curve[3].y = (-float(self.track.p2.y) + context.maxY) * context.scale + 100
         
-        self.curve[1].x = (float(self.track.p1.x) + float(self.track.v1.x) - oMinX) \
-            * scale + 100;
-        self.curve[1].y = (-float(self.track.p1.y) - float(self.track.v1.y) + oMaxY) \
-            * scale + 100;
-        self.curve[2].x = (float(self.track.p2.x) + float(self.track.v2.x) - oMinX) \
-            * scale + 100;
-        self.curve[2].y = (-float(self.track.p2.y) - float(self.track.v2.y) + oMaxY) \
-            * scale + 100;        
+        self.curve[1].x = (float(self.track.p1.x) + float(self.track.v1.x) - context.minX) \
+            * context.scale + 100;
+        self.curve[1].y = (-float(self.track.p1.y) - float(self.track.v1.y) + context.maxY) \
+            * context.scale + 100;
+        self.curve[2].x = (float(self.track.p2.x) + float(self.track.v2.x) - context.minX) \
+            * context.scale + 100;
+        self.curve[2].y = (-float(self.track.p2.y) - float(self.track.v2.y) + context.maxY) \
+            * context.scale + 100;
+
         
     
     def Draw(self, dc, clip, context):
+
+        # cache coordinates
+        if self.curve is None:
+            self.__ComputeCache(context)
+
         if context.scale < 1.0:
-            dc.DrawLine(self.curve[0].x, self.curve[0].y, \
+            dc.DrawLine(self.curve[0].x, self.curve[0].y,
                 self.curve[3].x, self.curve[3].y)
         else:
             dc.DrawSpline(self.curve)
 
 
-    def GetRepaintBounds(self):
+    def GetRepaintBounds(self, context):
+        if self.curve is None:
+            self.__ComputeCache(context)
+
         xspan = [self.curve[0].x, self.curve[1].x, \
                  self.curve[2].x, self.curve[3].x]
         yspan = [self.curve[0].y, self.curve[1].y, \
@@ -181,7 +203,10 @@ class TrackView(View, Snapable):
         return wx.Rect(l, t, r-l+1, b-t+1)
 
 
-    def GetSnapData(self, point):        
+    def GetSnapData(self, point, context):
+        if self.curve is None:
+            self.__ComputeCache(context)
+
         p1x = self.curve[0].x - point.x
         p1y = self.curve[0].y - point.y
         p2x = self.curve[3].x - point.x
@@ -205,7 +230,10 @@ class TrackView(View, Snapable):
             return None
 
 
-    def IsSelectionPossible(self, point):
+    def IsSelectionPossible(self, point, context):
+        if self.curve is None:
+            self.__ComputeCache(context)
+
         lines = sptmath.toLineSegments(self.curve)
         i = 1
         while i < len(lines):
@@ -225,10 +253,8 @@ class RailSwitchView(View, Snapable):
     
     def __init__(self, switch):
         self.switch = switch
-        self.straight = [wx.Point(0.0, 0.0), wx.Point(0.0, 0.0), \
-                         wx.Point(0.0, 0.0), wx.Point(0.0, 0.0)]
-        self.diverging = [wx.Point(0.0, 0.0), wx.Point(0.0, 0.0), \
-                          wx.Point(0.0, 0.0), wx.Point(0.0, 0.0)]
+        self.straight = None
+        self.diverging = None
         
     
     def GetElement(self):
@@ -251,37 +277,48 @@ class RailSwitchView(View, Snapable):
         return (float(min(xspan)), float(max(xspan)), float(min(yspan)), float(max(yspan)))
     
     
+    def __ComputeCache(self, context):
+        self.straight = [wx.Point() for i in range(4)]       
+        self.diverging = [wx.Point() for i in range(4)]
+
+        self.straight[0].x = (float(self.switch.pc.x) - context.minX) * context.scale + 100;
+        self.straight[0].y = (-float(self.switch.pc.y) + context.maxY) * context.scale + 100;
+        self.straight[3].x = (float(self.switch.p1.x) - context.minX) * context.scale + 100;
+        self.straight[3].y = (-float(self.switch.p1.y) + context.maxY) * context.scale + 100;
+      
+        self.straight[1].x = (float(self.switch.pc.x) + float(self.switch.vc1.x)-context.minX) \
+            * context.scale + 100;
+        self.straight[1].y = (-float(self.switch.pc.y) - float(self.switch.vc1.y)+context.maxY) \
+            * context.scale + 100;
+        self.straight[2].x = (float(self.switch.p1.x) + float(self.switch.v1.x)-context.minX) \
+            * context.scale + 100;
+        self.straight[2].y = (-float(self.switch.p1.y) - float(self.switch.v1.y)+context.maxY) \
+            * context.scale + 100;
+      
+        self.diverging[0].x = (float(self.switch.pc.x) - context.minX) * context.scale + 100;
+        self.diverging[0].y = (-float(self.switch.pc.y) + context.maxY) * context.scale + 100;
+        self.diverging[3].x = (float(self.switch.p2.x) - context.minX) * context.scale + 100;
+        self.diverging[3].y = (-float(self.switch.p2.y) + context.maxY) * context.scale + 100;
+      
+        self.diverging[1].x = (float(self.switch.pc.x) + float(self.switch.vc2.x)-context.minX) \
+            * context.scale + 100;
+        self.diverging[1].y = (-float(self.switch.pc.y) - float(self.switch.vc2.y)+context.maxY) \
+            * context.scale + 100;
+        self.diverging[2].x = (float(self.switch.p2.x) + float(self.switch.v2.x)-context.minX) \
+            * context.scale + 100;
+        self.diverging[2].y = (-float(self.switch.p2.y) - float(self.switch.v2.y)+context.maxY) \
+            * context.scale + 100;
+
+
     def Scale(self, scale, oMinX, oMaxX, oMinY, oMaxY):
-        self.straight[0].x = (float(self.switch.pc.x) - oMinX) * scale + 100;
-        self.straight[0].y = (-float(self.switch.pc.y) + oMaxY) * scale + 100;
-        self.straight[3].x = (float(self.switch.p1.x) - oMinX) * scale + 100;
-        self.straight[3].y = (-float(self.switch.p1.y) + oMaxY) * scale + 100;
-      
-        self.straight[1].x = (float(self.switch.pc.x) + float(self.switch.vc1.x)-oMinX) \
-            * scale + 100;
-        self.straight[1].y = (-float(self.switch.pc.y) - float(self.switch.vc1.y)+oMaxY) \
-            * scale + 100;
-        self.straight[2].x = (float(self.switch.p1.x) + float(self.switch.v1.x)-oMinX) \
-            * scale + 100;
-        self.straight[2].y = (-float(self.switch.p1.y) - float(self.switch.v1.y)+oMaxY) \
-            * scale + 100;
-      
-        self.diverging[0].x = (float(self.switch.pc.x) - oMinX) * scale + 100;
-        self.diverging[0].y = (-float(self.switch.pc.y) + oMaxY) * scale + 100;
-        self.diverging[3].x = (float(self.switch.p2.x) - oMinX) * scale + 100;
-        self.diverging[3].y = (-float(self.switch.p2.y) + oMaxY) * scale + 100;
-      
-        self.diverging[1].x = (float(self.switch.pc.x) + float(self.switch.vc2.x)-oMinX) \
-            * scale + 100;
-        self.diverging[1].y = (-float(self.switch.pc.y) - float(self.switch.vc2.y)+oMaxY) \
-            * scale + 100;
-        self.diverging[2].x = (float(self.switch.p2.x) + float(self.switch.v2.x)-oMinX) \
-            * scale + 100;
-        self.diverging[2].y = (-float(self.switch.p2.y) - float(self.switch.v2.y)+oMaxY) \
-            * scale + 100;
+        self.straight = None
+        self.diverging = None
     
     
     def Draw(self, dc, clip, context):
+        if self.straight is None:
+            self.__ComputeCache(context)
+
         if context.scale < 1.0:
             dc.DrawLine(self.straight[0].x, self.straight[0].y, \
                 self.straight[3].x, self.straight[3].y)
@@ -292,7 +329,10 @@ class RailSwitchView(View, Snapable):
             dc.DrawSpline(self.diverging)
         
         
-    def GetRepaintBounds(self):
+    def GetRepaintBounds(self, context):
+        if self.straight is None:
+            self.__ComputeCache(context)
+
         xspan = [self.straight[0].x, self.straight[1].x, \
                  self.straight[2].x, self.straight[3].x, \
                  self.diverging[0].x, self.diverging[1].x, \
@@ -308,7 +348,10 @@ class RailSwitchView(View, Snapable):
         return wx.Rect(l, t, r-l+1, b-t+1)
 
 
-    def GetSnapData(self, point):
+    def GetSnapData(self, point, context):
+        if self.straight is None:
+            self.__ComputeCache(context)
+
         pcx = self.straight[0].x - point.x
         pcy = self.straight[0].y - point.y
         p1x = self.straight[3].x - point.x
@@ -340,7 +383,10 @@ class RailSwitchView(View, Snapable):
             return None
 
 
-    def IsSelectionPossible(self, point):
+    def IsSelectionPossible(self, point, context):
+        if self.straight is None:
+            self.__ComputeCache(context)
+
         lines = sptmath.toLineSegments(self.straight)
         if self.__IsSelectionPossible(point, lines):
             return True
@@ -393,11 +439,11 @@ class BasePointView(View):
                       self.point.y - BASEPOINT_IMAGES[index].GetHeight() / 2)
         
         
-    def GetRepaintBounds(self):
+    def GetRepaintBounds(self, context):
         return wx.Rect(self.point.x - 10, self.point.y - 10, 20, 20)
     
     
-    def IsSelectionPossible(self, point):
+    def IsSelectionPossible(self, point, context):
         """
         Checks if selection of this view is possible from given point.
         """
