@@ -8,7 +8,7 @@ else(NOT UNIX)
     set(Boost_PYTHON_LIBRARY boost_python)
 endif(NOT UNIX)
 
-find_package(PythonLibs 2.6 REQUIRED)
+find_package(PythonLibs 2.7 REQUIRED)
 include_directories(${PYTHON_INCLUDE_PATH})
 
 macro(python_module TRGTNAME)

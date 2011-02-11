@@ -74,17 +74,16 @@ def install_boost():
     if os.path.exists('ext/include/boost'):
         print "Boost already installed"
         return
-    
-    boost_url = 'http://switch.dl.sourceforge.net/project/boost/boost-binaries/' + BOOST_VERSION +'/'
+
     boost_lib_version = BOOST_VERSION[:BOOST_VERSION.rfind('.')].replace('.', '_')
         
     print "Installing Boost libraries"
 
     for lib in BOOST_LIBS:
-        download_and_extract(boost_url, 'boost_%s-vc90-mt-%s.zip' % (lib, boost_lib_version), 'ext/lib')
-        download_and_extract(boost_url, 'boost_%s-vc90-mt-gd-%s.zip' % (lib, boost_lib_version), 'ext/lib')
+        download_and_extract(BOOST_URL, 'boost_%s-vc90-mt-%s.zip' % (lib, boost_lib_version), 'ext/lib')
+        download_and_extract(BOOST_URL, 'boost_%s-vc90-mt-gd-%s.zip' % (lib, boost_lib_version), 'ext/lib')
         
-    download_and_extract(boost_url, 'boost_%s_headers.zip' % boost_lib_version, 'ext/include')
+    download_and_extract(BOOST_URL, 'boost_%s_headers.zip' % boost_lib_version, 'ext/include')
     
 def install_osg():
     if os.path.exists('ext/include/osg'):
