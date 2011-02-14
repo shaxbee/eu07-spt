@@ -90,14 +90,11 @@ def install_osg():
         print "OSG already installed"
         return
         
-    osg_folder = 'OpenSceneGraph-' + OSG_VERSION if OSG_VERSION.count('.') == 1 else OSG_VERSION[:OSG_VERSION.rfind('.')]
-    osg_url = 'http://www.openscenegraph.org/downloads/stable_releases/OpenSceneGraph-' + osg_folder + '/binaries/Windows/VisualStudio9/'
-    
     print "Installing OSG libraries"
     
     for lib in ['libopenscenegraph',  'libopenscenegraph-dev', 'libopenthreads', 'libopenthreads-dev']:
         for dist in ['Debug', 'Release']:
-            download_and_extract(osg_url, '%s-%s-win32-x86-vc90sp1-%s.tar.gz' % (lib, OSG_VERSION, dist), tempdir)
+            download_and_extract(OSG_URL, '%s-%s-win32-x86-vc90-%s.zip' % (lib, OSG_VERSION, dist), tempdir)
 
     # cleanup after extract
     print "Moving OSG files"
