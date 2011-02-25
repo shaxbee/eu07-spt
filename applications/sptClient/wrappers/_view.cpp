@@ -31,9 +31,9 @@ BOOST_PYTHON_MODULE(_view)
 
     class_<VehicleView, boost::noncopyable>("VehicleView", no_init)
         .def("addComponent", &VehicleView::addComponent)
-        .def("getComponent", &VehicleView::getComponent)
+        .def("getComponent", &VehicleView::getComponent, return_value_policy<reference_existing_object>())
         .def("hasComponent", &VehicleView::hasComponent)
-        .def("getModel", &VehicleView::getModel)
+        .def("getModel", &VehicleView::getModel, return_value_policy<reference_existing_object>())
         .def("getUpdateLevel", &VehicleView::getUpdateLevel)
         .def("setUpdateLevel", &VehicleView::setUpdateLevel);
     

@@ -10,6 +10,8 @@ set(CMAKE_RELEASE_POSTFIX "" CACHE STRING "add a postfix, usually empty on windo
 set(CMAKE_RELWITHDEBINFO_POSTFIX "rd" CACHE STRING "add a postfix, usually empty on windows")
 set(CMAKE_MINSIZEREL_POSTFIX "s" CACHE STRING "add a postfix, usually empty on windows")
 
+enable_testing()
+
 include(build/SptUtils.cmake)
 include(build/PythonUtils.cmake)
 
