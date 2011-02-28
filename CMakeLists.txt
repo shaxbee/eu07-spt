@@ -18,7 +18,7 @@ include_directories(include)
 IF(WIN32)
     include_directories(SYSTEM ${SPT_DEP_DIR}/include)
     link_directories(${SPT_DEP_DIR}/lib)
-    set(BOOST_ROOT, ${SPT_DEP_DIR})
+    set(BOOST_ROOT ${SPT_DEP_DIR})
     
     set(CMAKE_PREFIX_PATH ${SPT_DEP_DIR})
     
@@ -27,7 +27,8 @@ IF(WIN32)
 ENDIF(WIN32)
 
 find_package(Boost 1.40.0 REQUIRED)
-find_package(OpenSceneGraph 2.8.0 REQUIRED osgDB osgUtil osgViewer)
+find_package(OpenSceneGraph 2.8.3 REQUIRED osgDB osgUtil osgViewer)
+find_package(PythonLibs 2.7 REQUIRED)
 
 add_subdirectory(src)
 add_subdirectory(wrappers)
