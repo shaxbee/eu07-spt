@@ -13,7 +13,11 @@ struct VehicleUpdateCallbackWrapper: VehicleUpdateCallback, wrapper<VehicleUpdat
     VehicleUpdateCallbackWrapper(const VehicleUpdateCallback& source): VehicleUpdateCallback(source) { };
 
     virtual ~VehicleUpdateCallbackWrapper() { };
-    virtual float update(float time, VehicleState& state) { return extract<const float&>(get_override("update")(time, state)); }
+    virtual float update(float time, VehicleState& state) 
+    { 
+        object result = get_override("update")(time, state);
+        return extract<float>(result); 
+    }
 };
 
 struct VehicleTraitsWrapper: VehicleTraits, wrapper<VehicleTraits>

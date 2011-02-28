@@ -16,9 +16,9 @@ struct RailTrackingWrapper: RailTracking, wrapper<RailTracking>
 {
     RailTrackingWrapper(Sector& sector): RailTracking(sector) { }
 
-    virtual const osg::Vec3& getExit(const osg::Vec3& entry) const { return extract<osg::Vec3&>(get_override("getExit")(entry)); }
-    virtual const Path& getPath(const osg::Vec3& entry) const { return extract<const Path&>(get_override("getPath")(entry)); };
-    virtual const Path& reversePath(const Path& path) const { return extract<const Path&>(get_override("reversePath")(path)); };
+    virtual const osg::Vec3& getExit(const osg::Vec3& entry) const { return get_override("getExit")(entry); }
+    virtual const Path& getPath(const osg::Vec3& entry) const { return get_override("getPath")(entry); };
+    virtual const Path& reversePath(const Path& path) const { return get_override("reversePath")(path); };
 };
 
 class SwitchableTrackingWrapper: public SwitchableTracking, public wrapper<SwitchableTracking>
@@ -26,16 +26,16 @@ class SwitchableTrackingWrapper: public SwitchableTracking, public wrapper<Switc
 public:
     SwitchableTrackingWrapper(Sector& sector): SwitchableTracking(sector) { };
 
-    virtual const osg::Vec3& getExit(const osg::Vec3& entry) const { return extract<osg::Vec3&>(get_override("getExit")(entry)); };
-    virtual const Path& getPath(const osg::Vec3& entry) const { return extract<const Path&>(get_override("getPath")(entry)); };    
-    virtual const Path& reversePath(const Path& path) const { return extract<const Path&>(get_override("reversePath")(path)); };
+    virtual const osg::Vec3& getExit(const osg::Vec3& entry) const { return get_override("getExit")(entry); };
+    virtual const Path& getPath(const osg::Vec3& entry) const { return get_override("getPath")(entry); };    
+    virtual const Path& reversePath(const Path& path) const { return get_override("reversePath")(path); };
 
     virtual const ValidPositions& getValidPositions() const 
     { 
         if(_initialized)
             return _positions;
 
-        list result = extract<list>(get_override("getValidPositions")());
+        list result = get_override("getValidPositions")();
 
         stl_input_iterator<std::string> begin(result), end;
         _positions.assign(begin, end);

@@ -76,7 +76,8 @@ void ExternalsManager::removeExternals(Scenery& scenery, const Sector& sector)
     };
 };
 
-Scenery::Scenery()
+Scenery::Scenery():
+    _externals(new ExternalsManager())
 {
 };
 
