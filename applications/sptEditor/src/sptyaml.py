@@ -19,17 +19,17 @@ def __represent(dumper, data, name, attrs):
         name,
         dict((attr, getattr(data, attr)) for attr in atrrs))
             
-__Track_attrs = ["p1", "v1", "v2", "p2"]
-__Switch_attrs = ["pc", "p1", "p2", "vc1", "vc3", "v1", "v2"]
+Track_attrs = ["p1", "v1", "v2", "p2"]
+Switch_attrs = ["pc", "p1", "p2", "vc1", "vc2", "v1", "v2"]
 
-__Track_r_attrs = __Track_attrs + "name"
-__Switch_r_attrs = __Switch_attrs + "name"
+Track_r_attrs = Track_attrs + ["name"]
+Switch_r_attrs = Switch_attrs + ["name"]
 
 def represent_Track(dumper, data):
-    return __represent(dumper, data, "Track", __Track_r_attrs)
+    return __represent(dumper, data, "Track", Track_r_attrs)
 
 def represent_Switch(dumper, data):
-    return __represent(dumper, data, "Switch", __Switch_r_attrs)
+    return __represent(dumper, data, "Switch", Switch_r_attrs)
 
 def represent_RailContainer(dumper, data):
     return __represent(dumper, data, "RailContainer", ["name", "children"])
@@ -58,9 +58,9 @@ class SptLoader(yaml.Loader):
         self.__stack = []
         
         classes = ["Vec3", "Track", "Switch", "RailContainer", "AxleCounter", "Scenery"]
-        
+
         for name in classes:
-            self.add_constructor(name, getattr(self, "contruct_" + name))
+            self.add_constructor(name, getattr(self, "construct_" + name))
         
     def construct_Vec3(self, loader, node):
         (x, y, z) = loader.construct_sequence(node)
@@ -78,15 +78,17 @@ class SptLoader(yaml.Loader):
             
         if len(self.__stack) > 0:
             self.__stack[-1].insert(result)
+
+        print repr(map)
             
         return result
 
     def construct_Track(self, loader, node):
-        return self.__construct_RailTracking(loader, node, Track, __Track_attrs)
+        return self.__construct_RailTracking(loader, node, model.tracks.Track, Track_attrs)
 
     def construct_Switch(self, loader, node):
-        attrs = ["pc", "p1", "p2", "vc1", "vc3", "v1", "v2"]
-        return self.__construct_RailTracking(loader, node, Switch, __Switch_attrs)
+        attrs = ["pc", "p1", "p2", "vc1", "vc2", "v1", "v2"]
+        return self.__construct_RailTracking(loader, node, model.tracks.Switch, Switch_attrs)
 
     def construct_RailContainer(self, loader, node):
         c = model.groups.RailContainer()

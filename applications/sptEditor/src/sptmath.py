@@ -7,6 +7,15 @@ Module containing dedicated math operations.
 from _sptmath import *
 from wx import Point
 
+orig_length = Vec3.length
+def new_length(self):
+    res = orig_length(self)
+    print repr(self)
+    print "length=" + repr(res)
+    return res
+
+Vec3.length = new_length
+
 def isNegativeVector(a, b):
     """
     Checks if a spin of vector a is negative to spin of vector b.

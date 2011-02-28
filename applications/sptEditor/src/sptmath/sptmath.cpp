@@ -121,17 +121,25 @@ BOOST_PYTHON_MODULE(_sptmath)
     // show user-defined docstrings and python signatures
     docstring_options doc_options(true, true, false);
 
+    Decimal (Decimal::*sub_operator_ptr)(const Decimal&) const = &Decimal::operator-;
+    Decimal (Decimal::*neg_operator_ptr)() const = &Decimal::operator-;
+
 	class_<Decimal>("Decimal", init<std::string>())
+        .def("__float__", &Decimal::operator float)
 		.def("__add__",  &Decimal::operator+)
-		.def("__sub__",  &Decimal::operator-)
+		.def("__sub__",  sub_operator_ptr)
 		.def("__mul__",  &Decimal::operator*)
 		.def("__div__",  &Decimal::operator/)
 		.def("__eq__",   &Decimal::operator==)
+        .def("__neg__", neg_operator_ptr) 
 
 		.def("__repr__", &Decimal::__repr__)
 		.def("__str__",  &Decimal::__str__);
 
-    class_<Vec3>("Vec3", doc_Vec3, init<const std::string&, const std::string&, const std::string&>(args("x", "y", "z")))
+    class_<Vec3>("Vec3", doc_Vec3, init<>())
+        .def(init<const std::string&, const std::string&, const std::string&>(args("x", "y", "z")))
+        .def(init<const Decimal&, const Decimal&, const Decimal&>(args("x", "y", "z")))
+        .def(init<const Vec3&>(arg("other")))
         .add_property("x",   &Vec3::getX, &Vec3::setX)
         .add_property("y",   &Vec3::getY, &Vec3::setY)
         .add_property("z",   &Vec3::getZ, &Vec3::setZ)

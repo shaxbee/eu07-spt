@@ -7,7 +7,10 @@
 class Vec3
 {
 public:
+    Vec3() { };
+    Vec3(const Vec3& other): _x(other.getX()), _y(other.getY()), _z(other.getZ()) { };
     Vec3(const std::string& x, const std::string& y, const std::string& z): _x(x), _y(y), _z(z) { };
+    Vec3(const Decimal& x, const Decimal& y, const Decimal& z): _x(x), _y(y), _z(z) { };
 	
 	Vec3 operator+(const Vec3& other) const
 	{
@@ -65,8 +68,6 @@ private:
 	Decimal _x;
 	Decimal _y;
 	Decimal _z;
-
-    explicit Vec3(Decimal x, Decimal y, Decimal z): _x(x), _y(y), _z(z) { };
 }; // class Vec3
 
 #endif // header guard

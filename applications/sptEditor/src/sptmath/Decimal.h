@@ -7,6 +7,7 @@
 class Decimal
 {
 public:
+    Decimal(): _value(0) { };
 	Decimal(const Decimal& other): _value(other._value) { };
 	explicit Decimal(const std::string& value);
     explicit Decimal(float value)
@@ -24,6 +25,11 @@ public:
 	{
 		return Decimal(_value - other._value);
 	};
+
+    Decimal operator-() const
+    {
+        return Decimal(-_value);
+    };
 
 	Decimal& operator+=(const Decimal& other)
 	{
