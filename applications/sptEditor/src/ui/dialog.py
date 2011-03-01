@@ -60,7 +60,7 @@ class CenterAtDialog(wx.Dialog):
             editor = self.GetParent().editor
             editor.parts[0].SetScale(pScale)
             (vx, vy) = editor.parts[0].ModelToView(Vec3(px, py, pz))
-            editor.parts[0].CenterViewAt(vx, vy)
+            editor.parts[0].CenterViewAt((vx, vy))
 
             self.Destroy()
         except ValueError: 
