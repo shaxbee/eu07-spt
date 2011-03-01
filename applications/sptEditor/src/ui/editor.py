@@ -7,7 +7,7 @@ Module containing main UI classes of scenery editor control.
 import math
 import datetime
 import logging
-from decimal import Decimal
+from sptmath import Decimal
 
 import wx
 from wx.lib.evtmgr import eventManager
@@ -418,7 +418,7 @@ class PlanePart(wx.ScrolledWindow):
         """
         p3d = Vec3(Decimal(str((point[0]-100)/self.scale + self.minX)), \
             Decimal(str(-((point[1]-100)/self.scale - self.maxY))), \
-            Decimal(0))
+            Decimal())
         return p3d
 
 

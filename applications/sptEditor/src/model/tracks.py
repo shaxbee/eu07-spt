@@ -241,14 +241,14 @@ class Track(RailTracking):
         Gets a normal vector for given point
         """
         if point == self.p1:
-            if self.v1.x == 0 and self.v1.y == 0 and self.v1.z == 0:
+            if not self.v1.x and not self.v1.y and not self.v1.z:
                 return Vec3(self.p1.x - self.p2.x, \
                         self.p1.y - self.p2.y, \
                         self.p1.z - self.p2.z)
             else:
                 return Vec3(-self.v1.x, -self.v1.y, -self.v1.z)
         elif point == self.p2:
-            if self.v2.x == 0 and self.v2.y == 0 and self.v2.z == 0:
+            if not self.v2.x and not self.v2.y and not self.v2.z:
                 return Vec3(self.p2.x - self.p1.x, \
                         self.p2.y - self.p1.y, \
                         self.p2.z - self.p1.z)

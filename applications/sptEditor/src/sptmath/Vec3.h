@@ -17,6 +17,11 @@ public:
 		return Vec3(_x + other._x, _y + other._y, _z + other._z);
 	};
 
+    Vec3 operator-() const
+    {
+        return Vec3(-_x, -_y, -_z);
+    };
+
 	Vec3 operator-(const Vec3& other) const
 	{
 		return Vec3(_x - other._x, _y - other._y, _z - other._z);
@@ -51,7 +56,7 @@ public:
 
 	float length() const
 	{
-		return std::sqrt(_x * _x + _y * _y + _z * _z);
+		return std::sqrt(float(_x * _x + _y * _y + _z * _z));
 	};
     
     float dotProduct(const Vec3& other) const

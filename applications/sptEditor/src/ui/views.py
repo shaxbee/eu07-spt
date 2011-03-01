@@ -7,7 +7,7 @@ Module containing views of scenery elements.
 import math
 import os.path
 import wx
-from decimal import Decimal
+from sptmath import Decimal
 
 import model.tracks
 import ui.editor

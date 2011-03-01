@@ -5,7 +5,6 @@ It maps tags of YAML documents to Python classes
 @author adammo
 '''
 
-import decimal
 import yaml
 
 import model.tracks
@@ -67,20 +66,18 @@ class SptLoader(yaml.Loader):
         return sptmath.Vec3(str(x), str(y), str(z))
         
     def __construct_RailTracking(self, loader, node, cls, attrs):
-        map = loader.construct_mapping(node, deep=False)
+        data = loader.construct_mapping(node, deep=False)
         result = cls()
         
         for attr in attrs:
-            setattr(result, attr, map[attr])
+            setattr(result, attr, data[attr])
             
-        if "name" in map:
-            result.name = map["name"]
+        if "name" in data:
+            result.name = data["name"]
             
         if len(self.__stack) > 0:
             self.__stack[-1].insert(result)
 
-        print repr(map)
-            
         return result
 
     def construct_Track(self, loader, node):

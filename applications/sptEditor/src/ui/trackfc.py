@@ -7,9 +7,8 @@ on tracks within editor.
 
 from math import sin, cos, atan, radians, pi, degrees
 import copy
-import decimal
 
-from sptmath import Vec3
+from sptmath import Vec3, Decimal
 from model.tracks import Track
 
 
@@ -56,18 +55,18 @@ class TrackFactory:
         v1 = Vec3()
         v2 = Vec3()
 
-        p1.x = decimal.Decimal(str(-radius * cos_a))
-        p1.y = decimal.Decimal(str(radius * sin_a))
-        p2.x = decimal.Decimal(str(-radius * cos_a))
-        p2.y = decimal.Decimal(str(-radius * sin_a))
+        p1.x = Decimal(-radius * cos_a)
+        p1.y = Decimal(radius * sin_a)
+        p2.x = Decimal(-radius * cos_a)
+        p2.y = Decimal(-radius * sin_a)
 
         ctrlX = -radius * (4.0 - cos_a) / 3.0
         ctrlY = -radius * (1.0 - cos_a) * (cos_a - 3.0) / (3.0 * sin_a)
 
-        v1.x = decimal.Decimal(str(ctrlX)) - p1.x
-        v1.y = decimal.Decimal(str(ctrlY)) - p1.y
-        v2.x = decimal.Decimal(str(ctrlX)) - p2.x
-        v2.y = decimal.Decimal(str(-ctrlY)) - p2.y
+        v1.x = Decimal(ctrlX) - p1.x
+        v1.y = Decimal(ctrlY) - p1.y
+        v2.x = Decimal(ctrlX) - p2.x
+        v2.y = Decimal(-ctrlY) - p2.y
 
         # Left or right
         tr = LeftTrackTransform(length, radius) if isLeft \
@@ -218,7 +217,7 @@ class RightTrackTransform(AbstractTransform):
 
         for p in points:
             transformVec3(matrix, p)
-            p.x = p.x + decimal.Decimal(str(self.radius))
+            p.x = p.x + Decimal(self.radius)
         for v in vectors:
             transformVec3(matrix, v)
 
@@ -254,7 +253,7 @@ class LeftTrackTransform(AbstractTransform):
 
         for p in points:
             transformVec3(matrix, p)
-            p.x = p.x + decimal.Decimal(str(-self.radius))
+            p.x = p.x + Decimal(-self.radius)
         for v in vectors:
             transformVec3(matrix, v)
 
@@ -302,9 +301,9 @@ def transformVec3(m, vec3):
     """
     x, y, z = float(vec3.x), float(vec3.y), float(vec3.z)
 
-    vec3.x = decimal.Decimal(str(m[0][0] * x + m[0][1] * y + m[0][2] * z))
-    vec3.y = decimal.Decimal(str(m[1][0] * x + m[1][1] * y + m[1][2] * z))
-    vec3.z = decimal.Decimal(str(m[2][0] * x + m[2][1] * y + m[2][2] * z))
+    vec3.x = Decimal(m[0][0] * x + m[0][1] * y + m[0][2] * z)
+    vec3.y = Decimal(m[1][0] * x + m[1][1] * y + m[1][2] * z)
+    vec3.z = Decimal(m[2][0] * x + m[2][1] * y + m[2][2] * z)
 
 
 def transformVec3_4(m, vec3):
@@ -313,7 +312,7 @@ def transformVec3_4(m, vec3):
     """
     x, y, z = float(vec3.x), float(vec3.y), float(vec3.z)
 
-    vec3.x = decimal.Decimal(str(m[0][0] * x + m[0][1] * y + m[0][2] * z + m[0][3]))
-    vec3.y = decimal.Decimal(str(m[1][0] * x + m[1][1] * y + m[1][2] * z + m[1][3]))
-    vec3.z = decimal.Decimal(str(m[2][0] * x + m[2][1] * y + m[2][2] * z + m[2][3]))
+    vec3.x = Decimal(m[0][0] * x + m[0][1] * y + m[0][2] * z + m[0][3])
+    vec3.y = Decimal(m[1][0] * x + m[1][1] * y + m[1][2] * z + m[1][3])
+    vec3.z = Decimal(m[2][0] * x + m[2][1] * y + m[2][2] * z + m[2][3])
     

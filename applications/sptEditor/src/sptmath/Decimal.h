@@ -52,6 +52,11 @@ public:
 		return _value == other._value;
 	};
 
+    operator bool() const
+    {
+        return _value != 0;
+    };
+
     Decimal& operator*=(const Decimal& other)
     {
         _value *= other._value;
@@ -70,6 +75,8 @@ public:
 	{
 		return float(_value / 1000) + (float(_value % 1000) / 1000);
 	};
+
+    boost::int64_t raw() const { return _value; }
 
 	std::string __repr__() const;
     std::string __str__() const;

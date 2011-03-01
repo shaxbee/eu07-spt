@@ -8,7 +8,7 @@ import math
 import wx
 import wx.xrc
 import yaml
-from decimal import Decimal
+from sptmath import Decimal
 import os.path
 
 from model.tracks import Track, Switch
@@ -52,9 +52,9 @@ class CenterAtDialog(wx.Dialog):
         Sets the scroll to the editor part.
         """       
         try: 
-            px = Decimal(self.x.GetValue())
-            py = Decimal(self.y.GetValue())
-            pz = Decimal(self.z.GetValue())
+            px = Decimal(str(self.x.GetValue()))
+            py = Decimal(str(self.y.GetValue()))
+            pz = Decimal(str(self.z.GetValue()))
             pScale = float(self.zoom.GetValue())
 
             editor = self.GetParent().editor
