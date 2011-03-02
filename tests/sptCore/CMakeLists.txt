@@ -17,6 +17,6 @@ link_internal(${TEST_NAME} osg OpenThreads)
 target_link_libraries(${TEST_NAME} ${GTEST_BOTH_LIBRARIES} sptCore)
 
 copy_dep(ot11 OpenThreads)
-copy_dep(osg55 osg)
+copy_dep(osg65 osg)
 
 gtest_add_tests(${TEST_NAME} "" ${TEST_SRC})
