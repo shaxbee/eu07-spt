@@ -112,6 +112,13 @@ float dotProduct(const Vec3& left, const Vec3& right)
     return left.dotProduct(right);
 };
 
+const char* doc_Decimal = \
+"Fixed precision number.\n"
+"\n"
+"Examples:\n"
+">>> Decimal('1') + Decimal('0.01')\n"
+"Decimal('1.010')";
+
 struct DecimalPickle: boost::python::pickle_suite
 {
     static boost::python::tuple getinitargs(const Decimal& value)
@@ -135,12 +142,12 @@ BOOST_PYTHON_MODULE(_sptmath)
 	using namespace boost::python;
 
     // show user-defined docstrings and python signatures
-    docstring_options doc_options(true, true, false);
+    docstring_options doc_options(true, false, false);
 
     Decimal (Decimal::*decimal_sub_operator_ptr)(const Decimal&) const = &Decimal::operator-;
     Decimal (Decimal::*decimal_neg_operator_ptr)() const = &Decimal::operator-;
 
-	class_<Decimal>("Decimal", init<std::string>())
+	class_<Decimal>("Decimal", doc_Decimal, init<std::string>())
         .def(init<>())
         .def(init<float>())
 

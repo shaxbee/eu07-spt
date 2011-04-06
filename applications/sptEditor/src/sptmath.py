@@ -4,8 +4,8 @@ Module containing dedicated math operations.
 @author adammo
 '''
 
-from _sptmath import *
 from wx import Point
+from _sptmath import dotProduct, Vec3, Decimal
 
 def isNegativeVector(a, b):
     """
@@ -133,6 +133,7 @@ def sqDistanceTo(line, point):
     if lenSq < 0.0:
         lenSq = 0.0
     return lenSq
-    
-
-
+  
+for sym in [Vec3, Decimal]:
+    sym.__module__ = 'sptmath' 
+    sym.__file__ = 'sptmath.cpp'
