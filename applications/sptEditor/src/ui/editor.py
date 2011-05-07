@@ -235,9 +235,9 @@ class PlanePart(wx.ScrolledWindow):
             if wx > 2*BASE_POINT_MARGIN and wy > 2*BASE_POINT_MARGIN:
                 if p.x < vx*ux + BASE_POINT_MARGIN or p.x > vx*ux + wx - BASE_POINT_MARGIN \
                         or p.y < vy*uy + BASE_POINT_MARGIN or p.y > vy*uy + wy - BASE_POINT_MARGIN:
-                    self.CenterViewAt(p.x, p.y)
+                    self.CenterViewAt((p.x, p.y))
             else:
-                self.CenterViewAt(p.x, p.y)
+                self.CenterViewAt((p.x, p.y))
 
 
     def SetMode(self, mode, updateMenu = False):
