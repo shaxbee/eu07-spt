@@ -2,8 +2,8 @@
 
 # If you have nosetests installed, please specify the path to it
 # default path:
-#NOSETESTS_PATH=/usr/bin/nosetests
 NOSETESTS_PATH=/usr/local/bin/nosetests
+PYTHON=/usr/bin/python2.7
 
 if [[ -x $NOSETESTS_PATH ]]; then
   $NOSETESTS_PATH -v --with-doctest --doctest-extension=txt test/*.py src/sptmath.py src/sptmath.txt
@@ -13,14 +13,14 @@ else
 
   pushd "test"
 
-  python t_groups.py
-  python t_switches.py
-  python t_tracks.py
-  python t_scenery.py
+  $PYTHON t_groups.py
+  $PYTHON t_switches.py
+  $PYTHON t_tracks.py
+  $PYTHON t_scenery.py
 
   popd
 
-  python -m doctest -v sptmath.py
-  python -m doctest -v sptmath.txt
+  $PYTHON -m doctest -v sptmath.py
+  $PYTHON -m doctest -v sptmath.txt
 fi
 
