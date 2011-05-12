@@ -123,7 +123,7 @@ struct DecimalPickle: boost::python::pickle_suite
 {
     static boost::python::tuple getinitargs(const Decimal& value)
     {
-        return boost::python::make_tuple(value.raw());
+        return boost::python::make_tuple(value.__str__());
     };
 };
 

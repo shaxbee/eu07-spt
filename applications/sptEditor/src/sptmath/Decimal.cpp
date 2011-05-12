@@ -18,8 +18,7 @@ Decimal::Decimal(const string& value, uint8_t precision)
 	try
 	{
         _base = pow(10, precision);
-		// convert decimal part
-		int64_t decimal = lexical_cast<int64_t>(value.substr(0, separator));
+		int64_t decimal = abs(lexical_cast<int64_t>(value.substr(0, separator)));
 
 		// extract fractional part if present
         if(separator != string::npos)

@@ -5,6 +5,18 @@ First import necessary classes
 
 >>> from sptmath import Vec3, Decimal
 
+Create Vec3:
+    >>> Decimal('-4.434')
+    Decimal('-4.434')
+    >>> Vec3('3.343', '-4.434', '6.454')
+    (3.343,-4.434,6.454)
+
+Copy it:
+    >>> import copy
+    >>> vec = Vec3('1.0', '-1.0', '0.0')
+    >>> vec == copy.deepcopy(vec)
+    True
+
 Test Vec3 core operations: 
 
     >>> Vec3('0.001', '-0.001', '0.000')
