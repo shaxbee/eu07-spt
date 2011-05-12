@@ -2,27 +2,30 @@
 
 #define _USE_MATH_DEFINES // we need M_PI 
 #include <math.h>
+#include <iostream>
 
 #include <boost/format.hpp>
 
 using namespace std;
 using namespace boost;
 
-void Vec3::normalize()
+Vec3 Vec3::normalize()
 {
-	float len = length();
-	_x /= Decimal(len);
-	_y /= Decimal(len);
-	_z /= Decimal(len);
+	double len = length();
+    double x(_x);
+    double y(_y);
+    double z(_z);
+
+	return Vec3(Decimal(x / len), Decimal(y / len), Decimal(z / len));
 };
 
 float Vec3::angleToJUnit() const
 {
-	float div = float(_y) / length();
-	float theta = div <= -1.0 ? float(M_PI) : acos(div);
+	double div = double(_y) / length();
+	double theta = div <= -1.0 ? double(M_PI) : acos(div);
 
-	if(float(_x) < -0.0)
-		return 2 * float(M_PI) - theta;
+	if(double(_x) < -0.0)
+		return 2 * double(M_PI) - theta;
 
 	return theta;
 };

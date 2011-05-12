@@ -11,68 +11,74 @@ public:
     Vec3(const Vec3& other): _x(other.getX()), _y(other.getY()), _z(other.getZ()) { };
     Vec3(const std::string& x, const std::string& y, const std::string& z): _x(x), _y(y), _z(z) { };
     Vec3(const Decimal& x, const Decimal& y, const Decimal& z): _x(x), _y(y), _z(z) { };
-	
-	Vec3 operator+(const Vec3& other) const
-	{
-		return Vec3(_x + other._x, _y + other._y, _z + other._z);
-	};
+    
+    Vec3 operator+(const Vec3& other) const
+    {
+        return Vec3(_x + other._x, _y + other._y, _z + other._z);
+    };
 
     Vec3 operator-() const
     {
         return Vec3(-_x, -_y, -_z);
     };
 
-	Vec3 operator-(const Vec3& other) const
-	{
-		return Vec3(_x - other._x, _y - other._y, _z - other._z);
-	};
+    Vec3 operator-(const Vec3& other) const
+    {
+        return Vec3(_x - other._x, _y - other._y, _z - other._z);
+    };
 
     bool operator==(const Vec3& other) const
     {
         return (_x == other._x) && (_y == other._y) && (_z == other._z);
     };
 
-	void moveBy(const Vec3& other)
-	{
-		_x += other._x;
-		_y += other._y;
-		_z += other._z;
-	};
-
-	void scale(const Vec3& other)
-	{
-		_x *= other._x;
-		_y *= other._y;
-		_z *= other._z;
-	};
-
-	Decimal getX() const { return _x; }
-	Decimal getY() const { return _y; }
-	Decimal getZ() const { return _z; }
-
-	void setX(const Decimal& x) { _x = x; }
-	void setY(const Decimal& y) { _y = y; }
-	void setZ(const Decimal& z) { _z = z; }
-
-	float length() const
-	{
-		return std::sqrt(float(_x * _x + _y * _y + _z * _z));
-	};
-    
-    float dotProduct(const Vec3& other) const
+    void moveBy(const Vec3& other)
     {
-        return float(_x * other._x + _y * other._y + _z * other._z);
+        _x += other._x;
+        _y += other._y;
+        _z += other._z;
     };
 
-	void normalize();
-	float angleToJUnit() const;
+    Vec3 scale(double value)
+    {
+        return scale_dec(Decimal(value));
+    };
 
-	std::string __repr__() const;
+    Decimal getX() const { return _x; }
+    Decimal getY() const { return _y; }
+    Decimal getZ() const { return _z; }
+
+    void setX(const Decimal& x) { _x = x; }
+    void setY(const Decimal& y) { _y = y; }
+    void setZ(const Decimal& z) { _z = z; }
+
+    double length() const
+    {
+        double x(_x);
+        double y(_y);
+        double z(_z);
+        return std::sqrt((x * x + y * y + z * z));
+    };
+    
+    double dotProduct(const Vec3& other) const
+    {
+        return double(_x * other._x + _y * other._y + _z * other._z);
+    };
+
+    Vec3 normalize();
+    float angleToJUnit() const;
+
+    std::string __repr__() const;
 
 private:
-	Decimal _x;
-	Decimal _y;
-	Decimal _z;
+    Vec3 scale_dec(const Decimal& value)
+    {
+        return Vec3(_x * value, _y * value, _z * value);
+    };
+
+    Decimal _x;
+    Decimal _y;
+    Decimal _z;
 }; // class Vec3
 
 #endif // header guard
