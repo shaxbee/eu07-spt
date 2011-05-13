@@ -323,7 +323,7 @@ class RailContainerTest(unittest.TestCase):
         self.assertTrue(Vec3("0", "0", "0") in outline)
         self.assertTrue(Vec3("0", "33.23", "0") in outline)    
         self.assertTrue(Vec3("-3.662", "32.989", "0") in outline)
-        self.assertTrue(Vec3("-3.673", "62.125") in outline)
+        self.assertTrue(Vec3("-3.673", "62.125", "0") in outline)
     
         group.insert(r3)
         outline = group.connections.keys()

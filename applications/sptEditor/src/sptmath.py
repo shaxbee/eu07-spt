@@ -10,6 +10,10 @@ try:
 	from _sptmath import dotProduct, Vec3, Decimal
 except ImportError:
 	from _sptmathd import dotProduct, Vec3, Decimal
+	
+	
+VEC3_ZERO = Vec3("0", "0", "0")
+
 
 def isNegativeVector(a, b):
     """
