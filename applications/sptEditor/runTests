@@ -6,7 +6,7 @@ NOSETESTS_PATH=/usr/local/bin/nosetests
 PYTHON=/usr/bin/python2.7
 
 if [[ -x $NOSETESTS_PATH ]]; then
-  $NOSETESTS_PATH -v --with-doctest --doctest-extension=txt test/*.py src/sptmath.py src/sptmath.txt
+  $NOSETESTS_PATH -v --with-doctest --doctest-extension=rst --with-xunit test/*.py src/sptmath.py doc/*.rst
 else
   PYTHONPATH=".:"`pwd`"/src/"
   export PYTHONPATH
