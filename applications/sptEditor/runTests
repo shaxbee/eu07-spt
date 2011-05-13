@@ -22,6 +22,6 @@ else
   popd
 
   $PYTHON -m doctest -v sptmath.py
-  $PYTHON -m doctest -v sptmath.txt
+  $PYTHON -m doctest -v doc/sptmath.rst
 fi
 
