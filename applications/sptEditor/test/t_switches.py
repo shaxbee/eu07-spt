@@ -4,8 +4,7 @@ Unit test for rail switches.
 
 import unittest
 
-from sptmath import Vec3
-from decimal import Decimal
+from sptmath import Vec3, Decimal
 
 from model.tracks import *
 
