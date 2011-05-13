@@ -4,6 +4,8 @@ Module containing dedicated math operations.
 @author adammo
 '''
 
+__doc__ = open("sptmath.txt").read();
+
 from wx import Point
 
 try:
