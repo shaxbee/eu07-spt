@@ -16,7 +16,7 @@ import model.vd.axleCounter
 def __represent(dumper, data, name, attrs):
     return dumper.represent_mapping(
         name,
-        dict((attr, getattr(data, attr)) for attr in atrrs))
+        dict((attr, getattr(data, attr)) for attr in attrs))
             
 Track_attrs = ["p1", "v1", "v2", "p2"]
 Switch_attrs = ["pc", "p1", "p2", "vc1", "vc2", "v1", "v2"]
