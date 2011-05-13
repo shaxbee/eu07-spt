@@ -2,8 +2,9 @@
 
 # If you have nosetests installed, please specify the path to it
 # default path:
-NOSETESTS_PATH=/usr/local/bin/nosetests
+NOSETESTS_PATH=/usr/bin/nosetests
 PYTHON=/usr/bin/python2.7
+PYTHONPATH=${PYTHONPATH}:src/
 
 if [[ -x $NOSETESTS_PATH ]]; then
   $NOSETESTS_PATH -v --with-doctest --doctest-extension=rst --with-xunit test/*.py src/sptmath.py doc/*.rst
