@@ -209,6 +209,14 @@ class Cuboid:
 
     def unionPoint(self, x, y, z):
         return self.union(Cuboid((x, y, z), (x, y, z)))
+    
+    
+    def min(self):
+        return (self.minX, self.minY, self.minZ)
+    
+    
+    def max(self):
+        return (self.maxX, self.maxY, self.maxZ)
         
 
     @classmethod
@@ -894,5 +902,9 @@ class RTree:
 
     def getRoot(self):
         return self.__root
+    
+    
+    def getMbc(self):
+        return self.__root.mbc()
 
 

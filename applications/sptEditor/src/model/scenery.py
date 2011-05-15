@@ -37,6 +37,10 @@ class Scenery:
 
     def RailTrackingIterator(self):
         return self.tracks.children
+    
+    
+    def GetMbc(self):
+        return self.tracks.children.getMbc()
 
 
     def RegisterListener(self, listener):

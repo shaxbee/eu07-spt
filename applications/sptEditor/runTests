@@ -2,14 +2,13 @@
 
 # If you have nosetests installed, please specify the path to it
 # default path:
-#NOSETESTS_PATH=/usr/bin/nosetests
-NOSETESTS_PATH=/usr/local/bin/nosetests-2.6
+NOSETESTS_PATH=/usr/bin/nosetests
+PYTHONPATH=".:"`pwd`"/src/"
+export PYTHONPATH
 
 if [[ -x $NOSETESTS_PATH ]]; then
-  $NOSETESTS_PATH -v --with-doctest test/t_groups.py test/t_switches.py test/t_tracks.py test/t_scenery.py test/t_sptial.py src/sptmath.py src/sptial.py
+  $NOSETESTS_PATH -v --with-doctest test/*.py src/
 else
-  PYTHONPATH=".:"`pwd`"/src/"
-  export PYTHONPATH
 
   pushd "test"
 
