@@ -68,6 +68,8 @@ class BinaryWriter(object):
 
     def writeString(self, value):
         self.writeUInt(len(value))
+        if(type(value) is unicode):
+            value = value.encode("ascii")
         self.write(value)
 
     def writeUInt(self, value):

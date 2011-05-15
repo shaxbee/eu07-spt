@@ -3,6 +3,7 @@
 
 #include "Decimal.h"
 #include <cmath>
+#include <boost/python/tuple.hpp>
 
 class Vec3
 {
@@ -69,6 +70,10 @@ public:
     float angleToJUnit() const;
 
     std::string __repr__() const;
+	boost::python::tuple to_tuple() const
+	{
+		return boost::python::make_tuple(_x, _y, _z);
+	};
 
 private:
     Vec3 scale_dec(const Decimal& value)

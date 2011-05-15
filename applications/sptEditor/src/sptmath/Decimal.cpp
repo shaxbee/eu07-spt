@@ -17,14 +17,14 @@ Decimal::Decimal(const string& value, uint8_t precision)
 
 	try
 	{
-        _base = pow(10, precision);
-		int64_t decimal = abs(lexical_cast<int64_t>(value.substr(0, separator)));
+        _base = pow(float(10), precision);
+		int64_t decimal = abs(long(lexical_cast<int64_t>(value.substr(0, separator))));
 
 		// extract fractional part if present
         if(separator != string::npos)
         {
 		    string fract_str = value.substr(separator + 1);
-            float fractional = lexical_cast<float>(fract_str) * pow(10, int(-fract_str.size() + precision));
+            float fractional = lexical_cast<float>(fract_str) * pow(float(10), int(-fract_str.size() + precision));
             _value = decimal * _base + int64_t(floor(fractional+0.5));
         }
         else

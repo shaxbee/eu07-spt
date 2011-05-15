@@ -8,14 +8,14 @@
 class Decimal
 {
 public:
-    static const uint8_t DEFAULT_PRECISION = 3;
+	static const boost::uint8_t DEFAULT_PRECISION = 3;
 
-    Decimal(): _value(0), _base(std::pow(10, DEFAULT_PRECISION)) { };
+    Decimal(): _value(0), _base(std::pow(float(10), DEFAULT_PRECISION)) { };
     Decimal(const Decimal& other): _value(other._value), _base(other._base) { };
     explicit Decimal(const std::string& value, boost::uint8_t precision = DEFAULT_PRECISION);
     explicit Decimal(float value, boost::uint8_t precision = DEFAULT_PRECISION)
     {
-        _base = std::pow(10, precision);
+        _base = std::pow(float(10), precision);
         boost::int64_t integral = boost::int64_t(value);
         _value = integral * _base + boost::int64_t((value - integral) * _base);
     };
@@ -43,7 +43,7 @@ public:
 
     Decimal operator*(const Decimal& other) const
     {
-        int64_t temp = _value * other._value;
+		boost::int64_t temp = _value * other._value;
         if(temp < _base && temp >= (_base / 2))
             temp = _base;
         return Decimal(temp / _base, _base);

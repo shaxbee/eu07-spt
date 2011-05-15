@@ -131,7 +131,7 @@ struct Vec3Pickle: boost::python::pickle_suite
 {
     static boost::python::tuple getinitargs(const Vec3& value)
     {
-        return boost::python::make_tuple(value.getX(), value.getY(), value.getZ());
+        return value.to_tuple();
     };
 }; // Vec3Pickle
 
@@ -186,6 +186,7 @@ BOOST_PYTHON_MODULE(_sptmath)
 
         .def("__repr__",     &Vec3::__repr__)
 
+		.def("to_tuple",     &Vec3::to_tuple)
         .def("moveBy",       &Vec3::moveBy, arg("other"), doc_Vec3_moveBy)
         .def("scale",        &Vec3::scale, arg("s"), doc_Vec3_scale)
         .def("length",       &Vec3::length, "The length of the vector.")
