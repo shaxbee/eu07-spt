@@ -42,6 +42,13 @@ class Vec3(object):
     >>> c = Vec3('0.0004', '-0.0004', '0.000')
     >>> c + c
     (0.000,-0.000,0.000)
+    >>> d = Vec3('-343.454', '343.099', '0.232')
+    >>> str(d[0])
+    '-343.454'
+    >>> str(d[1])
+    '343.099'
+    >>> str(d[2])
+    '0.232'
     """
 
     def __init__(self, x = 0, y = 0, z = 0):
@@ -116,6 +123,9 @@ class Vec3(object):
 
     def to_tuple(self):
         return tuple(self.__values)
+
+    def __getitem__(self, index):
+        return self.__values[index]    
 
     def moveBy(self, v):
         """

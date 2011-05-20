@@ -159,14 +159,11 @@ class PlanePart(wx.ScrolledWindow):
 
         self.bounds = EditorBounds()
 
-        #self.trackCache = []
-        #self.switchCache = []
         self.basePointView = None
 
         self.mode = MODE_NORMAL
         
-        size = self.ComputePreferredSize()
-        self.SetVirtualSize(size)
+        self.Resize()
         self.SetupScrolling()       
         
         
@@ -178,19 +175,18 @@ class PlanePart(wx.ScrolledWindow):
         self.Refresh()
         
         
+    # TODO: refactor
     def SetBasePoint(self, basePoint, follow = False):
         (vx, vy) = self.GetViewStart()
         (ux, uy) = self.GetScrollPixelsPerUnit()
 
-        context = ui.views.DCContext()
-        
-        oldView = self.basePointView
-        self.basePointView = ui.views.BasePointView(basePoint)
-        if oldView != None:
-            oldRect = oldView.GetRepaintBounds(context)
-            oldRect.x -= vx * ux 
-            oldRect.y -= vy * uy 
-            self.RefreshRect(oldRect)
+#        oldView = self.basePointView
+#        self.basePointView = ui.views.BasePointView(basePoint)
+#        if oldView != None:
+#            oldRect = oldView.GetRepaintBounds(context)
+#            oldRect.x -= vx * ux 
+#            oldRect.y -= vy * uy 
+#            self.RefreshRect(oldRect)
         #needed = self.ComputeMinMax(False)
         #if needed:            
         #    size = self.ComputePreferredSize()
@@ -234,6 +230,7 @@ class PlanePart(wx.ScrolledWindow):
             self.highlighter.SetEnabled(False)
 
 
+    # TODO: refactor
     def SetSelection(self, selection):
         (vx, vy) = self.GetViewStart()
         (ux, uy) = self.GetScrollPixelsPerUnit()
@@ -352,12 +349,7 @@ class PlanePart(wx.ScrolledWindow):
         clip = self.GetUpdateRegion().GetBox()
         (clip.x, clip.y) = self.CalcUnscrolledPosition(clip.x, clip.y)
 
-        context = ui.views.DCContext()
-        context.scale = self.bounds.scale
-        context.minX = self.bounds.minX
-        context.maxX = self.bounds.maxX
-        context.minY = self.bounds.minY
-        context.maxY = self.bounds.maxY
+        context = ui.views.DrawContext(dc, self.bounds)
 
         startTime = datetime.datetime.now()
         try:
@@ -447,7 +439,6 @@ class PlanePart(wx.ScrolledWindow):
         Paints foreground
         """
         self.PaintTracks(dc, clip, context)
-        #self.PaintSwitches(dc, clip, context)
         self.PaintSelection(dc, clip, context)
         self.PaintSnapPoint(dc, clip, context)
         self.PaintBasePoint(dc, clip, context)
@@ -466,49 +457,12 @@ class PlanePart(wx.ScrolledWindow):
         p3b = self.ViewToModel((vx*ux + sx, vy*uy + sy))
         
         viewport = sptial.Cuboid.fromEndpoints([p3a, p3b])
-
-        tracks = self.GetParent().scenery.tracks.children.queryView(viewport)
-
-        views = []
-        for t in tracks:
-            if (isinstance(t, model.groups.RailContainer)):
-                st = t.tracks()
-                for stt in st:
-                    views.append( ui.views.CreateView(stt) )
-                st = t.switches()
-                for stt in st:
-                    views.append( ui.views.CreateView(stt) )
-            else:
-                views.append( ui.views.CreateView(t) )
-
-        self.logger.debug("%d trackings to display" % len(views))
-
-        oldPen = dc.GetPen()
-        try:
-            dc.SetPen(wx.Pen((34, 139, 34),
-                3 if self.bounds.scale > 1.0 else 1))
-
-            for v in views:
-                v.Draw(dc, clip, context)
-        finally:
-            dc.SetPen(oldPen)
+        elements = self.GetParent().scenery.tracks.children.queryView(viewport)
+        
+        for t in elements:
+            ui.views.GetViewer(t).Draw(context)
             
             
-    def PaintSwitches(self, dc, clip, context):
-        """
-        Paints rail switches.
-        """
-        oldPen = dc.GetPen()
-        try:
-            dc.SetPen(wx.Pen((173, 255, 47),
-                3 if self.bounds.scale > 1.0 else 1))
-            for v in self.switchCache:
-                if v != self.selectedView:
-                    v.Draw(dc, clip, context)
-        finally:
-            dc.SetPen(oldPen)
-
-
     def PaintSelection(self, dc, clip, context):
         """
         Paints rail switches.
@@ -524,8 +478,11 @@ class PlanePart(wx.ScrolledWindow):
             dc.SetPen(oldPen)
             
             
+    # TODO: refactor
     def PaintBasePoint(self, dc, clip, context):
-        self.basePointView.Draw(dc, clip, context)
+        pass
+#        self.basePointView.Draw(dc, clip, context)
+
 
 
     def PaintSnapPoint(self, dc, clip, context):
@@ -553,8 +510,11 @@ class PlanePart(wx.ScrolledWindow):
         self.GetParent().leftRuler.UpdateMousePointer(opoint)
 
 
-    def SetSize(self, size):
-        wx.Panel.SetSize(size)
+    def Resize(self):
+        size = self.ComputePreferredSize()
+        self.SetVirtualSize(size)
+        self.Refresh()
+
 
 
 
@@ -735,6 +695,7 @@ class BasePoint:
 
 
 
+# TODO: refactor
 class BasePointMover:
     """
     Helper class that moves a basepoint respectively to the mouse drags.
@@ -752,7 +713,7 @@ class BasePointMover:
 
         point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
 
-        context = ui.views.DCContext()
+        context = ui.views.DrawContext()
         context.scale = self.editorPart.scale
         context.minX = self.editorPart.minX
         context.maxX = self.editorPart.maxX
@@ -862,6 +823,7 @@ class SceneryDragger:
 
 
 
+# TODO: refactor
 class TrackClosurer:
     """
     Closure track mouse listener handles creating track closure
@@ -952,6 +914,7 @@ class SnapData:
 
 
 
+# TODO: refactor, use sptial
 class Highlighter:
     """
     Mouse listener that make selection in editor
@@ -1044,32 +1007,17 @@ class SceneryListener(model.scenery.SceneryListener):
         (ux, uy) = part.GetScrollPixelsPerUnit()
         
         mbc = scenery.GetMbc()
-        part.bounds.Update(mbc.min(), mbc.max())
+        resizeNeeded = part.bounds.Update(mbc.min(), mbc.max())
+        if resizeNeeded:
+            part.Resize()
+        else:
+            box = ui.views.GetViewer(element).GetBox(part.bounds)
+            box.x -= vx * ux
+            box.y -= vy * uy
+            part.RefreshRect(box)
 
-        #geometry = element.GetGeometry()
-        #rect = None
-        #for mp in geometry:
-        #    vp = self.editor.ModelToView(mp)
-        #    rect.__add__()
 
-        #view = part.AddView(element)
-
-        # TODO: resizing?
-        # TODO: repaining only region
-        #needResizing = part.bounds.
-
-        #needPainting = part.ComputeMinMax()
-        #if needPainting:
-        self.editor.Refresh()
-#        else:
-#            view.Scale(part.scale, part.minX, part.maxX, part.minY, part.maxY)
-#        
-#            repaintRect = view.GetRepaintBounds()
-#            repaintRect.x -= vx * ux
-#            repaintRect.y -= vy * uy
-#            part.RefreshRect(repaintRect)
-#    
-
+    # TODO: refactor
     def sceneryRemove(self, element):
         part = self.editor.parts[0]
         (vx, vy) = part.GetViewStart()
@@ -1093,6 +1041,7 @@ class SceneryListener(model.scenery.SceneryListener):
             part.RefreshRect(repaintRect)
 
 
+    # TODO: refactor or even remove it all
     def sceneryAddGroup(self, group):
         part = self.editor.parts[0]
         (vx, vy) = part.GetViewStart()

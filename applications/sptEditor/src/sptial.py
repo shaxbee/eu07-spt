@@ -3,6 +3,7 @@ SPaTial indexing structures.
 """
 
 import decimal
+from sptmath import Vec3
 
 
 class Cuboid:
@@ -212,11 +213,11 @@ class Cuboid:
     
     
     def min(self):
-        return (self.minX, self.minY, self.minZ)
+        return Vec3(self.minX, self.minY, self.minZ)
     
     
     def max(self):
-        return (self.maxX, self.maxY, self.maxZ)
+        return Vec3(self.maxX, self.maxY, self.maxZ)
         
 
     @classmethod
