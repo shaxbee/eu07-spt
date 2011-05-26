@@ -446,7 +446,7 @@ class PlanePart(wx.ScrolledWindow):
         
     def PaintTracks(self, dc, clip, context):
         """
-        Paint rail tracks.
+        Paint rail trackings.
         """
 
         (vx, vy) = self.GetViewStart()
@@ -514,6 +514,18 @@ class PlanePart(wx.ScrolledWindow):
         size = self.ComputePreferredSize()
         self.SetVirtualSize(size)
         self.Refresh()
+        
+        
+    def RedrawRect(self, dirtyRegion):
+        """
+        Redraws the dirty region.
+        Dirty region is expressed in virtual coordinates.
+        """
+        (vx, vy) = self.GetViewStart()
+        (ux, uy) = self.GetScrollPixelsPerUnit()
+        dirtyRegion.x =- vx * ux
+        dirtyRegion.y =- vy * uy 
+        self.RefreshRect(dirtyRegion)
 
 
 
@@ -780,7 +792,7 @@ class BasePointMover:
 class SceneryDragger:
     """
     Dragger of scenery. This handles mouse drag with 'Ctrl' modifier
-    for movine scenery.
+    for moving scenery.
     """
 
     def __init__(self, editor):
@@ -1003,8 +1015,6 @@ class SceneryListener(model.scenery.SceneryListener):
 
     def sceneryAdd(self, scenery, element):
         part = self.editor.parts[0]
-        (vx, vy) = part.GetViewStart()
-        (ux, uy) = part.GetScrollPixelsPerUnit()
         
         mbc = scenery.GetMbc()
         resizeNeeded = part.bounds.Update(mbc.min(), mbc.max())
@@ -1012,9 +1022,7 @@ class SceneryListener(model.scenery.SceneryListener):
             part.Resize()
         else:
             box = ui.views.GetViewer(element).GetBox(part.bounds)
-            box.x -= vx * ux
-            box.y -= vy * uy
-            part.RefreshRect(box)
+            part.RedrawRect(box)
 
 
     # TODO: refactor

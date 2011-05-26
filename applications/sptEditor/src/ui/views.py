@@ -160,8 +160,8 @@ class SwitchViewer:
         
         oldPen = context.dc.GetPen()
         try:
-            dc.SetPen(wx.Pen(COLOR_SWITCH,
-                3 if self.bounds.scale > 1.0 else 1))
+            context.dc.SetPen(wx.Pen(COLOR_SWITCH,
+                3 if context.bounds.scale > 1.0 else 1))
             
             if (context.bounds.scale < 1.0):
                 pc = context.bounds.ModelToView(self.switch.pc)
@@ -172,12 +172,12 @@ class SwitchViewer:
                 context.dc.DrawLine(pc[0], pc[1], p2[0], p2[1])
             else:
                 s = (context.bounds.ModelToView(self.switch.pc),
-                     context.bounds.ModelToView(self.switch.pc + switch.vc1),
-                     context.bounds.ModelToView(self.switch.p1 + switch.v1),
+                     context.bounds.ModelToView(self.switch.pc + self.switch.vc1),
+                     context.bounds.ModelToView(self.switch.p1 + self.switch.v1),
                      context.bounds.ModelToView(self.switch.p1))
                 d = (context.bounds.ModelToView(self.switch.pc),
-                     context.bounds.ModelToView(self.switch.pc + switch.vc2),
-                     context.bounds.ModelToView(self.switch.p2 + switch.v2),
+                     context.bounds.ModelToView(self.switch.pc + self.switch.vc2),
+                     context.bounds.ModelToView(self.switch.p2 + self.switch.v2),
                      context.bounds.ModelToView(self.switch.p2))
             
                 context.dc.DrawSpline(s)
@@ -343,5 +343,7 @@ def GetViewer(element):
         return TrackViewer(element)
     elif (isinstance(element, model.tracks.Switch)):
         return SwitchViewer(element)
-    elif (isinstance(element, model.groups.RailGroup)):
+    elif (isinstance(element, model.groups.RailContainer)):
         return GroupViewer(element)
+    else:
+        raise ValueError(element)
