@@ -10,10 +10,10 @@ namespace sptMover
 
 VehicleUpdateCallback::~VehicleUpdateCallback() { };
 
-Vehicle::Vehicle(const std::string& name, const VehicleTraits& traits): 
+Vehicle::Vehicle(const std::string& name, const VehicleTraits& traits):
     _name(name), _traits(traits)
 {
-  
+
 }; // sptMover::Vehicle::Vehicle
 
 Vehicle::~Vehicle() { }

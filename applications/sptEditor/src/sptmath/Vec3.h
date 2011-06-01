@@ -12,7 +12,7 @@ public:
     Vec3(const Vec3& other): _x(other.getX()), _y(other.getY()), _z(other.getZ()) { };
     Vec3(const std::string& x, const std::string& y, const std::string& z): _x(x), _y(y), _z(z) { };
     Vec3(const Decimal& x, const Decimal& y, const Decimal& z): _x(x), _y(y), _z(z) { };
-    
+
     Vec3 operator+(const Vec3& other) const
     {
         return Vec3(_x + other._x, _y + other._y, _z + other._z);
@@ -60,7 +60,7 @@ public:
         double z(_z);
         return std::sqrt((x * x + y * y + z * z));
     };
-    
+
     double dotProduct(const Vec3& other) const
     {
         return double(_x * other._x + _y * other._y + _z * other._z);
@@ -70,10 +70,10 @@ public:
     float angleToJUnit() const;
 
     std::string __repr__() const;
-	boost::python::tuple to_tuple() const
-	{
-		return boost::python::make_tuple(_x, _y, _z);
-	};
+    boost::python::tuple to_tuple() const
+    {
+        return boost::python::make_tuple(_x, _y, _z);
+    };
 
 private:
     Vec3 scale_dec(const Decimal& value)

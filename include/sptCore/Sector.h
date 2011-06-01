@@ -33,13 +33,13 @@ struct ExternalConnection
     osg::Vec3f offset;
     osg::Vec3f position;
     boost::uint32_t index;
-    bool operator<(const ExternalConnection& other) const 
-    { 
-        return (position - other.position + offset - other.offset) < osg::Vec3f(0.001f, 0.001f, 0.001f); 
+    bool operator<(const ExternalConnection& other) const
+    {
+        return (position - other.position + offset - other.offset) < osg::Vec3f(0.001f, 0.001f, 0.001f);
     }
 
-    bool operator==(const ExternalConnection& other) const 
-    { 
+    bool operator==(const ExternalConnection& other) const
+    {
         osg::Vec3f diff(position - other.position + offset - other.offset);
         osg::Vec3f tolerance(0.001f, 0.001f, 0.001f);
         return -tolerance < diff && diff < tolerance;
@@ -58,7 +58,7 @@ public:
     Sector(const osg::Vec3d& position);
 
     const osg::Vec3f& getPosition() const { return _position; };
-   
+
     template <typename RailTrackingContainerT, typename ConnectionContainerT, typename ExternalsContainerT>
     void setData(RailTrackingContainerT& trackings, ConnectionContainerT& connections, ExternalsContainerT& externals);
 
@@ -73,7 +73,7 @@ public:
     //! \brief Update track connections.
     //! \param connections Container of ConnectionUpdate
     template <typename ContainerT>
-    void updateConnections(const ContainerT& connections); 
+    void updateConnections(const ContainerT& connections);
 
     //! \brief Update single connection.
     //! param position Connection position

@@ -129,7 +129,7 @@ void SceneryBuilder::removeTrack(Track& track)
 
     DynamicSector& sector = dynamic_cast<DynamicSector&>(track.getSector());
     const Path& path = track.getDefaultPath();
-    
+
     sector.removeConnection(path.front());
     sector.removeConnection(path.back());
 

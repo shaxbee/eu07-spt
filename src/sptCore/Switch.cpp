@@ -6,7 +6,7 @@ SwitchableTracking::ValidPositions Switch::_positions;
 
 const osg::Vec3& Switch::getExit(const osg::Vec3& entry) const
 {
-    
+
     // entry == begin
     if(entry == _straight->front())
         return (getPosition() == "STRAIGHT") ? _straight->back() : _diverted->back();
@@ -31,13 +31,13 @@ const Path& Switch::getPath(const osg::Vec3& entry) const
         return (getPosition() == "STRAIGHT") ? *_straight : *_diverted;
 
     if(entry == _straight->back())
-       return *_straightReversed;
+        return *_straightReversed;
 
     if(entry == _diverted->front())
-       return *_diverted;
+        return *_diverted;
 
     if(entry == _diverted->back())
-       return *_divertedReversed; 
+        return *_divertedReversed;
 
     throw UnknownEntryException() << PositionInfo(entry);
 

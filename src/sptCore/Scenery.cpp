@@ -33,7 +33,7 @@ class ExternalsManager
 public:
     ExternalsManager() { };
     ~ExternalsManager() { };
-    
+
     void addExternals(Scenery& scenery, Sector& sector);
     void removeExternals(Scenery& scenery, const Sector& sector);
 
@@ -41,7 +41,7 @@ private:
     typedef std::multiset<ExternalConnection, ExternalConnectionOrdering> ExternalConnectionsSet;
     ExternalConnectionsSet _externals;
 }; // class sptCore::ExternalsManager
-    
+
 void ExternalsManager::addExternals(Scenery& scenery, Sector& sector)
 {
     const ExternalConnections& externals = sector.getExternals();
@@ -88,8 +88,8 @@ Sector& Scenery::getSector(const osg::Vec3f& position)
     try
     {
         return _sectors.at(position);
-    } 
-    catch(boost::bad_ptr_container_operation&) 
+    }
+    catch(boost::bad_ptr_container_operation&)
     {
         throw SceneryException(str(format("Sector already exists at position (%f, %f, %f)") %
                     position.x() %
@@ -103,8 +103,8 @@ const Sector& Scenery::getSector(const osg::Vec3f& position) const
     try
     {
         return _sectors.at(position);
-    } 
-    catch(boost::bad_ptr_container_operation&) 
+    }
+    catch(boost::bad_ptr_container_operation&)
     {
         throw SceneryException(str(format("Sector already exists at position (%f, %f, %f)") %
                     position.x() %
@@ -112,7 +112,7 @@ const Sector& Scenery::getSector(const osg::Vec3f& position) const
                     position.z()));
     }
 }; // Scenery::getSector
-        
+
 bool Scenery::hasSector(const osg::Vec3f& position) const
 {
     Sectors::const_iterator iter = _sectors.find(position);
@@ -122,11 +122,11 @@ bool Scenery::hasSector(const osg::Vec3f& position) const
 Track& Scenery::getTrack(const std::string& name)
 {
     Tracks::const_iterator iter = _tracks.find(name);
-    
+
     if(iter == _tracks.end())
         throw SceneryException(str(format("Track with name %s doesn't exist.") % name));
 
-    return *(iter->second);   
+    return *(iter->second);
 }; // Scenery::getTrack
 
 SwitchableTracking& Scenery::getSwitch(const std::string& name)
@@ -136,7 +136,7 @@ SwitchableTracking& Scenery::getSwitch(const std::string& name)
     if(iter == _switches.end())
         throw SceneryException(str(format("Switch with name %s doesn't exist.") % name));
 
-    return *(iter->second);   
+    return *(iter->second);
 }; // Scenery::getSwitch
 
 void Scenery::addSector(std::auto_ptr<Sector> sector)
@@ -156,7 +156,7 @@ void Scenery::addSector(std::auto_ptr<Sector> sector)
 
     // update statistics
 //    _statistics.sectors++;
-//    _statistics.totalTracks += totalTracks;   
+//    _statistics.totalTracks += totalTracks;
 }; // Scenery::addSector
 
 std::auto_ptr<Sector> Scenery::removeSector(const osg::Vec3f& position)
@@ -181,11 +181,11 @@ void Scenery::addTrack(const std::string& name, Track& track)
 {
     std::pair<Tracks::iterator, bool> ret;
     ret = _tracks.insert(std::make_pair(name, &track));
-    
+
     if(!ret.second)
         throw SceneryException(str(format("Track with name %s already exists.") % name));
 
-//    _statistics.tracks++;  
+//    _statistics.tracks++;
 }; // Scenery::addTrack
 
 void Scenery::removeTrack(const std::string& name)
@@ -203,11 +203,11 @@ void Scenery::addSwitch(const std::string& name, SwitchableTracking& track)
 {
     std::pair<Switches::iterator, bool> ret;
     ret = _switches.insert(std::make_pair(name, &track));
-    
+
     if(!ret.second)
         throw SceneryException(str(format("Switch with name %s already exists.") % name));
 
-//    _statistics.switches++;  
+//    _statistics.switches++;
 }; // Scenery::addSwitch
 
 void Scenery::removeSwitch(const std::string& name)

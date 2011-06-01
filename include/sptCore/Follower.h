@@ -19,25 +19,25 @@ class Follower
 public:
     Follower(Track& track, float distance = 0.0f);
 
-    Sector& getSector() { return _track->getSector(); } 
-    const Sector& getSector() const { return _track->getSector(); } 
+    Sector& getSector() { return _track->getSector(); }
+    const Sector& getSector() const { return _track->getSector(); }
 
     const RailTracking& getTrack() const { return *_track; }
     const Path& getPath() const { return *_path; }
 
     //! \brief Get distance from begin of current Path
     float getDistance() const { return _distance; }
-    
+
     //! \brief Move follower by given distance
     //! \throw NullTrackException if there isn't next track
     void move(float distance);
 
     osg::Vec3 getPosition() const;
     osg::Matrix getMatrix() const;
-   
-    //! \brief Indicator of Follower exiting tracks 
+
+    //! \brief Indicator of Follower exiting tracks
     class NullTrackException: public std::runtime_error { };
-    
+
 private:
     void changeTrack(osg::Vec3 position);
     void findPosition(osg::ref_ptr<osg::Vec3Array> points, osg::Vec3Array::const_iterator& iter, float& ratio) const;

@@ -41,7 +41,7 @@ void recursiveBezier(osg::Vec3Array& dest, const osg::Vec3& p1, const osg::Vec3&
 
     osg::Vec3f delta = p4 - p1;
 
-    double dist = (pointDistance(p1, p4, p2) + pointDistance(p1, p4, p3)) / 2; 
+    double dist = (pointDistance(p1, p4, p2) + pointDistance(p1, p4, p3)) / 2;
 
     if(dist < tolerance * delta.length())
     {
@@ -112,7 +112,7 @@ osg::Vec3f StraightPath::backDir() const
     return frontDir();
 };
 
-osg::ref_ptr<osg::Vec3Array> StraightPath::points(float scale) const 
+osg::ref_ptr<osg::Vec3Array> StraightPath::points(float scale) const
 {
     osg::Vec3Array* result = new osg::Vec3Array;
     result->push_back(front());
@@ -165,7 +165,7 @@ float BezierPath::length() const
         const osg::Vec3Array& pts = *(points());
         for(osg::Vec3Array::const_iterator iter = pts.begin(); iter != pts.end() - 1; iter++)
             length += (*(iter + 1) - *iter).length();
-        
+
         _length = length;
     };
 
