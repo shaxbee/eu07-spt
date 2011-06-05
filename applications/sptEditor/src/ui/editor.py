@@ -168,50 +168,36 @@ class PlanePart(wx.ScrolledWindow):
         
         
     def SetScenery(self, scenery):
-            
-        #self.ComputeMinMax(True)
         mbc = scenery.GetMbc()
         self.bounds.Update(mbc.min(), mbc.max())
         self.Refresh()
         
         
-    # TODO: refactor
     def SetBasePoint(self, basePoint, follow = False):
         (vx, vy) = self.GetViewStart()
         (ux, uy) = self.GetScrollPixelsPerUnit()
 
-#        oldView = self.basePointView
-#        self.basePointView = ui.views.BasePointView(basePoint)
-#        if oldView != None:
-#            oldRect = oldView.GetRepaintBounds(context)
-#            oldRect.x -= vx * ux 
-#            oldRect.y -= vy * uy 
-#            self.RefreshRect(oldRect)
-        #needed = self.ComputeMinMax(False)
-        #if needed:            
-        #    size = self.ComputePreferredSize()
-        #    self.SetVirtualSize(size)            
-        #    self.Refresh()
-        #else:
-            # Scale base point view
-#===============================================================================
-#            self.basePointView.Scale(self.scale, self.minX, self.maxX,
-#                                     self.minY, self.maxY)
-#            newRect = self.basePointView.GetRepaintBounds(context)
-#            newRect.x -= vx * ux
-#            newRect.y -= vy * uy
-#            self.RefreshRect(newRect)
-# 
-#        if follow:
-#            p = self.basePointView.point
-#            (wx, wy) = self.GetSize()
-#            if (wx > 2*BASE_POINT_MARGIN and wy > 2*BASE_POINT_MARGIN):
-#                if (p.x < vx*ux + BASE_POINT_MARGIN or p.x > vx*ux + wx - BASE_POINT_MARGIN
-#                        or p.y < vy*uy + BASE_POINT_MARGIN or p.y > vy*uy + wy - BASE_POINT_MARGIN):
-#                    self.CenterViewAt(p.x, p.y)
-#            else:
-#                self.CenterViewAt(p.x, p.y)
-#===============================================================================
+        oldView = self.basePointView
+        self.basePointView = ui.views.BasePointView(basePoint)
+        if oldView is not None:
+            oldRect = oldView.GetBox(self.bounds)
+            self.RedrawRect(oldRect)
+        needed = self.bounds.Update(basePoint.point)
+        if needed:
+            self.Resize()
+        else:
+            rect = self.basePointView.GetBox(self.bounds)
+            self.RedrawRect(rect)
+        
+        if follow:
+            p = self.bounds.ModelToView(basePoint.point)
+            (wx, wy) = self.GetSize()
+            if (wx > 2*BASE_POINT_MARGIN and wy > 2*BASE_POINT_MARGIN):
+                if (p[0] < vx*ux + BASE_POINT_MARGIN or p[0] > vx*ux + wx - BASE_POINT_MARGIN
+                        or p[1] < vy*uy + BASE_POINT_MARGIN or p[1] > vy*uy + wy - BASE_POINT_MARGIN):
+                    self.CenterViewAt(p[0], p[1])
+            else:
+                self.CenterViewAt(p[0], p[1])
 
 
     def SetMode(self, mode, updateMenu = False):
@@ -348,7 +334,7 @@ class PlanePart(wx.ScrolledWindow):
 
         clip = self.GetUpdateRegion().GetBox()
         (clip.x, clip.y) = self.CalcUnscrolledPosition(clip.x, clip.y)
-
+        
         context = ui.views.DrawContext(dc, self.bounds)
 
         startTime = datetime.datetime.now()
@@ -356,10 +342,11 @@ class PlanePart(wx.ScrolledWindow):
             self.PaintBackground(dc, clip, context)
             self.PaintForeground(dc, clip, context)
         finally:
-            delta = datetime.datetime.now() - startTime
-            idelta = delta.days * 86400 + delta.seconds * 1000000 \
-                + delta.microseconds
-            self.logger.debug(u"Paint lasted %d \u00b5s" % idelta)
+            if self.logger.isEnabledFor(logging.DEBUG):
+                delta = datetime.datetime.now() - startTime
+                idelta = delta.days * 86400 + delta.seconds * 1000000 \
+                    + delta.microseconds
+                self.logger.debug(u"Paint lasted %d \u00b5s" % idelta)
 
 
     def PaintBackground(self, dc, clip, context):
@@ -478,11 +465,8 @@ class PlanePart(wx.ScrolledWindow):
             dc.SetPen(oldPen)
             
             
-    # TODO: refactor
     def PaintBasePoint(self, dc, clip, context):
-        pass
-#        self.basePointView.Draw(dc, clip, context)
-
+        self.basePointView.Draw(context)
 
 
     def PaintSnapPoint(self, dc, clip, context):
@@ -523,8 +507,8 @@ class PlanePart(wx.ScrolledWindow):
         """
         (vx, vy) = self.GetViewStart()
         (ux, uy) = self.GetScrollPixelsPerUnit()
-        dirtyRegion.x =- vx * ux
-        dirtyRegion.y =- vy * uy 
+        dirtyRegion.x = dirtyRegion.x - vx * ux
+        dirtyRegion.y = dirtyRegion.y - vy * uy
         self.RefreshRect(dirtyRegion)
 
 

@@ -31,11 +31,20 @@ def loadImages(file, tiles):
 
 
 def getImageIndexByAngle(angle):
+    """
+    Gets the image index for basepoint, snappoint alpha angle.
+    
+    Examples:
+    >>> import math
+    >>> map(getImageIndexByAngle, [0.0, 180.0, 90.0, 270.0, -3.0, -2.4, -2.5, 2.4, 2.5, 45.0, 357.613626644])
+    [0, 36, 18, 54, 71, 0, 0, 0, 1, 9, 0]
+    """
     d = math.radians(angle + 2.5)
     if d < 0.0:
-        d += 2*math.pi
+        d = d + 2*math.pi
     d = d / (2*math.pi)
-    return int(d * 72)
+    index = int(d * 72)
+    return 0 if index > 71 else index
 
 
 BASEPOINT_IMAGES = loadImages(os.path.join( \
@@ -295,33 +304,37 @@ class BasePointView:
     """
     
     def __init__(self, basePoint):
-        self.basePoint = basePoint
-        self.point = wx.Point()
+        self.basePoint = ui.editor.BasePoint(basePoint.point, basePoint.alpha, basePoint.gradient)
 
     
-    def GetElement(self):
-        return self.basePoint
-    
-    
-    def GetMinMax(self):
-        x = float(self.basePoint.point.x)
-        y = float(self.basePoint.point.y)
-   	return (x, x, y, y) 
-    
-    def Scale(self, scale, oMinX, oMaxX, oMinY, oMaxY):
-        self.point.x = int(((float(self.basePoint.point.x) - oMinX) * scale) + 100)
-        self.point.y = int(((-float(self.basePoint.point.y) + oMaxY) * scale) + 100)
-
-
-    def Draw(self, dc, clip, context):
+    def Draw(self, context):
+        p2d = context.bounds.ModelToView(self.basePoint.point)
         index = getImageIndexByAngle(self.basePoint.alpha)
-        dc.DrawBitmap(wx.BitmapFromImage(BASEPOINT_IMAGES[index]), \
-                      self.point.x - BASEPOINT_IMAGES[index].GetWidth() / 2, \
-                      self.point.y - BASEPOINT_IMAGES[index].GetHeight() / 2)
+        context.dc.DrawBitmap(wx.BitmapFromImage(BASEPOINT_IMAGES[index]), \
+                      p2d[0] - BASEPOINT_IMAGES[index].GetWidth() / 2, \
+                      p2d[1] - BASEPOINT_IMAGES[index].GetHeight() / 2)
         
         
-    def GetRepaintBounds(self, context):
-        return wx.Rect(self.point.x - 10, self.point.y - 10, 20, 20)
+    def GetBox(self, bounds):
+        """
+        Returns the box for base point.
+        
+        Examples:
+        >>> from ui.editor import BasePoint, EditorBounds
+        >>> from sptmath import Vec3
+        >>> bp = BasePoint(Vec3('-787.343', '34.342', '-23.005'), 1.0, 0.0)
+        >>> bounds = EditorBounds()
+        >>> bounds.scale = 2
+        >>> bounds.minX = -100000.0
+        >>> bounds.maxX = 1000.0
+        >>> bounds.minY = -100000.0
+        >>> bounds.maxY = 60000.0
+        >>> bv = BasePointView(bp)
+        >>> bv.GetBox(bounds)
+        wx.Rect(198515, 120021, 20, 20)
+        """
+        p2d = bounds.ModelToView(self.basePoint.point)
+        return wx.Rect(p2d[0] - 10, p2d[1] - 10, 20, 20)
     
     
     def IsSelectionPossible(self, point, context):
