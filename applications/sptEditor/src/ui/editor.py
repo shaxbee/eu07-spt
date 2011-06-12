@@ -182,10 +182,18 @@ class PlanePart(wx.ScrolledWindow):
         #self.SetFocusIgnoringChildren()
 
     def OnMouseEnter(self, event):
+        #Inform window that mouse is in area. Set focus to the ribbon
+        #to correct assign mouse wheel events.
         self.mouse_in_window = True
+        self.main_window.ribbon.SetFocus()
+        #self.logger.info("Mouse enter the window")
+        #print "mouse enter"
 
     def OnMouseLeave(self, event):
+        #inform window that mouse is out of the area.
         self.mouse_in_window = False
+        #self.logger.info("Mouse leave the window")
+        #print "mouse leave"
 
     def OnMouseWheel(self, event):
         #print "Editor mouse event"
@@ -352,7 +360,7 @@ class PlanePart(wx.ScrolledWindow):
             return False
 
     def CalculateCenterPointOfEditor(self):
-         # 1) Get the center point of editor
+        # 1) Get the center point of editor
         (view_start_x, view_start_y) = self.GetViewStart()
         (window_size_width, window_size_height) = self.GetSize()
         (scroll_rate_x, scroll_rate_y) = self.GetScrollPixelsPerUnit()
@@ -639,12 +647,12 @@ class PlanePart(wx.ScrolledWindow):
 
     def PaintSnapPoint(self, dc, clip):
         if self.snapData != None:
-             index = ui.views.getImageIndexByAngle(self.snapData.alpha)
-             snapImage = ui.views.SNAP_BASEPOINT_IMAGES[index]
+            index = ui.views.getImageIndexByAngle(self.snapData.alpha)
+            snapImage = ui.views.SNAP_BASEPOINT_IMAGES[index]
 
-             dc.DrawBitmap(wx.BitmapFromImage(snapImage), \
-                 self.snapData.p2d.x - snapImage.GetWidth()/2, \
-                 self.snapData.p2d.y - snapImage.GetHeight()/2)
+            dc.DrawBitmap(wx.BitmapFromImage(snapImage), \
+                self.snapData.p2d.x - snapImage.GetWidth()/2, \
+                self.snapData.p2d.y - snapImage.GetHeight()/2)
 
 
     def OnMoveUpdateStatusBar(self, event):
