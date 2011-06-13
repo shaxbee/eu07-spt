@@ -48,7 +48,11 @@ class Application(wx.App):
     """
     
     def __init__(self):
-        wx.App.__init__(self) 
+        '''
+        Application constructor
+        '''
+        #Redirect is for right behavior on PyDev (don't open own console on prints and logmessages)
+        wx.App.__init__(self,redirect=False) 
 
     
     def OnInit(self):
@@ -56,6 +60,7 @@ class Application(wx.App):
         
         self.SetVendorName("SPT-Team")
         self.SetAppName("EI07")
+        
         
         wx.FileConfig.Get()
         
@@ -574,7 +579,7 @@ class MainWindow(wx.Frame):
         Menu event handler for changing mode of editor.
         """
         wid = event.GetId()
-        if wid == ui.ribbon.ID_CHANGE_TRACK_NORMAL:
+        if wid == ui.ribbon.ID_MODE_TRACK_NORMAL:
             self.editor.SetMode(ui.editor.MODE_NORMAL)
         elif wid == ui.ribbon.ID_MODE_TRACK_CLOSURE:
             self.editor.SetMode(ui.editor.MODE_CLOSURE)
@@ -632,7 +637,7 @@ class MainWindow(wx.Frame):
         self.trackPaletteMenuEntry.Check(False)
 
 
-'''if __name__ == "__main__":
+if __name__ == "__main__":
     usage = "Usage: %prog [options]"
     parser = optparse.OptionParser(usage=usage)
     parser.add_option("-l", "--logging", action="store", type="string", \
@@ -641,43 +646,7 @@ class MainWindow(wx.Frame):
     
     if options.logging != None:
         logging.config.fileConfig(options.logging)
-    
+        
     app = Application()
     frame = MainWindow(None, ID_MAIN_FRAME)
     app.MainLoop()
-
-'''
-#----------------------------------------------------------------------
-# ONLY FOR TESTS PURPOSES, DO NOT DELETE
-#----------------------------------------------------------------------
-class TestPanel(wx.Panel):
-    def __init__(self, parent, log):
-        self.log = log
-        wx.Panel.__init__(self, parent, -1)
-
-        b1 = wx.Button(self, -1, " Pure-Python RibbonBar ", (50,50))
-        self.Bind(wx.EVT_BUTTON, self.OnButton1, b1)
-
-
-    def OnButton1(self, event):
-        self.win = MainWindow(self, ID_MAIN_FRAME)
-
-
-#----------------------------------------------------------------------
-
-def runTest(frame, nb, log):
-
-    win = MainWindow(None,ID_MAIN_FRAME)
-    #win = TestPanel(nb, log)
-    return win
-
-#----------------------------------------------------------------------
-
-
-overview = RB.__doc__
-
-
-if __name__ == '__main__':
-    import sys,os
-    import run
-    run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])

@@ -173,15 +173,16 @@ class RibbonPanel(wx.Panel):
                                        wx.DefaultSize, agwStyle=RB.RIBBON_PANEL_NO_AUTO_MINIMISE)
                                        
         insert = RB.RibbonButtonBar(insert_panel, wx.ID_ANY)
-        icon_insert_track = wx.Bitmap(os.path.join(self.bitmap_action_dir, "editor-switch.png"), wx.BITMAP_TYPE_PNG)
-        #icon_insert_curve = wx.Bitmap(os.path.join(self.bitmap_action_dir, "document-new.png"), wx.BITMAP_TYPE_PNG)
+        icon_insert_track = wx.Bitmap(os.path.join(self.bitmap_action_dir, "insert_straight.png"), wx.BITMAP_TYPE_PNG)
+        icon_insert_switch = wx.Bitmap(os.path.join(self.bitmap_action_dir, "insert_switch.png"), wx.BITMAP_TYPE_PNG)
+        icon_insert_curve = wx.Bitmap(os.path.join(self.bitmap_action_dir, "insert_curve.png"), wx.BITMAP_TYPE_PNG)
         #icon_save = wx.Bitmap(os.path.join(self.bitmap_action_dir, "document-save.png"), wx.BITMAP_TYPE_PNG)
         #icon_saveas = wx.Bitmap(os.path.join(self.bitmap_action_dir, "media-floppy.png"), wx.BITMAP_TYPE_PNG)
         #icon_export = wx.Bitmap(os.path.join(self.bitmap_action_dir, "application-x-bittorrent.png"), wx.BITMAP_TYPE_PNG)
 
         insert.AddSimpleButton(ID_INSERT_TRACK, "Track", icon_insert_track, "")
-        insert.AddSimpleButton(ID_INSERT_CURVE, "Curve", icon_insert_track, "")
-        insert.AddSimpleButton(ID_INSERT_SWITCH, "Switch", icon_insert_track, "")
+        insert.AddSimpleButton(ID_INSERT_CURVE, "Curve", icon_insert_curve, "")
+        insert.AddSimpleButton(ID_INSERT_SWITCH, "Switch", icon_insert_switch, "")
 
     def AddPerspectivePanel(self,home_page):
         pers_panel = RB.RibbonPanel(home_page, wx.ID_ANY, "Perspectives", wx.NullBitmap, wx.DefaultPosition,
