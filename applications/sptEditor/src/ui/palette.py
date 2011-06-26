@@ -14,21 +14,29 @@ import sptyaml
 
 
 
-class TrackPalette(wx.Panel):
+class ToolsPalette(wx.ScrolledWindow):
+    def __init__(self, parent, id = wx.ID_ANY):
+        wx.ScrolledWindow.__init__(self, parent, id, \
+            style = wx.VSCROLL | wx.HSCROLL)
+
+class TrackPalette(wx.ScrolledWindow):
     """
-    Track palette
+    Base class for palette with buttons to quick inserting buttons in editor
     """
 
-    def __init__(self, parent, id = wx.ID_ANY, w=400, h=400):
-        wx.Panel.__init__(self, parent, id,)
+    def __init__(self, parent, id = wx.ID_ANY, w=200, h=400):
+        wx.ScrolledWindow.__init__(self, parent, id,)
 
         #self.SetSize(wx.Size(w,h))
-        
+        #Loading prefabs of tracks from prefabric.yaml file using sptLoader (sptyaml.py file)
         self.LoadPrefabs()
+        #Verify loaded tracks
         self.VerifyPrefabs()
-
+        
+        #adding main sizer in form
         sizerRoot = wx.BoxSizer(wx.VERTICAL)
-
+        
+        #adding search pole on top of pallete
         searchPanel = wx.Panel(self, wx.ID_ANY)
         sizerSearch = wx.BoxSizer(wx.HORIZONTAL)
         sizerSearch.Add(wx.StaticText(searchPanel, wx.ID_ANY, label="Search:"), \
@@ -48,9 +56,11 @@ class TrackPalette(wx.Panel):
         sizerSearch.Add(self.clearSearch, 1, wx.EXPAND)
         searchPanel.SetSizer(sizerSearch)
 
+        #adding sizer for track groups below search
         self.sizerPalette = wx.BoxSizer(wx.VERTICAL)
         palettePanel = wx.Panel(self, wx.ID_ANY, style = wx.BORDER_SUNKEN)
-
+        
+        #Create new groups for everyone type of tracks
         # Straight
         straightGroup = TrackingTypeGroup(palettePanel, 'Straight', self.prefabs['straight'])
         self.sizerPalette.Add(straightGroup, 0, wx.EXPAND)
@@ -67,6 +77,7 @@ class TrackPalette(wx.Panel):
         rSwitchGroup = TrackingTypeGroup(palettePanel, 'Right switches', self.prefabs['right_switches'])
         self.sizerPalette.Add(rSwitchGroup, 0, wx.EXPAND)
 
+        #collate created  groups into dictionary
         self.groups = [straightGroup, arcGroup, lSwitchGroup, rSwitchGroup]
 
         palettePanel.SetSizer(self.sizerPalette)
@@ -80,18 +91,20 @@ class TrackPalette(wx.Panel):
 #        self.Bind(wx.EVT_CLOSE, self.OnClose)
 #        self.Bind(wx.EVT_DESTROY, self.OnClose)
         self.Bind(wx.EVT_MOUSEWHEEL, self.OnMouse)
+        self.SetScrollRate(10,15)
 
     def OnMouse(self, event):
         print "Track panel mouse wheel "+event.GetWheelRotation()
 
     def OnClose(self):
         self.Parent.miTogglePalette.Check(False)
-        print "Palette on Close"
-
+        
     def LoadPrefabs(self):
+        """
+        Method only for loading prefabs to memory using SPT own loader
+        """
         self.prefabs = yaml.load(file("prefabric.yaml", "r"), sptyaml.SptLoader)
-
-
+        
     def VerifyPrefabs(self):
         for v in self.prefabs.values():
             for e in v:
@@ -223,7 +236,7 @@ class TrackingItemRow(wx.Panel):
 
     def ClearSearch(self):
         if not self.IsShown():
-             self.Show(True)
+            self.Show(True)
 
 
     def Search(self, exp):

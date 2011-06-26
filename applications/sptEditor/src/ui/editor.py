@@ -25,6 +25,9 @@ SCALE_MIN = 0.004 # It gives 800px/200km
 SCALE_MAX = 2000.0 # It gives 2000px/m
 SCALE_DEFAULT = 1.0 # It gives 1px/m
 BASE_POINT_MARGIN = 50
+MANUAL_SCROLL_RATE_X = 30
+MANUAL_SCROLL_RATE_Y = 30
+
 
 # Modes of editor
 MODE_NORMAL = 0 # default
@@ -146,7 +149,9 @@ class PlanePart(wx.ScrolledWindow):
         self.Bind(wx.EVT_LEAVE_WINDOW, self.OnMouseLeave)
         self.Bind(wx.EVT_SCROLLWIN, parent.topRuler.HandleOnScroll)
         self.Bind(wx.EVT_SCROLLWIN, parent.leftRuler.HandleOnScroll)
-        
+        self.Bind(wx.EVT_SCROLLWIN_LINEUP, self.OnScrollUp)
+        self.Bind(wx.EVT_SCROLLWIN_LINEDOWN, self.OnScrollDown)
+
         eventManager.Register(self.OnMoveUpdateStatusBar, wx.EVT_MOTION, self)
         eventManager.Register(self.basePointMover.OnMouseDrag, wx.EVT_MOTION, self)
         eventManager.Register(self.basePointMover.OnMousePress, wx.EVT_LEFT_DOWN, self)
@@ -181,6 +186,29 @@ class PlanePart(wx.ScrolledWindow):
         self.SetupScrolling()       
         #self.SetFocusIgnoringChildren()
 
+    def OnScrollUp(self, event):
+        '''
+        Change scroll rate for scroll buttons use
+        '''
+        
+        cp = self.CalculateCenterPointOfEditor()
+        if (event.GetOrientation() == wx.HORIZONTAL):
+            cp.x -= MANUAL_SCROLL_RATE_X
+        else:
+            cp.y += MANUAL_SCROLL_RATE_Y
+        self.CenterViewAt((cp.x, cp.y))
+    
+    def OnScrollDown(self, event):
+        '''
+        Change scroll rate for scroll buttons use
+        '''
+        cp = self.CalculateCenterPointOfEditor()
+        if (event.GetOrientation() == wx.HORIZONTAL):
+            cp.x += MANUAL_SCROLL_RATE_X
+        else:
+            cp.y -= MANUAL_SCROLL_RATE_Y
+        self.CenterViewAt((cp.x, cp.y))
+        
     def OnMouseEnter(self, event):
         #Inform window that mouse is in area. Set focus to the ribbon
         #to correct assign mouse wheel events.
@@ -956,7 +984,6 @@ class SceneryDragger:
             
             #remember of position of mouse
             self.dragStart = event.GetPosition()
-            
             #refresh rulers
             self.editor.GetParent().leftRuler.Refresh()
             self.editor.GetParent().topRuler.Refresh()

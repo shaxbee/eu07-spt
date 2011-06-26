@@ -53,7 +53,7 @@ class SptLoader(yaml.Loader):
     def __init__(self, stream):
         yaml.Loader.__init__(self, stream)
 
-         # This is a stack for parent rail containers if any
+        # This is a stack for parent rail containers if any
         self.__stack = []
         
         classes = ["Vec3", "Track", "Switch", "RailContainer", "AxleCounter", "Scenery"]
@@ -65,9 +65,9 @@ class SptLoader(yaml.Loader):
         (x, y, z) = loader.construct_sequence(node)
         return sptmath.Vec3(str(x), str(y), str(z))
         
-    def __construct_RailTracking(self, loader, node, cls, attrs):
+    def __construct_RailTracking(self, loader, node, base_class, attrs):
         data = loader.construct_mapping(node, deep=False)
-        result = cls()
+        result = base_class()
         
         for attr in attrs:
             setattr(result, attr, data[attr])
@@ -84,7 +84,6 @@ class SptLoader(yaml.Loader):
         return self.__construct_RailTracking(loader, node, model.tracks.Track, Track_attrs)
 
     def construct_Switch(self, loader, node):
-        attrs = ["pc", "p1", "p2", "vc1", "vc2", "v1", "v2"]
         return self.__construct_RailTracking(loader, node, model.tracks.Switch, Switch_attrs)
 
     def construct_RailContainer(self, loader, node):

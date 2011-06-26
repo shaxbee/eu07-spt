@@ -205,8 +205,9 @@ class MainWindow(wx.Frame):
         self.PrepareTrackPalettePaneInfo()
 
         # Create palette
-        self.trackPaletteFrame = ui.palette.TrackPalette(self.main_content_panel,ID_TRACK_PALETTE,250,400)
-
+#        self.trackPaletteFrame = ui.palette.TrackPalette(self.main_content_panel,ID_TRACK_PALETTE,250,400)
+        self.trackPaletteFrame = ui.palette.TrackPalette(self.main_content_panel,ID_TRACK_PALETTE)
+        
         # Adding palette pane to manager as child
         self._paneManager.AddPane(self.trackPaletteFrame,self._trackPalettePaneInfo)
         #self.trackPaletteMenuEntry.Check(True)
