@@ -363,7 +363,7 @@ class BasePointView(View):
     def GetMinMax(self):
         x = float(self.basePoint.point.x)
         y = float(self.basePoint.point.y)
-   	return (x, x, y, y) 
+        return (x, x, y, y) 
     
     def Scale(self, scale, oMinX, oMaxX, oMinY, oMaxY):
         self.point.x = int(((float(self.basePoint.point.x) - oMinX) * scale) + 100)

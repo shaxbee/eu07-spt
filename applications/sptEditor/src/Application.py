@@ -6,9 +6,9 @@ Created on 2009-03-01
 @author: adammo
 """
 
-import logging
+#import logging
 import logging.config
-import wx
+#import wx
 import wx.xrc
 import wx.aui as AUI
 import yaml
@@ -17,17 +17,12 @@ import sys
 import optparse
 #import run
 
-import model.tracks
-import model.groups
 import model.scenery
 import ui.editor
 import ui.dialog
 import ui.palette
 import sptyaml
-import sptmath
 import ui.ribbon
-
-import wx.lib.agw.ribbon as RB
 
 # Stock items
 ID_CENTER_AT = wx.ID_HIGHEST          + 1
@@ -94,7 +89,7 @@ class MainWindow(wx.Frame):
         self.CreateMenu()
         self.ribbon = ui.ribbon.RibbonPanel(self)
         
-        # Ribbon need panel wich can be managed by AUIManager
+        # Ribbon need panel which can be managed by AUIManager
         self.main_content_panel = wx.Panel(self,wx.ID_ANY)
 
         # creating and setting sizer for ribbon and content
@@ -463,7 +458,7 @@ class MainWindow(wx.Frame):
         if self.modified:
             answer = wx.MessageBox("There are unsaved changes in " \
                 + "scenery.\nDo you want to save them?", "Save the file", \
-                wx.YES_NO_CANCEL | wx.ICON_QUESTION, self)
+                wx.YES_DEFAULT|wx.CANCEL|wx.ICON_QUESTION, self)
             if answer == wx.NO:
                 return True
             elif answer == wx.CANCEL:

@@ -7,7 +7,7 @@ the simulator.
 """
 
 import groups
-import tracks
+#import tracks
 
 class Scenery:
     """ 

@@ -118,7 +118,7 @@ class RailContainer:
         if not self.containsPoint(point):
             raise ValueError, "This point is not outline point"
 
-        nextPoint = None
+        #nextPoint = None
 
         # Get the first child from this container
         currentTracking = None

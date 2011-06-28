@@ -41,7 +41,7 @@ class RibbonPanel(wx.Panel):
         self.AddViewPage()
         self.BindButtons()
 
-        primary, secondary, tertiary = self._ribbon.GetArtProvider().GetColourScheme(0, 0, 0)
+        #primary, secondary, tertiary = self._ribbon.GetArtProvider().GetColourScheme(0, 0, 0)
         #print primary
         #print secondary
         #print tertiary
@@ -185,9 +185,10 @@ class RibbonPanel(wx.Panel):
         insert.AddSimpleButton(ID_INSERT_SWITCH, "Switch", icon_insert_switch, "")
 
     def AddPerspectivePanel(self,home_page):
-        pers_panel = RB.RibbonPanel(home_page, wx.ID_ANY, "Perspectives", wx.NullBitmap, wx.DefaultPosition,
-                                       wx.DefaultSize, agwStyle=RB.RIBBON_PANEL_NO_AUTO_MINIMISE)
-   
+        #pers_panel = RB.RibbonPanel(home_page, wx.ID_ANY, "Perspectives", wx.NullBitmap, wx.DefaultPosition,
+        #                               wx.DefaultSize, agwStyle=RB.RIBBON_PANEL_NO_AUTO_MINIMISE)
+        pass
+    
     def AddChangeModePanel(self,home_page):
         chmode_panel = RB.RibbonPanel(home_page, wx.ID_ANY, "Editor mode", wx.NullBitmap, wx.DefaultPosition,
                                        wx.DefaultSize, agwStyle=RB.RIBBON_PANEL_NO_AUTO_MINIMISE)

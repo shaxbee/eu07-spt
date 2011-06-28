@@ -68,6 +68,5 @@ if __name__ == "__main__":
     import yaml
     import sptyaml
     
-    sptyaml.configureYaml()
-    scenery = yaml.load(file("../../../scenery/test", "r"))
+    scenery = yaml.load(file("../../../scenery/test", "r"),sptyaml.SptLoader)
     exportScenery("../../../scenery/test123", scenery.tracks.tracks())

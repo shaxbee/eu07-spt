@@ -305,7 +305,7 @@ class PlanePart(wx.ScrolledWindow):
         if selection != None:
             view = self.FindView(selection)
             if view == None:
-                raise TransitionError, "Cannot find view in cache"
+                raise LookupError("Cannot find view in cache")
             self.selectedView = view
             newRect = view.GetRepaintBounds()
             newRect.x -= vx * ux

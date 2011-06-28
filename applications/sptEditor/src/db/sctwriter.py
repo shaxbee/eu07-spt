@@ -313,5 +313,5 @@ if __name__ == "__main__":
     switches = []
 
     start = time.time()
-    write_sector(file("test.sct", "w+"), Vec3(), tracks, switches)
+    writeSector(file("test.sct", "w+"), Vec3(), tracks, switches)
     print "Time: %f ms" % ((time.time() - start) * 1000.0)
