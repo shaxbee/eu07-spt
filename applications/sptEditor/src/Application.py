@@ -30,8 +30,8 @@ ID_BASEPOINT_EDIT = wx.ID_HIGHEST     + 2
 ID_TRACK_PALETTE = wx.ID_HIGHEST      + 3
 ID_EDITOR = wx.ID_HIGHEST             + 4
 ID_MAIN_FRAME = wx.ID_HIGHEST         + 5
-ID_MODE_TRACK_NORMAL = wx.ID_HIGHEST  + 6
-ID_MODE_TRACK_CLOSURE = wx.ID_HIGHEST + 7
+#ID_MODE_TRACK_NORMAL = wx.ID_HIGHEST  + 6
+#ID_MODE_TRACK_CLOSURE = wx.ID_HIGHEST + 7
 
 NAME_TRACK_PALETTE = "Track palette"
 NAME_TRACTION_PALETTE = "Traction palette"
@@ -159,7 +159,7 @@ class MainWindow(wx.Frame):
         Creates application main menu.
         """
 
-        # from XRC file
+        '''# from XRC file
         mainMenu = self.xRes.LoadMenuBar("MainMenu")
         self.SetMenuBar(mainMenu)
 
@@ -185,7 +185,9 @@ class MainWindow(wx.Frame):
 
         # Creating palette with track making tools
         self.trackPaletteMenuEntry = mainMenu.FindItemById(wx.xrc.XRCID('ID_TRACK_PALETTE'))
-
+        '''
+        pass
+    
     def CreateStatusBar(self):
 
         bar = wx.StatusBar(self)
@@ -576,9 +578,9 @@ class MainWindow(wx.Frame):
         """
         wid = event.GetId()
         if wid == ui.ribbon.ID_MODE_TRACK_NORMAL:
-            self.editor.SetMode(ui.editor.MODE_NORMAL)
+            self.editor.SetMode(ui.editor.MODE_NORMAL,True)
         elif wid == ui.ribbon.ID_MODE_TRACK_CLOSURE:
-            self.editor.SetMode(ui.editor.MODE_CLOSURE)
+            self.editor.SetMode(ui.editor.MODE_CLOSURE,True)
 
 
     def OnZoomIn(self, event):
@@ -632,6 +634,12 @@ class MainWindow(wx.Frame):
         self._paneManager.Update()
         self.trackPaletteMenuEntry.Check(False)
 
+    def MenuChangeEditorMode(self, mode):
+        if mode == ui.editor.MODE_NORMAL:
+            pass
+        elif mode == ui.editor.MODE_CLOSURE:
+            pass
+        pass
 
 if __name__ == "__main__":
     usage = "Usage: %prog [options]"

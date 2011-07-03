@@ -14,6 +14,7 @@ import sys
 import wx.lib.agw.ribbon as RB
 import art_ribbon as AR
 
+#this globals are overwrite by globals in application.py
 ID_EXPORT = wx.ID_HIGHEST
 ID_CENTER_AT = ID_EXPORT +1
 ID_INSERT_TRACK = ID_CENTER_AT +1

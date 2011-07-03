@@ -112,8 +112,8 @@ class SceneryEditor(wx.Panel):
         return self.parts[0].ModelToView(vec3)
 
 
-    def SetMode(self, mode):
-        self.parts[0].SetMode(mode)
+    def SetMode(self, mode, updateMenu = False):
+        self.parts[0].SetMode(mode, updateMenu)
 
     def OnMouseWheel(self, event):
         self.parts[0].OnMouseWheel(event)
@@ -157,6 +157,7 @@ class PlanePart(wx.ScrolledWindow):
         eventManager.Register(self.basePointMover.OnMousePress, wx.EVT_LEFT_DOWN, self)
         eventManager.Register(self.basePointMover.OnMouseRelease, wx.EVT_LEFT_UP, self)
         eventManager.Register(self.highlighter.OnMouseClick, wx.EVT_LEFT_DOWN, self)
+        eventManager.Register(self.highlighter.OnMouseMove, wx.EVT_MOTION, self)
         eventManager.Register(self.wheelScaler.OnMouseMove, wx.EVT_MOTION, self)
         eventManager.Register(self.sceneryDragger.OnMousePress, wx.EVT_MIDDLE_DOWN, self)
         eventManager.Register(self.sceneryDragger.MoveScenery, wx.EVT_MOTION, self)
@@ -195,7 +196,7 @@ class PlanePart(wx.ScrolledWindow):
         if (event.GetOrientation() == wx.HORIZONTAL):
             cp.x -= MANUAL_SCROLL_RATE_X
         else:
-            cp.y += MANUAL_SCROLL_RATE_Y
+            cp.y -= MANUAL_SCROLL_RATE_Y
         self.CenterViewAt((cp.x, cp.y))
     
     def OnScrollDown(self, event):
@@ -206,7 +207,7 @@ class PlanePart(wx.ScrolledWindow):
         if (event.GetOrientation() == wx.HORIZONTAL):
             cp.x += MANUAL_SCROLL_RATE_X
         else:
-            cp.y -= MANUAL_SCROLL_RATE_Y
+            cp.y += MANUAL_SCROLL_RATE_Y
         self.CenterViewAt((cp.x, cp.y))
         
     def OnMouseEnter(self, event):
@@ -281,15 +282,11 @@ class PlanePart(wx.ScrolledWindow):
         if mode == MODE_NORMAL:
             self.trackClosurer.SetEnabled(False)
             self.highlighter.SetEnabled(True)
-            if updateMenu:
-                # Find menu item 
-                mainWindow = wx.FindWindowById(Application.ID_MAIN_FRAME)
-                mainMenu = mainWindow.GetMenuBar()
-                miTrackNormal = mainMenu.FindItemById(wx.xrc.XRCID('ID_MODE_TRACK_NORMAL'))
-                miTrackNormal.Check()
         elif mode == MODE_CLOSURE:
             self.trackClosurer.SetEnabled(True)
             self.highlighter.SetEnabled(False)
+        if updateMenu:
+            self.GetTopLevelParent().MenuChangeEditorMode(mode)
 
 
     def SetSelection(self, selection):
@@ -314,6 +311,11 @@ class PlanePart(wx.ScrolledWindow):
         else:
             self.selectedView = None
 
+    def SetSnapPoint(self, selection):
+        #check if snap point is the same, to avoid not needed refresh of scene
+        if (self.snapData != selection):
+            self.snapData = selection
+            self.Refresh()
 
     def AddView(self, element):
         view = None
@@ -426,8 +428,8 @@ class PlanePart(wx.ScrolledWindow):
         delta_to_screen_center.x = self.GetSize().x/2 - scrolled_position.x
         delta_to_screen_center.y = self.GetSize().y/2 - scrolled_position.y
         
-        print "Center to point:"
-        print p3d
+        #print "Center to point:"
+        #print p3d
         # 2) do scalling
         self.scale = scale
         self.SetVirtualSize(self.ComputePreferredSize())
@@ -895,7 +897,6 @@ class BasePointMover:
             return
         
         point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
-        
         if self.editorPart.basePointView.IsSelectionPossible(point):
             self.pressed = True
     
@@ -1092,7 +1093,22 @@ class Highlighter:
     def SetEnabled(self, enabled = True):
         self.__enabled = enabled
 
-
+    def OnMouseMove(self, event):
+        point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
+            
+        found = None
+        for v in self.editorPart.trackCache + self.editorPart.switchCache:
+            if v.IsSelectionPossible(point):
+                found = v
+                break
+        if found != None:
+            snapData = found.GetSnapData(point)
+            #snapElement = found.GetElement()
+            #print snapData.__repr__()
+            self.editorPart.SetSnapPoint(snapData)
+        else:
+            self.editorPart.SetSnapPoint(None)
+    
     def OnMouseClick(self, event):
         if self.__enabled and not self.editorPart.basePointMover.pressed:
             point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
@@ -1106,6 +1122,8 @@ class Highlighter:
                         break
                 if found != None:
                     self.editorPart.GetParent().SetSelection(found.GetElement())
+                else:
+                    self.editorPart.GetParent().SetSelection(None)
             finally:
                 delta = datetime.datetime.now() - startTime
                 idelta = delta.days * 86400 + delta.seconds * 1000000 \
@@ -1127,7 +1145,7 @@ class WheelScaler:
         self.mouse_position = event.GetPosition()
         
     def OnMouseWheel(self, event):
-        print "Mouse wheel event"
+        #print "Mouse wheel event"
         #print "Wheel rotation:"
         #print event.GetWheelRotation()
         delta = event.GetWheelRotation()
