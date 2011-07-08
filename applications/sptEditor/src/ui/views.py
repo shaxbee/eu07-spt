@@ -43,8 +43,8 @@ BASEPOINT_IMAGES = loadImages(os.path.join( \
 SNAP_BASEPOINT_IMAGES = loadImages(os.path.join( \
     "icons", "canvas", "snappoint.png"), 72)
 
-SNAP_DISTANCE = 25
-
+SNAP_DISTANCE = 100
+SELECTION_DISTANCE = 16
 
 
 
@@ -200,7 +200,7 @@ class TrackView(View, Snapable):
         i = 1
         while i < len(lines):
             l = lines[i-1:i+1]
-            if sptmath.sqDistanceTo(l, point) < 16.0:
+            if sptmath.sqDistanceTo(l, point) < SELECTION_DISTANCE:
                 return True
             i += 1
         return False
@@ -337,7 +337,7 @@ class RailSwitchView(View, Snapable):
         i = 1
         while i < len(lines):
             l = lines[i-1:i+1]
-            if sptmath.sqDistanceTo(l, point) < 16.0:
+            if sptmath.sqDistanceTo(l, point) < SELECTION_DISTANCE:
                 return True
             i += 1
         return False

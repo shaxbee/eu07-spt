@@ -180,6 +180,8 @@ class PlanePart(wx.ScrolledWindow):
         self.switchCache = []
         self.basePointView = None
 
+        self._pen_rail_tracking_width = 1
+
         self.mode = MODE_NORMAL
         
         size = self.ComputePreferredSize()
@@ -296,8 +298,10 @@ class PlanePart(wx.ScrolledWindow):
         oldView = self.selectedView
         if oldView != None:
             oldRect = oldView.GetRepaintBounds()
-            oldRect.x -= vx * ux
-            oldRect.y -= vy * uy
+            oldRect.x -= vx * ux + self._pen_rail_tracking_width/2
+            oldRect.y -= vy * uy + self._pen_rail_tracking_width/2
+            oldRect.width += self._pen_rail_tracking_width/2
+            oldRect.height += self._pen_rail_tracking_width/2
             self.RefreshRect(oldRect)
         if selection != None:
             view = self.FindView(selection)
@@ -314,8 +318,18 @@ class PlanePart(wx.ScrolledWindow):
     def SetSnapPoint(self, selection):
         #check if snap point is the same, to avoid not needed refresh of scene
         if (self.snapData != selection):
+            
+            (vx, vy) = self.GetViewStart()
+            (ux, uy) = self.GetScrollPixelsPerUnit()
+            if selection == None:
+                newRect = wx.Rect(self.snapData.p2d.x - 10, self.snapData.p2d.y - 10, 20, 20)
+            else:
+                newRect = wx.Rect(selection.p2d.x - 10, selection.p2d.y - 10, 20, 20)
             self.snapData = selection
-            self.Refresh()
+            newRect.x -= vx * ux
+            newRect.y -= vy * uy
+            self.RefreshRect(newRect)
+            #self.Refresh()
 
     def AddView(self, element):
         view = None
@@ -441,6 +455,12 @@ class PlanePart(wx.ScrolledWindow):
         new_screen_center_unscrolled = self.CalcUnscrolledPosition(self.CalcScrolledPosition(new_position) + delta_to_screen_center)
         
         self.CenterViewAt(new_screen_center_unscrolled)
+        
+        # 4) set Pen for displaying tracks
+        if self.scale > 1:
+            self._pen_rail_tracking_width = 3
+        else:
+            self._pen_rail_tracking_width = 1
         
         # 4) Refresh views
         self.Update()
@@ -632,8 +652,7 @@ class PlanePart(wx.ScrolledWindow):
         """        
         oldPen = dc.GetPen()
         try:
-            dc.SetPen(wx.Pen((34, 139, 34), \
-                3 if self.scale > 1.0 else 1))
+            dc.SetPen(wx.Pen((34, 139, 34), self._pen_rail_tracking_width))
             for v in self.trackCache:
                 if v != self.selectedView:
                     v.Draw(dc, clip)
@@ -647,8 +666,7 @@ class PlanePart(wx.ScrolledWindow):
         """
         oldPen = dc.GetPen()
         try:
-            dc.SetPen(wx.Pen((173, 255, 47), \
-                3 if self.scale > 1.0 else 1))
+            dc.SetPen(wx.Pen((173, 255, 47), self._pen_rail_tracking_width))
             for v in self.switchCache:
                 if v != self.selectedView:
                     v.Draw(dc, clip)
@@ -664,8 +682,7 @@ class PlanePart(wx.ScrolledWindow):
             return
         oldPen = dc.GetPen()
         try:
-            dc.SetPen(wx.Pen((255, 0, 0), \
-                3 if self.scale > 1.0 else 1))
+            dc.SetPen(wx.Pen((255, 0, 0), self._pen_rail_tracking_width))
             self.selectedView.Draw(dc, clip)
         finally:
             dc.SetPen(oldPen)
@@ -1098,7 +1115,7 @@ class Highlighter:
             
         found = None
         for v in self.editorPart.trackCache + self.editorPart.switchCache:
-            if v.IsSelectionPossible(point):
+            if v.GetSnapData(point):
                 found = v
                 break
         if found != None:
