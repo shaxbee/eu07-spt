@@ -298,10 +298,8 @@ class PlanePart(wx.ScrolledWindow):
         oldView = self.selectedView
         if oldView != None:
             oldRect = oldView.GetRepaintBounds()
-            oldRect.x -= vx * ux + self._pen_rail_tracking_width/2
-            oldRect.y -= vy * uy + self._pen_rail_tracking_width/2
-            oldRect.width += self._pen_rail_tracking_width/2
-            oldRect.height += self._pen_rail_tracking_width/2
+            oldRect.x -= vx * ux
+            oldRect.y -= vy * uy
             self.RefreshRect(oldRect)
         if selection != None:
             view = self.FindView(selection)
@@ -310,7 +308,7 @@ class PlanePart(wx.ScrolledWindow):
             self.selectedView = view
             newRect = view.GetRepaintBounds()
             newRect.x -= vx * ux
-            newRect.y -= vy * uy           
+            newRect.y -= vy * uy
             self.RefreshRect(newRect)            
         else:
             self.selectedView = None
@@ -334,10 +332,10 @@ class PlanePart(wx.ScrolledWindow):
     def AddView(self, element):
         view = None
         if isinstance(element, model.tracks.Track):
-            view = ui.views.TrackView(element)
+            view = ui.views.TrackView(element,self._pen_rail_tracking_width)
             self.trackCache.append(view)
         elif isinstance(element, model.tracks.Switch):
-            view = ui.views.RailSwitchView(element)
+            view = ui.views.RailSwitchView(element,self._pen_rail_tracking_width)
             self.switchCache.append(view)
         else:
             raise ValueError("Unsupported element: " + str(type(element)))

@@ -119,11 +119,11 @@ class TrackView(View, Snapable):
     View implementation for track.
     """
     
-    def __init__(self, track):
+    def __init__(self, track, pen_width=1):
         self.track = track
         self.curve = [wx.Point(0.0, 0.0), wx.Point(0.0, 0.0), \
                       wx.Point(0.0, 0.0), wx.Point(0.0, 0.0)]
-        
+        self._pen_width = pen_width
         
     def GetElement(self):
         return self.track
@@ -156,6 +156,7 @@ class TrackView(View, Snapable):
         
     
     def Draw(self, dc, clip):
+        self._pen_width = dc.GetPen().GetWidth()
         dc.DrawSpline(self.curve)
 
 
@@ -168,7 +169,8 @@ class TrackView(View, Snapable):
         r = max(xspan)
         t = min(yspan)
         b = max(yspan)
-        return wx.Rect(l, t, r-l+1, b-t+1)
+        return wx.Rect(l-self._pen_width/2, t-self._pen_width, \
+                       r-l+self._pen_width, b-t+self._pen_width)
 
 
     def GetSnapData(self, point):        
@@ -213,13 +215,13 @@ class RailSwitchView(View, Snapable):
     View implementation for rail switches.
     """
     
-    def __init__(self, switch):
+    def __init__(self, switch, pen_width=1):
         self.switch = switch
         self.straight = [wx.Point(0.0, 0.0), wx.Point(0.0, 0.0), \
                          wx.Point(0.0, 0.0), wx.Point(0.0, 0.0)]
         self.diverging = [wx.Point(0.0, 0.0), wx.Point(0.0, 0.0), \
                           wx.Point(0.0, 0.0), wx.Point(0.0, 0.0)]
-        
+        self._pen_width = pen_width
     
     def GetElement(self):
         return self.switch
