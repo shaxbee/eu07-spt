@@ -171,11 +171,10 @@ class TrackFactory:
 
         length = (startPoint - endPoint).length()
 
-        startVec.normalize()
-        startVec.scale(length * 0.333)
-        endVec.normalize()
-        endVec.scale(length * 0.333)
-
+        startVec = startVec.normalize()
+        startVec = startVec.scale(length * 0.333)
+        endVec = endVec.normalize()
+        endVec = endVec.scale(length * 0.333)
         t = Track(p1 = startPoint, v1 = startVec, v2 = endVec, p2 = endPoint)
         return t
 
