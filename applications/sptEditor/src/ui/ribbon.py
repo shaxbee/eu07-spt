@@ -199,3 +199,34 @@ class RibbonPanel(wx.Panel):
 
         chmode.AddSimpleButton(ID_MODE_TRACK_NORMAL, "Normal", icon_normal, "")
         chmode.AddSimpleButton(ID_MODE_TRACK_CLOSURE, "Closure", icon_closure, "")
+        
+    def SelectButton(self, id):
+        #self._ribbon.
+        #b = self._ribbon.FindWindowById(id)
+        button = self.GetButtonById(id)
+        
+        pass
+                                    
+    
+    def DeselectButton(self, id):
+        pass
+    
+    def GetButtonById(self, id):
+        for page in self._ribbon.GetChildren():
+            if isinstance(page,RB.RibbonPage):
+                for panel in page.GetChildren():
+                    if isinstance(panel,RB.RibbonPanel):
+                        for bar in panel.GetChildren():
+                            if isinstance(bar,RB.RibbonButtonBar):
+                                for button in bar._buttons:
+                                    if button.id == id:
+                                        bar.EnableButton(id)
+                                        
+                            elif isinstance(bar,RB.RibbonToolBar):
+                                for group in bar._groups:
+                                    for tool in group.tools:
+                                        if tool.id == id:
+                                            return tool
+        return None        
+
+        

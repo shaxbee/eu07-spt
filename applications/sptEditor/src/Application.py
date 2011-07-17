@@ -635,11 +635,12 @@ class MainWindow(wx.Frame):
         self.trackPaletteMenuEntry.Check(False)
 
     def MenuChangeEditorMode(self, mode):
+        '''Change editor mode: check aprioprate button'''
         if mode == ui.editor.MODE_NORMAL:
             pass
         elif mode == ui.editor.MODE_CLOSURE:
-            pass
-        pass
+            self.ribbon.SelectButton(ui.ribbon.ID_MODE_TRACK_NORMAL)
+            self.ribbon.DeselectButton(ui.ribbon.ID_MODE_TRACK_CLOSURE)
 
 if __name__ == "__main__":
     usage = "Usage: %prog [options]"

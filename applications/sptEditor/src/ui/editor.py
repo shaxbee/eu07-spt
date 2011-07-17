@@ -113,8 +113,11 @@ class SceneryEditor(wx.Panel):
 
 
     def SetMode(self, mode, updateMenu = False):
-        self.parts[0].SetMode(mode, updateMenu)
-
+        self.parts[0].SetMode(mode)
+        #update menu
+        if updateMenu != False:
+            self.GetTopLevelParent().MenuChangeEditorMode(mode)
+            
     def OnMouseWheel(self, event):
         self.parts[0].OnMouseWheel(event)
         #TODO
@@ -1035,8 +1038,9 @@ class TrackClosurer:
         startTime = datetime.datetime.now()
         try:
             foundView = None
+            #Check if can snap some point
             for v in self.__editor.trackCache + self.__editor.switchCache:
-                if v.IsSelectionPossible(point):
+                if v.GetSnapData(point):
                     foundView = v
                     break
             if foundView is None:
