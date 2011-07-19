@@ -47,10 +47,25 @@ def getImageIndexByAngle(angle):
     return 0 if index > 71 else index
 
 
-BASEPOINT_IMAGES = loadImages(os.path.join( \
-    "icons", "canvas", "basepoint.png"), 72)
-SNAP_BASEPOINT_IMAGES = loadImages(os.path.join( \
-    "icons", "canvas", "snappoint.png"), 72)
+
+
+BASEPOINT_IMAGES = None
+SNAP_BASEPOINT_IMAGES = None
+
+
+def GetBasePointImages():
+    global BASEPOINT_IMAGES
+    if BASEPOINT_IMAGES is None:
+        BASEPOINT_IMAGES = loadImages(os.path.join("icons", "canvas", "basepoint.png"), 72)
+    return BASEPOINT_IMAGES
+
+
+def GetSnapPointImages():
+    global SNAP_BASEPOINT_IMAGES
+    if SNAP_BASEPOINT_IMAGES is None:
+        SNAP_BASEPOINT_IMAGES = loadImages(os.path.join("icons", "canvas", "snappoint.png"), 72)
+    return SNAP_BASEPOINT_IMAGES
+
 
 SNAP_DISTANCE = 25
 
@@ -153,6 +168,70 @@ class TrackViewer:
         bottom = max(p1[1], v1[1], v2[1], p2[1])
         
         return wx.Rect(left, top, right-left+1, bottom-top+1)
+    
+    
+    def GetSnapData(self, bounds, point):
+        """
+        Gets the snap data for this view.
+        
+        Example:
+        >>> from model.tracks import Track
+        >>> from editor import EditorBounds
+        >>> from sptmath import Vec3
+        >>> import wx
+        >>> t = Track(p1 = Vec3("-51416.636", "56806.718", "0.000"),
+        ...     v1 = Vec3("-1.416", "-16.607", "0.000"),
+        ...     v2 = Vec3("0.376", "16.664", "0.000"),
+        ...     p2 = Vec3("-51419.325", "56756.799", "0.000"))
+        >>> bounds = EditorBounds()
+        >>> bounds.scale = 10.0
+        >>> bounds.minX = -55000.0
+        >>> bounds.maxX = 1000.0
+        >>> bounds.minY = -5000.0
+        >>> bounds.maxY = 60000.0
+        >>> tv = TrackViewer(t)
+        >>> sp = tv.GetSnapData(bounds, wx.Point(35935, 32030))
+        >>> sp.p2d
+        (35933, 32032)
+        >>> sp.p3d
+        (-51416.636,56806.718,0.000)
+        >>> round(sp.alpha, 2)
+        4.87
+        >>> sp = tv.GetSnapData(bounds, wx.Point(35907, 32530))
+        >>> sp.p2d
+        (35906, 32532)
+        >>> sp.p3d
+        (-51419.325,56756.799,0.000)
+        >>> round(sp.alpha, 2)
+        -178.71
+        >>> tv.GetSnapData(bounds, wx.Point(0, 0))
+        
+        """
+        p1 = bounds.ModelToView(self.track.p1)
+        p2 = bounds.ModelToView(self.track.p2)
+        
+        p1x = p1[0] - point.x
+        p1y = p1[1] - point.y
+        p2x = p2[0] - point.x
+        p2y = p2[1] - point.y
+        if (p1x * p1x + p1y * p1y <= SNAP_DISTANCE
+                and self.track.point2tracking(self.track.p1) == None):
+
+            data = ui.editor.SnapData()
+            data.p2d = p1
+            data.p3d = self.track.p1
+            data.Complete(self.track)
+            return data
+        elif (p2x * p2x + p2y * p2y <= SNAP_DISTANCE
+                and self.track.point2tracking(self.track.p2) == None):
+            data = ui.editor.SnapData()
+            data.p2d = p2
+            data.p3d = self.track.p2
+            data.Complete(self.track)
+            return data
+        else:
+            return None
+            
         
         
         
@@ -235,6 +314,80 @@ class SwitchViewer:
         bottom = max(pc[1], vc1[1], v1[1], p1[1], vc2[1], v2[1], p2[1])
         
         return wx.Rect(left, top, right-left+1, bottom-top+1)
+    
+    
+    def GetSnapData(self, bounds, point):
+        """
+        Gets the snap data for this view.
+        
+        Example:
+        >>> from model.tracks import Switch
+        >>> from editor import EditorBounds
+        >>> from sptmath import Vec3
+        >>> import wx
+        >>> s = Switch(p1 = Vec3("-51416.636", "56806.718", "0.000"),
+        ...     v1 = Vec3("-1.416", "-16.607", "0.000"),
+        ...     v2 = Vec3("0.376", "16.664", "0.000"),
+        ...     p2 = Vec3("-51419.325", "56756.799", "0.000"))
+        >>> bounds = EditorBounds()
+        >>> bounds.scale = 10.0
+        >>> bounds.minX = -55000.0
+        >>> bounds.maxX = 1000.0
+        >>> bounds.minY = -5000.0
+        >>> bounds.maxY = 60000.0
+        >>> tv = SwitchViewer(s)
+        >>> sp = tv.GetSnapData(bounds, wx.Point(35935, 32030))
+        >>> sp.p2d
+        (35933, 32032)
+        >>> sp.p3d
+        (-51416.636,56806.718,0.000)
+        >>> round(sp.alpha, 2)
+        4.87
+        >>> sp = tv.GetSnapData(bounds, wx.Point(35907, 32530))
+        >>> sp.p2d
+        (35906, 32532)
+        >>> sp.p3d
+        (-51419.325,56756.799,0.000)
+        >>> round(sp.alpha, 2)
+        -178.71
+        >>> tv.GetSnapData(bounds, wx.Point(0, 0))
+        
+        """
+        pc = bounds.ModelToView(self.switch.pc)
+        p1 = bounds.ModelToView(self.switch.p1)
+        p2 = bounds.ModelToView(self.switch.p2)        
+        
+        pcx = pc[0] - point.x
+        pcy = pc[1] - point.y
+        p1x = p1[0] - point.x
+        p1y = p1[1] - point.y
+        p2x = p2[0] - point.x
+        p2y = p2[1] - point.y
+        if (pcx * pcx + pcy * pcy <= SNAP_DISTANCE
+            and self.switch.point2tracking(self.switch.pc) is None):
+            
+            data = ui.editor.SnapData()
+            data.p2d = pc
+            data.p3d = self.switch.pc
+            data.Complete(self.switch)
+            return data
+        elif (p1x * p1x + p1y * p1y <= SNAP_DISTANCE
+                and self.switch.point2tracking(self.switch.p1) is None):
+
+            data = ui.editor.SnapData()
+            data.p2d = p1
+            data.p3d = self.switch.p1
+            data.Complete(self.switch)
+            return data
+        elif (p2x * p2x + p2y * p2y <= SNAP_DISTANCE
+                and self.switch.point2tracking(self.switch.p2) is None):
+            data = ui.editor.SnapData()
+            data.p2d = p2
+            data.p3d = self.switch.p2
+            data.Complete(self.switch)
+            return data
+        else:
+            return None    
 
 
 
@@ -297,6 +450,18 @@ class GroupViewer:
         return wx.Rect(min[0], min[1], max[0]-min[0]+1, min[1]-max[1]+1)
 
 
+    def GetSnapData(self, bounds, point):
+        """
+        Gets the snap data for this view.
+        """
+        for c in self.group.children:
+            sd = GetViewer(c).GetSnapData(bounds, point)
+            if sd is not None:
+                return sd
+        return None
+
+
+
 
 class BasePointView:
     """
@@ -310,9 +475,10 @@ class BasePointView:
     def Draw(self, context):
         p2d = context.bounds.ModelToView(self.basePoint.point)
         index = getImageIndexByAngle(self.basePoint.alpha)
-        context.dc.DrawBitmap(wx.BitmapFromImage(BASEPOINT_IMAGES[index]), \
-                      p2d[0] - BASEPOINT_IMAGES[index].GetWidth() / 2, \
-                      p2d[1] - BASEPOINT_IMAGES[index].GetHeight() / 2)
+        image = GetBasePointImages()[index]
+        context.dc.DrawBitmap(wx.BitmapFromImage(image), \
+                      p2d[0] - image.GetWidth() / 2, \
+                      p2d[1] - image.GetHeight() / 2)
         
         
     def GetBox(self, bounds):
@@ -337,12 +503,13 @@ class BasePointView:
         return wx.Rect(p2d[0] - 10, p2d[1] - 10, 20, 20)
     
     
-    def IsSelectionPossible(self, point, context):
+    def IsSelectionPossible(self, point, bounds):
         """
         Checks if selection of this view is possible from given point.
         """
-        x = self.point.x - point.x
-        y = self.point.y - point.y
+        p2d = bounds.ModelToView(self.basePoint.point)
+        x = p2d[0] - point.x
+        y = p2d[1] - point.y
         return (x*x + y*y) <= SNAP_DISTANCE
 
 

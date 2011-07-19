@@ -472,11 +472,11 @@ class PlanePart(wx.ScrolledWindow):
     def PaintSnapPoint(self, dc, clip, context):
         if self.snapData is not None:
              index = ui.views.getImageIndexByAngle(self.snapData.alpha)
-             snapImage = ui.views.SNAP_BASEPOINT_IMAGES[index]
+             snapImage = ui.views.GetSnapPointImages()[index]
 
              dc.DrawBitmap(wx.BitmapFromImage(snapImage),
-                 self.snapData.p2d.x - snapImage.GetWidth()/2,
-                 self.snapData.p2d.y - snapImage.GetHeight()/2)
+                 self.snapData.p2d[0] - snapImage.GetWidth()/2,
+                 self.snapData.p2d[1] - snapImage.GetHeight()/2)
 
 
     def OnMoveUpdateStatusBar(self, event):
@@ -709,14 +709,7 @@ class BasePointMover:
 
         point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
 
-        context = ui.views.DrawContext()
-        context.scale = self.editorPart.scale
-        context.minX = self.editorPart.minX
-        context.maxX = self.editorPart.maxX
-        context.minY = self.editorPart.minY
-        context.maxY = self.editorPart.maxY
-        
-        if self.editorPart.basePointView.IsSelectionPossible(point, context):
+        if self.editorPart.basePointView.IsSelectionPossible(point, self.editorPart.bounds):
             self.pressed = True
     
     
@@ -735,7 +728,7 @@ class BasePointMover:
             else:
                 p3d = self.editorPart.ViewToModel(point)
                 self.editorPart.GetParent().basePoint.point = p3d
-            self.editorPart.GetParent().SetBasePoint(
+            self.editorPart.GetParent().SetBasePoint( \
                 self.editorPart.GetParent().basePoint)
             
         self.pressed = False
@@ -750,9 +743,16 @@ class BasePointMover:
             foundSnapData = None
             updateScreen = False
             
-            # This may be optimised by using scenery outline points
-            for v in self.editorPart.trackCache + self.editorPart.switchCache:
-                foundSnapData = v.GetSnapData(point)
+            p2a = wx.Point(point.x - 5, point.y - 5)
+            p2b = wx.Point(point.x + 5, point.y + 5)
+            p3a = self.editorPart.ViewToModel(p2a)
+            p3b = self.editorPart.ViewToModel(p2b)            
+            
+            viewport = sptial.Cuboid.fromEndpoints([p3a, p3b])
+            elements = self.editorPart.GetParent().scenery.tracks.children.queryView(viewport)
+            
+            for v in elements:
+                foundSnapData = ui.views.GetViewer(v).GetSnapData(self.editorPart.bounds, point)
                 if foundSnapData is not None:
                     self.editorPart.snapData = foundSnapData
                     break
@@ -760,12 +760,12 @@ class BasePointMover:
             if foundSnapData is None:
                 self.editorPart.snapData = None
             if oldSnapData is not None:
-                self.editorPart.RefreshRect(
-                    wx.Rect(oldSnapData.p2d.x-10, oldSnapData.p2d.y-10, 20, 20))
+                self.editorPart.RedrawRect(
+                    wx.Rect(oldSnapData.p2d[0]-10, oldSnapData.p2d[1]-10, 20, 20))
                 updateScreen = True
             if foundSnapData is not None:
-                self.editorPart.RefreshRect(
-                    wx.Rect(foundSnapData.p2d.x-10, foundSnapData.p2d.y-10, 20, 20))
+                self.editorPart.RedrawRect(
+                    wx.Rect(foundSnapData.p2d[0]-10, foundSnapData.p2d[1]-10, 20, 20))
                 updateScreen = True
             if updateScreen:
                 self.editorPart.Update()
@@ -987,11 +987,7 @@ class SceneryListener(model.scenery.SceneryListener):
         element = event.GetElement()
         changeType = event.GetType()
 
-        if changeType == model.scenery.CHANGE_ADD \
-            and isinstance(element, model.groups.RailContainer):
-
-            self.sceneryAddGroup(element)
-        elif changeType == model.scenery.CHANGE_ADD:
+        if changeType == model.scenery.CHANGE_ADD:
             self.sceneryAdd(scenery, element)
         elif changeType == model.scenery.CHANGE_REMOVE:
             self.sceneryRemove(element)
@@ -1031,34 +1027,3 @@ class SceneryListener(model.scenery.SceneryListener):
             repaintRect.x -= vx * ux
             repaintRect.y -= vy * uy
             part.RefreshRect(repaintRect)
-
-
-    # TODO: refactor or even remove it all
-    def sceneryAddGroup(self, group):
-        part = self.editor.parts[0]
-        (vx, vy) = part.GetViewStart()
-        (ux, uy) = part.GetScrollPixelsPerUnit()
-
-        views = []
-        for track in group.tracks():
-            views.append(part.AddView(track))
-        for sw in group.switches():
-            views.append(part.AddView(sw))
-
-        needPainting = part.ComputeMinMax()
-        if needPainting:
-            self.editor.Refresh()
-        else:
-            repaintRect = None
-            for view in views:
-                view.Scale(part.scale, part.minX, part.maxX, part.minY, part.maxY)
-                nextRepaintRect = view.GetRepaintBounds()
-                if repaintRect is None:
-                    repaintRect = nextRepaintRect
-                else:
-                    repaintRect = repaintRect.Union(nextRepaintRect)
-
-            repaintRect.x -= vx * ux
-            repaintRect.y -= vy * uy
-            part.RefreshRect(repaintRect)
-
