@@ -639,8 +639,8 @@ class MainWindow(wx.Frame):
         if mode == ui.editor.MODE_NORMAL:
             pass
         elif mode == ui.editor.MODE_CLOSURE:
-            self.ribbon.SelectButton(ui.ribbon.ID_MODE_TRACK_NORMAL)
-            self.ribbon.DeselectButton(ui.ribbon.ID_MODE_TRACK_CLOSURE)
+            self.ribbon.DeselectButton(ui.ribbon.ID_MODE_TRACK_NORMAL)
+            self.ribbon.SelectButton(ui.ribbon.ID_MODE_TRACK_CLOSURE)
 
 if __name__ == "__main__":
     usage = "Usage: %prog [options]"

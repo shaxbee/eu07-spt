@@ -204,7 +204,10 @@ class RibbonPanel(wx.Panel):
         #self._ribbon.
         #b = self._ribbon.FindWindowById(id)
         button = self.GetButtonById(id)
-        
+        if button != None:
+            button.state |= RB.RIBBON_BUTTONBAR_BUTTON_NORMAL_ACTIVE
+            
+            self.Refresh(False)
         pass
                                     
     
@@ -220,8 +223,9 @@ class RibbonPanel(wx.Panel):
                             if isinstance(bar,RB.RibbonButtonBar):
                                 for button in bar._buttons:
                                     if button.id == id:
-                                        bar.EnableButton(id)
-                                        
+                                        #bar.EnableButton(id)
+                                        return button
+                                    
                             elif isinstance(bar,RB.RibbonToolBar):
                                 for group in bar._groups:
                                     for tool in group.tools:
