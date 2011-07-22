@@ -53,7 +53,7 @@ void Extruder::extrude(const sptCore::Path& path, const osg::Vec3& position, con
     // profiles from second
     for(size_t row = 1; row < numPathVerts - 1; row++)
     {
-        osg::Vec3 point = (*points)[row]; 
+        osg::Vec3 point = (*points)[row];
         osg::Vec3 dir = point - prev;
         texCoordV += dir.length();
 
@@ -63,14 +63,14 @@ void Extruder::extrude(const sptCore::Path& path, const osg::Vec3& position, con
     };
 
     // last profile
-    texCoordV += (path.back() - prev).length(); 
+    texCoordV += (path.back() - prev).length();
     transformProfile(path.back(), offset, path.backDir(), texCoordV);
 
     // create faces index arrays
     for(size_t face = 0; face < numProfileVerts - 1; face++)
     {
         osg::DrawElementsUInt* primitiveSet = new osg::DrawElementsUInt(GL_TRIANGLE_STRIP, numPathVerts * 2);
-            
+
         for(size_t row=0; row < numPathVerts; row++)
         {
             size_t index = row * numProfileVerts + face;

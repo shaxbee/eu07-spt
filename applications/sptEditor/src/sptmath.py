@@ -5,7 +5,15 @@ Module containing dedicated math operations.
 '''
 
 from wx import Point
-from _sptmath import dotProduct, Vec3, Decimal
+
+try:
+	from _sptmath import dotProduct, Vec3, Decimal
+except ImportError:
+	from _sptmathd import dotProduct, Vec3, Decimal
+	
+	
+VEC3_ZERO = Vec3("0", "0", "0")
+
 
 def isNegativeVector(a, b):
     """
@@ -137,3 +145,7 @@ def sqDistanceTo(line, point):
 for sym in [Vec3, Decimal]:
     sym.__module__ = 'sptmath' 
     sym.__file__ = 'sptmath.cpp'
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testfile("sptmath.txt", optionflags=doctest.ELLIPSIS)

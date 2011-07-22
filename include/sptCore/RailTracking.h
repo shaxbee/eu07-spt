@@ -4,7 +4,7 @@
 #include <osg/Vec3>
 #include <osg/Matrix>
 
-#include <boost/exception/all.hpp> 
+#include <boost/exception/all.hpp>
 
 #include <sptCore/Path.h>
 

@@ -12,15 +12,15 @@ using namespace sptCore;
 Follower::Follower(Track& track, float distance):
     _track(&track), _distance(distance)
 {
-    
+
     _path = track.getDefaultPath();
 
 };
 
 void Follower::move(float distance)
 {
-    
-    _distance += distance;    
+
+    _distance += distance;
 
     while(_distance < 0)
     {
@@ -28,15 +28,15 @@ void Follower::move(float distance)
         _path = _path->reverse();
         _distance += _path->length();
     };
-    
+
     while(_distance > _path->length())
     {
-        
+
         _distance -= _path->length();
         changeTrack(_path->back());
-                
+
     };
-    
+
 }; // Follower::move
 
 float segmentLength(osg::Vec3Array::const_iterator& iter)
@@ -46,7 +46,7 @@ float segmentLength(osg::Vec3Array::const_iterator& iter)
 
 void Follower::findPosition(osg::ref_ptr<osg::Vec3Array> points, osg::Vec3Array::const_iterator& iter, float& ratio) const
 {
-    float distance = segmentLength(iter); 
+    float distance = segmentLength(iter);
 
     // find point location on path matching distance
     for(iter = points->begin() + 1; distance < _distance && iter != points->end(); iter++)

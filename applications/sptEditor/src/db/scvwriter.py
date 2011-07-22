@@ -11,7 +11,7 @@ class VariantError(RuntimeError):
 def __writeVariantSectors(writer, sectors):
     writer.writeUInt(len(sectors))
     
-    data = ((int(sector.position.x) / SECTOR_SIZE, int(sector.position.y) / SECTOR_SIZE) for sector in sectors)
+    data = ((int(sector.position[0]) / SECTOR_SIZE, int(sector.position[1]) / SECTOR_SIZE) for sector in sectors)
     writer.writeArray(struct.Struct("<ii"), data, len(sectors))
 
 def writeVariant(fout, id, sectors):

@@ -169,6 +169,9 @@ class RailContainer:
                     v_tracking_normal = tracking.getNormalVector(gpoint)
                     v_child_normal = child.getNormalVector(gpoint)
                     
+                    _logger.debug("Tracking normal is %s" % v_tracking_normal)
+                    _logger.debug("Child normal is %s" % v_child_normal)
+                    
                     # Check if normal vectors may plug together
                     if sptmath.isNegativeVector(v_tracking_normal, v_child_normal):
 

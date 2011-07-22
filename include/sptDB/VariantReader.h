@@ -12,9 +12,9 @@ namespace sptDB
 
 struct VariantSector
 {
-	int x;
-	int y;
-	unsigned short variantId;
+    int x;
+    int y;
+    unsigned short variantId;
 };
 
 typedef std::vector<VariantSector> VariantSectors;
@@ -22,17 +22,17 @@ typedef std::vector<VariantSector> VariantSectors;
 class Variant
 {
 public:
-	Variant(unsigned short variantId, VariantSectors& sectors): _variantId(variantId)
-	{
-		_sectors.swap(sectors);
-	};
+    Variant(unsigned short variantId, VariantSectors& sectors): _variantId(variantId)
+    {
+        _sectors.swap(sectors);
+    };
 
-	unsigned short getVariantId() const { return _variantId; }
-	const VariantSectors& getSectors() const { return _sectors; }
+    unsigned short getVariantId() const { return _variantId; }
+    const VariantSectors& getSectors() const { return _sectors; }
 
 private:
-	unsigned short _variantId;
-	VariantSectors _sectors;
+    unsigned short _variantId;
+    VariantSectors _sectors;
 };
 
 std::string getSectorFileName(const VariantSector& sector);

@@ -2,10 +2,9 @@
 Unit tests for tracks module.
 """
 
-from decimal import Decimal
 import unittest
 
-from sptmath import Vec3
+from sptmath import Vec3, Decimal
 from model.tracks import *
 
 class TrackTest(unittest.TestCase):

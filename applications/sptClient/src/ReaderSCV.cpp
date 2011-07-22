@@ -30,58 +30,58 @@ public:
     };
 
     virtual ReadResult readNode(const std::string& fileName, const Options* options = NULL) const
-	{
+    {
         // extract file extension and check if it is supported
-		std::string ext = osgDB::getLowerCaseFileExtension(fileName);
-        if(!acceptsExtension(ext)) 
-			return ReadResult::FILE_NOT_HANDLED;
+        std::string ext = osgDB::getLowerCaseFileExtension(fileName);
+        if(!acceptsExtension(ext))
+            return ReadResult::FILE_NOT_HANDLED;
 
         // locate file on search path
-		std::string fullFileName = osgDB::findDataFile(fileName);
-		if(fullFileName.empty())
-			return ReadResult::FILE_NOT_FOUND;
+        std::string fullFileName = osgDB::findDataFile(fileName);
+        if(fullFileName.empty())
+            return ReadResult::FILE_NOT_FOUND;
 
         // do actual read
-		osgDB::ifstream input(fullFileName.c_str(), std::ios::binary);
+        osgDB::ifstream input(fullFileName.c_str(), std::ios::binary);
         return readNode(input, options);
     }; // ReaderSCV::readNode
 
     virtual ReadResult readNode(std::istream& fin, const Options* options = NULL) const
     {
-		osg::ref_ptr<osg::Group> result = new osg::Group;
+        osg::ref_ptr<osg::Group> result = new osg::Group;
 
-		try
-		{
+        try
+        {
             // read variant data from fin
-			std::auto_ptr<Variant> variant(readVariant(fin));
+            std::auto_ptr<Variant> variant(readVariant(fin));
 
             // for each sector
-			for(sptDB::VariantSectors::const_iterator iter = variant->getSectors().begin(); iter != variant->getSectors().end(); iter++)
-			{
+            for(sptDB::VariantSectors::const_iterator iter = variant->getSectors().begin(); iter != variant->getSectors().end(); iter++)
+            {
                 // read sector file
-				osg::ref_ptr<osg::Node> sector = osgDB::readNodeFile(getSectorFileName(*iter));
+                osg::ref_ptr<osg::Node> sector = osgDB::readNodeFile(getSectorFileName(*iter));
 
                 // if read was successful
-				if(sector.valid())
+                if(sector.valid())
                 {
                     // create transform for sector
                     osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform(osg::Matrix::translate(iter->x, iter->y, 0.0f));
                     // add sector to transform
                     transform->addChild(sector.get());
                     // add transform to root
-					result->addChild(transform.get());
+                    result->addChild(transform.get());
                 }
-			};
+            };
 
-			return ReadResult(result);
-		}
-		catch(std::exception& exc)	
-		{
+            return ReadResult(result);
+        }
+        catch(std::exception& exc)
+        {
             // exception was catched during reading variant, report error.
-			osg::notify(osg::FATAL) << "Variant loading failed. " << exc.what();
-		};
+            osg::notify(osg::FATAL) << "Variant loading failed. " << exc.what();
+        };
 
-		return ReadResult::ERROR_IN_READING_FILE;
+        return ReadResult::ERROR_IN_READING_FILE;
     };
 
 }; // class ReaderSCV

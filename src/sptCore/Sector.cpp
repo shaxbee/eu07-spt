@@ -55,5 +55,5 @@ const RailTracking* Sector::updateConnection(const osg::Vec3f& position, const R
         return iter->first;
     };
 
-    return NULL;  
+    return NULL;
 };

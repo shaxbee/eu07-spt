@@ -1,7 +1,7 @@
 import math
 import os.path
 
-from sptmath import Vec3
+from sptmath import Vec3, Decimal
 from model.tracks import Track, Switch
 from model.groups import RailContainer
 
@@ -9,6 +9,8 @@ from time import sleep
 
 from sctwriter import writeSector, SECTOR_SIZE
 from scvwriter import writeVariant
+
+DEC_SECTOR_SIZE = Decimal(str(SECTOR_SIZE))
 
 #SECTOR_CENTER = Vec3(SECTOR_SIZE / 2, SECTOR_SIZE / 2, 0)
 
@@ -23,9 +25,9 @@ def exportScenery(path, tracks, switches, callback):
     callback(percent);
         
     for sector in sectors.itervalues():
-        sector_name = "%+05d%+05d.sct" % (sector.position.x, sector.position.y)
+        sector_name = "%+05d%+05d.sct" % sector.position
         with file(os.path.abspath(os.path.join(path, sector_name)), "wb") as fout:
-            position = Vec3(sector.position.x * SECTOR_SIZE, sector.position.y * SECTOR_SIZE, 0)
+            position = Vec3(Decimal(sector.position[0]) * DEC_SECTOR_SIZE, Decimal(sector.position[1]) * DEC_SECTOR_SIZE, Decimal("0.0"))
             writeSector(fout, position, sector.tracks, sector.switches)
         
         progress += 1
@@ -54,7 +56,7 @@ def __sortTrackings(sectors, trackings, dest):
     """
     
     for tracking in trackings:
-        position = Vec3(math.floor(tracking.p1.x / SECTOR_SIZE), math.floor(tracking.p1.y / SECTOR_SIZE), 0)
+        position = (math.floor(tracking.p1.x / DEC_SECTOR_SIZE), math.floor(tracking.p1.y / DEC_SECTOR_SIZE))
         #position += SECTOR_CENTER
         
         if position not in sectors:

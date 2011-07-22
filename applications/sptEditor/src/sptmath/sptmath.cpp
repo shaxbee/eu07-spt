@@ -123,7 +123,7 @@ struct DecimalPickle: boost::python::pickle_suite
 {
     static boost::python::tuple getinitargs(const Decimal& value)
     {
-        return boost::python::make_tuple(value.raw());
+        return boost::python::make_tuple(value.__str__());
     };
 };
 
@@ -131,7 +131,7 @@ struct Vec3Pickle: boost::python::pickle_suite
 {
     static boost::python::tuple getinitargs(const Vec3& value)
     {
-        return boost::python::make_tuple(value.getX(), value.getY(), value.getZ());
+        return value.to_tuple();
     };
 }; // Vec3Pickle
 
@@ -139,7 +139,7 @@ struct Vec3Pickle: boost::python::pickle_suite
 
 BOOST_PYTHON_MODULE(_sptmath)
 {
-	using namespace boost::python;
+    using namespace boost::python;
 
     // show user-defined docstrings and python signatures
     docstring_options doc_options(true, false, false);
@@ -147,23 +147,23 @@ BOOST_PYTHON_MODULE(_sptmath)
     Decimal (Decimal::*decimal_sub_operator_ptr)(const Decimal&) const = &Decimal::operator-;
     Decimal (Decimal::*decimal_neg_operator_ptr)() const = &Decimal::operator-;
 
-	class_<Decimal>("Decimal", doc_Decimal, init<std::string>())
+    class_<Decimal>("Decimal", doc_Decimal, init<std::string>())
         .def(init<>())
         .def(init<float>())
 
         .def_pickle(DecimalPickle())
 
         .def("__float__", &Decimal::operator float)
-		.def("__add__",  &Decimal::operator+)
-		.def("__sub__",  decimal_sub_operator_ptr)
-		.def("__mul__",  &Decimal::operator*)
-		.def("__div__",  &Decimal::operator/)
-		.def("__eq__",   &Decimal::operator==)
+        .def("__add__",  &Decimal::operator+)
+        .def("__sub__",  decimal_sub_operator_ptr)
+        .def("__mul__",  &Decimal::operator*)
+        .def("__div__",  &Decimal::operator/)
+        .def("__eq__",   &Decimal::operator==)
         .def("__neg__",  decimal_neg_operator_ptr)
         .def("__nonzero__", &Decimal::operator bool)
 
-		.def("__repr__", &Decimal::__repr__)
-		.def("__str__",  &Decimal::__str__);
+        .def("__repr__", &Decimal::__repr__)
+        .def("__str__",  &Decimal::__str__);
 
     Vec3 (Vec3::*vec3_sub_operator_ptr)(const Vec3&) const = &Vec3::operator-;
     Vec3 (Vec3::*vec3_neg_operator_ptr)() const = &Vec3::operator-;
@@ -186,13 +186,14 @@ BOOST_PYTHON_MODULE(_sptmath)
 
         .def("__repr__",     &Vec3::__repr__)
 
+        .def("to_tuple",     &Vec3::to_tuple)
         .def("moveBy",       &Vec3::moveBy, arg("other"), doc_Vec3_moveBy)
         .def("scale",        &Vec3::scale, arg("s"), doc_Vec3_scale)
         .def("length",       &Vec3::length, "The length of the vector.")
         .def("dotProduct",   &Vec3::dotProduct, "Dot product of this vector and another.")
         .def("normalize",    &Vec3::normalize, doc_Vec3_normalize)
         .def("angleToJUnit", &Vec3::angleToJUnit, doc_Vec3_angleToJUnit);
-        
+
     def("dotProduct", &dotProduct, args("left", "right"), "Dot product of two vectors.");
 
 };

@@ -182,10 +182,18 @@ class PlanePart(wx.ScrolledWindow):
         #self.SetFocusIgnoringChildren()
 
     def OnMouseEnter(self, event):
+        #Inform window that mouse is in area. Set focus to the ribbon
+        #to correct assign mouse wheel events.
         self.mouse_in_window = True
+        self.main_window.ribbon.SetFocus()
+        #self.logger.info("Mouse enter the window")
+        #print "mouse enter"
 
     def OnMouseLeave(self, event):
+        #inform window that mouse is out of the area.
         self.mouse_in_window = False
+        #self.logger.info("Mouse leave the window")
+        #print "mouse leave"
 
     def OnMouseWheel(self, event):
         #print "Editor mouse event"
@@ -235,9 +243,9 @@ class PlanePart(wx.ScrolledWindow):
             if wx > 2*BASE_POINT_MARGIN and wy > 2*BASE_POINT_MARGIN:
                 if p.x < vx*ux + BASE_POINT_MARGIN or p.x > vx*ux + wx - BASE_POINT_MARGIN \
                         or p.y < vy*uy + BASE_POINT_MARGIN or p.y > vy*uy + wy - BASE_POINT_MARGIN:
-                    self.CenterViewAt(p.x, p.y)
+                    self.CenterViewAt((p.x, p.y))
             else:
-                self.CenterViewAt(p.x, p.y)
+                self.CenterViewAt((p.x, p.y))
 
 
     def SetMode(self, mode, updateMenu = False):
@@ -352,7 +360,7 @@ class PlanePart(wx.ScrolledWindow):
             return False
 
     def CalculateCenterPointOfEditor(self):
-         # 1) Get the center point of editor
+        # 1) Get the center point of editor
         (view_start_x, view_start_y) = self.GetViewStart()
         (window_size_width, window_size_height) = self.GetSize()
         (scroll_rate_x, scroll_rate_y) = self.GetScrollPixelsPerUnit()
@@ -383,6 +391,13 @@ class PlanePart(wx.ScrolledWindow):
         
         #recalculate point to model (in mm) because we cannot scale point directly
         p3d = self.ViewToModel(position)
+        scrolled_position = self.CalcScrolledPosition(position)
+        
+        #Calc delta between center of screen and actual position of mouse
+        delta_to_screen_center = wx.Point()
+        delta_to_screen_center.x = self.GetSize().x/2 - scrolled_position.x
+        delta_to_screen_center.y = self.GetSize().y/2 - scrolled_position.y
+        
         print "Center to point:"
         print p3d
         # 2) do scalling
@@ -392,8 +407,11 @@ class PlanePart(wx.ScrolledWindow):
 
         # 3) Move to the center of editor component
         new_position = self.ModelToView(p3d)
-        self.CenterViewAt(new_position)
-
+        #Calc center of screen including delta to screen, where is mouse
+        new_screen_center_unscrolled = self.CalcUnscrolledPosition(self.CalcScrolledPosition(new_position) + delta_to_screen_center)
+        
+        self.CenterViewAt(new_screen_center_unscrolled)
+        
         # 4) Refresh views
         self.Update()
         self.Refresh()
@@ -431,9 +449,6 @@ class PlanePart(wx.ScrolledWindow):
             int((-float(point.y) + self.maxY) * self.scale + 100))
         return p2d
 
-    def CenterViewAt(self, requiered_position = wx.Point()):
-        self.CenterViewAt((requiered_position.x, requiered_position.y))
-
     def CenterViewAt(self, (requiered_position_x, requiered_position_y)):
         """
         Centers the view on following point in pixels.
@@ -443,10 +458,10 @@ class PlanePart(wx.ScrolledWindow):
         (scroll_rate_x, scroll_rate_y) = self.GetScrollPixelsPerUnit()
         
         #calculate position of left upper corner to which we scroll
-        corner_x = max(0,requiered_position_x - (window_size_width / 2))
+        corner_x = max(0, requiered_position_x - (window_size_width / 2))
         corner_y = max(0, requiered_position_y - (window_size_height / 2))
         
-        #scroll to reqiered position
+        #scroll to requiered position
         self.Scroll(corner_x / scroll_rate_x, corner_y / scroll_rate_y)
         #refresh rulers
         self.GetParent().leftRuler.Refresh()
@@ -632,12 +647,12 @@ class PlanePart(wx.ScrolledWindow):
 
     def PaintSnapPoint(self, dc, clip):
         if self.snapData != None:
-             index = ui.views.getImageIndexByAngle(self.snapData.alpha)
-             snapImage = ui.views.SNAP_BASEPOINT_IMAGES[index]
+            index = ui.views.getImageIndexByAngle(self.snapData.alpha)
+            snapImage = ui.views.SNAP_BASEPOINT_IMAGES[index]
 
-             dc.DrawBitmap(wx.BitmapFromImage(snapImage), \
-                 self.snapData.p2d.x - snapImage.GetWidth()/2, \
-                 self.snapData.p2d.y - snapImage.GetHeight()/2)
+            dc.DrawBitmap(wx.BitmapFromImage(snapImage), \
+                self.snapData.p2d.x - snapImage.GetWidth()/2, \
+                self.snapData.p2d.y - snapImage.GetHeight()/2)
 
 
     def OnMoveUpdateStatusBar(self, event):

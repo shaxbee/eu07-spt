@@ -10,7 +10,7 @@
 #include <sptCore/Path.h>
 #include <sptCore/Track.h>
 
-namespace 
+namespace
 {
 
 osg::Geometry* createProfile()
@@ -76,7 +76,7 @@ void createSectorGeometry(osg::Geode* target, const sptCore::Sector& sector)
 
 };
 
-SectorNode::SectorNode(sptCore::Sector& sector): _sector(sector) 
-{ 
-	createSectorGeometry(this, sector);
+SectorNode::SectorNode(sptCore::Sector& sector): _sector(sector)
+{
+    createSectorGeometry(this, sector);
 }

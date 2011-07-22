@@ -8,7 +8,7 @@ namespace sptMover
 {
 
 Trainset::Trainset(const std::string& name):
-	_name(name) 
+    _name(name)
 {
 };
 
@@ -38,23 +38,23 @@ float Trainset::update(float time)
 # if 0
     double totalForce = 0.0f;
     double totalMass = 0.0f;
-    
+
     for(TrainsetState::Vehicles::iterator iter = _state.vehicles.begin(); iter != _state.vehicles.end(); iter++)
     {
         totalForce += iter->update(time);
         totalMass += iter->getState().getLoad() + iter->getTraits().mass;
     };
-    
+
     _state.acceleration = totalForce / totalMass;
     double distance = (_speed + (_state.acceleration / 2 * time)) * time;
-    _state.speed += _state.acceleration * time;    
-    
+    _state.speed += _state.acceleration * time;
+
     for(Vehicles::iterator iter = _state.vehicles.begin(); iter != _state.vehicles.end(); iter++)
     {
         iter->move(distance);
     };
 
-	return distance;
+    return distance;
 }; // sptMover::Trainset::update
 #endif
 
@@ -65,7 +65,7 @@ float Trainset::getDistance() const
 }; // sptMover::Trainset::getDistance
 
 osg::Vec3f Trainset::getPosition() const
-{  
+{
     checkEmpty("position");
     return getBoundingBox().center();
 }; // sptMover::Trainset::getPosition
@@ -78,7 +78,7 @@ osg::BoundingBox Trainset::getBoundingBox() const
 
 const sptCore::Follower& Trainset::getFirstFollower() const
 {
-    return *(_state.vehicles.begin()->getFollowers().begin());    
+    return *(_state.vehicles.begin()->getFollowers().begin());
 };
 
 const sptCore::Follower& Trainset::getLastFollower() const
@@ -91,7 +91,7 @@ void Trainset::addVehicle(std::auto_ptr<sptMover::Vehicle> vehicle)
     _state.length += vehicle->getTraits().getDimensions().x();
     _state.vehicles.push_back(vehicle);
 };
-    
+
 void Trainset::checkEmpty(const char* kind) const
 {
     if(_state.vehicles.empty())

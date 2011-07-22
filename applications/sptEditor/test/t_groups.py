@@ -255,7 +255,7 @@ class RailContainerTest(unittest.TestCase):
             Vec3("-1.838", "33.162", "0"))
         #track { -3.673 62.125 0.0  0.0 0.0 0.0  0.0 0.0 0.0  -3.673 60.126 0.0 }
         t2 = Track( \
-            Vec3("-3.673", "62.125" "0"), \
+            Vec3("-3.673", "62.125", "0"), \
             Vec3("0", "0", "0"), \
             Vec3("0", "0", "0"), \
             Vec3("-3.673", "60.126", "0"))
@@ -263,7 +263,7 @@ class RailContainerTest(unittest.TestCase):
         t3 = Track( \
             Vec3("-7.976", "-16.881", "0"), \
             Vec3("-0.187", "16.665", "0"), \
-            Vec3("0.881", "-16.644" "0"), \
+            Vec3("0.881", "-16.644", "0"), \
             Vec3("-9.58", "33.09", "0"))
     
         # switch { 0.0 0.0 0.0  0.0 0.0 0.0  0.0 0.0 0.0  0.0 33.23 0.0  0.0 0.0 0.0  0.0 11.079 0.0  1.225 -11.012 0.0  -1.838 33.162 0.0 }
@@ -323,7 +323,7 @@ class RailContainerTest(unittest.TestCase):
         self.assertTrue(Vec3("0", "0", "0") in outline)
         self.assertTrue(Vec3("0", "33.23", "0") in outline)    
         self.assertTrue(Vec3("-3.662", "32.989", "0") in outline)
-        self.assertTrue(Vec3("-3.673", "62.125") in outline)
+        self.assertTrue(Vec3("-3.673", "62.125", "0") in outline)
     
         group.insert(r3)
         outline = group.connections.keys()

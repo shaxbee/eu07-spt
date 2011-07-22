@@ -21,8 +21,8 @@ public:
     //! \param position initial position
     template <typename T1, typename T2>
     Switch(Sector& sector, T1 straight, T2 diverted, const std::string& position = "STRAIGHT"):
-        SwitchableTracking(sector), 
-        _straight(straight), 
+        SwitchableTracking(sector),
+        _straight(straight),
         _diverted(diverted)
     {
         setPosition(position);

@@ -660,14 +660,14 @@ class TestPanel(wx.Panel):
 
 
     def OnButton1(self, event):
-        self.win = MainWindow(self, -1)
+        self.win = MainWindow(self, ID_MAIN_FRAME)
 
 
 #----------------------------------------------------------------------
 
 def runTest(frame, nb, log):
 
-    win = MainWindow(None,-1)
+    win = MainWindow(None,ID_MAIN_FRAME)
     #win = TestPanel(nb, log)
     return win
 

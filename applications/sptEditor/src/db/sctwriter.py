@@ -6,7 +6,7 @@ import operator
 import itertools
 
 from struct import Struct
-from sptmath import Vec3
+from sptmath import Vec3, Decimal
 
 from binwriter import BinaryWriter
 
@@ -29,9 +29,7 @@ def writeSector(fout, position, tracks, switches):
     :raises: SectorWriteError
     """
     writer = BinaryWriter(fout)
-    
-    print "sector position:", repr(position.to_tuple())
-    
+        
     # transform tracks and switches
     tracks = [SectorTrack(track, position) for track in tracks]
     switches = [SectorSwitch(switch, position) for switch in switches]
@@ -123,7 +121,7 @@ def __collectConnections(tracks, switches, index):
     def addConnection(position, left, right):
         if (position.x < 0) or (position.x > SECTOR_SIZE) or (position.y < 0) or (position.y > SECTOR_SIZE):
             rightId = MAX_UINT32
-        elif position not in internal:
+        elif position not in connections:
             rightId = index[right] if right in index else MAX_UINT32
         connections[position] = (index[left], rightId)
         
@@ -150,7 +148,7 @@ def __writeConnections(writer, tracks, switches, index):
     connections = __collectConnections(tracks, switches, index)
 
     writer.writeUInt(len(connections))
-    writer.writeArray(Struct("<3f I I"), (position + indexes for position, indexes in internal), len(internal))
+    writer.writeArray(Struct("<3f I I"), (position.to_tuple() + indexes for position, indexes in connections), len(connections))
 
     writer.endChunk("CNLS")
 

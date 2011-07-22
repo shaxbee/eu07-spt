@@ -7,6 +7,7 @@ using namespace boost::assign;
 
 osg::Vec3 Switch::getExit(const osg::Vec3& entry) const
 {
+    
     // entry == begin
     if(entry == _straight->front())
         return (getPosition() == "STRAIGHT") ? _straight->back() : _diverted->back();

@@ -43,7 +43,7 @@ class Trainset
 {
 
 public:
-	Trainset(const std::string& name);
+    Trainset(const std::string& name);
 
     void setPlacement(sptCore::Track& track, float distance);
     bool isPlaced() const;
@@ -56,9 +56,9 @@ public:
     //! \return Distance travelled
     float update(float time);
 
-	const std::string& getName() const { return _name; };
+    const std::string& getName() const { return _name; };
 
-    //! \brief Get first occupied tracking 
+    //! \brief Get first occupied tracking
     const sptCore::RailTracking& getFirstTracking() const;
 
     //! \brief Get last occupied tracking
@@ -86,20 +86,20 @@ public:
     //! \brief Split trainset into two trainsets
     //! \param index Index of Vehicle from which split starts
     std::auto_ptr<Trainset> split(size_t index);
-    
+
     //! \brief Join with other trainset
     //! \param other Other trainset - will be deleted after join
     void join(std::auto_ptr<Trainset> other);
 
 private:
-	std::string _name;
+    std::string _name;
     TrainsetState _state;
 
     std::auto_ptr<TrainsetUpdateCallback> _update;
 
     const sptCore::Follower& getFirstFollower() const;
     const sptCore::Follower& getLastFollower() const;
-    
+
     void checkEmpty(const char* kind) const;
 
 }; // class sptMover::Trainset

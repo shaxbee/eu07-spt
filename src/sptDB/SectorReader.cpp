@@ -80,7 +80,7 @@ std::auto_ptr<Path> readPath(BinaryReader& reader)
 {
     uint8_t type;
     reader.read(type);
-    
+
     if(type == STRAIGHT)
         return readStraightPath(reader);
 
@@ -200,7 +200,7 @@ void readConnections(BinaryReader& reader, const osg::Vec3f& offset, const RailT
 
         uint32_t right;
         reader.read(right);
-        
+
         if(right != std::numeric_limits<size_t>::max())
         {
             Connection connection =
@@ -221,7 +221,7 @@ void readConnections(BinaryReader& reader, const osg::Vec3f& offset, const RailT
                 NULL
             };
 
-            ExternalConnection external = 
+            ExternalConnection external =
             {
                 offset,
                 position,

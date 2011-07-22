@@ -12,7 +12,7 @@ namespace sptMover
 
 class Trainset;
 class Vehicle;
-    
+
 struct VehicleAxleTraits
 {
     // diameter of axle wheels
@@ -44,7 +44,7 @@ public:
     float getMaxLoad() const { return _maxLoad; }
     void setMaxLoad(float maxLoad) { _maxLoad = maxLoad; }
 
-    // bogies distances 
+    // bogies distances
     typedef std::vector<float> Bogies;
     const Bogies& getBogies() const { return _bogies; }
     void setBogies(const Bogies& bogies) { _bogies = bogies; }
@@ -85,13 +85,13 @@ class Vehicle
 {
 
 public:
-	Vehicle(const std::string& name, const VehicleTraits& traits);
+    Vehicle(const std::string& name, const VehicleTraits& traits);
     ~Vehicle();
 
     void place(sptCore::Track& track, float distance = 0.0f);
     bool isPlaced() const { return !_followers.empty(); }
 
-	const std::string& getName() const { return _name; }
+    const std::string& getName() const { return _name; }
 
     bool hasUpdateCallback() const { return _update.get() != NULL; }
     VehicleUpdateCallback& getUpdateCallback();
@@ -104,15 +104,15 @@ public:
 
     //! \brief Move vehicle by given distance
     void move(float distance);
-        
-	typedef boost::ptr_vector<sptCore::Follower> Followers;    
+
+    typedef boost::ptr_vector<sptCore::Follower> Followers;
     const Followers& getFollowers() const { return _followers; }
 
     const VehicleTraits& getTraits() const { return _traits; }
     const VehicleState& getState() const { return _state; }
 
 private:
-	std::string _name;
+    std::string _name;
     Followers _followers;
 
     const VehicleTraits _traits;
