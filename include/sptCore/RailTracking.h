@@ -20,19 +20,16 @@ class RailTracking
 {
 
 public:
-    RailTracking(Sector& sector): _sector(sector) { };
-    virtual ~RailTracking() { };
+    RailTracking(Sector& sector);
+    virtual ~RailTracking();
 
     //! Get tracking exit for given entry point
     //! \throw UnknownEntryException if there is no exit for given entry
-    virtual const osg::Vec3& getExit(const osg::Vec3& entry) const = 0;
+    virtual osg::Vec3 getExit(const osg::Vec3& entry) const = 0;
 
     //! Get path that begins at given position
     //! \throw UnknownEntryException if there is no path for given entry
-    virtual const Path& getPath(const osg::Vec3& entry) const = 0;
-
-    //! Reverse path
-    virtual const Path& reversePath(const Path& path) const = 0;
+    virtual std::auto_ptr<Path> getPath(const osg::Vec3& entry) const = 0;
 
     Sector& getSector() const { return _sector; }
 

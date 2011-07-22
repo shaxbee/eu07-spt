@@ -23,33 +23,24 @@ public:
     Switch(Sector& sector, T1 straight, T2 diverted, const std::string& position = "STRAIGHT"):
         SwitchableTracking(sector), 
         _straight(straight), 
-        _diverted(diverted),
-        _straightReversed(_straight->reverse()),
-        _divertedReversed(_diverted->reverse())
+        _diverted(diverted)
     {
         setPosition(position);
     };
 
     virtual ~Switch() { };
 
-    virtual const osg::Vec3& getExit(const osg::Vec3& entry) const;
-    virtual const Path& getPath(const osg::Vec3& entry) const;
-    virtual const Path& reversePath(const Path& path) const;
+    virtual osg::Vec3 getExit(const osg::Vec3& entry) const;
+    virtual std::auto_ptr<Path> getPath(const osg::Vec3& entry) const;
 
     virtual const ValidPositions& getValidPositions() const;
 
-    const Path& getStraightPath() const { return *_straight; }
-    const Path& getDivertedPath() const { return *_diverted; }
+    std::auto_ptr<Path> getStraightPath() const { return _straight->clone(); }
+    std::auto_ptr<Path> getDivertedPath() const { return _diverted->clone(); }
 
 private:
-    //PathPair createBezier(const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2);
-
-    static ValidPositions _positions;
-
     std::auto_ptr<Path> _straight;
     std::auto_ptr<Path> _diverted;
-    std::auto_ptr<Path> _straightReversed;
-    std::auto_ptr<Path> _divertedReversed;
 
 }; // class Switch
 

@@ -65,13 +65,13 @@ TEST_F(SwitchTest, GetPath)
     switch_.setPosition("STRAIGHT");
 
     // begin -> straight        
-    ASSERT_EQ(switch_.getPath(begin).back(), straight);
+    ASSERT_EQ(switch_.getPath(begin)->back(), straight);
     // diverted -> begin
-    ASSERT_EQ(switch_.getPath(diverted).back(), begin);
+    ASSERT_EQ(switch_.getPath(diverted)->back(), begin);
     // straight -> begin
-    ASSERT_EQ(switch_.getPath(straight).back(), begin);
+    ASSERT_EQ(switch_.getPath(straight)->back(), begin);
     // diverted != straight        
-    ASSERT_NE(switch_.getPath(diverted).front(), switch_.getPath(straight).front());
+    ASSERT_NE(switch_.getPath(diverted)->front(), switch_.getPath(straight)->front());
 
     // incorrect entry point
     ASSERT_THROW(switch_.getPath(osg::Vec3f(0.0f, 0.0f, 1.0f)), RailTracking::UnknownEntryException);
@@ -79,13 +79,13 @@ TEST_F(SwitchTest, GetPath)
     switch_.setPosition("DIVERTED");        
     
     // begin -> diverted
-    ASSERT_EQ(switch_.getPath(begin).back(), diverted);
+    ASSERT_EQ(switch_.getPath(begin)->back(), diverted);
     // diverted -> begin
-    ASSERT_EQ(switch_.getPath(diverted).back(), begin);
+    ASSERT_EQ(switch_.getPath(diverted)->back(), begin);
     // straight -> begin
-    ASSERT_EQ(switch_.getPath(straight).back(), begin);
+    ASSERT_EQ(switch_.getPath(straight)->back(), begin);
     // diverted != straight
-    ASSERT_NE(switch_.getPath(diverted).front(), switch_.getPath(straight).front());
+    ASSERT_NE(switch_.getPath(diverted)->front(), switch_.getPath(straight)->front());
             
     // incorrect entry point
     ASSERT_THROW(switch_.getPath(osg::Vec3f(0.0f, 0.0f, 1.0f)), RailTracking::UnknownEntryException);
