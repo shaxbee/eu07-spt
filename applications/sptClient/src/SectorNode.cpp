@@ -38,7 +38,7 @@ osg::Geometry* createProfile()
 
 };
 
-void extrude(osg::Geode* target, osg::Geometry* profile, const sptCore::Path& path)
+void extrude(osg::Geode* target, osg::Geometry* profile, std::auto_ptr<sptCore::Path> path)
 {
     osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
     geometry->setVertexArray(new osg::Vec3Array);
@@ -54,7 +54,7 @@ void extrude(osg::Geode* target, osg::Geometry* profile, const sptCore::Path& pa
     sptGFX::Extruder extruder(profile, settings);
     extruder.setGeometry(geometry.get());
 
-    extruder.extrude(path);
+    extruder.extrude(*path);
 
     target->addDrawable(geometry.get());
 };
