@@ -9,7 +9,7 @@
 using namespace std;
 using namespace boost;
 
-Vec3 Vec3::normalize()
+Vec3 Vec3::normalized()
 {
     double len = length();
     double x(_x);
