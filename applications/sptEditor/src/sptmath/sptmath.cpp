@@ -80,7 +80,7 @@ BOOST_PYTHON_MODULE(_sptmath)
 
         .def("to_tuple",     &Vec3::to_tuple)
         .def("moveBy",       &Vec3::moveBy, arg("other"))
-        .def("scale",        &Vec3::scaled, arg("s"))
+        .def("scaled",        &Vec3::scaled, arg("s"))
         .def("length",       &Vec3::length, "The length of the vector.")
         .def("dotProduct",   &Vec3::dotProduct, "Dot product of this vector and another.")
         .def("normalized",    &Vec3::normalized)
