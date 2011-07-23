@@ -22,8 +22,10 @@ import ui.editor
 import ui.dialog
 import ui.palette
 import sptyaml
-import ui.ribbon
+#import ui.ribbon
+import ui.toolbar
 
+from ui.toolbar import ID_MODE_TRACK_NORMAL, ID_MODE_TRACK_CLOSURE
 # Stock items
 ID_CENTER_AT = wx.ID_HIGHEST          + 1
 ID_BASEPOINT_EDIT = wx.ID_HIGHEST     + 2
@@ -32,6 +34,8 @@ ID_EDITOR = wx.ID_HIGHEST             + 4
 ID_MAIN_FRAME = wx.ID_HIGHEST         + 5
 #ID_MODE_TRACK_NORMAL = wx.ID_HIGHEST  + 6
 #ID_MODE_TRACK_CLOSURE = wx.ID_HIGHEST + 7
+
+
 
 NAME_TRACK_PALETTE = "Track palette"
 NAME_TRACTION_PALETTE = "Traction palette"
@@ -87,14 +91,16 @@ class MainWindow(wx.Frame):
         self.UpdateTitle()
 
         self.CreateMenu()
-        self.ribbon = ui.ribbon.RibbonPanel(self)
+        #self._menubar = ui.ribbon.RibbonPanel(self)
+        self._menubar = ui.toolbar.ToolBarPanel(self)
         
         # Ribbon need panel which can be managed by AUIManager
         self.main_content_panel = wx.Panel(self,wx.ID_ANY)
 
         # creating and setting sizer for ribbon and content
         main_sizer = wx.BoxSizer(wx.VERTICAL)
-        main_sizer.Add(self.ribbon, 0, wx.EXPAND)
+        #main_sizer.Add(self.ribbon, 0, wx.EXPAND)
+        main_sizer.Add(self._menubar, 0, wx.EXPAND)
         main_sizer.Add(self.main_content_panel,1,wx.EXPAND)
         self.SetSizer(main_sizer)
         
@@ -132,6 +138,7 @@ class MainWindow(wx.Frame):
         self.editor.CenterViewAt(x, y)
         self.Show(True)
 
+        self.MenuChangeEditorMode(ui.editor.MODE_NORMAL)
 
     def OnMouseWheel(self, event):
         '''Tracks mouse wheel event trought many windows'''
@@ -577,9 +584,9 @@ class MainWindow(wx.Frame):
         Menu event handler for changing mode of editor.
         """
         wid = event.GetId()
-        if wid == ui.ribbon.ID_MODE_TRACK_NORMAL:
+        if wid == ID_MODE_TRACK_NORMAL:
             self.editor.SetMode(ui.editor.MODE_NORMAL,True)
-        elif wid == ui.ribbon.ID_MODE_TRACK_CLOSURE:
+        elif wid == ID_MODE_TRACK_CLOSURE:
             self.editor.SetMode(ui.editor.MODE_CLOSURE,True)
 
 
@@ -601,7 +608,7 @@ class MainWindow(wx.Frame):
 
     def OnToggleFramePalette(self, event):
         """
-        Chenge the state of palettes
+        Change the state of palettes
         """
         eid = event.GetId()
         if eid ==  wx.xrc.XRCID('ID_TRACK_PALETTE'):
@@ -637,10 +644,11 @@ class MainWindow(wx.Frame):
     def MenuChangeEditorMode(self, mode):
         '''Change editor mode: check aprioprate button'''
         if mode == ui.editor.MODE_NORMAL:
-            pass
+            self._menubar.SelectButton(ID_MODE_TRACK_NORMAL)
+            self._menubar.DeselectButton(ID_MODE_TRACK_CLOSURE)
         elif mode == ui.editor.MODE_CLOSURE:
-            self.ribbon.DeselectButton(ui.ribbon.ID_MODE_TRACK_NORMAL)
-            self.ribbon.SelectButton(ui.ribbon.ID_MODE_TRACK_CLOSURE)
+            self._menubar.DeselectButton(ID_MODE_TRACK_NORMAL)
+            self._menubar.SelectButton(ID_MODE_TRACK_CLOSURE)
 
 if __name__ == "__main__":
     usage = "Usage: %prog [options]"

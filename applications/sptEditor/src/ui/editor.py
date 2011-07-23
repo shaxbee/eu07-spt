@@ -12,7 +12,7 @@ from sptmath import Decimal
 import wx
 from wx.lib.evtmgr import eventManager
 
-import Application
+#import Application
 import model.tracks
 import model.scenery
 import ui.views
@@ -219,7 +219,7 @@ class PlanePart(wx.ScrolledWindow):
         #Inform window that mouse is in area. Set focus to the ribbon
         #to correct assign mouse wheel events.
         self.mouse_in_window = True
-        self.main_window.ribbon.SetFocus()
+        self.main_window._menubar.SetFocus()
         #self.logger.info("Mouse enter the window")
         #print "mouse enter"
 
