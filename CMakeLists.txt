@@ -28,7 +28,9 @@ IF(WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996")
 ENDIF(WIN32)
 
-#Was needed for 64 bit compilation
+#-fPIC was needed for 64 bit compilation, but with newest code it is not enough ---
+#there are still fPIC related problems (probably linking against static
+#libraries in shared objects
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ")
 
 find_package(Boost 1.40.0 REQUIRED)
