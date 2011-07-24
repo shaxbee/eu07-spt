@@ -28,7 +28,7 @@ IF(WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996")
 ENDIF(WIN32)
 
-#####TODO for 64 bit linux we need -fPIC probably
+######TODO for 64 bit linux we need -fPIC probably
 
 find_package(Boost 1.40.0 REQUIRED)
 find_package(OpenSceneGraph 2.8.3 REQUIRED osgDB osgUtil osgViewer)
