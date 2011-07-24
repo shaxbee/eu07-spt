@@ -11,4 +11,4 @@ OSG_URL = SPTDEP_URL
 
 # OSG_FOLDER = 'OpenSceneGraph-' + OSG_VERSION if OSG_VERSION.count('.') == 1 else OSG_VERSION[:OSG_VERSION.rfind('.')]
 # OSG_URL = 'http://www.openscenegraph.org/downloads/stable_releases/OpenSceneGraph-' + osg_folder + '/binaries/Windows/VisualStudio9/'
-# tmp
+# tmp 2
