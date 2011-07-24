@@ -91,8 +91,6 @@ class MainWindow(wx.Frame):
         self.UpdateTitle()
 
         self.CreateMenu()
-        #self._menubar = ui.ribbon.RibbonPanel(self)
-        self._menubar = ui.toolbar.ToolBarPanel(self)
         
         # Ribbon need panel which can be managed by AUIManager
         self.main_content_panel = wx.Panel(self,wx.ID_ANY)
@@ -134,10 +132,13 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
 
         self.Layout()
+        
+        #center on center of model
         (x, y) = self.editor.ModelToView()
         self.editor.CenterViewAt(x, y)
         self.Show(True)
 
+        #select normal mode button
         self.MenuChangeEditorMode(ui.editor.MODE_NORMAL)
 
     def OnMouseWheel(self, event):
@@ -165,6 +166,9 @@ class MainWindow(wx.Frame):
         """
         Creates application main menu.
         """
+
+        #self._menubar = ui.ribbon.RibbonPanel(self)
+        self._menubar = ui.toolbar.ToolBarPanel(self)
 
         '''# from XRC file
         mainMenu = self.xRes.LoadMenuBar("MainMenu")
@@ -210,7 +214,8 @@ class MainWindow(wx.Frame):
 
         # Create palette
 #        self.trackPaletteFrame = ui.palette.TrackPalette(self.main_content_panel,ID_TRACK_PALETTE,250,400)
-        self.trackPaletteFrame = ui.palette.TrackPalette(self.main_content_panel,ID_TRACK_PALETTE)
+        #self.trackPaletteFrame = ui.palette.TrackPalette(self.main_content_panel,ID_TRACK_PALETTE)
+        self.trackPaletteFrame = ui.palette.ToolsPalette(self.main_content_panel,ID_TRACK_PALETTE)
         
         # Adding palette pane to manager as child
         self._paneManager.AddPane(self.trackPaletteFrame,self._trackPalettePaneInfo)

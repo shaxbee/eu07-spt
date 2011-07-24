@@ -1045,7 +1045,7 @@ class TrackClosurer:
                     break
             if foundView is None:
                 # Reset mode to default
-                self.__editor.SetMode(MODE_NORMAL)
+                self.__editor.GetParent().SetMode(MODE_NORMAL,True)
             else:
                 snapData = foundView.GetSnapData(point)
                 snapElement = foundView.GetElement()
@@ -1059,7 +1059,7 @@ class TrackClosurer:
                     scenery.AddRailTracking(closureTrack)
 
                     # Reset editor mode
-                    self.__editor.SetMode(MODE_NORMAL, True)
+                    self.__editor.GetParent().SetMode(MODE_NORMAL, True)
                 else:
                     # Handle first point (store it only)
                     self.__startPoint = snapData.p3d
@@ -1069,7 +1069,6 @@ class TrackClosurer:
             idelta = delta.days * 86400 + delta.seconds * 1000000 \
                 + delta.microseconds
             self.__editor.logger.debug(u"Create closure track lasted %d \u00b5s" % idelta)
-
 
 
 
