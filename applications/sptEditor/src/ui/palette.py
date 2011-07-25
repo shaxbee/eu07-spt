@@ -13,12 +13,12 @@ import ui.dialog
 import ui.trackfc
 import sptyaml
 
-import wx.lib.agw.flatmenu as FM
+import ui.flatmenu as FM
 from wx.lib.agw.artmanager import ArtManager
 #from wx.lib.agw.fmresources import ControlFocus, ControlPressed
 from wx.lib.agw.fmresources import FM_OPT_SHOW_TOOLBAR, FM_OPT_MINIBAR, FM_OPT_IS_LCD
 
-from ui.uitools import SelectButton, DeselectButton, ResizeBitmap
+from ui.uitools import SelectButton, DeselectButton, ResizeBitmap, FindItemById
 
 from ui.toolbar import ID_INSERT_TRACK, ID_INSERT_CURVE, ID_INSERT_SWITCH
 
@@ -55,10 +55,15 @@ class ToolsPalette(wx.Panel):
         icon_insert_curve = ResizeBitmap(wx.Bitmap(os.path.join(self.bitmap_action_dir, "insert_curve.png"), wx.BITMAP_TYPE_PNG),16)
         
         #adding tools
-        self._mb.AddTool(ID_INSERT_TRACK, "Insert track", icon_insert_track)
-        self._mb.AddTool(ID_INSERT_CURVE, "Insert curve", icon_insert_curve)
-        self._mb.AddTool(ID_INSERT_SWITCH, "Insert switch", icon_insert_switch)
+        self._mb.AddRadioTool(ID_INSERT_TRACK, "Insert track", icon_insert_track)
+        self._mb.AddRadioTool(ID_INSERT_CURVE, "Insert curve", icon_insert_curve)
+        self._mb.AddRadioTool(ID_INSERT_SWITCH, "Insert switch", icon_insert_switch)
 
+        self.Bind(FM.EVT_FLAT_MENU_SELECTED, self.GetGrandParent().OnInsertStraightTrack, id=ID_INSERT_TRACK)
+
+    def OnInsertTrack(self, event):
+        e = event
+        pass
 
 class TrackPalette(wx.ScrolledWindow):
     """
