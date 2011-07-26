@@ -12,20 +12,18 @@ class Track: public RailTracking
 {
 public:
     template <typename PathT>
-    Track(Sector& sector, PathT path): RailTracking(sector), _forward(path), _backward(_forward->reverse()) { };
+    Track(Sector& sector, PathT path): RailTracking(sector), _path(path) { };
 
     virtual ~Track() { };
 
-    virtual const osg::Vec3& getExit(const osg::Vec3& entry) const;
-    virtual const Path& getPath(const osg::Vec3& entry) const;
-    virtual const Path& reversePath(const Path& path) const;
+    virtual osg::Vec3 getExit(const osg::Vec3& entry) const;
+    virtual std::auto_ptr<Path> getPath(const osg::Vec3& entry) const;
 
     //! \brief Get default (forward) path
-    const Path& getDefaultPath() const { return *_forward; }
+    std::auto_ptr<Path> getDefaultPath() const { return _path->clone(); }
     
 private:
-    std::auto_ptr<Path> _forward;
-    std::auto_ptr<Path> _backward;
+    std::auto_ptr<Path> _path;
 };
 
 } // namespace sptCore

@@ -40,7 +40,7 @@ public:
         _z += other._z;
     };
 
-    Vec3 scale(double value)
+    Vec3 scaled(double value)
     {
         return scale_dec(Decimal(value));
     };
@@ -66,7 +66,7 @@ public:
         return double(_x * other._x + _y * other._y + _z * other._z);
     };
 
-    Vec3 normalize();
+    Vec3 normalized();
     float angleToJUnit() const;
 
     std::string __repr__() const;

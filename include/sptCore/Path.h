@@ -20,6 +20,7 @@ public:
     Path(const osg::Vec3f& front, const osg::Vec3f& back): _front(front), _back(back) { };
     virtual ~Path() { };
 
+    virtual std::auto_ptr<Path> clone() const = 0;
     //! Return reversed path
     virtual std::auto_ptr<Path> reverse() const = 0;
 
@@ -45,7 +46,9 @@ class StraightPath: public Path
 {
 public:
     StraightPath(const osg::Vec3f& front, const osg::Vec3f& back): Path(front, back) { };
+    virtual ~StraightPath();
 
+    virtual std::auto_ptr<Path> clone() const;
     virtual std::auto_ptr<Path> reverse() const;
 
     virtual osg::Vec3f frontDir() const;
@@ -59,9 +62,11 @@ public:
 class BezierPath: public Path
 {
 public:
-    BezierPath(const osg::Vec3f& front, const osg::Vec3f& frontCP, const osg::Vec3f& back, const osg::Vec3f& backCP):
-        Path(front, back), _frontCP(frontCP), _backCP(backCP), _length(0.0f) { };
+    BezierPath(const osg::Vec3f& front, const osg::Vec3f& frontCP, const osg::Vec3f& back, const osg::Vec3f& backCP);
+    BezierPath(const osg::Vec3f& front, const osg::Vec3f& frontCP, const osg::Vec3f& back, const osg::Vec3f& backCP, const float length);
+    virtual ~BezierPath();
 
+    virtual std::auto_ptr<Path> clone() const;
     virtual std::auto_ptr<Path> reverse() const;
 
     virtual osg::Vec3f frontDir() const;
@@ -76,12 +81,9 @@ public:
 private:
     osg::Vec3f _frontCP;
     osg::Vec3f _backCP;
-    mutable float _length;
+    float _length;
 
-    typedef std::pair<float, osg::ref_ptr<osg::Vec3Array> > Entry;
-    typedef std::vector<Entry> Entries;
-
-    mutable Entries _entries;
+    osg::ref_ptr<osg::Vec3Array> _points;
 
 }; // class sptCore::BezierPath
 

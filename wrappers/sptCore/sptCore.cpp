@@ -12,13 +12,15 @@ using namespace boost::python;
 using namespace sptCore;
 
 
-struct RailTrackingWrapper: RailTracking, wrapper<RailTracking>
+struct RailTrackingWrapper: public RailTracking, public wrapper<RailTracking>
 {
     RailTrackingWrapper(Sector& sector): RailTracking(sector) { }
 
-    virtual const osg::Vec3& getExit(const osg::Vec3& entry) const { return get_override("getExit")(entry); }
-    virtual const Path& getPath(const osg::Vec3& entry) const { return get_override("getPath")(entry); };
-    virtual const Path& reversePath(const Path& path) const { return get_override("reversePath")(path); };
+    virtual osg::Vec3 getExit(const osg::Vec3& entry) const { return get_override("getExit")(entry); }
+    virtual std::auto_ptr<Path> getPath(const osg::Vec3& entry) const 
+    { 
+        return extract<std::auto_ptr<Path> >(get_override("getPath")(entry)); 
+    };
 };
 
 class SwitchableTrackingWrapper: public SwitchableTracking, public wrapper<SwitchableTracking>
@@ -26,9 +28,11 @@ class SwitchableTrackingWrapper: public SwitchableTracking, public wrapper<Switc
 public:
     SwitchableTrackingWrapper(Sector& sector): SwitchableTracking(sector) { };
 
-    virtual const osg::Vec3& getExit(const osg::Vec3& entry) const { return get_override("getExit")(entry); };
-    virtual const Path& getPath(const osg::Vec3& entry) const { return get_override("getPath")(entry); };    
-    virtual const Path& reversePath(const Path& path) const { return get_override("reversePath")(path); };
+    virtual osg::Vec3 getExit(const osg::Vec3& entry) const { return get_override("getExit")(entry); };
+    virtual std::auto_ptr<Path> getPath(const osg::Vec3& entry) const 
+    { 
+        return extract<std::auto_ptr<Path> >(get_override("getPath")(entry)); 
+    };  
 
     virtual const ValidPositions& getValidPositions() const 
     { 
@@ -61,13 +65,17 @@ private:
 BOOST_PYTHON_MODULE(_sptCore)
 {
 
-    class_<RailTrackingWrapper, noncopyable>("RailTracking", init<Sector&>())
-        .def("getExit", &RailTrackingWrapper::getExit, return_value_policy<return_by_value>())
-        .def("getPath", &RailTrackingWrapper::getPath, return_internal_reference<>());
+    class_<RailTracking>("RailTracking", init<Sector&>())
+        .def("getExit", &RailTrackingWrapper::getExit);
 
+    class_<RailTrackingWrapper>("PyRailTracking", init<Sector&>())
+        .def("getExit", &RailTrackingWrapper::getExit);
+//        .def("getPath", &RailTrackingWrapper::getPath);
+
+#if 0
     class_<SwitchableTrackingWrapper, noncopyable>("SwitchableTracking", init<Sector&>())
         .def("getExit", &SwitchableTrackingWrapper::getExit, return_value_policy<return_by_value>())
-        .def("getPath", &SwitchableTrackingWrapper::getPath, return_internal_reference<>())
+        .def("getPath", &SwitchableTrackingWrapper::getPath)
         .def("getPosition", &SwitchableTracking::getPosition)
         .def("setPosition", &SwitchableTrackingWrapper::setPosition)
         .def("isValidPosition", &SwitchableTracking::isValidPosition)
@@ -75,17 +83,18 @@ BOOST_PYTHON_MODULE(_sptCore)
 
     class_<Track, bases<RailTracking>, noncopyable>("Track", no_init)
         .def("getExit", &Track::getExit, return_value_policy<return_by_value>())
-        .def("getPath", &Track::getPath, return_internal_reference<>())
+        .def("getPath", &Track::getPath)
         .def("getDefaultPath", &Track::getDefaultPath, return_internal_reference<>());
 
     class_<Switch, bases<SwitchableTracking>, noncopyable>("Switch", no_init)
         .def("getExit", &Switch::getExit, return_value_policy<return_by_value>())
-        .def("getPath", &Switch::getPath, return_internal_reference<>())
-        .def("getStraightPath", &Switch::getStraightPath, return_internal_reference<>())
-        .def("getDivertedPath", &Switch::getDivertedPath, return_internal_reference<>())
+        .def("getPath", &Switch::getPath)
+        .def("getStraightPath", &Switch::getStraightPath)
+        .def("getDivertedPath", &Switch::getDivertedPath)
         .def("getValidPositions", &Switch::getValidPositions, return_value_policy<return_by_value>());
 
     class_<Scenery, noncopyable>("Scenery", no_init)
         .def("getTrack", &Scenery::getTrack, return_internal_reference<>(), args("name"))
         .def("getSwitch", &Scenery::getSwitch, return_internal_reference<>(), args("name"));
+#endif
 };

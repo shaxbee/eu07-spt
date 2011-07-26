@@ -1,12 +1,13 @@
 #include "sptCore/Switch.h"
 
+#include <boost/assign/list_of.hpp>
+
 using namespace sptCore;
+using namespace boost::assign;
 
-SwitchableTracking::ValidPositions Switch::_positions;
-
-const osg::Vec3& Switch::getExit(const osg::Vec3& entry) const
+osg::Vec3 Switch::getExit(const osg::Vec3& entry) const
 {
-
+    
     // entry == begin
     if(entry == _straight->front())
         return (getPosition() == "STRAIGHT") ? _straight->back() : _diverted->back();
@@ -21,57 +22,37 @@ const osg::Vec3& Switch::getExit(const osg::Vec3& entry) const
         return _diverted->front();
 
     throw UnknownEntryException() << PositionInfo(entry);
-
 }; // Switch::getExit(entry)
 
-const Path& Switch::getPath(const osg::Vec3& entry) const
+std::auto_ptr<Path> Switch::getPath(const osg::Vec3& entry) const
 {
-
     if(entry == _straight->front())
-        return (getPosition() == "STRAIGHT") ? *_straight : *_diverted;
+    {
+        if(getPosition() == "STRAIGHT")
+        {
+            return _straight->clone();
+        }
+        else
+        {
+            return _diverted->clone();
+        };
+    };
 
     if(entry == _straight->back())
-        return *_straightReversed;
-
-    if(entry == _diverted->front())
-        return *_diverted;
+    {
+        return _straight->reverse();
+    };
 
     if(entry == _diverted->back())
-        return *_divertedReversed;
+    {
+       return _diverted->reverse();
+    }
 
     throw UnknownEntryException() << PositionInfo(entry);
-
 }; // Switch::getPath(entry)
-
-const Path& Switch::reversePath(const Path& path) const
-{
-    if(&path == _straight.get())
-        return *_straightReversed;
-
-    if(&path == _straightReversed.get())
-        return *_straight;
-
-    if(&path == _diverted.get())
-        return *_divertedReversed;
-
-    if(&path == _divertedReversed.get())
-        return *_diverted;
-
-    throw std::logic_error("Unknown path");
-}; // Switch::reversePath
 
 const SwitchableTracking::ValidPositions& Switch::getValidPositions() const
 {
-
-    static bool initialized = false;
-
-    if(!initialized)
-    {
-        _positions.push_back("STRAIGHT");
-        _positions.push_back("DIVERTED");
-        initialized = true;
-    };
-
-    return _positions;
-
+    static ValidPositions positions = list_of("STRAIGHT")("DIVERTED");
+    return positions;
 }; // Switch::getValidPositions

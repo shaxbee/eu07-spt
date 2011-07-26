@@ -13,7 +13,7 @@ Follower::Follower(Track& track, float distance):
     _track(&track), _distance(distance)
 {
 
-    _path = &track.getDefaultPath();
+    _path = track.getDefaultPath();
 
 };
 
@@ -25,7 +25,7 @@ void Follower::move(float distance)
     while(_distance < 0)
     {
         changeTrack(_path->front());
-        _path = &_track->reversePath(*_path);
+        _path = _path->reverse();
         _distance += _path->length();
     };
 
@@ -104,5 +104,5 @@ void Follower::changeTrack(osg::Vec3 position)
     position -= (_track->getSector().getPosition() - sector.getPosition());
 
     // update path
-    _path = &(_track->getPath(position));
+    _path = _track->getPath(position);
 }; // Follower::moveToNextTrack
