@@ -33,7 +33,7 @@ find_package(OpenSceneGraph 2.8.3 REQUIRED osgDB osgUtil osgViewer)
 find_package(PythonLibs 2.7 REQUIRED)
 
 add_subdirectory(src)
-add_subdirectory(wrappers)
+#add_subdirectory(wrappers)
 add_subdirectory(applications)
 add_subdirectory(tests)
 
