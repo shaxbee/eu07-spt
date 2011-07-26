@@ -28,7 +28,7 @@ IF(WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996")
 ENDIF(WIN32)
 
-find_package(Boost 1.40.0 REQUIRED)
+find_package(Boost 1.42.0 REQUIRED)
 find_package(OpenSceneGraph 2.8.3 REQUIRED osgDB osgUtil osgViewer)
 find_package(PythonLibs 2.7 REQUIRED)
 
