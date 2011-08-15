@@ -173,6 +173,10 @@ class PlanePart(wx.ScrolledWindow):
         self.Refresh()
         
         
+    def GetScenery(self):
+        return self.GetParent().GetScenery()
+        
+        
     def SetBasePoint(self, basePoint, follow = False):
         (vx, vy) = self.GetViewStart()
         (ux, uy) = self.GetScrollPixelsPerUnit()
@@ -656,6 +660,27 @@ class EditorBounds:
             changed = True
         
         return changed
+    
+    
+    def GetBezierFlatnessFactor(self):
+        """
+        Gets the flatness of Bezier approximation algorithm
+        based on the scale.
+        
+        Example:
+        >>> bounds = EditorBounds()
+        >>> bounds.scale = 1;
+        >>> bounds.GetBezierFlatnessFactor()
+        5
+        >>> bounds.scale = 0.004
+        >>> bounds.GetBezierFlatnessFactor()
+        16
+        >>> bounds.scale = 1000.0
+        >>> bounds.GetBezierFlatnessFactor()
+        3
+        """
+        return int(math.ceil(16 / (math.log10(self.scale * 250) + 1)))
+        
         
 
 
@@ -691,7 +716,6 @@ class BasePoint:
 
 
 
-# TODO: refactor
 class BasePointMover:
     """
     Helper class that moves a basepoint respectively to the mouse drags.
@@ -749,7 +773,7 @@ class BasePointMover:
             p3b = self.editorPart.ViewToModel(p2b)            
             
             viewport = sptial.Cuboid.fromEndpoints([p3a, p3b])
-            elements = self.editorPart.GetParent().scenery.tracks.children.queryView(viewport)
+            elements = self.editorPart.GetParent().scenery.Query(viewport)
             
             for v in elements:
                 foundSnapData = ui.views.GetViewer(v).GetSnapData(self.editorPart.bounds, point)
@@ -932,19 +956,18 @@ class Highlighter:
 
             startTime = datetime.datetime.now()
             try:
-                # TODO: query scenery
-                found = None
-                for v in self.editorPart.trackCache + self.editorPart.switchCache:
-                    if v.IsSelectionPossible(point):
-                        found = v
-                        break
-                if found != None:
-                    self.editorPart.GetParent().SetSelection(found.GetElement())
+                scenery = self.editorPart.GetScenery()
+                elements = scenery.QueryPoint(p3d)
+                selectedElement = next((e for e in elements if self.IsSelectionPossible(e, point)), None)
+                self.editorPart.GetParent().SetSelection(selectedElement)
             finally:
                 delta = datetime.datetime.now() - startTime
-                idelta = delta.days * 86400 + delta.seconds * 1000000 \
-                    + delta.microseconds
+                idelta = delta.days * 86400 + delta.seconds * 1000000 + delta.microseconds
                 self.editorPart.logger.debug(u"Selection lasted %d \u00b5s" % idelta)
+                
+                
+    def IsSelectionPossible(self, element, point):
+        return ui.views.GetViewer(element).IsSelectionPossible(self.editorPart.bounds, point)
 
 
 

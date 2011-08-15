@@ -8,6 +8,7 @@ the simulator.
 
 import groups
 import tracks
+from sptmath import Vec3
 
 class Scenery:
     """ 
@@ -41,6 +42,15 @@ class Scenery:
     
     def GetMbc(self):
         return self.tracks.children.getMbc()
+    
+    
+    def Query(self, vp):
+        return self.tracks.children.queryView(vp)
+    
+    
+    def QueryPoint(self, p):
+        assert isinstance(p, Vec3)
+        return self.tracks.children.queryPoint(p.x, p.y, p.z)
 
 
     def RegisterListener(self, listener):

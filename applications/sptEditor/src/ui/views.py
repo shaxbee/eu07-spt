@@ -231,6 +231,46 @@ class TrackViewer:
             return data
         else:
             return None
+        
+        
+    def IsSelectionPossible(self, bounds, point):
+        """
+        Returns True if selection is possible.
+        
+        Example:
+        >>> from model.tracks import Track
+        >>> from editor import EditorBounds
+        >>> from sptmath import Vec3
+        >>> import wx
+        >>> t = Track(p1 = Vec3("-51416.636", "56806.718", "0.000"),
+        ...     v1 = Vec3("-1.416", "-16.607", "0.000"),
+        ...     v2 = Vec3("0.376", "16.664", "0.000"),
+        ...     p2 = Vec3("-51419.325", "56756.799", "0.000"))
+        >>> bounds = EditorBounds()
+        >>> bounds.scale = 10.0
+        >>> bounds.minX = -55000.0
+        >>> bounds.maxX = 1000.0
+        >>> bounds.minY = -5000.0
+        >>> bounds.maxY = 60000.0
+        >>> tv = TrackViewer(t)
+        >>> tv.IsSelectionPossible(bounds, wx.Point(35935, 32030))
+        True
+        >>> tv.IsSelectionPossible(bounds, wx.Point(35950, 32048))
+        False
+        """
+        p1 = bounds.ModelToView(self.track.p1)
+        v1 = bounds.ModelToView(self.track.p1 + self.track.v1)
+        v2 = bounds.ModelToView(self.track.p2 + self.track.v2)
+        p2 = bounds.ModelToView(self.track.p2)
+
+        lines = sptmath.toLineSegments((p1, v1, v2, p2), bounds.GetBezierFlatnessFactor())
+        i = 1
+        while i < len(lines):
+            l = lines[i-1:i+1]
+            if sptmath.sqDistanceTo(l, point) < 16.0:
+                return True
+            i += 1
+        return False
             
         
         
@@ -325,8 +365,9 @@ class SwitchViewer:
         >>> from editor import EditorBounds
         >>> from sptmath import Vec3
         >>> import wx
-        >>> s = Switch(p1 = Vec3("-51416.636", "56806.718", "0.000"),
-        ...     v1 = Vec3("-1.416", "-16.607", "0.000"),
+        >>> s = Switch(pc = Vec3("-51416.636", "56806.718", "0.000"),
+        ...     p1 = Vec3("-51412.000", "56755.000", "0.000"),
+        ...     vc1 = Vec3("-1.416", "-16.607", "0.000"),
         ...     v2 = Vec3("0.376", "16.664", "0.000"),
         ...     p2 = Vec3("-51419.325", "56756.799", "0.000"))
         >>> bounds = EditorBounds()
@@ -387,7 +428,63 @@ class SwitchViewer:
             data.Complete(self.switch)
             return data
         else:
-            return None    
+            return None
+        
+        
+        
+    def IsSelectionPossible(self, bounds, point):
+        """
+        Returns True if selection is possible
+        
+        Example:
+        >>> from model.tracks import Switch
+        >>> from editor import EditorBounds
+        >>> from sptmath import Vec3
+        >>> import wx
+        >>> s = Switch(pc = Vec3("-51416.636", "56806.718", "0.000"),
+        ...     p1 = Vec3("-51412.000", "56755.000", "0.000"),
+        ...     vc1 = Vec3("-1.416", "-16.607", "0.000"),
+        ...     v2 = Vec3("0.376", "16.664", "0.000"),
+        ...     p2 = Vec3("-51419.325", "56756.799", "0.000"))
+        >>> bounds = EditorBounds()
+        >>> bounds.scale = 10.0
+        >>> bounds.minX = -55000.0
+        >>> bounds.maxX = 1000.0
+        >>> bounds.minY = -5000.0
+        >>> bounds.maxY = 60000.0
+        >>> tv = SwitchViewer(s)
+        >>> tv.IsSelectionPossible(bounds, wx.Point(35935, 32030))
+        True
+        >>> tv.IsSelectionPossible(bounds, wx.Point(35935, 33030))
+        False
+        """
+        pc = bounds.ModelToView(self.switch.pc)
+        vc1 = bounds.ModelToView(self.switch.pc + self.switch.vc1)
+        v1 = bounds.ModelToView(self.switch.p1 + self.switch.v1)
+        p1 = bounds.ModelToView(self.switch.p1)
+        vc2 = bounds.ModelToView(self.switch.pc + self.switch.vc2)
+        v2 = bounds.ModelToView(self.switch.p2 + self.switch.v2)
+        p2 = bounds.ModelToView(self.switch.p2)
+
+        flatnessFactor = bounds.GetBezierFlatnessFactor()
+
+        lines = sptmath.toLineSegments((pc, vc1, v1, p1), flatnessFactor)
+        i = 1
+        while i < len(lines):
+            l = lines[i-1:i+1]
+            if sptmath.sqDistanceTo(l, point) < 16.0:
+                return True
+            i += 1
+        
+        lines = sptmath.toLineSegments((pc, vc2, v2, p2), flatnessFactor)
+        i = 1
+        while i < len(lines):
+            l = lines[i-1:i+1]
+            if sptmath.sqDistanceTo(l, point) < 16.0:
+                return True
+            i += 1
+
+        return False;
 
 
 
@@ -459,7 +556,16 @@ class GroupViewer:
             if sd is not None:
                 return sd
         return None
-
+    
+    
+    def IsSelectionPossible(self, bounds, point):
+        """
+        Iterates through the children to search potential selection.
+        """
+        for c in self.group.children:
+            if (GetViewer(c).IsSelectionPossible(bounds, point)):
+                return True
+        return False
 
 
 

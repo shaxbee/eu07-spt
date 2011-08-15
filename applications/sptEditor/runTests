@@ -7,7 +7,7 @@ PYTHONPATH=".:"`pwd`"/src/"
 export PYTHONPATH
 
 if [[ -x $NOSETESTS_PATH ]]; then
-  $NOSETESTS_PATH -v --with-doctest test/*.py src/
+  $NOSETESTS_PATH -v --with-doctest test/*.py test/ui/*.py src/
 else
 
   pushd "test"
@@ -17,6 +17,7 @@ else
   python t_tracks.py
   python t_scenery.py
   python t_sptial.py
+  python ui/t_views.py
 
   popd
 fi
