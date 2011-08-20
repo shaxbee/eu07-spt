@@ -71,6 +71,7 @@ SNAP_DISTANCE = 25
 
 COLOR_TRACK = (34, 139, 34)
 COLOR_SWITCH = (173, 255, 47)
+COLOR_HIGHLIGHT = (255, 0, 0)
 
 
 
@@ -97,9 +98,10 @@ class DrawContext:
     draw the scenery element onto editor pane.
     """
     
-    def __init__(self, dc, bounds):
+    def __init__(self, dc, bounds, selected = False):
         self.dc = dc
         self.bounds = bounds
+        self.selected = selected
 
 
 
@@ -116,7 +118,7 @@ class TrackViewer:
         
         oldPen = context.dc.GetPen()
         try:
-            context.dc.SetPen(wx.Pen(COLOR_TRACK,
+            context.dc.SetPen(wx.Pen(COLOR_TRACK if not context.selected else COLOR_HIGHLIGHT,
                 3 if context.bounds.scale > 1.0 else 1))
         
             if (context.bounds.scale < 1.0):
@@ -288,7 +290,7 @@ class SwitchViewer:
         
         oldPen = context.dc.GetPen()
         try:
-            context.dc.SetPen(wx.Pen(COLOR_SWITCH,
+            context.dc.SetPen(wx.Pen(COLOR_SWITCH if not context.selected else COLOR_HIGHLIGHT,
                 3 if context.bounds.scale > 1.0 else 1))
             
             if (context.bounds.scale < 1.0):

@@ -131,7 +131,7 @@ class PlanePart(wx.ScrolledWindow):
         self.snapData = None
         self.basePointMover = BasePointMover(self)
 
-        self.selectedView = None
+        self.selected = None
         self.highlighter = Highlighter(self)
 
         self.wheelScaler = WheelScaler(self)        
@@ -220,28 +220,19 @@ class PlanePart(wx.ScrolledWindow):
             self.highlighter.SetEnabled(False)
 
 
-    # TODO: refactor
     def SetSelection(self, selection):
         (vx, vy) = self.GetViewStart()
         (ux, uy) = self.GetScrollPixelsPerUnit()
 
-        oldView = self.selectedView
-        if oldView is not None:
-            oldRect = oldView.GetRepaintBounds()
-            oldRect.x -= vx * ux
-            oldRect.y -= vy * uy
-            self.RefreshRect(oldRect)
-        if selection is not None:
-            view = self.FindView(selection)
-            if view is None:
-                raise TransitionError, "Cannot find view in cache"
-            self.selectedView = view
-            newRect = view.GetRepaintBounds()
-            newRect.x -= vx * ux
-            newRect.y -= vy * uy           
-            self.RefreshRect(newRect)            
-        else:
-            self.selectedView = None
+        oldView = self.selected
+        if (oldView is not None):
+            tv = ui.views.GetViewer(oldView)
+            self.RedrawRect(tv.GetBox(self.bounds))
+        
+        self.selected = selection
+        if (selection is not None):
+            tv = ui.views.GetViewer(selection)
+            self.RedrawRect(tv.GetBox(self.bounds))
             
 
     def GetScale(self):
@@ -458,15 +449,12 @@ class PlanePart(wx.ScrolledWindow):
         """
         Paints rail switches.
         """
-        if self.selectedView is None:
-            return
-        oldPen = dc.GetPen()
-        try:
-            dc.SetPen(wx.Pen((255, 0, 0),
-                3 if self.bounds.scale > 1.0 else 1))
-            self.selectedView.Draw(dc, clip, context)
-        finally:
-            dc.SetPen(oldPen)
+        if self.selected is not None:
+            try:
+                context.selected = True
+                ui.views.GetViewer(self.selected).Draw(context)
+            finally: 
+                context.selected = False
             
             
     def PaintBasePoint(self, dc, clip, context):
@@ -934,7 +922,6 @@ class SnapData:
 
 
 
-# TODO: refactor, use sptial
 class Highlighter:
     """
     Mouse listener that make selection in editor
