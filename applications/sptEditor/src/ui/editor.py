@@ -848,7 +848,6 @@ class SceneryDragger:
 
 
 
-# TODO: refactor
 class TrackClosurer:
     """
     Closure track mouse listener handles creating track closure
@@ -875,26 +874,27 @@ class TrackClosurer:
             return # Return immediately
 
         point = self.__editor.CalcUnscrolledPosition(event.GetPosition())
+        rect = self.__editor.bounds.GetHighlightRect(point)
+        viewport = sptial.Cuboid.fromEndpoints(rect)
 
         startTime = datetime.datetime.now()
         try:
-            foundView = None
-            for v in self.__editor.trackCache + self.__editor.switchCache:
-                if v.IsSelectionPossible(point):
-                    foundView = v
-                    break
-            if foundView is None:
+            scenery = self.__editor.GetParent().GetScenery()
+            
+            elements = scenery.Query(viewport)
+            selectedElement = next((e for e in elements if self.IsSelectionPossible(e, point)), None)
+            
+            if selectedElement is None:
                 # Reset mode to default
                 self.__editor.SetMode(MODE_NORMAL)
             else:
-                snapData = foundView.GetSnapData(point)
-                snapElement = foundView.GetElement()
+                snapData = ui.views.GetViewer(selectedElement).GetSnapData(self.__editor.bounds, point)
 
                 if self.__startPoint is not None:
                     # Handle second point by creating closure track and adding it to scenery
                     _trackfc = ui.trackfc.TrackFactory(self.__editor)
-                    closureTrack = _trackfc.CreateClosureTrack( \
-                        self.__startElement, self.__startPoint, snapElement, snapData.p3d)
+                    closureTrack = _trackfc.CreateClosureTrack(
+                        self.__startElement, self.__startPoint, selectedElement, snapData.p3d)
                     scenery = self.__editor.GetParent().GetScenery()
                     scenery.AddRailTracking(closureTrack)
 
@@ -903,12 +903,16 @@ class TrackClosurer:
                 else:
                     # Handle first point (store it only)
                     self.__startPoint = snapData.p3d
-                    self.__startElement = snapElement
+                    self.__startElement = selectedElement
         finally:
             delta = datetime.datetime.now() - startTime
             idelta = delta.days * 86400 + delta.seconds * 1000000 \
                 + delta.microseconds
             self.__editor.logger.debug(u"Create closure track lasted %d \u00b5s" % idelta)
+            
+            
+    def IsSelectionPossible(self, element, point):
+        return ui.views.GetViewer(element).IsSelectionPossible(self.__editor.bounds, point)
 
 
 
