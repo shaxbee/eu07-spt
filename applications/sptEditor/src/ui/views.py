@@ -67,7 +67,9 @@ def GetSnapPointImages():
     return SNAP_BASEPOINT_IMAGES
 
 
-SNAP_DISTANCE = 25
+SNAP_DISTANCE_SQ = 25
+HIGHLIGHT_DISTANCE = 5
+HIGHLIGHT_DISTANCE_SQ = HIGHLIGHT_DISTANCE * HIGHLIGHT_DISTANCE
 
 COLOR_TRACK = (34, 139, 34)
 COLOR_SWITCH = (173, 255, 47)
@@ -216,7 +218,7 @@ class TrackViewer:
         p1y = p1[1] - point.y
         p2x = p2[0] - point.x
         p2y = p2[1] - point.y
-        if (p1x * p1x + p1y * p1y <= SNAP_DISTANCE
+        if (p1x * p1x + p1y * p1y <= SNAP_DISTANCE_SQ
                 and self.track.point2tracking(self.track.p1) == None):
 
             data = ui.editor.SnapData()
@@ -224,7 +226,7 @@ class TrackViewer:
             data.p3d = self.track.p1
             data.Complete(self.track)
             return data
-        elif (p2x * p2x + p2y * p2y <= SNAP_DISTANCE
+        elif (p2x * p2x + p2y * p2y <= SNAP_DISTANCE_SQ
                 and self.track.point2tracking(self.track.p2) == None):
             data = ui.editor.SnapData()
             data.p2d = p2
@@ -269,7 +271,7 @@ class TrackViewer:
         i = 1
         while i < len(lines):
             l = lines[i-1:i+1]
-            if sptmath.sqDistanceTo(l, point) < 16.0:
+            if sptmath.sqDistanceTo(l, point) <= HIGHLIGHT_DISTANCE_SQ:
                 return True
             i += 1
         return False
@@ -406,7 +408,7 @@ class SwitchViewer:
         p1y = p1[1] - point.y
         p2x = p2[0] - point.x
         p2y = p2[1] - point.y
-        if (pcx * pcx + pcy * pcy <= SNAP_DISTANCE
+        if (pcx * pcx + pcy * pcy <= SNAP_DISTANCE_SQ
             and self.switch.point2tracking(self.switch.pc) is None):
             
             data = ui.editor.SnapData()
@@ -414,7 +416,7 @@ class SwitchViewer:
             data.p3d = self.switch.pc
             data.Complete(self.switch)
             return data
-        elif (p1x * p1x + p1y * p1y <= SNAP_DISTANCE
+        elif (p1x * p1x + p1y * p1y <= SNAP_DISTANCE_SQ
                 and self.switch.point2tracking(self.switch.p1) is None):
 
             data = ui.editor.SnapData()
@@ -422,7 +424,7 @@ class SwitchViewer:
             data.p3d = self.switch.p1
             data.Complete(self.switch)
             return data
-        elif (p2x * p2x + p2y * p2y <= SNAP_DISTANCE
+        elif (p2x * p2x + p2y * p2y <= SNAP_DISTANCE_SQ
                 and self.switch.point2tracking(self.switch.p2) is None):
             data = ui.editor.SnapData()
             data.p2d = p2
@@ -474,7 +476,7 @@ class SwitchViewer:
         i = 1
         while i < len(lines):
             l = lines[i-1:i+1]
-            if sptmath.sqDistanceTo(l, point) < 16.0:
+            if sptmath.sqDistanceTo(l, point) <= HIGHLIGHT_DISTANCE_SQ:
                 return True
             i += 1
         
@@ -482,7 +484,7 @@ class SwitchViewer:
         i = 1
         while i < len(lines):
             l = lines[i-1:i+1]
-            if sptmath.sqDistanceTo(l, point) < 16.0:
+            if sptmath.sqDistanceTo(l, point) <= HIGHLIGHT_DISTANCE_SQ:
                 return True
             i += 1
 
@@ -618,7 +620,7 @@ class BasePointView:
         p2d = bounds.ModelToView(self.basePoint.point)
         x = p2d[0] - point.x
         y = p2d[1] - point.y
-        return (x*x + y*y) <= SNAP_DISTANCE
+        return (x*x + y*y) <= SNAP_DISTANCE_SQ
 
 
 

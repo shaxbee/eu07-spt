@@ -439,7 +439,7 @@ class PlanePart(wx.ScrolledWindow):
         p3b = self.ViewToModel((vx*ux + sx, vy*uy + sy))
         
         viewport = sptial.Cuboid.fromEndpoints([p3a, p3b])
-        elements = self.GetParent().scenery.tracks.children.queryView(viewport)
+        elements = self.GetParent().scenery.Query(viewport)
         
         for t in elements:
             ui.views.GetViewer(t).Draw(context)
@@ -668,6 +668,23 @@ class EditorBounds:
         3
         """
         return int(math.ceil(16 / (math.log10(self.scale * 250) + 1)))
+    
+    
+    def GetHighlightRect(self, point):
+        """
+        Gets the hightlight cuboid.
+        
+        Example:
+        >>> bounds = EditorBounds()
+        >>> bounds.scale = 0.5
+        >>> bounds.GetHighlightRect(wx.Point(598, 602))
+        [(-14.000,6.000,0.000), (6.000,-14.000,0.000)]
+        """
+        p2d_1 = point - wx.Point(ui.views.HIGHLIGHT_DISTANCE, ui.views.HIGHLIGHT_DISTANCE)
+        p3d_1 = self.ViewToModel(p2d_1)
+        p2d_2 = point + wx.Point(ui.views.HIGHLIGHT_DISTANCE, ui.views.HIGHLIGHT_DISTANCE)
+        p3d_2 = self.ViewToModel(p2d_2)
+        return [p3d_1, p3d_2]
         
         
 
@@ -939,12 +956,13 @@ class Highlighter:
     def OnMouseClick(self, event):
         if self.__enabled and not self.editorPart.basePointMover.pressed:
             point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
-            p3d = self.editorPart.ViewToModel(point)
+            rect = self.editorPart.bounds.GetHighlightRect(point)
+            viewport = sptial.Cuboid.fromEndpoints(rect)
 
             startTime = datetime.datetime.now()
             try:
                 scenery = self.editorPart.GetScenery()
-                elements = scenery.QueryPoint(p3d)
+                elements = scenery.Query(viewport)
                 selectedElement = next((e for e in elements if self.IsSelectionPossible(e, point)), None)
                 self.editorPart.GetParent().SetSelection(selectedElement)
             finally:
@@ -955,6 +973,7 @@ class Highlighter:
                 
     def IsSelectionPossible(self, element, point):
         return ui.views.GetViewer(element).IsSelectionPossible(self.editorPart.bounds, point)
+    
 
 
 
@@ -997,13 +1016,10 @@ class SceneryListener(model.scenery.SceneryListener):
         element = event.GetElement()
         changeType = event.GetType()
 
-        if changeType == model.scenery.CHANGE_ADD:
-            self.sceneryAdd(scenery, element)
-        elif changeType == model.scenery.CHANGE_REMOVE:
-            self.sceneryRemove(element)
-      
-
-    def sceneryAdd(self, scenery, element):
+        if changeType == model.scenery.CHANGE_REMOVE:
+            if element == self.editor.GetSelection():
+                self.editor.SetSelection(None)
+            
         part = self.editor.parts[0]
         
         mbc = scenery.GetMbc()
@@ -1013,27 +1029,4 @@ class SceneryListener(model.scenery.SceneryListener):
         else:
             box = ui.views.GetViewer(element).GetBox(part.bounds)
             part.RedrawRect(box)
-
-
-    # TODO: refactor
-    def sceneryRemove(self, element):
-        part = self.editor.parts[0]
-        (vx, vy) = part.GetViewStart()
-        (ux, uy) = part.GetScrollPixelsPerUnit()
-
-        if element == self.editor.GetSelection():
-            self.editor.SetSelection(None)
-        view = part.FindView(element)
-        if type(element) is model.tracks.Track:
-            part.trackCache.remove(view)
-        elif type(element) is model.tracks.Switch:
-            part.switchCache.remove(view)
-
-        needPainting = part.ComputeMinMax()
-        if needPainting:
-            self.editor.Refresh()
-        else:
-            repaintRect = view.GetRepaintBounds()
-            repaintRect.x -= vx * ux
-            repaintRect.y -= vy * uy
-            part.RefreshRect(repaintRect)
+      

@@ -41,6 +41,34 @@ class TrackViewerTest(unittest.TestCase):
         self.assertIsNone(sd)
 
 
+    def testTrackViewer_IsSelectionPossible(self):
+        t1 = Track(p1 = Vec3("0", "0", "0"),
+                   p2 = Vec3("0", "20", "0"))
+        bounds = EditorBounds();
+        bounds.scale = 1.0
+        bounds.minX = -1000.0
+        bounds.maxX = 1000.0
+        bounds.minY = -1000.0
+        bounds.maxY = 1000.0
+        
+        tv = TrackViewer(t1)
+        self.assertTrue(tv.IsSelectionPossible(bounds, wx.Point(1100, 1100)))
+        self.assertTrue(tv.IsSelectionPossible(bounds, wx.Point(1100, 1090)))
+        self.assertTrue(tv.IsSelectionPossible(bounds, wx.Point(1100, 1080)))
+        
+        self.assertTrue(tv.IsSelectionPossible(bounds, wx.Point(1100, 1075)))
+        self.assertFalse(tv.IsSelectionPossible(bounds, wx.Point(1100, 1074)))
+        
+        self.assertFalse(tv.IsSelectionPossible(bounds, wx.Point(1100, 1005)))
+        
+        self.assertTrue(tv.IsSelectionPossible(bounds, wx.Point(1096, 1080)))
+        self.assertTrue(tv.IsSelectionPossible(bounds, wx.Point(1104, 1080)))
+        self.assertTrue(tv.IsSelectionPossible(bounds, wx.Point(1096, 1100)))
+        self.assertTrue(tv.IsSelectionPossible(bounds, wx.Point(1104, 1100)))
+        
+        self.assertTrue(tv.IsSelectionPossible(bounds, wx.Point(1096, 1090)))
+        self.assertTrue(tv.IsSelectionPossible(bounds, wx.Point(1104, 1090)))
+
     
     
 if __name__ == "__main__":
