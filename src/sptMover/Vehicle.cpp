@@ -30,7 +30,7 @@ float Vehicle::update(float time)
     return getUpdateCallback().update(time, _state);
 };
 
-void Vehicle::place(Track& track, float distance)
+void Vehicle::place(SimpleTrack& track, float distance)
 {
     _followers.clear();
 

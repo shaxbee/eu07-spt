@@ -1,4 +1,4 @@
-m#ifndef SPTCORE_FOLLOWER_H
+#ifndef SPTCORE_FOLLOWER_H
 #define SPTCORE_FOLLOWER_H 1
 
 #include <stdexcept>
@@ -17,12 +17,12 @@ class Follower
 {
 
 public:
-    Follower(Track& track, float distance = 0.0f);
+    Follower(SimpleTrack& track, float distance = 0.0f);
 
     Sector& getSector() { return _track->getSector(); }
     const Sector& getSector() const { return _track->getSector(); }
 
-    const RailTracking& getTrack() const { return *_track; }
+    const Track& getTrack() const { return *_track; }
     const Path& getPath() const { return *_path; }
 
     //! \brief Get distance from begin of current Path
@@ -42,7 +42,7 @@ private:
     void changeTrack(osg::Vec3 position);
     void findPosition(osg::ref_ptr<osg::Vec3Array> points, osg::Vec3Array::const_iterator& iter, float& ratio) const;
 
-    const RailTracking* _track;
+    const Track* _track;
     std::auto_ptr<const Path> _path;
 
     float _distance;

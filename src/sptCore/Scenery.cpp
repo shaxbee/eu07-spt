@@ -50,7 +50,7 @@ void ExternalsManager::addExternals(Scenery& scenery, Sector& sector)
         ExternalConnectionsSet::const_iterator match = _externals.find(*iter);
         if(match != _externals.end())
         {
-            const RailTracking* other = scenery.getSector(match->offset).updateConnection(match->position, NULL, &sector.getRailTracking(match->index));
+            const Track* other = scenery.getSector(match->offset).updateConnection(match->position, NULL, &sector.getRailTracking(match->index));
             sector.updateConnection(iter->position, NULL, other);
         };
     };
@@ -113,7 +113,7 @@ bool Scenery::hasSector(const osg::Vec3f& position) const
     return (iter != _sectors.end());
 }; // Scenery::hasSector
 
-Track& Scenery::getTrack(const std::string& name)
+SimpleTrack& Scenery::getTrack(const std::string& name)
 {
     Tracks::const_iterator iter = _tracks.find(name);
 
@@ -171,7 +171,7 @@ std::auto_ptr<Sector> Scenery::removeSector(const osg::Vec3f& position)
     return std::auto_ptr<Sector>(_sectors.release(iter).release());
 }; // Scenery::removeSector
 
-void Scenery::addTrack(const std::string& name, Track& track)
+void Scenery::addTrack(const std::string& name, SimpleTrack& track)
 {
     std::pair<Tracks::iterator, bool> ret;
     ret = _tracks.insert(std::make_pair(name, &track));

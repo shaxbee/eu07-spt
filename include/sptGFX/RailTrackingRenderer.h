@@ -19,7 +19,7 @@ public:
     virtual void setOutput(osg::Geometry* output) = 0;
 
     //! Render tracking to geometry
-    virtual void render(sptCore::RailTracking* tracking, RailTrackingProfile* profile) = 0;
+    virtual void render(sptCore::Track* tracking, RailTrackingProfile* profile) = 0;
 
 }; // class sptGFX::RailTrackingRenderer    
 

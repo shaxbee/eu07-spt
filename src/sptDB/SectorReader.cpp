@@ -29,9 +29,9 @@ enum PathType
     BEZIER = 1
 };
 
-typedef boost::ptr_vector<Track> Tracks;
+typedef boost::ptr_vector<SimpleTrack> Tracks;
 typedef boost::ptr_vector<Switch> Switches;
-typedef boost::ptr_vector<RailTracking> RailTrackings;
+typedef boost::ptr_vector<Track> RailTrackings;
 
 void print_vec(const osg::Vec3f& vec)
 {
@@ -118,7 +118,7 @@ void readTracks(Sector& sector, BinaryReader& reader, Tracks& output)
         {
 //            std::cout << "TRACK ";
             std::auto_ptr<Path> path = readStraightPath(reader);
-            std::auto_ptr<Track> track(new Track(sector, path));
+            std::auto_ptr<SimpleTrack> track(new SimpleTrack(sector, path));
 
             output.push_back(track);
 //            std::cout << std::endl;
@@ -134,7 +134,7 @@ void readTracks(Sector& sector, BinaryReader& reader, Tracks& output)
         {
 //            std::cout << "TRACK ";
             std::auto_ptr<Path> path = readBezierPath(reader);
-            std::auto_ptr<Track> track(new Track(sector, path));
+            std::auto_ptr<SimpleTrack> track(new SimpleTrack(sector, path));
 
             output.push_back(track);
 //            std::cout << std::endl;

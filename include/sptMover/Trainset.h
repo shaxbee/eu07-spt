@@ -45,7 +45,7 @@ class Trainset
 public:
     Trainset(const std::string& name);
 
-    void setPlacement(sptCore::Track& track, float distance);
+    void setPlacement(sptCore::SimpleTrack& track, float distance);
     bool isPlaced() const;
 
     const TrainsetUpdateCallback& getUpdateCallback() const { return *_update; }
@@ -59,10 +59,10 @@ public:
     const std::string& getName() const { return _name; };
 
     //! \brief Get first occupied tracking
-    const sptCore::RailTracking& getFirstTracking() const;
+    const sptCore::Track& getFirstTracking() const;
 
     //! \brief Get last occupied tracking
-    const sptCore::RailTracking& getLastTracking() const;
+    const sptCore::Track& getLastTracking() const;
 
     float getLength() const { return _state.length; }
 

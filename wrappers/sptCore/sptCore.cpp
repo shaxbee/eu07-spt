@@ -12,9 +12,9 @@ using namespace boost::python;
 using namespace sptCore;
 
 
-struct RailTrackingWrapper: public RailTracking, public wrapper<RailTracking>
+struct RailTrackingWrapper: public Track, public wrapper<Track>
 {
-    RailTrackingWrapper(Sector& sector): RailTracking(sector) { }
+    RailTrackingWrapper(Sector& sector): Track(sector) { }
 
     virtual osg::Vec3 getExit(const osg::Vec3& entry) const { return get_override("getExit")(entry); }
     virtual std::auto_ptr<Path> getPath(const osg::Vec3& entry) const 
@@ -65,7 +65,7 @@ private:
 BOOST_PYTHON_MODULE(_sptCore)
 {
 
-    class_<RailTracking>("RailTracking", init<Sector&>())
+    class_<Track>("RailTracking", init<Sector&>())
         .def("getExit", &RailTrackingWrapper::getExit);
 
     class_<RailTrackingWrapper>("PyRailTracking", init<Sector&>())
@@ -81,10 +81,10 @@ BOOST_PYTHON_MODULE(_sptCore)
         .def("isValidPosition", &SwitchableTracking::isValidPosition)
         .def("getValidPositions", &SwitchableTrackingWrapper::getValidPositions, return_value_policy<return_by_value>());
 
-    class_<Track, bases<RailTracking>, noncopyable>("Track", no_init)
-        .def("getExit", &Track::getExit, return_value_policy<return_by_value>())
-        .def("getPath", &Track::getPath)
-        .def("getDefaultPath", &Track::getDefaultPath, return_internal_reference<>());
+    class_<SimpleTrack, bases<Track>, noncopyable>("Track", no_init)
+        .def("getExit", &SimpleTrack::getExit, return_value_policy<return_by_value>())
+        .def("getPath", &SimpleTrack::getPath)
+        .def("getDefaultPath", &SimpleTrack::getDefaultPath, return_internal_reference<>());
 
     class_<Switch, bases<SwitchableTracking>, noncopyable>("Switch", no_init)
         .def("getExit", &Switch::getExit, return_value_policy<return_by_value>())

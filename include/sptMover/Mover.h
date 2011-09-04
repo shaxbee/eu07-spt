@@ -10,7 +10,7 @@ class Mover: public sptCore::Follower
 {
 
 public:
-    Mover(sptCore::RailTracking* track, float position = 0.0f): sptCore::Follower(track), _offset(offset) { };
+    Mover(sptCore::Track* track, float position = 0.0f): sptCore::Follower(track), _offset(offset) { };
 
     virtual void update(double time) = 0;
 

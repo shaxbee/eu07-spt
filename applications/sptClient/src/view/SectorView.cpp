@@ -41,10 +41,10 @@ void createSectorGeometry(osg::Geode* target, osg::Geometry* profile, const sptC
 {
     for(unsigned int index = 0; index != sector.getRailTrackingCount(); index++)
     {
-        const sptCore::RailTracking& tracking = sector.getRailTracking(index);
-        if(typeid(tracking) == typeid(sptCore::Track))
+        const sptCore::Track& tracking = sector.getRailTracking(index);
+        if(typeid(tracking) == typeid(sptCore::SimpleTrack))
         {
-            const sptCore::Track& track = static_cast<const sptCore::Track&>(tracking);
+            const sptCore::SimpleTrack& track = static_cast<const sptCore::SimpleTrack&>(tracking);
             extrude(target, profile, track.getDefaultPath());
         };
     };

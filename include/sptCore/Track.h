@@ -1,30 +1,48 @@
-#ifndef SPTCORE_TRACK_H
-#define SPTCORE_TRACK_H 1
+#ifndef SPTCORE_RAILTRACKING_H
+#define SPTCORE_RAILTRACKING_H 1
 
-#include <sptCore/RailTracking.h>
+#include <osg/Vec3>
+#include <osg/Matrix>
 
-#include <memory>
+#include <boost/exception/all.hpp>
+
+#include <sptCore/Path.h>
 
 namespace sptCore
 {
 
-class Track: public RailTracking
+class Sector;
+class Follower;
+
+//! \brief Abstract representation of railway tracking
+//! \author Zbyszek "ShaXbee" Mandziejewicz
+class Track
 {
+
 public:
-    template <typename PathT>
-    Track(Sector& sector, size_t id, PathT path): RailTracking(sector, id), _path(path) { };
+    Track(Sector& sector, size_t id);
+    virtual ~Track();
 
-    virtual ~Track() { };
+    size_t getId() const { return _id; };
 
-    virtual osg::Vec3 getExit(const osg::Vec3& entry) const;
-    virtual std::auto_ptr<Path> getPath(const osg::Vec3& entry) const;
+    //! Get tracking exit for given entry point
+    //! \throw UnknownEntryException if there is no exit for given entry
+    virtual osg::Vec3 getExit(const osg::Vec3& entry) const = 0;
 
-    //! \brief Get default (forward) path
-    std::auto_ptr<Path> getDefaultPath() const { return _path->clone(); }
-    
+    //! Get path that begins at given position
+    //! \throw UnknownEntryException if there is no path for given entry
+    virtual std::auto_ptr<Path> getPath(const osg::Vec3& entry) const = 0;
+
+    Sector& getSector() const { return _sector; }
+
+    typedef boost::error_info<struct tag_position, osg::Vec3f> PositionInfo;
+    class UnknownEntryException: public boost::exception { };
+
 private:
-    std::auto_ptr<Path> _path;
-};
+    Sector& _sector;
+    size_t _id;
+
+}; // class sptCore::RailTracking
 
 } // namespace sptCore
 

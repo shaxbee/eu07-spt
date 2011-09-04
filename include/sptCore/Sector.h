@@ -14,7 +14,7 @@
 namespace sptCore
 {
 
-typedef boost::ptr_vector<RailTracking> RailTrackings;
+typedef boost::ptr_vector<Track> RailTrackings;
 
 struct Connection
 {
@@ -37,7 +37,7 @@ public:
     //! \throw UnknownConnectionException if there is no connection at given position
     const size_t getNextRailTracking(const osg::Vec3f& position, const size_t from) const;
 
-    const RailTracking& getRailTracking(const size_t index) const;
+    const Track& getRailTracking(const size_t index) const;
 
     size_t getRailTrackingCount() const;
 

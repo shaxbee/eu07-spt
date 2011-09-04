@@ -9,7 +9,7 @@
 
 using namespace sptCore;
 
-Follower::Follower(Track& track, float distance):
+Follower::Follower(SimpleTrack& track, float distance):
     _track(&track), _distance(distance)
 {
 
@@ -99,7 +99,7 @@ osg::Matrix Follower::getMatrix() const
 void Follower::changeTrack(osg::Vec3 position)
 {
     const Sector& sector = _track->getSector();
-    _track = &(sector.getNextTrack(position, *_track));
+// TODO: refactor    _track = &(sector.getNextTrack(position, *_track));
 
     position -= (_track->getSector().getPosition() - sector.getPosition());
 

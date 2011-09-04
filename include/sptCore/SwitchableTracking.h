@@ -13,11 +13,11 @@ namespace sptCore
 
 //! \brief Base class for tracking with switchable connections
 //! \author Zbyszek "ShaXbee" Mandziejewicz
-class SwitchableTracking: public RailTracking
+class SwitchableTracking: public Track
 {
 
 public:
-    SwitchableTracking(Sector& sector): RailTracking(sector) { };
+    SwitchableTracking(Sector& sector): Track(sector) { };
     virtual ~SwitchableTracking() { };
 
     std::string getPosition() const { return _position; };

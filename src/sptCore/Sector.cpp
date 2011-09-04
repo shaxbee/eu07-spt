@@ -10,7 +10,7 @@ Sector::Sector(const osg::Vec3d& position, RailTrackings& trackings, Connections
     _connections.swap(connections);
 }; // Sector::Sector(scenery)
 
-const RailTracking& Sector::getNextRailTracking(const osg::Vec3f& position, const size_t from) const
+const Track& Sector::getNextRailTracking(const osg::Vec3f& position, const size_t from) const
 {
     Connections::const_iterator iter = _connections.find(position);
 
@@ -22,7 +22,7 @@ const RailTracking& Sector::getNextRailTracking(const osg::Vec3f& position, cons
     return (iter->first == from) ? iter->second : iter->first;
 }; // Sector::getNextTrack(position, from)
 
-const RailTracking& Sector::getRailTracking(const size_t index) const
+const Track& Sector::getRailTracking(const size_t index) const
 {
     return _trackings.at(index);
 };
