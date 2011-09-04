@@ -12,7 +12,6 @@ namespace sptCore
 //! \author Zbyszek "ShaXbee" Mandziejewicz
 class Switch: public SwitchableTracking
 {
-
 public:
     //! Construct switch described by bezier path
     //! \param sector owner
@@ -20,8 +19,8 @@ public:
     //! \param diverted diverted path
     //! \param position initial position
     template <typename T1, typename T2>
-    Switch(Sector& sector, T1 straight, T2 diverted, const std::string& position = "STRAIGHT"):
-        SwitchableTracking(sector),
+    Switch(Sector& sector, size_t id, T1 straight, T2 diverted, const std::string& position = "STRAIGHT"):
+        SwitchableTracking(sector, id),
         _straight(straight),
         _diverted(diverted)
     {
@@ -41,7 +40,6 @@ public:
 private:
     std::auto_ptr<Path> _straight;
     std::auto_ptr<Path> _diverted;
-
 }; // class Switch
 
 } // namespace sptCore

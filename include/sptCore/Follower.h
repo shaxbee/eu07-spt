@@ -1,4 +1,4 @@
-#ifndef SPTCORE_FOLLOWER_H
+m#ifndef SPTCORE_FOLLOWER_H
 #define SPTCORE_FOLLOWER_H 1
 
 #include <stdexcept>

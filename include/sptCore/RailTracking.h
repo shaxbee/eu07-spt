@@ -20,8 +20,10 @@ class RailTracking
 {
 
 public:
-    RailTracking(Sector& sector);
+    RailTracking(Sector& sector, size_t id);
     virtual ~RailTracking();
+
+    size_t getId() const { return _id; };
 
     //! Get tracking exit for given entry point
     //! \throw UnknownEntryException if there is no exit for given entry
@@ -36,10 +38,9 @@ public:
     typedef boost::error_info<struct tag_position, osg::Vec3f> PositionInfo;
     class UnknownEntryException: public boost::exception { };
 
-    bool operator<(const RailTracking& other) const { return this < &other; }
-
 private:
     Sector& _sector;
+    size_t _id;
 
 }; // class sptCore::RailTracking
 

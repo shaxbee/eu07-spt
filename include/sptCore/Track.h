@@ -12,7 +12,7 @@ class Track: public RailTracking
 {
 public:
     template <typename PathT>
-    Track(Sector& sector, PathT path): RailTracking(sector), _path(path) { };
+    Track(Sector& sector, size_t id, PathT path): RailTracking(sector, id), _path(path) { };
 
     virtual ~Track() { };
 
