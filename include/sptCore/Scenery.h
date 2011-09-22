@@ -41,6 +41,8 @@ public:
 
     bool hasSector(const osg::Vec3f& position) const;
 
+    const Track& getNextTrack(const Track& track, const osg::Vec3f& from) const;
+
     SimpleTrack& getTrack(const std::string& name);
     SwitchableTracking& getSwitch(const std::string& name);
 

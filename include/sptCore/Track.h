@@ -14,16 +14,30 @@ namespace sptCore
 class Sector;
 class Follower;
 
+class TrackId
+{
+public:
+    explicit TrackId(uint32_t value);
+
+    bool isNull() const;
+    bool isExternal() const;
+
+    uint32_t value() const;
+
+private:
+    uint32_t _value;
+};
+
 //! \brief Abstract representation of railway tracking
 //! \author Zbyszek "ShaXbee" Mandziejewicz
 class Track
 {
 
 public:
-    Track(Sector& sector, size_t id);
+    Track(Sector& sector, TrackId id);
     virtual ~Track();
 
-    size_t getId() const { return _id; };
+    TrackID getId() const { return _id; };
 
     //! Get tracking exit for given entry point
     //! \throw UnknownEntryException if there is no exit for given entry
@@ -33,6 +47,9 @@ public:
     //! \throw UnknownEntryException if there is no path for given entry
     virtual std::auto_ptr<Path> getPath(const osg::Vec3& entry) const = 0;
 
+    //! Get connected track
+    virtual TrackId getNextTrack(const osg::Vec3& entry) const = 0;
+
     Sector& getSector() const { return _sector; }
 
     typedef boost::error_info<struct tag_position, osg::Vec3f> PositionInfo;
@@ -40,7 +57,7 @@ public:
 
 private:
     Sector& _sector;
-    size_t _id;
+    TrackId _id;
 
 }; // class sptCore::RailTracking
 
