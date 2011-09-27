@@ -123,7 +123,7 @@ class TrackViewer:
             context.dc.SetPen(wx.Pen(COLOR_TRACK if not context.selected else COLOR_HIGHLIGHT,
                 3 if context.bounds.scale > 1.0 else 1))
         
-            if (context.bounds.scale < 1.0):
+            if (context.bounds.scale.isLargeScale()):
                 p1 = context.bounds.ModelToView(self.track.p1)
                 p2 = context.bounds.ModelToView(self.track.p2)
                 
@@ -152,7 +152,7 @@ class TrackViewer:
         ...     v2 = Vec3("0.376", "16.664", "0.000"),
         ...     p2 = Vec3("-51419.325", "56756.799", "0.000"))
         >>> bounds = EditorBounds()
-        >>> bounds.scale = 10.0
+        >>> bounds.scale = Scale(10.0)
         >>> bounds.minX = -60000.0
         >>> bounds.maxX = 1000.0
         >>> bounds.minY = -1000.0
@@ -188,7 +188,7 @@ class TrackViewer:
         ...     v2 = Vec3("0.376", "16.664", "0.000"),
         ...     p2 = Vec3("-51419.325", "56756.799", "0.000"))
         >>> bounds = EditorBounds()
-        >>> bounds.scale = 10.0
+        >>> bounds.scale = Scale(10.0)
         >>> bounds.minX = -55000.0
         >>> bounds.maxX = 1000.0
         >>> bounds.minY = -5000.0
@@ -251,7 +251,7 @@ class TrackViewer:
         ...     v2 = Vec3("0.376", "16.664", "0.000"),
         ...     p2 = Vec3("-51419.325", "56756.799", "0.000"))
         >>> bounds = EditorBounds()
-        >>> bounds.scale = 10.0
+        >>> bounds.scale = Scale(10.0)
         >>> bounds.minX = -55000.0
         >>> bounds.maxX = 1000.0
         >>> bounds.minY = -5000.0
@@ -295,7 +295,7 @@ class SwitchViewer:
             context.dc.SetPen(wx.Pen(COLOR_SWITCH if not context.selected else COLOR_HIGHLIGHT,
                 3 if context.bounds.scale > 1.0 else 1))
             
-            if (context.bounds.scale < 1.0):
+            if (context.bounds.scale.isLargeScale()):
                 pc = context.bounds.ModelToView(self.switch.pc)
                 p1 = context.bounds.ModelToView(self.switch.p1)
                 p2 = context.bounds.ModelToView(self.switch.p2)
@@ -335,7 +335,7 @@ class SwitchViewer:
         ...     vc2 = Vec3("-2.876", "-21.415", "0.000"),        
         ...     v2 = Vec3("4.028", "21.228", "0.000"))        
         >>> bounds = EditorBounds()
-        >>> bounds.scale = 0.5
+        >>> bounds.scale = Scale(0.8)
         >>> bounds.minX = -60000.0
         >>> bounds.maxX = 1000.0
         >>> bounds.minY = -1000.0
@@ -375,7 +375,7 @@ class SwitchViewer:
         ...     v2 = Vec3("0.376", "16.664", "0.000"),
         ...     p2 = Vec3("-51419.325", "56756.799", "0.000"))
         >>> bounds = EditorBounds()
-        >>> bounds.scale = 10.0
+        >>> bounds.scale = Scale(10.0)
         >>> bounds.minX = -55000.0
         >>> bounds.maxX = 1000.0
         >>> bounds.minY = -5000.0
@@ -451,7 +451,7 @@ class SwitchViewer:
         ...     v2 = Vec3("0.376", "16.664", "0.000"),
         ...     p2 = Vec3("-51419.325", "56756.799", "0.000"))
         >>> bounds = EditorBounds()
-        >>> bounds.scale = 10.0
+        >>> bounds.scale = Scale(10.0)
         >>> bounds.minX = -55000.0
         >>> bounds.maxX = 1000.0
         >>> bounds.minY = -5000.0
@@ -534,7 +534,7 @@ class GroupViewer:
         >>> g.insert(s)
         >>> g.insert(t)
         >>> bounds = EditorBounds()
-        >>> bounds.scale = 2
+        >>> bounds.scale = Scale(2.0)
         >>> bounds.minX = -100000.0
         >>> bounds.maxX = 1000.0
         >>> bounds.minY = -100000.0
@@ -600,7 +600,7 @@ class BasePointView:
         >>> from sptmath import Vec3
         >>> bp = BasePoint(Vec3('-787.343', '34.342', '-23.005'), 1.0, 0.0)
         >>> bounds = EditorBounds()
-        >>> bounds.scale = 2
+        >>> bounds.scale = Scale(2.0)
         >>> bounds.minX = -100000.0
         >>> bounds.maxX = 1000.0
         >>> bounds.minY = -100000.0

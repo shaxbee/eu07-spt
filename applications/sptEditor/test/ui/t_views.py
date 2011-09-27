@@ -5,7 +5,7 @@ Test module for ui.views
 import unittest
 from sptmath import Vec3
 from model.tracks import *
-from ui.editor import EditorBounds
+from ui.editor import EditorBounds, Scale
 from ui.views import TrackViewer
 import wx
 
@@ -27,7 +27,7 @@ class TrackViewerTest(unittest.TestCase):
         t2.n2 = t1
         
         bounds = EditorBounds()
-        bounds.scale = 10.0
+        bounds.scale = Scale(10.0)
         bounds.minX = -55000.0
         bounds.maxX = 1000.0
         bounds.minY = -5000.0
@@ -45,7 +45,7 @@ class TrackViewerTest(unittest.TestCase):
         t1 = Track(p1 = Vec3("0", "0", "0"),
                    p2 = Vec3("0", "20", "0"))
         bounds = EditorBounds();
-        bounds.scale = 1.0
+        bounds.scale = Scale(1.0)
         bounds.minX = -1000.0
         bounds.maxX = 1000.0
         bounds.minY = -1000.0

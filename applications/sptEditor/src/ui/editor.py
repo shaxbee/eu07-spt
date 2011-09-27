@@ -26,6 +26,7 @@ from sptmath import Vec3
 SCALE_MIN = 0.004 # It gives 800px/200km
 SCALE_MAX = 2000.0 # It gives 2000px/m
 SCALE_DEFAULT = 1.0 # It gives 1px/m
+
 BASE_POINT_MARGIN = 50
 
 # Modes of editor
@@ -246,9 +247,7 @@ class PlanePart(wx.ScrolledWindow):
 
         Scale preserves the center view.
         """
-        # Set limits to the scale
-        if scale > SCALE_MAX + 0.001 or scale < SCALE_MIN - 0.001:
-            return
+        assert isinstance(scale, Scale)
 
         # 1) Get the center point of editor
         (vx, vy) = self.GetViewStart()
@@ -270,7 +269,7 @@ class PlanePart(wx.ScrolledWindow):
         self.Refresh()
         self.GetParent().topRuler.Refresh()
         self.GetParent().leftRuler.Refresh()
-        self.main_window.SetStatusText("%.3f px/m" % scale, 2)
+        self.main_window.SetStatusText(str(scale), 2)
         
         
     def ViewToModel(self, point):
@@ -516,7 +515,7 @@ class EditorBounds:
         self.maxX = 1000.0;
         self.minY = -1000.0;
         self.maxY = 1000.0;
-        self.scale = SCALE_DEFAULT;
+        self.scale = Scale();
         self.extentX = 100;
         self.extentY = 100;
         
@@ -529,17 +528,17 @@ class EditorBounds:
         >>> layout = EditorBounds()
         >>> layout.ComputePreferredSize((800, 600))
         (2200, 2200)
-        >>> layout.scale = SCALE_MIN
+        >>> layout.scale = Scale(SCALE_MIN)
         >>> layout.ComputePreferredSize((800, 600))
         (1000, 800)
-        >>> layout.scale = SCALE_MAX
+        >>> layout.scale = Scale(SCALE_MAX)
         >>> layout.ComputePreferredSize((800, 600))
         (4000200, 4000200)
         """
         (w, h) = actualSize
         
-        return (max(w, int(self.scale * (self.maxX - self.minX))) + 2 * self.extentX,
-            max(h, int(self.scale * (self.maxY - self.minY))) + 2 * self.extentY)
+        return (max(w, int(self.scale.get() * (self.maxX - self.minX))) + 2 * self.extentX,
+            max(h, int(self.scale.get() * (self.maxY - self.minY))) + 2 * self.extentY)
     
     
     def ViewToModel(self, point):
@@ -551,15 +550,15 @@ class EditorBounds:
         >>> layout = EditorBounds()
         >>> layout.ViewToModel((1100, 1100))
         (0.000,-0.000,0.000)
-        >>> layout.scale = SCALE_MIN
+        >>> layout.scale = Scale(SCALE_MIN)
         >>> layout.ViewToModel((1100, 1100))
         (249000.000,-249000.000,0.000)
-        >>> layout.scale = SCALE_MAX
+        >>> layout.scale = Scale(SCALE_MAX)
         >>> layout.ViewToModel((1100, 1100))
         (-999.500,999.500,0.000)
         """
-        p3d = Vec3(Decimal(str((point[0]-self.extentX)/self.scale + self.minX)),
-            Decimal(str(-((point[1]-self.extentY)/self.scale - self.maxY))),
+        p3d = Vec3(Decimal(str((point[0]-self.extentX)/self.scale.get() + self.minX)),
+            Decimal(str(-((point[1]-self.extentY)/self.scale.get() - self.maxY))),
             Decimal(0))
         return p3d
 
@@ -573,17 +572,17 @@ class EditorBounds:
         >>> layout = EditorBounds()
         >>> layout.ModelToView()
         (1100, 1100)
-        >>> layout.scale = 0.5
+        >>> layout.scale = Scale(0.5)
         >>> layout.ModelToView()
         (600, 600)
-        >>> layout.scale = 2.0
+        >>> layout.scale = Scale(2.0)
         >>> layout.ModelToView()
         (2100, 2100)
         >>> layout.ModelToView(Vec3('-4.000', '540.000', '3.000'))
         (2092, 1020)
         """        
-        p2d = (int((float(point.x) - self.minX) * self.scale + self.extentX),
-            int((-float(point.y) + self.maxY) * self.scale + self.extentY))
+        p2d = (int((float(point.x) - self.minX) * self.scale.get() + self.extentX),
+            int((-float(point.y) + self.maxY) * self.scale.get() + self.extentY))
         return p2d
     
     
@@ -596,8 +595,8 @@ class EditorBounds:
         >>> layout.GetMinMax()
         (2100, 2100)
         """
-        x = int((self.maxX - self.minX) * self.scale) + self.extentX
-        y = int((self.maxY - self.minY) * self.scale) + self.extentY
+        x = int((self.maxX - self.minX) * self.scale.get()) + self.extentX
+        y = int((self.maxY - self.minY) * self.scale.get()) + self.extentY
         return (x, y)
     
     
@@ -657,17 +656,17 @@ class EditorBounds:
         
         Example:
         >>> bounds = EditorBounds()
-        >>> bounds.scale = 1;
+        >>> bounds.scale = Scale(1.0);
         >>> bounds.GetBezierFlatnessFactor()
         5
-        >>> bounds.scale = 0.004
+        >>> bounds.scale = Scale(0.004)
         >>> bounds.GetBezierFlatnessFactor()
         16
-        >>> bounds.scale = 1000.0
+        >>> bounds.scale = Scale(1000.0)
         >>> bounds.GetBezierFlatnessFactor()
         3
         """
-        return int(math.ceil(16 / (math.log10(self.scale * 250) + 1)))
+        return int(math.ceil(16 / (math.log10(self.scale.get() * 250) + 1)))
     
     
     def GetHighlightRect(self, point):
@@ -676,7 +675,7 @@ class EditorBounds:
         
         Example:
         >>> bounds = EditorBounds()
-        >>> bounds.scale = 0.5
+        >>> bounds.scale = Scale(0.5)
         >>> bounds.GetHighlightRect(wx.Point(598, 602))
         [(-14.000,6.000,0.000), (6.000,-14.000,0.000)]
         """
@@ -685,8 +684,158 @@ class EditorBounds:
         p2d_2 = point + wx.Point(ui.views.HIGHLIGHT_DISTANCE, ui.views.HIGHLIGHT_DISTANCE)
         p3d_2 = self.ViewToModel(p2d_2)
         return [p3d_1, p3d_2]
-        
-        
+
+
+
+
+class Scale:
+    """
+    The editor scale.
+
+    The editor scale is defined as mathematical number set:
+
+    .. math::
+        scale = {s : s \in \Re \vee (s \geq 0.4 \vedge s \leq 2000) \vee s = 0.04 \vee s = 0.004}
+
+    Example:
+    >>> s = Scale()
+    >>> s.increase()
+    >>> s.get()
+    2.0
+    >>> s.decrease()
+    >>> s.get()
+    1.0
+    >>> s.set(3000.0)
+    Traceback (most recent call last):
+        ...
+    ValueError
+    """
+
+    LSCALE_MAX = 0.4
+
+    __large_scales = [LSCALE_MAX, 0.04, SCALE_MIN]
+
+    def __init__(self, value = SCALE_DEFAULT):
+        self.set(value)
+
+
+    def increase(self):
+        """
+        Increases a scale.
+
+        Examples:
+        >>> s = Scale()
+        >>> s.increase()
+        >>> s
+        2px/m
+        >>> s.set(0.004)
+        >>> s.increase()
+        >>> s
+        1px/25.0m
+        >>> s.increase()
+        >>> s
+        1px/2.5m
+        >>> s.increase()
+        >>> s
+        1px/1.25m
+        >>> s.set(1000.0)
+        >>> s.increase()
+        >>> s
+        2000px/m
+        >>> s.increase()
+        >>> s
+        2000px/m
+        """
+        try:
+            idx = self.__large_scales.index(self.value)
+            if (idx == 0):
+                self.value = 2*self.LSCALE_MAX
+            else:
+                self.value = self.__large_scales[idx-1]
+        except ValueError:
+            n = self.value * 2
+            if (n >= SCALE_MAX):
+                self.value = SCALE_MAX
+            else:
+                self.value = n
+
+
+    def decrease(self):
+        """
+        Decreases the scale.
+
+        Examples:
+        >>> s = Scale()
+        >>> s.decrease()
+        >>> s
+        1px/2.0m
+        >>> s.set(0.6)
+        >>> s.decrease()
+        >>> s
+        1px/2.5m
+        """
+        try:
+            idx = self.__large_scales.index(self.value)
+            if (idx == len(self.__large_scales) - 1):
+                self.value = SCALE_MIN
+            else:
+                self.value = self.__large_scales[idx+1]
+        except ValueError:
+            n = self.value / 2
+            if (n <= self.LSCALE_MAX):
+                self.value = self.LSCALE_MAX
+            else:
+                self.value = n
+
+
+    def get(self):
+        return self.value
+
+
+    def set(self, value):
+        """
+        Sets the value for the scale.
+        It can raise ValueError.
+
+        Example:
+        >>> s = Scale()
+        >>> s.set(500.0)
+        >>> s
+        500px/m
+        >>> s.set(2001.0)
+        Traceback (most recent call last):
+            ...
+        ValueError
+        >>> s.set(0.002)
+        Traceback (most recent call last):
+            ...
+        ValueError
+        >>> s.set(0.04)
+        >>> s
+        1px/25.0m
+        >>> s.set(0.5)
+        >>> s
+        1px/2.0m
+        >>> s.set(0.4)
+        >>> s
+        1px/2.5m
+        """
+        if ((value < self.LSCALE_MAX or value > SCALE_MAX) and value not in self.__large_scales):
+            raise ValueError
+        self.value = value
+
+
+    def isLargeScale(self):
+        return self.value in self.__large_scales
+
+
+    def __repr__(self):
+        if (self.value <= 1.0):
+            return "1px/%sm" % float(1.0 / self.value)
+        else:
+            return "%dpx/m" % self.value
+
+
 
 
 class BasePoint:
@@ -994,11 +1143,13 @@ class WheelScaler:
     def OnMouseWheel(self, event):
         if event.ControlDown():
             delta = event.GetWheelRotation()
-            scale = self.editor.GetScale()
+            scale = self.editor.GetScale()            
             if delta < 0:
-                self.editor.SetScale(scale / 2)
+                scale.increase()
+                self.editor.SetScale(scale)
             else:
-                self.editor.SetScale(scale * 2)
+                scale.decrease()
+                self.editor.SetScale(scale)
         else:
             event.Skip()
 
@@ -1033,4 +1184,9 @@ class SceneryListener(model.scenery.SceneryListener):
         else:
             box = ui.views.GetViewer(element).GetBox(part.bounds)
             part.RedrawRect(box)
-      
+
+
+if (__name__ == '__main__'):
+    import doctest
+    doctest.testmod()
+
