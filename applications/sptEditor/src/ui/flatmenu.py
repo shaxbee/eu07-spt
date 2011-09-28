@@ -2048,7 +2048,7 @@ class FileHistory(object):
         for index in xrange(self._fileMaxFiles):
         
             if index < len(self._fileHistory):
-                config.Write(buffer%(index+1), self._fileHistory[i])
+                config.Write(buffer%(index+1), self._fileHistory[index])
             else:
                 config.Write(buffer%(index+1), "")
     
@@ -2086,7 +2086,7 @@ class FileHistory(object):
             menu.AppendSeparator()
 
         for index in xrange(len(self._fileHistory)):        
-            menu.Append(self._idBase + index, GetMRUEntryLabel(index, self._fileHistory[i]))
+            menu.Append(self._idBase + index, GetMRUEntryLabel(index, self._fileHistory[index]))
         
 
 # ---------------------------------------------------------------------------- #
@@ -2794,6 +2794,54 @@ class FlatMenuBar(wx.Panel):
                 return mi
         return None
 
+    def FindToolbarItem(self, id):
+        """
+        Returns a L{FlatToolbarItem} according to its 'id'
+        
+        :para 'id': the identifier for the sought L{FlatToolbarItem}.
+        """
+        
+        for item in self._tbButtons:
+            if item._tbItem.GetId() == id:
+                return item._tbItem
+
+    def SetSelection(self, id):
+        """
+        Selects a particular item.
+
+        :param `id`: an id of the instance of L{FlatToolbarItem}.
+        """
+        item = self.FindToolbarItem(id)
+        if item != None:
+            redrawAll = False
+            idx = None
+            
+            # Try to change selection if its check item
+            item.Toggle()
+            
+            # Change selsction if its radio item
+            if item.IsRadioItem() and not item.IsSelected():
+                group = item.GetGroup()
+                for i in xrange(len(self._tbButtons)):
+                    if self._tbButtons[i]._tbItem.GetGroup() == group and \
+                      self._tbButtons[i]._tbItem != item and \
+                      self._tbButtons[i]._tbItem.IsSelected():
+                        self._tbButtons[i]._state = ControlNormal
+                        self._tbButtons[i]._tbItem.Select(False)
+                        redrawAll = True
+                    if self._tbButtons[i]._tbItem == item:
+                        idx = i
+                item.Select(True)
+
+            if redrawAll:
+                self.Refresh()
+                if "__WXMSW__" in wx.Platform:
+                    dc = wx.BufferedDC(wx.ClientDC(self))
+                else:
+                    dc = wx.ClientDC(self)
+            else:
+                dc = wx.ClientDC(self)
+                self.DrawToolbarItem(dc, idx, ControlPressed)
 
     def OnSize(self, event):
         """

@@ -13,8 +13,6 @@ from wx.lib.agw.artmanager import ArtManager
 #from wx.lib.agw.fmresources import ControlFocus, ControlPressed
 from wx.lib.agw.fmresources import FM_OPT_SHOW_CUSTOMIZE, FM_OPT_SHOW_TOOLBAR, FM_OPT_MINIBAR, FM_OPT_IS_LCD
 
-from ui.uitools import SelectButton, DeselectButton
-
 #this globals are overwrite by globals in application.py
 ID_EXPORT = wx.ID_HIGHEST
 ID_CENTER_AT = ID_EXPORT +1
@@ -129,10 +127,6 @@ class ToolBarPanel(wx.Panel):
     
     def SelectButton(self, id):
         '''Select button from menu'''
-        SelectButton(self._mb, id)
-
-    def DeselectButton(self, id):
-        '''Deselect button in menu'''
-        DeselectButton(self._mb, id)
+        self._mb.SetSelection(id)
         
     

@@ -649,12 +649,10 @@ class MainWindow(wx.Frame):
     def MenuChangeEditorMode(self, mode):
         '''Change editor mode: check aprioprate button'''
         if mode == ui.editor.MODE_NORMAL:
-            pass
             self._menubar.SelectButton(ID_MODE_TRACK_NORMAL)
-            self._menubar.DeselectButton(ID_MODE_TRACK_CLOSURE)
+            #self._menubar.DeselectButton(ID_MODE_TRACK_CLOSURE)
         elif mode == ui.editor.MODE_CLOSURE:
-            pass
-            self._menubar.DeselectButton(ID_MODE_TRACK_NORMAL)
+            #self._menubar.DeselectButton(ID_MODE_TRACK_NORMAL)
             self._menubar.SelectButton(ID_MODE_TRACK_CLOSURE)
 
 if __name__ == "__main__":

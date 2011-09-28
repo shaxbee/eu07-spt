@@ -16,8 +16,7 @@ def ResizeBitmap(bitmap, size):
     
 def SelectButton(menu, id):
     "only for compatibility purposes with ribbon"
-    b = FindItemById(menu, id)
-    b.Select(True)
+    menu.SetSelection(id)
     menu.Refresh(False)
 
 def DeselectButton(menu, id):

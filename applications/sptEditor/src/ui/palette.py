@@ -31,6 +31,7 @@ class ToolsPalette(wx.Panel):
         bitmapDir = os.path.join(dirName, 'icons')
         self.bitmap_action_dir = os.path.join(bitmapDir, 'actions')
         
+        self.CreateSearch()
         self.CreateMenu()
         
         ArtManager.Get().SetMBVerticalGradient(True)
@@ -38,16 +39,17 @@ class ToolsPalette(wx.Panel):
         
         
         s = wx.BoxSizer(wx.VERTICAL)
-        s.Add(self._mb, 0, wx.EXPAND)
+        s.Add(self._searchPanel,0,wx.EXPAND)
+        s.Add(self._menu, 1, wx.EXPAND)
         self.SetSizer(s)
        
-        self._mb.Refresh()
+        self._menu.Refresh()
         pass
     
     def CreateMenu(self):
         '''Create menu in window'''
-        self._mb = FM.FlatMenuBar(self, wx.ID_ANY, 16, 5, options = FM_OPT_IS_LCD | FM_OPT_MINIBAR | FM_OPT_SHOW_TOOLBAR)
-        self._mb.GetRendererManager().SetTheme(FM.Style2007)
+        self._menu = FM.FlatMenuBar(self, wx.ID_ANY, 16, 5, options = FM_OPT_IS_LCD | FM_OPT_MINIBAR | FM_OPT_SHOW_TOOLBAR)
+        self._menu.GetRendererManager().SetTheme(FM.Style2007)
 
         #Create icons, resize it to 16 px
         icon_insert_track = ResizeBitmap(wx.Bitmap(os.path.join(self.bitmap_action_dir, "insert_straight.png"), wx.BITMAP_TYPE_PNG),16)
@@ -55,15 +57,58 @@ class ToolsPalette(wx.Panel):
         icon_insert_curve = ResizeBitmap(wx.Bitmap(os.path.join(self.bitmap_action_dir, "insert_curve.png"), wx.BITMAP_TYPE_PNG),16)
         
         #adding tools
-        self._mb.AddRadioTool(ID_INSERT_TRACK, "Insert track", icon_insert_track)
-        self._mb.AddRadioTool(ID_INSERT_CURVE, "Insert curve", icon_insert_curve)
-        self._mb.AddRadioTool(ID_INSERT_SWITCH, "Insert switch", icon_insert_switch)
+        self._menu.AddRadioTool(ID_INSERT_TRACK, "Insert track", icon_insert_track)
+        self._menu.AddRadioTool(ID_INSERT_CURVE, "Insert curve", icon_insert_curve)
+        self._menu.AddRadioTool(ID_INSERT_SWITCH, "Insert switch", icon_insert_switch)
 
-        self.Bind(FM.EVT_FLAT_MENU_SELECTED, self.GetGrandParent().OnInsertStraightTrack, id=ID_INSERT_TRACK)
+        #self.Bind(FM.EVT_FLAT_MENU_SELECTED, self.GetGrandParent().OnInsertStraightTrack, id=ID_INSERT_TRACK)
 
-    def OnInsertTrack(self, event):
-        e = event
-        pass
+    def CreateSearch(self):
+        '''Create search pole on the top of the window'''
+        
+        self._searchPanel = wx.Panel(self, wx.ID_ANY)
+        sizerSearch = wx.BoxSizer(wx.HORIZONTAL)
+        sizerSearch.Add(wx.StaticText(self._searchPanel, wx.ID_ANY, label="Search:"), \
+            0, wx.SHAPED | wx.ALIGN_CENTER)
+
+        self.searchTextCtrl = wx.TextCtrl(self._searchPanel, wx.ID_ANY)
+        self.searchTextCtrl.SetMaxLength(32)
+        self.searchTextCtrl.SetFocus()
+
+        self.searchTextCtrl.Bind(wx.EVT_TEXT, self.OnTextSearch, id=wx.ID_ANY)
+
+        sizerSearch.Add(self.searchTextCtrl, 3, wx.EXPAND)
+
+        self.clearSearch = wx.Button(self._searchPanel, wx.ID_CLEAR)
+        self.clearSearch.Bind(wx.EVT_BUTTON, self.OnClearSearch, id=wx.ID_CLEAR)
+
+        sizerSearch.Add(self.clearSearch, 1, wx.EXPAND)
+        self._searchPanel.SetSizer(sizerSearch)
+
+    def OnClearSearch(self, event):
+        self.searchTextCtrl.Clear()
+        self.searchTextCtrl.SetFocus()
+
+
+    def OnTextSearch(self, event):
+        exp = event.GetEventObject().GetValue()
+        if exp.strip() == "":
+            self.ClearSearch()
+        else:
+            self.Search(exp)
+
+
+    def ClearSearch(self):
+        for g in self.groups:
+            g.ClearSearch()
+        self.sizerPalette.Layout()
+
+
+    def Search(self, exp):
+        for g in self.groups:
+            g.Search(exp)
+        self.sizerPalette.Layout()
+
 
 class TrackPalette(wx.ScrolledWindow):
     """
