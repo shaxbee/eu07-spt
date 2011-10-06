@@ -14,19 +14,3 @@ def ResizeBitmap(bitmap, size):
         return wx.BitmapFromImage(img)
     return None
     
-def SelectButton(menu, id):
-    "only for compatibility purposes with ribbon"
-    menu.SetSelection(id)
-    menu.Refresh(False)
-
-def DeselectButton(menu, id):
-    "only for compatibility purposes"
-    b = FindItemById(menu, id)
-    b.Select(False)
-    menu.Refresh(False)
-    
-def FindItemById(menu, id):
-    for b in menu._tbButtons:
-        if b._tbItem._id == id:
-            return b._tbItem
-    return None

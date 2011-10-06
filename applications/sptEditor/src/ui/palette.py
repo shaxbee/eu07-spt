@@ -18,7 +18,7 @@ from wx.lib.agw.artmanager import ArtManager
 #from wx.lib.agw.fmresources import ControlFocus, ControlPressed
 from wx.lib.agw.fmresources import FM_OPT_SHOW_TOOLBAR, FM_OPT_MINIBAR, FM_OPT_IS_LCD
 
-from ui.uitools import SelectButton, DeselectButton, ResizeBitmap, FindItemById
+from ui.uitools import ResizeBitmap #, FindItemById, SelectButton, DeselectButton 
 
 from ui.toolbar import ID_INSERT_TRACK, ID_INSERT_CURVE, ID_INSERT_SWITCH
 
@@ -109,6 +109,13 @@ class ToolsPalette(wx.Panel):
             g.Search(exp)
         self.sizerPalette.Layout()
 
+
+class PropertiesPalette(wx.ScrolledWindow):
+    """
+    Base class for all properties palettes for tools
+    """
+    def __init__(self, parent, id = wx.ID_ANY, w=200, h=400):
+        wx.ScrolledWindow.__init__(self, parent, id)
 
 class TrackPalette(wx.ScrolledWindow):
     """

@@ -216,9 +216,12 @@ class MainWindow(wx.Frame):
 #        self.trackPaletteFrame = ui.palette.TrackPalette(self.main_content_panel,ID_TRACK_PALETTE,250,400)
         #self.trackPaletteFrame = ui.palette.TrackPalette(self.main_content_panel,ID_TRACK_PALETTE)
         self.trackPaletteFrame = ui.palette.ToolsPalette(self.main_content_panel,ID_TRACK_PALETTE)
-        
+        self.propertiesPaletteFrame = ui.palette.PropertiesPalette(self.main_content_panel,wx.ID_ANY)
         # Adding palette pane to manager as child
         self._paneManager.AddPane(self.trackPaletteFrame,self._trackPalettePaneInfo)
+        self._paneManager.AddPane(self.propertiesPaletteFrame, AUI.AuiPaneInfo().Dockable().CloseButton(). \
+                                  PinButton().MinimizeButton().MaximizeButton().CaptionVisible(). \
+                                  Caption("Properties"))
         #self.trackPaletteMenuEntry.Check(True)
         self._paneManager.Update()
         

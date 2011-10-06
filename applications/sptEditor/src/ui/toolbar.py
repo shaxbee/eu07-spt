@@ -82,6 +82,8 @@ class ToolBarPanel(wx.Panel):
         self._mb.AddTool(wx.ID_ZOOM_IN, "Zoom In", icon_zoomin)
         self._mb.AddTool(wx.ID_ZOOM_OUT, "Zoom Out", icon_zoomout)
         
+        # This will'be not needed
+        '''
         self._mb.AddSeparator()
         
         icon_insert_track = wx.Bitmap(os.path.join(self.bitmap_action_dir, "insert_straight.png"), wx.BITMAP_TYPE_PNG)
@@ -91,7 +93,7 @@ class ToolBarPanel(wx.Panel):
         self._mb.AddTool(ID_INSERT_TRACK, "Insert track", icon_insert_track)
         self._mb.AddTool(ID_INSERT_CURVE, "Insert curve", icon_insert_curve)
         self._mb.AddTool(ID_INSERT_SWITCH, "Insert switch", icon_insert_switch)
-        
+        '''
         self._mb.AddSeparator()
         
         icon_normal = wx.Bitmap(os.path.join(self.bitmap_action_dir, "transform-crop-and-resize.png"), wx.BITMAP_TYPE_PNG)
