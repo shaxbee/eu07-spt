@@ -22,16 +22,21 @@ from ui.uitools import ResizeBitmap #, FindItemById, SelectButton, DeselectButto
 
 from ui.toolbar import ID_INSERT_TRACK, ID_INSERT_CURVE, ID_INSERT_SWITCH
 
+ID_TRACK_TOOL = wx.ID_HIGHEST
+ID_SRK_TOOL = wx.ID_HIGHEST
+
 class ToolsPalette(wx.Panel):
     def __init__(self, parent, id=wx.ID_ANY):
         wx.Panel.__init__(self,parent,id)
     
+        self._tool_panel = None
+        
         #create link to bitmap directory 
         dirName = os.path.dirname(os.path.abspath(sys.argv[0]))
         bitmapDir = os.path.join(dirName, 'icons')
         self.bitmap_action_dir = os.path.join(bitmapDir, 'actions')
         
-        self.CreateSearch()
+        #self.CreateSearch()
         self.CreateMenu()
         
         ArtManager.Get().SetMBVerticalGradient(True)
@@ -39,11 +44,20 @@ class ToolsPalette(wx.Panel):
         
         
         s = wx.BoxSizer(wx.VERTICAL)
-        s.Add(self._searchPanel,0,wx.EXPAND)
-        s.Add(self._menu, 1, wx.EXPAND)
+        #s.Add(self._searchPanel,0,wx.EXPAND)
+        s.Add(self._menu, 0, wx.EXPAND)
         self.SetSizer(s)
+
+        self.Bind(FM.EVT_FLAT_MENU_SELECTED, self.ToolSelected, id=ID_TRACK_TOOL)
+        self.Bind(FM.EVT_FLAT_MENU_SELECTED, self.ToolSelected, id=ID_SRK_TOOL)
+
        
         self._menu.Refresh()
+        
+        self._panels = {
+                        ID_TRACK_TOOL: self.LoadToolPanel,
+                        }
+        
         pass
     
     def CreateMenu(self):
@@ -54,14 +68,13 @@ class ToolsPalette(wx.Panel):
         #Create icons, resize it to 16 px
         icon_insert_track = ResizeBitmap(wx.Bitmap(os.path.join(self.bitmap_action_dir, "insert_straight.png"), wx.BITMAP_TYPE_PNG),16)
         icon_insert_switch = ResizeBitmap(wx.Bitmap(os.path.join(self.bitmap_action_dir, "insert_switch.png"), wx.BITMAP_TYPE_PNG),16)
-        icon_insert_curve = ResizeBitmap(wx.Bitmap(os.path.join(self.bitmap_action_dir, "insert_curve.png"), wx.BITMAP_TYPE_PNG),16)
+        #icon_insert_curve = ResizeBitmap(wx.Bitmap(os.path.join(self.bitmap_action_dir, "insert_curve.png"), wx.BITMAP_TYPE_PNG),16)
         
         #adding tools
-        self._menu.AddRadioTool(ID_INSERT_TRACK, "Insert track", icon_insert_track)
-        self._menu.AddRadioTool(ID_INSERT_CURVE, "Insert curve", icon_insert_curve)
-        self._menu.AddRadioTool(ID_INSERT_SWITCH, "Insert switch", icon_insert_switch)
+        #self._menu.AddRadioTool(ID_INSERT_CURVE, "Insert curve", icon_insert_curve)
+        self._menu.AddRadioTool(ID_TRACK_TOOL, "Insert track", icon_insert_track)
+        self._menu.AddRadioTool(ID_SRK_TOOL, "Insert switch", icon_insert_switch)
 
-        #self.Bind(FM.EVT_FLAT_MENU_SELECTED, self.GetGrandParent().OnInsertStraightTrack, id=ID_INSERT_TRACK)
 
     def CreateSearch(self):
         '''Create search pole on the top of the window'''
@@ -97,7 +110,6 @@ class ToolsPalette(wx.Panel):
         else:
             self.Search(exp)
 
-
     def ClearSearch(self):
         for g in self.groups:
             g.ClearSearch()
@@ -109,6 +121,27 @@ class ToolsPalette(wx.Panel):
             g.Search(exp)
         self.sizerPalette.Layout()
 
+    def ToolSelected(self, event):
+        """
+        Function that is called within tool selected radio buttons in menu.
+        It bind id of button with appriopriate Tools panel to load.
+        Bind is stored in _panels variable
+        """
+        if self._tool_panel != None:
+            self.UnloadToolPanel()
+        self._panels[event.Id](TrackPalette)
+    
+    def LoadToolPanel(self, panel):
+        """
+        Loaded tool panel under the menu.
+        """
+        
+        self._tool_panel = self.GetSizer().Add(panel(self),1,wx.EXPAND | wx.ALIGN_BOTTOM)
+        self.Refresh()
+        
+    def UnloadToolPanel(self):
+        if self.GetSizer().Remove(self._tool_panel):
+            self._tool_panel = None
 
 class PropertiesPalette(wx.ScrolledWindow):
     """
@@ -116,7 +149,18 @@ class PropertiesPalette(wx.ScrolledWindow):
     """
     def __init__(self, parent, id = wx.ID_ANY, w=200, h=400):
         wx.ScrolledWindow.__init__(self, parent, id)
+        self.SetSizer(wx.BoxSizer(wx.VERTICAL))
 
+    def LoadToolProperties(self, panel):
+        if self._tool_prop != None:
+            self.UnloadToolProperties()
+        self._tool_prop = self.GetSizer().Add(panel,1,wx.EXPAND)
+        
+    def UnloadToolProperties(self):
+        if self.GetSizer().Remove(self._tool_prop):
+            self._tool_prop = None
+        
+        
 class TrackPalette(wx.ScrolledWindow):
     """
     Base class for palette with buttons to quick inserting buttons in editor

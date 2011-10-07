@@ -37,7 +37,7 @@ ID_MAIN_FRAME = wx.ID_HIGHEST         + 5
 
 
 
-NAME_TRACK_PALETTE = "Track palette"
+NAME_TRACK_PALETTE = "Tools palette"
 NAME_TRACTION_PALETTE = "Traction palette"
 NAME_MAIN_EDITOR_TOP_VIEW = "Main Window"
 
