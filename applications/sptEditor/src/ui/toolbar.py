@@ -14,6 +14,7 @@ from wx.lib.agw.artmanager import ArtManager
 from wx.lib.agw.fmresources import FM_OPT_SHOW_CUSTOMIZE, FM_OPT_SHOW_TOOLBAR, FM_OPT_MINIBAR, FM_OPT_IS_LCD
 
 #this globals are overwrite by globals in application.py
+
 ID_EXPORT = wx.ID_HIGHEST
 ID_CENTER_AT = ID_EXPORT +1
 ID_INSERT_TRACK = ID_CENTER_AT +1

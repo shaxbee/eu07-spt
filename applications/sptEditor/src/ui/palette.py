@@ -22,8 +22,9 @@ from ui.uitools import ResizeBitmap #, FindItemById, SelectButton, DeselectButto
 
 #from ui.toolbar import ID_INSERT_TRACK, ID_INSERT_CURVE, ID_INSERT_SWITCH
 
+#from Application import ID_TRACK_TOOL, ID_SWITCH_TOOL
 ID_TRACK_TOOL = 1
-ID_SRK_TOOL = 2
+ID_SWITCH_TOOL = 2
 
 class ToolsPalette(wx.Panel):
     def __init__(self, parent, id=wx.ID_ANY):
@@ -45,19 +46,15 @@ class ToolsPalette(wx.Panel):
         s = wx.BoxSizer(wx.VERTICAL)
         s.Add(self._menu, 0, wx.EXPAND)
         self.SetSizer(s)
-
-        self.Bind(FM.EVT_FLAT_MENU_SELECTED, self.ToolSelected, id=ID_TRACK_TOOL)
-        self.Bind(FM.EVT_FLAT_MENU_SELECTED, self.ToolSelected, id=ID_SRK_TOOL)
-
-       
+      
         self._menu.Refresh()
         
+        #in this dictionary insert name of class that will be load to \
+        #tool panel at event from button of given ID
         self._panels = {
-                        ID_TRACK_TOOL: self.LoadToolPanel,
+                        ID_TRACK_TOOL: TrackTool,
                         }
         
-        pass
-    
     def CreateMenu(self):
         '''Create menu in window'''
         self._menu = FM.FlatMenuBar(self, wx.ID_ANY, 16, 5, options = FM_OPT_IS_LCD | FM_OPT_MINIBAR | FM_OPT_SHOW_TOOLBAR)
@@ -66,14 +63,14 @@ class ToolsPalette(wx.Panel):
         #Create icons, resize it to 16 px
         icon_insert_track = ResizeBitmap(wx.Bitmap(os.path.join(self.bitmap_action_dir, "insert_straight.png"), wx.BITMAP_TYPE_PNG),16)
         icon_insert_switch = ResizeBitmap(wx.Bitmap(os.path.join(self.bitmap_action_dir, "insert_switch.png"), wx.BITMAP_TYPE_PNG),16)
-        #icon_insert_curve = ResizeBitmap(wx.Bitmap(os.path.join(self.bitmap_action_dir, "insert_curve.png"), wx.BITMAP_TYPE_PNG),16)
         
         #adding tools
-        #self._menu.AddRadioTool(ID_INSERT_CURVE, "Insert curve", icon_insert_curve)
         self._menu.AddRadioTool(ID_TRACK_TOOL, "Insert track", icon_insert_track)
-        self._menu.AddRadioTool(ID_SRK_TOOL, "Insert switch", icon_insert_switch)
-
-
+        self._menu.AddRadioTool(ID_SWITCH_TOOL, "Insert switch", icon_insert_switch)
+       
+        #binding events
+        self.Bind(FM.EVT_FLAT_MENU_SELECTED, self.ToolSelected, id=ID_TRACK_TOOL)
+        self.Bind(FM.EVT_FLAT_MENU_SELECTED, self.ToolSelected, id=ID_SWITCH_TOOL)
 
     def ToolSelected(self, event):
         """
@@ -85,16 +82,16 @@ class ToolsPalette(wx.Panel):
             self.UnloadToolPanel()
         
         try:
-            self._panels[event.Id](TrackTool, event.Id)
+            self.LoadToolPanel(self._panels[event.Id](self))
         except KeyError:
             pass
     
-    def LoadToolPanel(self, panel, id):
+    def LoadToolPanel(self, panel):
         """
         Loaded tool panel under the menu.
         """
         
-        self._tool_panel = self.GetSizer().Add(panel(self),1,wx.EXPAND).GetWindow()
+        self._tool_panel = self.GetSizer().Add(panel,1,wx.EXPAND).GetWindow()
         
         #Refresh
         self.Layout()
@@ -121,22 +118,52 @@ class PropertiesPalette(wx.ScrolledWindow):
         wx.ScrolledWindow.__init__(self, parent, id)
         self.SetSizer(wx.BoxSizer(wx.VERTICAL))
 
+        self._panels = {
+                        }    
+
     def LoadToolProperties(self, panel):
-        if self._tool_prop != None:
-            self.UnloadToolProperties()
-        self._tool_prop = self.GetSizer().Add(panel,1,wx.EXPAND)
+        """
+        Loaded properties panel under the menu.
+        """
+        
+        self._properties_panel = self.GetSizer().Add(panel(self),1,wx.EXPAND).GetWindow()
+        
+        #Refresh
+        self.Layout()
         
     def UnloadToolProperties(self):
-        if self.GetSizer().Remove(self._tool_prop):
-            self._tool_prop = None
+        """
+        Remove properties panel from sizer and then destroy him
+        """
+        
+        if self.GetSizer().Remove(self._properties_panel):
+            self._properties_panel.Destroy()
+            self._properties_panel = None
+            
+            #Refresh
+            self.Layout()
         
 
 class TrackTool(wx.Panel):
     def __init__(self, parent, id = wx.ID_ANY):
         wx.Panel.__init__(self, parent, id)
 
-        self.searchTextCtrl = wx.TextCtrl(self, wx.ID_ANY)
+        #self.searchTextCtrl = wx.TextCtrl(self, wx.ID_ANY)
       
+        #wx.SpinCtrl(self)
+        s = wx.BoxSizer(wx.VERTICAL)
+        #s.Add(self._menu, 0, wx.EXPAND)
+        
+        
+        sl = wx.Slider(self,wx.ID_ANY,0,0,100, size=(250,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
+        sl.SetTickFreq(5)
+        
+        s.Add(sl,1,wx.EXPAND)
+        
+        self.SetSizer(s)
+        
+        
+        
         
 class TrackPalette(wx.ScrolledWindow):
     """
