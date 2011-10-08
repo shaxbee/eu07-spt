@@ -20,10 +20,10 @@ from wx.lib.agw.fmresources import FM_OPT_SHOW_TOOLBAR, FM_OPT_MINIBAR, FM_OPT_I
 
 from ui.uitools import ResizeBitmap #, FindItemById, SelectButton, DeselectButton 
 
-from ui.toolbar import ID_INSERT_TRACK, ID_INSERT_CURVE, ID_INSERT_SWITCH
+#from ui.toolbar import ID_INSERT_TRACK, ID_INSERT_CURVE, ID_INSERT_SWITCH
 
-ID_TRACK_TOOL = wx.ID_HIGHEST
-ID_SRK_TOOL = wx.ID_HIGHEST
+ID_TRACK_TOOL = 1
+ID_SRK_TOOL = 2
 
 class ToolsPalette(wx.Panel):
     def __init__(self, parent, id=wx.ID_ANY):
@@ -36,7 +36,6 @@ class ToolsPalette(wx.Panel):
         bitmapDir = os.path.join(dirName, 'icons')
         self.bitmap_action_dir = os.path.join(bitmapDir, 'actions')
         
-        #self.CreateSearch()
         self.CreateMenu()
         
         ArtManager.Get().SetMBVerticalGradient(True)
@@ -44,7 +43,6 @@ class ToolsPalette(wx.Panel):
         
         
         s = wx.BoxSizer(wx.VERTICAL)
-        #s.Add(self._searchPanel,0,wx.EXPAND)
         s.Add(self._menu, 0, wx.EXPAND)
         self.SetSizer(s)
 
@@ -76,50 +74,6 @@ class ToolsPalette(wx.Panel):
         self._menu.AddRadioTool(ID_SRK_TOOL, "Insert switch", icon_insert_switch)
 
 
-    def CreateSearch(self):
-        '''Create search pole on the top of the window'''
-        
-        self._searchPanel = wx.Panel(self, wx.ID_ANY)
-        sizerSearch = wx.BoxSizer(wx.HORIZONTAL)
-        sizerSearch.Add(wx.StaticText(self._searchPanel, wx.ID_ANY, label="Search:"), \
-            0, wx.SHAPED | wx.ALIGN_CENTER)
-
-        self.searchTextCtrl = wx.TextCtrl(self._searchPanel, wx.ID_ANY)
-        self.searchTextCtrl.SetMaxLength(32)
-        self.searchTextCtrl.SetFocus()
-
-        self.searchTextCtrl.Bind(wx.EVT_TEXT, self.OnTextSearch, id=wx.ID_ANY)
-
-        sizerSearch.Add(self.searchTextCtrl, 3, wx.EXPAND)
-
-        self.clearSearch = wx.Button(self._searchPanel, wx.ID_CLEAR)
-        self.clearSearch.Bind(wx.EVT_BUTTON, self.OnClearSearch, id=wx.ID_CLEAR)
-
-        sizerSearch.Add(self.clearSearch, 1, wx.EXPAND)
-        self._searchPanel.SetSizer(sizerSearch)
-
-    def OnClearSearch(self, event):
-        self.searchTextCtrl.Clear()
-        self.searchTextCtrl.SetFocus()
-
-
-    def OnTextSearch(self, event):
-        exp = event.GetEventObject().GetValue()
-        if exp.strip() == "":
-            self.ClearSearch()
-        else:
-            self.Search(exp)
-
-    def ClearSearch(self):
-        for g in self.groups:
-            g.ClearSearch()
-        self.sizerPalette.Layout()
-
-
-    def Search(self, exp):
-        for g in self.groups:
-            g.Search(exp)
-        self.sizerPalette.Layout()
 
     def ToolSelected(self, event):
         """
@@ -129,19 +83,35 @@ class ToolsPalette(wx.Panel):
         """
         if self._tool_panel != None:
             self.UnloadToolPanel()
-        self._panels[event.Id](TrackPalette)
+        
+        try:
+            self._panels[event.Id](TrackTool, event.Id)
+        except KeyError:
+            pass
     
-    def LoadToolPanel(self, panel):
+    def LoadToolPanel(self, panel, id):
         """
         Loaded tool panel under the menu.
         """
         
-        self._tool_panel = self.GetSizer().Add(panel(self),1,wx.EXPAND | wx.ALIGN_BOTTOM)
-        self.Refresh()
+        self._tool_panel = self.GetSizer().Add(panel(self),1,wx.EXPAND).GetWindow()
+        
+        #Refresh
+        self.Layout()
         
     def UnloadToolPanel(self):
+        """
+        Remove tools panel from sizer and then destroy him
+        """
+        
         if self.GetSizer().Remove(self._tool_panel):
+            self._tool_panel.Destroy()
             self._tool_panel = None
+            
+            #Refresh
+            self.Layout()
+
+
 
 class PropertiesPalette(wx.ScrolledWindow):
     """
@@ -160,6 +130,13 @@ class PropertiesPalette(wx.ScrolledWindow):
         if self.GetSizer().Remove(self._tool_prop):
             self._tool_prop = None
         
+
+class TrackTool(wx.Panel):
+    def __init__(self, parent, id = wx.ID_ANY):
+        wx.Panel.__init__(self, parent, id)
+
+        self.searchTextCtrl = wx.TextCtrl(self, wx.ID_ANY)
+      
         
 class TrackPalette(wx.ScrolledWindow):
     """
