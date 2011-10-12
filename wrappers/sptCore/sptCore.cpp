@@ -12,9 +12,9 @@ using namespace boost::python;
 using namespace sptCore;
 
 
-struct RailTrackingWrapper: public Track, public wrapper<Track>
+struct TrackWrapper: public Track, public wrapper<Track>
 {
-    RailTrackingWrapper(Sector& sector): Track(sector) { }
+    TrackWrapper(Sector& sector): Track(sector) { }
 
     virtual osg::Vec3 getExit(const osg::Vec3& entry) const { return get_override("getExit")(entry); }
     virtual std::auto_ptr<Path> getPath(const osg::Vec3& entry) const 
@@ -65,12 +65,12 @@ private:
 BOOST_PYTHON_MODULE(_sptCore)
 {
 
-    class_<Track>("RailTracking", init<Sector&>())
-        .def("getExit", &RailTrackingWrapper::getExit);
+    class_<Track>("Track", init<Sector&>())
+        .def("getExit", &TrackWrapper::getExit);
 
-    class_<RailTrackingWrapper>("PyRailTracking", init<Sector&>())
-        .def("getExit", &RailTrackingWrapper::getExit);
-//        .def("getPath", &RailTrackingWrapper::getPath);
+    class_<TrackWrapper>("PyTrack", init<Sector&>())
+        .def("getExit", &TrackWrapper::getExit);
+//        .def("getPath", &TrackWrapper::getPath);
 
 #if 0
     class_<SwitchableTrackingWrapper, noncopyable>("SwitchableTracking", init<Sector&>())

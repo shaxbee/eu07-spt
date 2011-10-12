@@ -1,7 +1,7 @@
-#ifndef SPTCORE_TRACK_H
-#define SPTCORE_TRACK_H 1
+#ifndef SPTCORE_SIMPLETRACK_H
+#define SPTCORE_SIMPLETRACK_H 1
 
-#include <sptCore/RailTracking.h>
+#include "sptCore/Track.h"
 
 #include <memory>
 
@@ -26,6 +26,6 @@ private:
     std::auto_ptr<Path> _path;
 };
 
-} // namespace sptCore
+}; // namespace sptCore
 
 #endif // headerguard

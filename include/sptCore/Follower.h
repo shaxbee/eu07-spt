@@ -5,13 +5,14 @@
 #include <osg/Matrix>
 
 #include <sptCore/Track.h>
+#include <sptCore/SimpleTrack.h>
 #include <sptCore/Sector.h>
 #include <sptCore/Scenery.h>
 
 namespace sptCore
 {
 
-//! \brief Follower tied and moving on RailTracking in Scenery
+//! \brief Follower tied and moving on Track in Scenery
 //! \author Zbyszek "ShaXbee" Mandziejewicz
 class Follower
 {

@@ -1,33 +1,29 @@
 #include "sptCore/Sector.h"
 
+#include <boost/functional/hash.hpp>
+
 using namespace sptCore;
 
 float Sector::SIZE = 2000.0;
 
-Sector::Sector(const osg::Vec3d& position, RailTrackings& trackings, Connections& connections): _position(position)
+namespace osg
 {
-    _trackings.swap(trackings);
-    _connections.swap(connections);
-}; // Sector::Sector(scenery)
-
-const Track& Sector::getNextRailTracking(const osg::Vec3f& position, const size_t from) const
+size_t hash_value(const osg::Vec3f& value)
 {
-    Connections::const_iterator iter = _connections.find(position);
-
-    if(iter == _connections.end() || (iter->first != from && iter->second != from))
-    {
-        throw UnknownConnectionException() << PositionInfo(position);
-    };
-
-    return (iter->first == from) ? iter->second : iter->first;
-}; // Sector::getNextTrack(position, from)
-
-const Track& Sector::getRailTracking(const size_t index) const
-{
-    return _trackings.at(index);
+	size_t result = 0;
+	boost::hash_combine(result, value.x());
+	boost::hash_combine(result, value.y());
+	boost::hash_combine(result, value.z());
+}
 };
 
-size_t Sector::getRailTrackingCount() const
+Sector::Sector(const osg::Vec3f& position, Tracks& trackings, Externals& connections): _position(position)
 {
-    return _trackings.size();
-}; // Sector::getRailTrackingCount()
+    _trackings.swap(trackings);
+    _externals.swap(connections);
+}; // Sector::Sector(scenery)
+
+const Track& Sector::getTrack(const TrackId id) const
+{
+    return _trackings.at(id.value());
+};

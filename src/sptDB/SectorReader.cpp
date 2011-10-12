@@ -31,7 +31,7 @@ enum PathType
 
 typedef boost::ptr_vector<SimpleTrack> Tracks;
 typedef boost::ptr_vector<Switch> Switches;
-typedef boost::ptr_vector<Track> RailTrackings;
+typedef boost::ptr_vector<Track> Tracks;
 
 void print_vec(const osg::Vec3f& vec)
 {
@@ -178,12 +178,12 @@ void readCustomTracking(Sector& sector, BinaryReader& reader, Tracks& tracks, Sw
     reader.read(count);
 
     if(count != 0)
-        throw std::logic_error("Custom RailTracking reading not implemented");
+        throw std::logic_error("Custom Track reading not implemented");
 
     reader.endChunk("RTLS");
 };
 
-void readConnections(BinaryReader& reader, const osg::Vec3f& offset, const RailTrackings& trackings, Connections& connections, ExternalConnections& externals)
+void readConnections(BinaryReader& reader, const osg::Vec3f& offset, const Tracks& trackings, Connections& connections, ExternalConnections& externals)
 {
     reader.expectChunk("CNLS");
 
@@ -311,7 +311,7 @@ Sector& readSector(std::istream& input, Scenery& scenery)
     readSwitches(*sector, reader, switches);
 
 #if 0
-    // RTLS - Custom RailTracking List
+    // RTLS - Custom Track List
     readCustomTracking(*sector, reader, tracks, switches);
 #endif
 
@@ -321,12 +321,12 @@ Sector& readSector(std::istream& input, Scenery& scenery)
     // SWNM - Switch Names
     readSwitchNames(scenery, reader, switches);
 
-    RailTrackings trackings;
+    Tracks trackings;
     trackings.reserve(tracks.size() + switches.size());
     trackings.transfer(trackings.begin(), tracks);
     trackings.transfer(trackings.end() - 1, switches);
 
-    // RTCN - RailTracking Connections
+    // RTCN - Track Connections
     Connections connections;
     ExternalConnections externals;
     readConnections(reader, position, trackings, connections, externals);

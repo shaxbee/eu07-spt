@@ -63,9 +63,9 @@ osg::ref_ptr<osg::Geometry> profile = createProfile();
 
 void createSectorGeometry(osg::Geode* target, const sptCore::Sector& sector)
 {
-    for(unsigned int index = 0; index != sector.getRailTrackingCount(); index++)
+    for(unsigned int index = 0; index != sector.getTrackCount(); index++)
     {
-        const sptCore::Track& tracking = sector.getRailTracking(index);
+        const sptCore::Track& tracking = sector.getTrack(index);
         if(typeid(tracking) == typeid(sptCore::SimpleTrack))
         {
             const sptCore::SimpleTrack& track = static_cast<const sptCore::SimpleTrack&>(tracking);

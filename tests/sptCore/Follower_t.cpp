@@ -19,7 +19,7 @@ namespace
 template <typename TracksContainerT>
 void set_sector_data(Sector& sector, TracksContainerT& data, size_t index)
 {
-    boost::array<RailTracking*, 1> trackings = 
+    boost::array<Track*, 1> trackings = 
     {{ 
         data[index] 
     }};

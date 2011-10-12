@@ -1,5 +1,5 @@
-#ifndef SPTCORE_RAILTRACKING_H
-#define SPTCORE_RAILTRACKING_H 1
+#ifndef SPTCORE_TRACK_H
+#define SPTCORE_TRACK_H 1
 
 #include <osg/Vec3>
 #include <osg/Matrix>
@@ -34,10 +34,8 @@ class Track
 {
 
 public:
-    Track(Sector& sector, TrackId id);
+    Track(Sector& sector);
     virtual ~Track();
-
-    TrackID getId() const { return _id; };
 
     //! Get tracking exit for given entry point
     //! \throw UnknownEntryException if there is no exit for given entry
@@ -57,10 +55,9 @@ public:
 
 private:
     Sector& _sector;
-    TrackId _id;
 
-}; // class sptCore::RailTracking
+}; // class sptCore::Track
 
-} // namespace sptCore
+}; // namespace sptCore
 
 #endif // headerguard

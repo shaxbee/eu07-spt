@@ -1,7 +1,7 @@
 #ifndef SPTCORE_SWITCHABLETRACKING_H
 #define SPTCORE_SWITCHABLETRACKING_H
 
-#include <sptCore/RailTracking.h>
+#include <sptCore/Track.h>
 
 #include <string>
 #include <vector>

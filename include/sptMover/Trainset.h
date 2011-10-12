@@ -7,7 +7,7 @@
 #include <osg/Vec3>
 #include <osg/BoundingBox>
 
-#include <sptCore/RailTracking.h>
+#include <sptCore/Track.h>
 #include <sptMover/Vehicle.h>
 
 namespace sptMover

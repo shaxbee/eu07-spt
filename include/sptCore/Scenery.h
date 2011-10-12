@@ -19,6 +19,7 @@ namespace sptCore
 
 class Sector;
 
+class Track;
 class SimpleTrack;
 class SwitchableTracking;
 class Switch;
@@ -76,8 +77,6 @@ private:
     typedef boost::ptr_map<osg::Vec3f, Sector> Sectors;
     typedef std::map<std::string, SimpleTrack*> Tracks;
     typedef std::map<std::string, SwitchableTracking*> Switches;
-
-    boost::scoped_ptr<ExternalsManager> _externals;
 
     Sectors _sectors;
     Tracks _tracks;

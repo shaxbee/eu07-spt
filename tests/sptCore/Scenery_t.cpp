@@ -56,7 +56,7 @@ TEST_F(SceneryTest, AddSector)
     {
         std::auto_ptr<Sector> left(new Sector(leftPos));
         {
-            boost::array<RailTracking*, 1> tracks = {{ new Track(*left, new StraightPath(beginInternal, endInternal)) }};
+            boost::array<Track*, 1> tracks = {{ new Track(*left, new StraightPath(beginInternal, endInternal)) }};
             boost::array<Connection, 1> connections = {{ {endInternal, tracks[0], NULL} }};
             boost::array<ExternalConnection, 1> externals = {{ {leftPos, endInternal, 0} }};
 
@@ -65,7 +65,7 @@ TEST_F(SceneryTest, AddSector)
 
         std::auto_ptr<Sector> right(new Sector(rightPos));
         {
-            boost::array<RailTracking*, 1> tracks = {{ new Track(*right, new StraightPath(beginExternal, endExternal)) }};
+            boost::array<Track*, 1> tracks = {{ new Track(*right, new StraightPath(beginExternal, endExternal)) }};
             boost::array<Connection, 1> connections = {{ {beginExternal, tracks[0], NULL} }};
             boost::array<ExternalConnection, 1> externals = {{ {rightPos, beginExternal, 0} }};
 
@@ -79,9 +79,9 @@ TEST_F(SceneryTest, AddSector)
     const Sector& left = scenery.getSector(leftPos);
     const Sector& right = scenery.getSector(rightPos);
 
-    ASSERT_EQ(&left.getNextTrack(endInternal, left.getRailTracking(0)), &right.getRailTracking(0));
-    ASSERT_EQ(&right.getNextTrack(beginExternal, right.getRailTracking(0)), &left.getRailTracking(0));
+    ASSERT_EQ(&left.getNextTrack(endInternal, left.getTrack(0)), &right.getTrack(0));
+    ASSERT_EQ(&right.getNextTrack(beginExternal, right.getTrack(0)), &left.getTrack(0));
 
     scenery.removeSector(rightPos);
-    ASSERT_THROW(left.getNextTrack(endInternal, left.getRailTracking(0)), Sector::UnknownConnectionException);
+    ASSERT_THROW(left.getNextTrack(endInternal, left.getTrack(0)), Sector::UnknownConnectionException);
 };

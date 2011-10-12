@@ -1,12 +1,12 @@
 #ifndef SPTGFX_TRACKRENDERER_H
 #define SPTGFX_TRACKRENDERER_H 1
 
-#include <sptGFX/RailTrackingRenderer.h>
+#include <sptGFX/TrackRenderer.h>
 
 namespace sptGFX
 {
 
-class TrackRenderer: public RailTrackingRenderer
+class TrackRenderer: public TrackRenderer
 {
 
 public:

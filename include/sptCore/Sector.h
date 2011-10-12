@@ -14,7 +14,7 @@
 namespace sptCore
 {
 
-typedef boost::ptr_vector<Track> RailTrackings;
+typedef boost::ptr_vector<Track> Tracks;
 
 struct External
 {
@@ -29,7 +29,7 @@ typedef std::tr1::unordered_map<osg::Vec3f, External> Externals;
 class Sector
 {
 public:
-    Sector(const osg::Vec3f& position, RailTrackings& trackings, Externals& externals);
+    Sector(const osg::Vec3f& position, Tracks& trackings, Externals& externals);
 
     const osg::Vec3f& getPosition() const { return _position; };
 
@@ -44,7 +44,7 @@ public:
 private:
     const osg::Vec3f _position;
     Externals _externals;
-    RailTrackings _trackings;
+    Tracks _trackings;
 }; // class sptCore::Sector
 
 } // namespace sptCore

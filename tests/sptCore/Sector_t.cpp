@@ -29,7 +29,7 @@ public:
         std::auto_ptr<Path> path1(new StraightPath(pointA, pointB));
         std::auto_ptr<Path> path2(new StraightPath(pointB, pointC));
 
-        boost::array<RailTracking*, 2> tracks =
+        boost::array<Track*, 2> tracks =
         {{
             new Track(sector, path1),
             new Track(sector, path2)
@@ -57,22 +57,22 @@ protected:
 
 TEST_F(SectorTest, GetNextTrack)
 {
-    ASSERT_THROW(sector.getNextTrack(pointA, sector.getRailTracking(0)), Sector::UnknownConnectionException);
-    ASSERT_THROW(sector.getNextTrack(pointC, sector.getRailTracking(0)), Sector::UnknownConnectionException);
-    ASSERT_THROW(sector.getNextTrack(osg::Vec3(17, 17, 17), sector.getRailTracking(0)), Sector::UnknownConnectionException);
+    ASSERT_THROW(sector.getNextTrack(pointA, sector.getTrack(0)), Sector::UnknownConnectionException);
+    ASSERT_THROW(sector.getNextTrack(pointC, sector.getTrack(0)), Sector::UnknownConnectionException);
+    ASSERT_THROW(sector.getNextTrack(osg::Vec3(17, 17, 17), sector.getTrack(0)), Sector::UnknownConnectionException);
 
-    ASSERT_EQ(&sector.getNextTrack(pointB, sector.getRailTracking(0)), &sector.getRailTracking(1));
-    ASSERT_EQ(&sector.getNextTrack(pointB, sector.getRailTracking(1)), &sector.getRailTracking(0));
+    ASSERT_EQ(&sector.getNextTrack(pointB, sector.getTrack(0)), &sector.getTrack(1));
+    ASSERT_EQ(&sector.getNextTrack(pointB, sector.getTrack(1)), &sector.getTrack(0));
 };
 
 TEST_F(SectorTest, UpdateConnections)
 {
     boost::array<ConnectionUpdate, 1> updates =
     {{
-        {pointA, NULL, &sector.getRailTracking(1)}
+        {pointA, NULL, &sector.getTrack(1)}
     }};
 
     sector.updateConnections(updates);
 
-    ASSERT_EQ(&sector.getNextTrack(pointA, sector.getRailTracking(0)), &sector.getRailTracking(1));
+    ASSERT_EQ(&sector.getNextTrack(pointA, sector.getTrack(0)), &sector.getTrack(1));
 };

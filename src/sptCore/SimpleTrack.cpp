@@ -1,4 +1,4 @@
-#include "sptCore/Track.h"
+#include "sptCore/SimpleTrack.h"
 
 using namespace sptCore;
 

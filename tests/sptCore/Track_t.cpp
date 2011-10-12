@@ -31,7 +31,7 @@ TEST_F(TrackTest, GetExit)
     ASSERT_EQ(track.getExit(begin), end);
     ASSERT_EQ(track.getExit(end), begin);
     
-    ASSERT_THROW(track.getExit(osg::Vec3f(0.0f, 0.0f, 1.0f)), RailTracking::UnknownEntryException);
+    ASSERT_THROW(track.getExit(osg::Vec3f(0.0f, 0.0f, 1.0f)), Track::UnknownEntryException);
 };
     
 TEST_F(TrackTest, GetPath)
@@ -41,5 +41,5 @@ TEST_F(TrackTest, GetPath)
    
 //    ASSERT_NE(track.getPath(begin), track.getPath(end));
     
-    ASSERT_THROW(track.getPath(osg::Vec3f(0.0f, 0.0f, 1.0f)), RailTracking::UnknownEntryException);
+    ASSERT_THROW(track.getPath(osg::Vec3f(0.0f, 0.0f, 1.0f)), Track::UnknownEntryException);
 };
