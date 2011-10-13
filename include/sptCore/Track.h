@@ -11,9 +11,6 @@
 namespace sptCore
 {
 
-class Sector;
-class Follower;
-
 class TrackId
 {
 public:
@@ -34,8 +31,10 @@ class Track
 {
 
 public:
-    Track(Sector& sector);
+	Track(const osg::Vec3f& sector);
     virtual ~Track();
+
+    osg::Vec3f getSector() const;
 
     //! Get tracking exit for given entry point
     //! \throw UnknownEntryException if there is no exit for given entry
@@ -48,13 +47,11 @@ public:
     //! Get connected track
     virtual TrackId getNextTrack(const osg::Vec3& entry) const = 0;
 
-    Sector& getSector() const { return _sector; }
-
     typedef boost::error_info<struct tag_position, osg::Vec3f> PositionInfo;
     class UnknownEntryException: public boost::exception { };
 
 private:
-    Sector& _sector;
+    osg::Vec3f _sector;
 
 }; // class sptCore::Track
 

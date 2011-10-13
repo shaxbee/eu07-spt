@@ -19,7 +19,7 @@ public:
     //! \param diverted diverted path
     //! \param position initial position
     template <typename T1, typename T2>
-    Switch(Sector& sector, size_t id, T1 straight, T2 diverted, const std::string& position = "STRAIGHT"):
+    Switch(const osg::Vec3f& sector, size_t id, T1 straight, T2 diverted, const std::string& position = "STRAIGHT"):
         SwitchableTracking(sector, id),
         _straight(straight),
         _diverted(diverted)

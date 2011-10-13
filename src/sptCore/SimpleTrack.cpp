@@ -15,7 +15,7 @@ osg::Vec3 SimpleTrack::getExit(const osg::Vec3& entry) const
 
     throw UnknownEntryException() << PositionInfo(entry);
 
-}; // Track::getNext
+}; // SimpleTrack::getNext
 
 std::auto_ptr<Path> SimpleTrack::getPath(const osg::Vec3& entry) const
 {
@@ -26,4 +26,20 @@ std::auto_ptr<Path> SimpleTrack::getPath(const osg::Vec3& entry) const
         return _path->reverse();
 
     throw UnknownEntryException() << PositionInfo(entry);
-}; // Track::getPath
+}; // SimpleTrack::getPath
+
+TrackId SimpleTrack::getNextTrack(const osg::Vec3& entry) const
+{
+    if(entry == _path->front())
+    {
+        return _front;
+    };
+
+    if(entry == _path->back())
+    {
+        return _back;
+    };
+
+    throw UnknownEntryException() << PositionInfo(entry);
+}; // SimpleTrack::getNextTrack
+

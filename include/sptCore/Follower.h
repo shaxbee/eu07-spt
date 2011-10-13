@@ -20,8 +20,7 @@ class Follower
 public:
     Follower(SimpleTrack& track, float distance = 0.0f);
 
-    Sector& getSector() { return _track->getSector(); }
-    const Sector& getSector() const { return _track->getSector(); }
+    osg::Vec3f getSector() const { return _track->getSector(); }
 
     const Track& getTrack() const { return *_track; }
     const Path& getPath() const { return *_path; }

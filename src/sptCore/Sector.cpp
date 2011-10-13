@@ -17,10 +17,9 @@ size_t hash_value(const osg::Vec3f& value)
 }
 };
 
-Sector::Sector(const osg::Vec3f& position, Tracks& trackings, Externals& connections): _position(position)
+Sector::Sector(const osg::Vec3f& position, Tracks& trackings): _position(position)
 {
     _trackings.swap(trackings);
-    _externals.swap(connections);
 }; // Sector::Sector(scenery)
 
 const Track& Sector::getTrack(const TrackId id) const

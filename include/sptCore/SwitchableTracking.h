@@ -17,7 +17,7 @@ class SwitchableTracking: public Track
 {
 
 public:
-    SwitchableTracking(Sector& sector): Track(sector) { };
+    SwitchableTracking(const osg::Vec3f& sector): Track(sector) { };
     virtual ~SwitchableTracking() { };
 
     std::string getPosition() const { return _position; };

@@ -29,7 +29,7 @@ typedef std::tr1::unordered_map<osg::Vec3f, External> Externals;
 class Sector
 {
 public:
-    Sector(const osg::Vec3f& position, Tracks& trackings, Externals& externals);
+    Sector(const osg::Vec3f& position, Tracks& trackings);
 
     const osg::Vec3f& getPosition() const { return _position; };
 

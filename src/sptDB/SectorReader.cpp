@@ -9,6 +9,7 @@
 #include <sptCore/Scenery.h>
 #include <sptCore/Sector.h>
 #include <sptCore/Track.h>
+#include <sptCore/SimpleTrack.h>
 #include <sptCore/Switch.h>
 
 #include <sptDB/BinaryReader.h>
@@ -29,7 +30,7 @@ enum PathType
     BEZIER = 1
 };
 
-typedef boost::ptr_vector<SimpleTrack> Tracks;
+typedef boost::ptr_vector<SimpleTrack> SimpleTracks;
 typedef boost::ptr_vector<Switch> Switches;
 typedef boost::ptr_vector<Track> Tracks;
 
@@ -105,7 +106,7 @@ osg::Vec3d readHeader(BinaryReader& reader)
     return result;
 }; // ::readHeader(reader)
 
-void readTracks(Sector& sector, BinaryReader& reader, Tracks& output)
+void readTracks(osg::Vec3f sector, BinaryReader& reader, Tracks& output)
 {
     reader.expectChunk("TRLS");
 
@@ -118,7 +119,14 @@ void readTracks(Sector& sector, BinaryReader& reader, Tracks& output)
         {
 //            std::cout << "TRACK ";
             std::auto_ptr<Path> path = readStraightPath(reader);
-            std::auto_ptr<SimpleTrack> track(new SimpleTrack(sector, path));
+
+            uint32_t front;
+            reader.read(front);
+
+            uint32_t back;
+            reader.read(back);
+
+            std::auto_ptr<SimpleTrack> track(new SimpleTrack(sector, path, TrackId(front), TrackId(back)));
 
             output.push_back(track);
 //            std::cout << std::endl;
@@ -134,7 +142,14 @@ void readTracks(Sector& sector, BinaryReader& reader, Tracks& output)
         {
 //            std::cout << "TRACK ";
             std::auto_ptr<Path> path = readBezierPath(reader);
-            std::auto_ptr<SimpleTrack> track(new SimpleTrack(sector, path));
+
+            uint32_t front;
+            reader.read(front);
+
+            uint32_t back;
+            reader.read(back);
+
+            std::auto_ptr<SimpleTrack> track(new SimpleTrack(sector, path, TrackId(front), TrackId(back)));
 
             output.push_back(track);
 //            std::cout << std::endl;
@@ -182,59 +197,6 @@ void readCustomTracking(Sector& sector, BinaryReader& reader, Tracks& tracks, Sw
 
     reader.endChunk("RTLS");
 };
-
-void readConnections(BinaryReader& reader, const osg::Vec3f& offset, const Tracks& trackings, Connections& connections, ExternalConnections& externals)
-{
-    reader.expectChunk("CNLS");
-
-    uint32_t count;
-    reader.read(count);
-
-    while(count--)
-    {
-        osg::Vec3f position;
-        reader.read(position);
-
-        uint32_t left;
-        reader.read(left);
-
-        uint32_t right;
-        reader.read(right);
-
-        if(right != std::numeric_limits<size_t>::max())
-        {
-            Connection connection =
-            {
-                position,
-                &trackings.at(left),
-                &trackings.at(right)
-            };
-
-            connections.push_back(connection);
-        }
-        else
-        {
-            Connection connection =
-            {
-                position,
-                &trackings.at(left),
-                NULL
-            };
-
-            ExternalConnection external =
-            {
-                offset,
-                position,
-                left
-            };
-
-            connections.push_back(connection);
-            externals.push_back(external);
-        };
-    };
-
-    reader.endChunk("CNLS");
-}; // ::readConnections(reader, trackings, output)
 
 void readTrackNames(Scenery& scenery, BinaryReader& reader, Tracks& tracks)
 {
@@ -300,15 +262,14 @@ Sector& readSector(std::istream& input, Scenery& scenery)
     reader.expectChunk("SECT");
 
     osg::Vec3d position = readHeader(reader);
-    std::auto_ptr<Sector> sector(new Sector(position));
 
     // TRLS - Tracks List
-    Tracks tracks;
-    readTracks(*sector, reader, tracks);
+    SimpleTracks simpleTracks;
+    readTracks(position, reader, simpleTracks);
 
     // SWLS - Switches List
     Switches switches;
-    readSwitches(*sector, reader, switches);
+    readSwitches(position, reader, switches);
 
 #if 0
     // RTLS - Custom Track List
@@ -321,8 +282,8 @@ Sector& readSector(std::istream& input, Scenery& scenery)
     // SWNM - Switch Names
     readSwitchNames(scenery, reader, switches);
 
-    Tracks trackings;
-    trackings.reserve(tracks.size() + switches.size());
+    Tracks tracks;
+    trackings.reserve(simpleTracks.size() + switches.size());
     trackings.transfer(trackings.begin(), tracks);
     trackings.transfer(trackings.end() - 1, switches);
 
@@ -333,12 +294,9 @@ Sector& readSector(std::istream& input, Scenery& scenery)
 
 //    connections.insert(connections.end(), externals.begin(), externals.end());
 
-    sector->setData(trackings, connections, externals);
-
     reader.endChunk("SECT");
 
-    Sector& sectorRef = *sector;
-    scenery.addSector(sector);
+    scenery.addSector(std::auto_ptr<Sector>(new Sector(position, tracks)));
 
     return sectorRef;
 
