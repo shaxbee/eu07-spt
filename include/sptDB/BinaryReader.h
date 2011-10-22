@@ -69,6 +69,9 @@ public:
     void read(osg::Vec3d& output);
     void readVersion();
 
+    template <typename T>
+    T read();
+
     std::string readChunk();
     void expectChunk(const std::string& type);
     void endChunk(const std::string& type);
@@ -102,6 +105,14 @@ void BinaryReader::read(T& output)
     _watcher.check(sizeof(T));
     _input.read(reinterpret_cast<char*>(&output), sizeof(T));
     checkEof(sizeof(T));
+};
+
+template <typename T>
+T BinaryReader::read()
+{
+    T result;
+    read(result);
+    return result;
 };
 
 template <typename T>

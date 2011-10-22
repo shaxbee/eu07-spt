@@ -19,10 +19,13 @@ public:
     //! \param diverted diverted path
     //! \param position initial position
     template <typename T1, typename T2>
-    Switch(const osg::Vec3f& sector, size_t id, T1 straight, T2 diverted, const std::string& position = "STRAIGHT"):
-        SwitchableTracking(sector, id),
+    Switch(const osg::Vec3f& sector, T1 straight, T2 diverted, TrackId commonId, TrackId straightId, TrackId divertedId, const std::string& position = "STRAIGHT"):
+        SwitchableTracking(sector),
         _straight(straight),
-        _diverted(diverted)
+        _diverted(diverted),
+        _commonId(commonId),
+        _straightId(straightId),
+        _divertedId(divertedId)
     {
         setPosition(position);
     };
@@ -31,6 +34,7 @@ public:
 
     virtual osg::Vec3 getExit(const osg::Vec3& entry) const;
     virtual std::auto_ptr<Path> getPath(const osg::Vec3& entry) const;
+    virtual TrackId getNextTrack(const osg::Vec3& entry) const;
 
     virtual const ValidPositions& getValidPositions() const;
 
@@ -40,6 +44,10 @@ public:
 private:
     std::auto_ptr<Path> _straight;
     std::auto_ptr<Path> _diverted;
+
+    TrackId _commonId;
+    TrackId _straightId;
+    TrackId _divertedId;
 }; // class Switch
 
 } // namespace sptCore

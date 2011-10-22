@@ -8,7 +8,7 @@
 #include <sptGFX/Extruder.h>
 
 #include <sptCore/Path.h>
-#include <sptCore/Track.h>
+#include <sptCore/SimpleTrack.h>
 
 namespace
 {

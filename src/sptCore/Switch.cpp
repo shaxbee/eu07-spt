@@ -51,6 +51,26 @@ std::auto_ptr<Path> Switch::getPath(const osg::Vec3& entry) const
     throw UnknownEntryException() << PositionInfo(entry);
 }; // Switch::getPath(entry)
 
+TrackId Switch::getNextTrack(const osg::Vec3& entry) const
+{
+    if(entry == _straight->front())
+    {
+        return _commonId; 
+    };
+
+    if(entry == _straight->back())
+    {
+        return _straightId;
+    };
+
+    if(entry == _diverted->back())
+    {
+        return _divertedId;
+    };
+    
+    throw UnknownEntryException() << PositionInfo(entry);
+};
+
 const SwitchableTracking::ValidPositions& Switch::getValidPositions() const
 {
     static ValidPositions positions = list_of("STRAIGHT")("DIVERTED");
