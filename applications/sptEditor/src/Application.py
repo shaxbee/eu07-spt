@@ -15,7 +15,6 @@ import yaml
 import os.path
 import sys
 import optparse
-#import run
 
 import model.tracks
 import model.groups
@@ -26,6 +25,7 @@ import ui.palette
 import sptyaml
 import sptmath
 import ui.ribbon
+import osgwx
 
 import wx.lib.agw.ribbon as RB
 
@@ -632,7 +632,7 @@ class MainWindow(wx.Frame):
         self.trackPaletteMenuEntry.Check(False)
 
 
-'''if __name__ == "__main__":
+if __name__ == "__main__":
     usage = "Usage: %prog [options]"
     parser = optparse.OptionParser(usage=usage)
     parser.add_option("-l", "--logging", action="store", type="string", \
@@ -644,40 +644,8 @@ class MainWindow(wx.Frame):
     
     app = Application()
     frame = MainWindow(None, ID_MAIN_FRAME)
+    
+    preview = osgwx.Preview3DFrame(frame, "Preview")
+    
     app.MainLoop()
 
-'''
-#----------------------------------------------------------------------
-# ONLY FOR TESTS PURPOSES, DO NOT DELETE
-#----------------------------------------------------------------------
-class TestPanel(wx.Panel):
-    def __init__(self, parent, log):
-        self.log = log
-        wx.Panel.__init__(self, parent, -1)
-
-        b1 = wx.Button(self, -1, " Pure-Python RibbonBar ", (50,50))
-        self.Bind(wx.EVT_BUTTON, self.OnButton1, b1)
-
-
-    def OnButton1(self, event):
-        self.win = MainWindow(self, ID_MAIN_FRAME)
-
-
-#----------------------------------------------------------------------
-
-def runTest(frame, nb, log):
-
-    win = MainWindow(None,ID_MAIN_FRAME)
-    #win = TestPanel(nb, log)
-    return win
-
-#----------------------------------------------------------------------
-
-
-overview = RB.__doc__
-
-
-if __name__ == '__main__':
-    import sys,os
-    import run
-    run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])

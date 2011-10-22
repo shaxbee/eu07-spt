@@ -31,6 +31,7 @@ ENDIF(WIN32)
 find_package(Boost 1.42.0 REQUIRED)
 find_package(OpenSceneGraph 2.8.3 REQUIRED osgDB osgUtil osgViewer)
 find_package(PythonLibs 2.7 REQUIRED)
+find_package(wxWidgets 2.8.11 COMPONENTS base core gl REQUIRED)
 
 add_subdirectory(src)
 #add_subdirectory(wrappers)
