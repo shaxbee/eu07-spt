@@ -11,7 +11,7 @@ from sptmath import Vec3, Decimal
 from binwriter import BinaryWriter
 
 SECTOR_SIZE = 2000
-SECTOR_FILE_VERSION = "1.1"
+SECTOR_FILE_VERSION = "1.2"
 
 MAX_UINT32 = 2 ** 32 - 1
 
@@ -41,13 +41,11 @@ def writeSector(fout, position, tracks, switches):
     
     __writeHeader(writer, position)
     
-    __writeTrackList(writer, tracks)
-    __writeSwitchList(writer, switches)
+    __writeTrackList(writer, tracks, index)
+    __writeSwitchList(writer, switches, index)
     
     __writeNames(writer, "TRNM", tracks, index)
     __writeNames(writer, "SWNM", switches, index)
-    
-    __writeConnections(writer, tracks, switches, index)
     
     writer.endChunk("SECT")
     writer.finalize()
@@ -65,6 +63,13 @@ def __buildTrackingIndex(*args):
         index.update(itertools.izip(keys, values))        
             
     return index
+
+def __connection(position, instance, index):
+    if instance is None:
+        return MAX_UINT32
+    if (position.x < 0) or (position.x > SECTOR_SIZE) or (position.y < 0) or (position.y > SECTOR_SIZE):
+        return MAX_UINT32 - 1
+    return index[instance]
     
 def __writeHeader(writer, position):
     writer.beginChunk("HEAD")
@@ -75,27 +80,27 @@ def __writeHeader(writer, position):
 
     writer.endChunk("HEAD")
     
-def __writeTrackList(writer, tracks):
-    def writeKind(kind, recordSize):
-        # get list of floats representing points of each track path
-        source = list(track.path.to_tuple() for track in tracks if track.path.kind == kind)
-            
-        # write tracks count
+def __writeTrackList(writer, tracks, index):
+    def writeKind(kind):
+        fmt = __trackFormats[kind]
+        source = [track.path.to_tuple() + (__connection(track.p1, track.n1, index), __connection(track.p2, track.n2, index)) for track in tracks if track.path.kind == kind]
+
         writer.writeUInt(len(source))
-        # write points
-        writer.writeArray(struct.Struct("<%df" % recordSize), source, len(source))
+        for entry in source:
+            writer.writeFmt(fmt, entry) 
         
     writer.beginChunk("TRLS")                
-    writeKind(PathKind.STRAIGHT, 6)
-    writeKind(PathKind.BEZIER, 12)
+    writeKind(PathKind.STRAIGHT)
+    writeKind(PathKind.BEZIER)
     writer.endChunk("TRLS")    
     
-def __writeSwitchList(writer, switches):
+def __writeSwitchList(writer, switches, index):
     def flat(switch):
         fmt = __switchFormats[switch.straight.kind + switch.diverted.kind * 2]
         return (fmt, (0 if switch.position == "STRAIGHT" else 1,) + \
             (switch.straight.kind,) + switch.straight.to_tuple() + \
-            (switch.diverted.kind,) + switch.diverted.to_tuple())
+            (switch.diverted.kind,) + switch.diverted.to_tuple() + \
+            (__connection(switch.pc, switch.nc, index), __connection(switch.p1, switch.n1, index), __connection(switch.p2, switch.n2, index)))
     
     writer.beginChunk("SWLS")
     writer.writeUInt(len(switches))
@@ -115,43 +120,6 @@ def __writeNames(writer, chunk, source, index):
             
     writer.endChunk(chunk)
     
-def __collectConnections(tracks, switches, index):
-    connections = dict()
-        
-    def addConnection(position, left, right):
-        if (position.x < 0) or (position.x > SECTOR_SIZE) or (position.y < 0) or (position.y > SECTOR_SIZE):
-            rightId = MAX_UINT32
-        elif position not in connections:
-            rightId = index[right] if right in index else MAX_UINT32
-        connections[position] = (index[left], rightId)
-        
-    for track in tracks:
-        if track.n1 is not None:
-            addConnection(track.p1, track.original, track.n1)
-        if track.n2 is not None:
-            addConnection(track.p2, track.original, track.n2)
-
-    for switch in switches:
-        if switch.nc is not None:
-            addConnection(switch.pc, switch.original, switch.nc)
-        if switch.n1 is not None:
-            addConnection(switch.p1, switch.original, switch.n1)
-        if switch.n2 is not None:
-            addConnection(switch.p2, switch.original, switch.n2)
-                
-    # return connections sorted by position
-    return sorted(connections.iteritems(), key=operator.itemgetter(0))
-
-def __writeConnections(writer, tracks, switches, index):
-    writer.beginChunk("CNLS")
-        
-    connections = __collectConnections(tracks, switches, index)
-
-    writer.writeUInt(len(connections))
-    writer.writeArray(Struct("<3f I I"), (position.to_tuple() + indexes for position, indexes in connections), len(connections))
-
-    writer.endChunk("CNLS")
-
 def _getPath(p1, v1, p2, v2):
     if v1 == p1 and v2 == p2:
         return StraightPath(p1, p2)
@@ -162,15 +130,15 @@ def _translate(point, offset):
     return FastVec3(*(point - offset).to_tuple())
 
 __trackFormats = [
-    Struct("<3f3f"), # straight
-    Struct("<3f3f3f3f") # bezier
+    Struct("<3f3f I I"), # straight, prev track, next track
+    Struct("<3f3f3f3f I I") # bezier, prev track, next track
 ]
 
 __switchFormats = [
-    Struct("<B B 3f3f B 3f3f"), # position, straight, straight
-    Struct("<B B 3f3f B 3f3f3f3f"), # position, straight, bezier
-    Struct("<B B 3f3f3f3f B 3f3f"), # position, bezier, straight
-    Struct("<B B 3f3f3f3f B 3f3f3f3f") # position, bezier, bezier
+    Struct("<B B 3f3f B 3f3f I I I"), # position, straight, straight, common track, straight track, diverted track
+    Struct("<B B 3f3f B 3f3f3f3f I I I"), # position, straight, bezier, common track, straight track, diverted track
+    Struct("<B B 3f3f3f3f B 3f3f I I I"), # position, bezier, straight, common track, straight track, diverted track
+    Struct("<B B 3f3f3f3f B 3f3f3f3f I I I") # position, bezier, bezier, common track, straight track, diverted track
 ]
 
 class PathKind(object):
@@ -303,15 +271,15 @@ if __name__ == "__main__":
             self.position = position
             self.name = name
 
-    zero = Vec3(0, 0, 0)
+    zero = Vec3("0.0", "0.0", "0.0")
 
     tracks = [
-         Track(zero, zero, Vec3(100, 1, 0), zero)]
+         Track(zero, zero, Vec3("100.0", "1.0", "0.0"), zero)]
 #        Track(Vec3(100, 100, 0), Vec3(0, 100, 0), Vec3(200, 200, 0), Vec3(0, -100, 0), "start"),
 #        Track(zero, Vec3(0, 100, 0), Vec3(100, 100, 0), Vec3(-100, 0, 0))]
 
     switches = []
 
     start = time.time()
-    write_sector(file("test.sct", "w+"), Vec3(), tracks, switches)
+    writeSector(file("test.sct", "w+"), Vec3(), tracks, switches)
     print "Time: %f ms" % ((time.time() - start) * 1000.0)

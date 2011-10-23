@@ -96,7 +96,7 @@ osg::Vec3d readHeader(BinaryReader& reader)
 {
     reader.expectChunk("HEAD");
 
-    reader.expectVersion(Version(1, 1));
+    reader.expectVersion(Version(1, 2));
     osg::Vec3f result;
     reader.read(result);
 
