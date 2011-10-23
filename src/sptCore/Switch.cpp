@@ -1,9 +1,15 @@
 #include "sptCore/Switch.h"
+#include "sptCore/TrackVisitor.h"
 
 #include <boost/assign/list_of.hpp>
 
 using namespace sptCore;
 using namespace boost::assign;
+
+void Switch::accept(TrackVisitor& visitor) const
+{
+    visitor.apply(*this);
+}; // Switch::accept
 
 osg::Vec3 Switch::getExit(const osg::Vec3& entry) const
 {

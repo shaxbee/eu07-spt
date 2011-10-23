@@ -1,6 +1,8 @@
 #include "sptCore/Sector.h"
+#include "sptCore/TrackVisitor.h"
 
 #include <boost/functional/hash.hpp>
+#include <boost/bind.hpp>
 
 using namespace sptCore;
 
@@ -25,4 +27,9 @@ Sector::Sector(const osg::Vec3f& position, Tracks& trackings): _position(positio
 const Track& Sector::getTrack(const TrackId id) const
 {
     return _trackings.at(id.value());
+};
+
+void Sector::accept(TrackVisitor& visitor) const
+{
+    std::for_each(_trackings.begin(), _trackings.end(), boost::bind(&Track::accept, _1, boost::ref(visitor)));
 };

@@ -9,7 +9,8 @@ set(LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/Sector.h
     ${HEADER_PATH}/Switch.h
     ${HEADER_PATH}/SwitchableTracking.h
-    ${HEADER_PATH}/SimpleTrack.h)    
+    ${HEADER_PATH}/SimpleTrack.h
+    ${HEADER_PATH}/TrackVisitor.h)    
 
 add_library(${LIB_NAME} 
     ${LIB_PUBLIC_HEADERS}
@@ -20,6 +21,7 @@ add_library(${LIB_NAME}
     Sector.cpp 
     Switch.cpp 
     SwitchableTracking.cpp 
-    SimpleTrack.cpp)
+    SimpleTrack.cpp
+    TrackVisitor.cpp)
     
 install(TARGETS ${LIB_NAME} ARCHIVE DESTINATION ${SPT_SOURCE_DIR}/lib)

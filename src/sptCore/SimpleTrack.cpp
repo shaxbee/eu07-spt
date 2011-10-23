@@ -1,6 +1,12 @@
 #include "sptCore/SimpleTrack.h"
+#include "sptCore/TrackVisitor.h"
 
 using namespace sptCore;
+
+void SimpleTrack::accept(TrackVisitor& visitor) const
+{
+    visitor.apply(*this);
+}; // SimpleTrack::accept
 
 osg::Vec3 SimpleTrack::getExit(const osg::Vec3& entry) const
 {

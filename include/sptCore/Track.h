@@ -16,14 +16,21 @@ class TrackId
 public:
     explicit TrackId(uint32_t value);
 
+    bool operator==(TrackId other) const;
+
     bool isNull() const;
     bool isExternal() const;
 
     uint32_t value() const;
 
+    static TrackId null();
+    static TrackId external();
+
 private:
     uint32_t _value;
 };
+
+class TrackVisitor;
 
 //! \brief Abstract representation of railway tracking
 //! \author Zbyszek "ShaXbee" Mandziejewicz
@@ -35,6 +42,8 @@ public:
     virtual ~Track();
 
     osg::Vec3f getSector() const;
+
+    virtual void accept(TrackVisitor& visitor) const = 0;
 
     //! Get tracking exit for given entry point
     //! \throw UnknownEntryException if there is no exit for given entry

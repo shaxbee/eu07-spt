@@ -22,6 +22,7 @@ public:
 
     virtual ~SimpleTrack() { };
 
+    virtual void accept(TrackVisitor& visitor) const;
     virtual osg::Vec3 getExit(const osg::Vec3& entry) const;
     virtual std::auto_ptr<Path> getPath(const osg::Vec3& entry) const;
     virtual TrackId getNextTrack(const osg::Vec3& entry) const;

@@ -24,6 +24,8 @@ struct External
 
 typedef std::tr1::unordered_map<osg::Vec3f, External> Externals;
 
+class TrackVisitor;
+
 //! Container for rail trackings located in chunk of Scenery
 //! \author Zbigniew "ShaXbee" Mandziejewicz
 class Sector
@@ -35,6 +37,8 @@ public:
 
     const External getExternal(const osg::Vec3f& position);
     const Track& getTrack(const TrackId index) const;
+
+    void accept(TrackVisitor& visitor) const;
 
     typedef boost::error_info<struct tag_position, osg::Vec3f> PositionInfo;
     class UnknownConnectionException: public boost::exception { };

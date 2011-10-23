@@ -12,16 +12,16 @@ class SwitchTest: public ::testing::Test
     
 public:
     SwitchTest():
-        sector(osg::Vec3()),
+        sector(0.0f, 0.0f, 0.0f),
         begin(0.0f, 0.0f, 0.0f), 
         straight(10.0f, 0.0f, 0.0f), 
         diverted(10.0f, 10.0f, 0.0f), 
-        switch_(sector, new StraightPath(begin, straight), new StraightPath(begin, diverted), "STRAIGHT") 
+        switch_(sector, new StraightPath(begin, straight), new StraightPath(begin, diverted), TrackId::null(), TrackId::null(), TrackId::null(), "STRAIGHT") 
     { 
     };
 
 protected:
-    Sector sector;
+    osg::Vec3 sector;
 
     osg::Vec3 begin;
     osg::Vec3 straight;
