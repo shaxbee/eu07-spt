@@ -14,64 +14,12 @@ namespace
 
 static osg::Vec3f tolerance(0.001f, 0.001f, 0.001f);
 
-struct ExternalConnectionOrdering: public std::binary_function<sptCore::ExternalConnection, sptCore::ExternalConnection, bool>
-{
-    result_type operator()(first_argument_type const& lhs, second_argument_type const& rhs) const
-    {
-        osg::Vec3f diff = lhs.offset - rhs.offset + lhs.position - rhs.position;
-        return diff < -tolerance;
-    };
-};
-
 };
 
 namespace sptCore
 {
 
-class ExternalsManager
-{
-public:
-    ExternalsManager() { };
-    ~ExternalsManager() { };
-
-    void addExternals(Scenery& scenery, Sector& sector);
-    void removeExternals(Scenery& scenery, const Sector& sector);
-
-private:
-    typedef std::multiset<ExternalConnection, ExternalConnectionOrdering> ExternalConnectionsSet;
-    ExternalConnectionsSet _externals;
-}; // class sptCore::ExternalsManager
-
-void ExternalsManager::addExternals(Scenery& scenery, Sector& sector)
-{
-    const ExternalConnections& externals = sector.getExternals();
-    for(ExternalConnections::const_iterator iter = externals.begin(); iter != externals.end(); iter++)
-    {
-        ExternalConnectionsSet::const_iterator match = _externals.find(*iter);
-        if(match != _externals.end())
-        {
-            const RailTracking* other = scenery.getSector(match->offset).updateConnection(match->position, NULL, &sector.getRailTracking(match->index));
-            sector.updateConnection(iter->position, NULL, other);
-        };
-    };
-
-    _externals.insert(externals.begin(), externals.end());
-};
-
-void ExternalsManager::removeExternals(Scenery& scenery, const Sector& sector)
-{
-    osg::Vec3f offset = sector.getPosition();
-    for(ExternalConnectionsSet::iterator iter = _externals.begin(); iter != _externals.end(); iter++)
-    {
-        if(iter->offset == offset)
-        {
-            scenery.getSector(iter->offset).updateConnection(iter->position, &sector.getRailTracking(iter->index), NULL);
-        }
-    };
-};
-
-Scenery::Scenery():
-    _externals(new ExternalsManager())
+Scenery::Scenery()
 {
 };
 
@@ -113,7 +61,7 @@ bool Scenery::hasSector(const osg::Vec3f& position) const
     return (iter != _sectors.end());
 }; // Scenery::hasSector
 
-Track& Scenery::getTrack(const std::string& name)
+SimpleTrack& Scenery::getTrack(const std::string& name)
 {
     Tracks::const_iterator iter = _tracks.find(name);
 
@@ -145,7 +93,6 @@ void Scenery::addSector(std::auto_ptr<Sector> sector)
                     position.y() %
                     position.z()));
 
-    _externals->addExternals(*this, *sector);
     _sectors.insert(position, sector);
 
     // update statistics
@@ -163,15 +110,13 @@ std::auto_ptr<Sector> Scenery::removeSector(const osg::Vec3f& position)
                     position.y() %
                     position.z()));
 
-    _externals->removeExternals(*this, *iter->second);
-
 //    _statistics.totalTracks -= iter->second->getTracksCount();
 //    _statistics.sectors--;
 
     return std::auto_ptr<Sector>(_sectors.release(iter).release());
 }; // Scenery::removeSector
 
-void Scenery::addTrack(const std::string& name, Track& track)
+void Scenery::addTrack(const std::string& name, SimpleTrack& track)
 {
     std::pair<Tracks::iterator, bool> ret;
     ret = _tracks.insert(std::make_pair(name, &track));
@@ -200,8 +145,6 @@ void Scenery::addSwitch(const std::string& name, SwitchableTracking& track)
 
     if(!ret.second)
         throw SceneryException(str(format("Switch with name %s already exists.") % name));
-
-//    _statistics.switches++;
 }; // Scenery::addSwitch
 
 void Scenery::removeSwitch(const std::string& name)
@@ -210,7 +153,6 @@ void Scenery::removeSwitch(const std::string& name)
 
     if(iter != _switches.end())
     {
-//        _statistics.switches--;
         _switches.erase(iter);
     };
 }; // Scenery::removeSwitch

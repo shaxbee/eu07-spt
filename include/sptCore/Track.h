@@ -1,31 +1,69 @@
 #ifndef SPTCORE_TRACK_H
 #define SPTCORE_TRACK_H 1
 
-#include <sptCore/RailTracking.h>
+#include <osg/Vec3>
+#include <osg/Matrix>
 
-#include <memory>
+#include <boost/exception/all.hpp>
+
+#include <sptCore/Path.h>
 
 namespace sptCore
 {
 
-class Track: public RailTracking
+class TrackId
 {
 public:
-    template <typename PathT>
-    Track(Sector& sector, PathT path): RailTracking(sector), _path(path) { };
+    explicit TrackId(uint32_t value);
 
-    virtual ~Track() { };
+    bool operator==(TrackId other) const;
 
-    virtual osg::Vec3 getExit(const osg::Vec3& entry) const;
-    virtual std::auto_ptr<Path> getPath(const osg::Vec3& entry) const;
+    bool isNull() const;
+    bool isExternal() const;
 
-    //! \brief Get default (forward) path
-    std::auto_ptr<Path> getDefaultPath() const { return _path->clone(); }
-    
+    uint32_t value() const;
+
+    static TrackId null();
+    static TrackId external();
+
 private:
-    std::auto_ptr<Path> _path;
+    uint32_t _value;
 };
 
-} // namespace sptCore
+class TrackVisitor;
+
+//! \brief Abstract representation of railway tracking
+//! \author Zbyszek "ShaXbee" Mandziejewicz
+class Track
+{
+
+public:
+	Track(const osg::Vec3f& sector);
+    virtual ~Track();
+
+    osg::Vec3f getSector() const;
+
+    virtual void accept(TrackVisitor& visitor) const = 0;
+
+    //! Get tracking exit for given entry point
+    //! \throw UnknownEntryException if there is no exit for given entry
+    virtual osg::Vec3 getExit(const osg::Vec3& entry) const = 0;
+
+    //! Get path that begins at given position
+    //! \throw UnknownEntryException if there is no path for given entry
+    virtual std::auto_ptr<Path> getPath(const osg::Vec3& entry) const = 0;
+
+    //! Get connected track
+    virtual TrackId getNextTrack(const osg::Vec3& entry) const = 0;
+
+    typedef boost::error_info<struct tag_position, osg::Vec3f> PositionInfo;
+    class UnknownEntryException: public boost::exception { };
+
+private:
+    osg::Vec3f _sector;
+
+}; // class sptCore::Track
+
+}; // namespace sptCore
 
 #endif // headerguard

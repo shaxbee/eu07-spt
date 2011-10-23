@@ -12,7 +12,7 @@ Trainset::Trainset(const std::string& name):
 {
 };
 
-void Trainset::setPlacement(sptCore::Track& track, float distance)
+void Trainset::setPlacement(sptCore::SimpleTrack& track, float distance)
 {
     for(TrainsetState::Vehicles::reverse_iterator iter = _state.vehicles.rbegin(); iter != _state.vehicles.rend(); iter++)
     {

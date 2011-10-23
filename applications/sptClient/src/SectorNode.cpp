@@ -8,7 +8,10 @@
 #include <sptGFX/Extruder.h>
 
 #include <sptCore/Path.h>
-#include <sptCore/Track.h>
+
+#include <sptCore/TrackVisitor.h>
+#include <sptCore/SimpleTrack.h>
+#include <sptCore/Switch.h>
 
 namespace
 {
@@ -59,24 +62,32 @@ void extrude(osg::Geode* target, osg::Geometry* profile, std::auto_ptr<sptCore::
     target->addDrawable(geometry.get());
 };
 
-osg::ref_ptr<osg::Geometry> profile = createProfile();
-
-void createSectorGeometry(osg::Geode* target, const sptCore::Sector& sector)
+class TrackGeometryVisitor: public sptCore::TrackVisitor
 {
-    for(unsigned int index = 0; index != sector.getRailTrackingCount(); index++)
+public:
+    TrackGeometryVisitor(osg::Geode* target, osg::Geometry* profile):
+        _target(target), _profile(profile)
     {
-        const sptCore::RailTracking& tracking = sector.getRailTracking(index);
-        if(typeid(tracking) == typeid(sptCore::Track))
-        {
-            const sptCore::Track& track = static_cast<const sptCore::Track&>(tracking);
-            extrude(target, profile, track.getDefaultPath());
-        };
-    };
-};
+    }
+
+    virtual void apply(const sptCore::SimpleTrack& value)
+    {
+        extrude(_target, _profile, value.getDefaultPath());
+    }
+
+    virtual void apply(const sptCore::Switch& value)
+    {
+    }
+
+private:
+    osg::ref_ptr<osg::Geode> _target;
+    osg::ref_ptr<osg::Geometry> _profile;
+}; // class TrackGeometryVisitor
 
 };
 
 SectorNode::SectorNode(sptCore::Sector& sector): _sector(sector)
 {
-    createSectorGeometry(this, sector);
+    TrackGeometryVisitor visitor(this, createProfile());
+    sector.accept(visitor);
 }

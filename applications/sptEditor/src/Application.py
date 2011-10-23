@@ -48,7 +48,7 @@ class Application(wx.App):
     """
     
     def __init__(self):
-        wx.App.__init__(self) 
+        wx.App.__init__(self, redirect=false) 
 
     
     def OnInit(self):

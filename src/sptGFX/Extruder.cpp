@@ -84,12 +84,13 @@ void Extruder::extrude(const sptCore::Path& path, const osg::Vec3& position, con
 
     // create normal vectors
     // TODO: change this to some native implementation
+    #if 0
     osgUtil::SmoothingVisitor::smooth(*_geometry);
     osg::Vec3Array* normals = static_cast<osg::Vec3Array*>(_geometry->getNormalArray());
 
     for(osg::Vec3Array::iterator iter = normals->begin(); iter != normals->end(); iter++)
         *iter = -(*iter);
-
+    #endif
 
 }; // Extruder::createPrimitiveSet
 

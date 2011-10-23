@@ -20,6 +20,7 @@ namespace sptCore
 class Sector;
 
 class Track;
+class SimpleTrack;
 class SwitchableTracking;
 class Switch;
 
@@ -41,7 +42,9 @@ public:
 
     bool hasSector(const osg::Vec3f& position) const;
 
-    Track& getTrack(const std::string& name);
+    const Track& getNextTrack(const Track& track, const osg::Vec3f& from) const;
+
+    SimpleTrack& getTrack(const std::string& name);
     SwitchableTracking& getSwitch(const std::string& name);
 
 //    const Statistics& getStatistics() const { return _statistics; };
@@ -56,7 +59,7 @@ public:
 
     //! \brief Add named Track
     //! \throw SceneryException if Track with same name exists
-    void addTrack(const std::string& name, Track& track);
+    void addTrack(const std::string& name, SimpleTrack& track);
 
     //! \brief Remove named Track
     //! \throw SceneryException when no Track with specified name is found
@@ -72,10 +75,8 @@ public:
 
 private:
     typedef boost::ptr_map<osg::Vec3f, Sector> Sectors;
-    typedef std::map<std::string, Track*> Tracks;
+    typedef std::map<std::string, SimpleTrack*> Tracks;
     typedef std::map<std::string, SwitchableTracking*> Switches;
-
-    boost::scoped_ptr<ExternalsManager> _externals;
 
     Sectors _sectors;
     Tracks _tracks;
