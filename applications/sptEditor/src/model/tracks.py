@@ -153,22 +153,27 @@ class Track(RailTracking):
             return True
         if not isinstance(other, Track):
             return False
-        return self.p1 == other.p1 \
-            and self.v1 == other.v1 \
-            and self.v2 == other.v2 \
-            and self.p2 == other.p2
+        return (self.p1 == other.p1
+            and self.v1 == other.v1
+            and self.v2 == other.v2
+            and self.p2 == other.p2)
+
+
+    def __hash__(self):
+        """Returns a hash of track."""
+        return (hash(self.p1) + 37*hash(self.p2))
             
         
     def next(self, previous):
         """
         Returns the next bound rail tracking.
         """
-        if previous == None:
-            if self.n1 != None and self.n2 != None:
+        if previous is None:
+            if self.n1 is not None and self.n2 is not None:
                 raise ValueError, "Previous RailTracking was null"
-            elif self.n1 != None:
+            elif self.n1 is not None:
                 return self.n1
-            elif self.n2 != None:
+            elif self.n2 is not None:
                 return self.n2
             else:
                 raise UndeterminedTrackingException, "Undetermined RailTracking"
@@ -189,15 +194,14 @@ class Track(RailTracking):
 
 
     def tracking2point(self, tracking):
-        if tracking == None and self.n1 == None \
-                and self.n2 == None:
+        if (tracking is None and self.n1 is None and self.n2 is None):
             raise ValueError, "Cannot determine geometry point"
             
-        if (tracking == None and self.n1 == None) \
-                or (tracking != None and tracking == self.n1):
+        if ((tracking is None and self.n1 is None)
+                or (tracking is not None and tracking == self.n1)):
             return self.p1
-        elif (tracking == None and self.n2 == None) \
-                or (tracking != None and tracking == self.n2):
+        elif ((tracking is None and self.n2 is None)
+                or (tracking is not None and tracking == self.n2)):
             return self.p2
         else:
             raise ValueError, "Tracking element is not bound"
@@ -217,7 +221,7 @@ class Track(RailTracking):
 
 
     def setTracking(self, point, next):
-        if point == None:
+        if point is None:
             raise ValueError, "Point is none"
         if not self.containsPoint(point):
             raise ValueError, "Point is not in geometry"
@@ -265,12 +269,12 @@ class Switch(RailTracking):
     Rail switch class.
     """
 
-    def __init__(self, pc=Vec3(), \
-                       p1=Vec3(), \
-                       p2=Vec3(), \
-                       vc1=Vec3(), \
-                       vc2=Vec3(), \
-                       v1=Vec3(), \
+    def __init__(self, pc=Vec3(),
+                       p1=Vec3(),
+                       p2=Vec3(),
+                       vc1=Vec3(),
+                       vc2=Vec3(),
+                       v1=Vec3(),
                        v2=Vec3()):
         """
         Creates a switch.
@@ -315,40 +319,45 @@ class Switch(RailTracking):
             return True
         if not isinstance(other, Switch):
             return False
-        return self.pc == other.pc \
-            and self.p1 == other.p1 \
-            and self.p2 == other.p2 \
-            and self.vc1 == other.vc1 \
-            and self.v1 == other.v1 \
-            and self.vc2 == other.vc2 \
-            and self.v2 == other.v2
+        return (self.pc == other.pc
+            and self.p1 == other.p1
+            and self.p2 == other.p2
+            and self.vc1 == other.vc1
+            and self.v1 == other.v1
+            and self.vc2 == other.vc2
+            and self.v2 == other.v2)
+
+
+    def __hash__(self):
+        """Returns hash of the switch."""
+        return (hash(self.pc) + 37*hash(self.p1) + 37*hash(self.p2))
 
 
     def next(self, previous):
-        if previous == None:
-            if self.nc == None \
-                    and self.n1 != None \
-                    and self.n2 != None:
+        if (previous is None):
+            if (self.nc is None
+                    and self.n1 is not None
+                    and self.n2 is not None):
                 return self.n1
-            elif self.nc != None \
-                    and ((self.n1 == None and self.n2 != None) \
-                        or (self.n1 != None and self.n2 == None)):
+            elif (self.nc is not None
+                    and ((self.n1 is None and self.n2 is not None)
+                        or (self.n1 is not None and self.n2 is None))):
                 return self.nc
             else:
                 raise UndeterminedTrackingException, "Previous rail tracking is null"
 
-        if previous == self.nc:
+        if (previous == self.nc):
             return self.n1
-        elif previous == self.n1 or previous == self.n2:
+        elif (previous == self.n1 or previous == self.n2):
             return self.nc
 
         raise ValueError, "Previous tracking not found"
 
 
     def nextPoint(self, start):
-        if start == self.pc:
+        if (start == self.pc):
             return self.p1
-        elif start == self.p1 or start == self.p2:
+        elif (start == self.p1 or start == self.p2):
             return self.pc
 
         raise ValueError, "Start point not found in geometry"
@@ -357,14 +366,14 @@ class Switch(RailTracking):
     def tracking2point(self, tracking):
         bits = 0
 
-        if tracking == self.nc \
-            or (tracking != None and tracking == self.nc):
+        if (tracking == self.nc
+            or (tracking != None and tracking == self.nc)):
             bits |= 1
-        if tracking == self.n1 \
-            or (tracking != None and tracking == self.n1):
+        if (tracking == self.n1
+            or (tracking != None and tracking == self.n1)):
             bits |= 2
-        if tracking == self.n2 \
-            or (tracking != None and tracking == self.n2):
+        if (tracking == self.n2
+            or (tracking != None and tracking == self.n2)):
             bits |= 4
 
         if bits == 1:
@@ -393,7 +402,7 @@ class Switch(RailTracking):
 
 
     def setTracking(self, point, next):
-        if point == None:
+        if point is None:
             raise ValueError, "Point is null"
         if not self.containsPoint(point):
             raise ValueError, "Point is not in geometry"
@@ -474,7 +483,7 @@ def isDisconnected(tracking):
     """
     geometry = tracking.getEndPoints()
     for p in geometry:
-        if tracking.point2tracking(p) != None:
+        if tracking.point2tracking(p) is not None:
             return False
     return True
 

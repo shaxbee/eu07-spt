@@ -13,8 +13,10 @@ import wx
 from wx.lib.evtmgr import eventManager
 
 import Application
+import sptial
 import model.tracks
 import model.scenery
+from ui.rulers import Ruler
 import ui.views
 import ui.trackfc
 from sptmath import Vec3
@@ -24,6 +26,7 @@ from sptmath import Vec3
 SCALE_MIN = 0.004 # It gives 800px/200km
 SCALE_MAX = 2000.0 # It gives 2000px/m
 SCALE_DEFAULT = 1.0 # It gives 1px/m
+
 BASE_POINT_MARGIN = 50
 
 # Modes of editor
@@ -45,9 +48,9 @@ class SceneryEditor(wx.Panel):
 
         corner = wx.Panel(self, name = "Corner")
         corner.SetBackgroundColour('WHITE')
-        self.leftRuler = Ruler(self, orientation = wx.VERTICAL, \
+        self.leftRuler = Ruler(self, orientation = wx.VERTICAL,
             name = "Left ruler")
-        self.topRuler = Ruler(self, orientation = wx.HORIZONTAL, \
+        self.topRuler = Ruler(self, orientation = wx.HORIZONTAL,
             name = "Top ruler")
         self.parts = [PlanePart(self, main_window)]
 
@@ -70,7 +73,7 @@ class SceneryEditor(wx.Panel):
         """
         Sets the scenery. Notify also active parts.
         """
-        if self.scenery != None:
+        if self.scenery is not None:
             self.scenery.UnregisterListener(self.sceneryListener)
         self.scenery = scenery
         self.SetSelection(None)
@@ -124,14 +127,14 @@ class PlanePart(wx.ScrolledWindow):
     """
 
     def __init__(self, parent, main_window, id = wx.ID_ANY):
-        wx.ScrolledWindow.__init__(self, parent, id, \
+        wx.ScrolledWindow.__init__(self, parent, id,
             style = wx.VSCROLL | wx.HSCROLL)
 
         self.main_window = main_window
         self.snapData = None
         self.basePointMover = BasePointMover(self)
 
-        self.selectedView = None
+        self.selected = None
         self.highlighter = Highlighter(self)
 
         self.wheelScaler = WheelScaler(self)        
@@ -159,25 +162,15 @@ class PlanePart(wx.ScrolledWindow):
 
         self.logger = logging.getLogger('Paint')
 
-        self.scale = SCALE_DEFAULT
-        self.main_window.SetStatusText("%.3f px/m" % self.scale, 2)
+        self.main_window.SetStatusText("%.3f px/m" % SCALE_DEFAULT, 2)
 
-        self.minX = -1000.0
-        self.minY = -1000.0
-        self.maxX = 1000.0
-        self.maxY = 1000.0
+        self.bounds = EditorBounds()
 
-        self.extentX = 0
-        self.extentY = 0
-
-        self.trackCache = []
-        self.switchCache = []
         self.basePointView = None
 
         self.mode = MODE_NORMAL
         
-        size = self.ComputePreferredSize()
-        self.SetVirtualSize(size)
+        self.Resize()
         self.SetupScrolling()       
         #self.SetFocusIgnoringChildren()
 
@@ -201,51 +194,40 @@ class PlanePart(wx.ScrolledWindow):
             self.wheelScaler.OnMouseWheel(event)
 
     def SetScenery(self, scenery):
-        self.trackCache = []
-        self.switchCache = []
-        for e in scenery.tracks.tracks():
-            self.AddView(e)
-        for e in scenery.tracks.switches():
-            self.AddView(e)
-            
-        self.ComputeMinMax(True)
+        mbc = scenery.GetMbc()
+        self.bounds.Update(mbc.min(), mbc.max())
         self.Refresh()
+        
+        
+    def GetScenery(self):
+        return self.GetParent().GetScenery()
         
         
     def SetBasePoint(self, basePoint, follow = False):
         (vx, vy) = self.GetViewStart()
         (ux, uy) = self.GetScrollPixelsPerUnit()
-        
+
         oldView = self.basePointView
         self.basePointView = ui.views.BasePointView(basePoint)
-        if oldView != None:
-            oldRect = oldView.GetRepaintBounds()
-            oldRect.x -= vx * ux 
-            oldRect.y -= vy * uy 
-            self.RefreshRect(oldRect)
-        needed = self.ComputeMinMax(False)
-        if needed:            
-            size = self.ComputePreferredSize()
-            self.SetVirtualSize(size)            
-            self.Refresh()
+        if oldView is not None:
+            oldRect = oldView.GetBox(self.bounds)
+            self.RedrawRect(oldRect)
+        needed = self.bounds.Update(basePoint.point)
+        if needed:
+            self.Resize()
         else:
-            # Scale base point view
-            self.basePointView.Scale(self.scale, self.minX, self.maxX, \
-                                     self.minY, self.maxY)
-            newRect = self.basePointView.GetRepaintBounds()
-            newRect.x -= vx * ux
-            newRect.y -= vy * uy
-            self.RefreshRect(newRect)
-
+            rect = self.basePointView.GetBox(self.bounds)
+            self.RedrawRect(rect)
+        
         if follow:
-            p = self.basePointView.point
+            p = self.bounds.ModelToView(basePoint.point)
             (wx, wy) = self.GetSize()
             if wx > 2*BASE_POINT_MARGIN and wy > 2*BASE_POINT_MARGIN:
-                if p.x < vx*ux + BASE_POINT_MARGIN or p.x > vx*ux + wx - BASE_POINT_MARGIN \
-                        or p.y < vy*uy + BASE_POINT_MARGIN or p.y > vy*uy + wy - BASE_POINT_MARGIN:
-                    self.CenterViewAt((p.x, p.y))
+                if (p[0] < vx*ux + BASE_POINT_MARGIN or p[0] > vx*ux + wx - BASE_POINT_MARGIN
+                        or p[1] < vy*uy + BASE_POINT_MARGIN or p[1] > vy*uy + wy - BASE_POINT_MARGIN):
+                    self.CenterViewAt(p)
             else:
-                self.CenterViewAt((p.x, p.y))
+                self.CenterViewAt(p)
 
 
     def SetMode(self, mode, updateMenu = False):
@@ -268,97 +250,16 @@ class PlanePart(wx.ScrolledWindow):
         (vx, vy) = self.GetViewStart()
         (ux, uy) = self.GetScrollPixelsPerUnit()
 
-        oldView = self.selectedView
-        if oldView != None:
-            oldRect = oldView.GetRepaintBounds()
-            oldRect.x -= vx * ux
-            oldRect.y -= vy * uy
-            self.RefreshRect(oldRect)
-        if selection != None:
-            view = self.FindView(selection)
-            if view == None:
-                raise TransitionError, "Cannot find view in cache"
-            self.selectedView = view
-            newRect = view.GetRepaintBounds()
-            newRect.x -= vx * ux
-            newRect.y -= vy * uy           
-            self.RefreshRect(newRect)            
-        else:
-            self.selectedView = None
-
-
-    def AddView(self, element):
-        view = None
-        if isinstance(element, model.tracks.Track):
-            view = ui.views.TrackView(element)
-            self.trackCache.append(view)
-        elif isinstance(element, model.tracks.Switch):
-            view = ui.views.RailSwitchView(element)
-            self.switchCache.append(view)
-        else:
-            raise ValueError("Unsupported element: " + str(type(element)))
-        return view
-
-
-    def FindView(self, element):
-        cache = None
-        if isinstance(element, model.tracks.Track):
-            cache = self.trackCache
-        elif isinstance(element, model.tracks.Switch):
-            cache = self.switchCache
-        else:
-            return None
-
-        for v in cache:
-            if v.GetElement() == element:
-                return v
-        return None
+        oldView = self.selected
+        if (oldView is not None):
+            tv = ui.views.GetViewer(oldView)
+            self.RedrawRect(tv.GetBox(self.bounds))
         
-
-    def ComputeMinMax(self, doScaling = False):
-        """
-        Computes bounds of scenery expressed in scenery coordinates.
-        """
-        nMinX = -1000.0
-        nMinY = -1000.0
-        nMaxX = 1000.0
-        nMaxY = 1000.0
-
-        # tracks
-        for v in self.trackCache:
-            (vMinX, vMaxX, vMinY, vMaxY) = v.GetMinMax()
-            nMinX = min(vMinX, nMinX)
-            nMaxX = max(vMaxX, nMaxX)
-            nMinY = min(vMinY, nMinY)
-            nMaxY = max(vMaxY, nMaxY)
-        # switches
-        for v in self.switchCache:
-            (vMinX, vMaxX, vMinY, vMaxY) = v.GetMinMax()
-            nMinX = min(vMinX, nMinX)
-            nMaxX = max(vMaxX, nMaxX)
-            nMinY = min(vMinY, nMinY)
-            nMaxY = max(vMaxY, nMaxY)
-        # base point
-        (vMinX, vMaxX, vMinY, vMaxY) = self.basePointView.GetMinMax()
-        nMinX = min(vMinX, nMinX)
-        nMaxX = max(vMaxX, nMaxX)
-        nMinY = min(vMinY, nMinY)
-        nMaxY = max(vMaxY, nMaxY)
-
-        # Changes
-        if doScaling or nMinX < self.minX or nMinY < self.minY \
-            or nMaxX > self.maxX or nMaxY > self.maxY:
-            self.minX = min(self.minX, nMinX)
-            self.minY = min(self.minY, nMinY)
-            self.maxX = max(self.maxX, nMaxX)
-            self.maxY = max(self.maxY, nMaxY)
+        self.selected = selection
+        if (selection is not None):
+            tv = ui.views.GetViewer(selection)
+            self.RedrawRect(tv.GetBox(self.bounds))
             
-            self.__ScaleAll(self.scale)
-
-            return True
-        else:
-            return False
-
     def CalculateCenterPointOfEditor(self):
         # 1) Get the center point of editor
         (view_start_x, view_start_y) = self.GetViewStart()
@@ -370,7 +271,7 @@ class PlanePart(wx.ScrolledWindow):
                 view_start_y * scroll_rate_y + window_size_height / 2)
         
     def GetScale(self):
-        return self.scale
+        return self.bounds.scale
 
 
     def SetScale(self, scale, position=None):
@@ -380,9 +281,7 @@ class PlanePart(wx.ScrolledWindow):
 
         Scale preserves the center view.
         """
-        # Set limits to the scale
-        if scale > SCALE_MAX + 0.001 or scale < SCALE_MIN - 0.001:
-            return
+        assert isinstance(scale, Scale)
 
         # 1) Get the center point of editor
         #if it's not position we calc position of center of the screen
@@ -398,12 +297,9 @@ class PlanePart(wx.ScrolledWindow):
         delta_to_screen_center.x = self.GetSize().x/2 - scrolled_position.x
         delta_to_screen_center.y = self.GetSize().y/2 - scrolled_position.y
         
-        print "Center to point:"
-        print p3d
         # 2) do scalling
-        self.scale = scale
+        self.bounds.scale = scale
         self.SetVirtualSize(self.ComputePreferredSize())
-        self.__ScaleAll(scale)
 
         # 3) Move to the center of editor component
         new_position = self.ModelToView(p3d)
@@ -417,27 +313,15 @@ class PlanePart(wx.ScrolledWindow):
         self.Refresh()
         #self.GetParent().topRuler.Refresh()
         #self.GetParent().leftRuler.Refresh()
-        self.main_window.SetStatusText("%.3f px/m" % scale, 2)
+        self.main_window.SetStatusText(str(scale), 2)
         
         
-    def __ScaleAll(self, scale):
-        for v in self.trackCache:
-            v.Scale(scale, self.minX, self.maxX, self.minY, self.maxY)
-        for v in self.switchCache:
-            v.Scale(scale, self.minX, self.maxX, self.minY, self.maxY)
-        self.basePointView.Scale(scale, self.minX, self.maxX, self.minY, \
-                                 self.maxY)
-
-
     def ViewToModel(self, point):
         """
         Converts 2D point of UI editor coordinates into 3D point
         of scenery coordinates.
         """
-        p3d = Vec3(Decimal(str((point[0]-100)/self.scale + self.minX)), \
-            Decimal(str(-((point[1]-100)/self.scale - self.maxY))), \
-            Decimal())
-        return p3d
+        return self.bounds.ViewToModel(point)
 
 
     def ModelToView(self, point = Vec3()):
@@ -445,9 +329,7 @@ class PlanePart(wx.ScrolledWindow):
         Converts 3D point of scenery coordiante into 2D point of
         UI editor coordinates.
         """        
-        p2d = (int((float(point.x) - self.minX) * self.scale + 100), \
-            int((-float(point.y) + self.maxY) * self.scale + 100))
-        return p2d
+        return self.bounds.ModelToView(point)
 
     def CenterViewAt(self, (requiered_position_x, requiered_position_y)):
         """
@@ -475,12 +357,11 @@ class PlanePart(wx.ScrolledWindow):
 
 
     def ComputePreferredSize(self):
-        (w, h) = self.GetSize()
-        
-        return (max(w, int(self.scale * (self.maxX - self.minX)) \
-                + 200) + self.extentX,
-            max(h + self.extentY, int(self.scale * (self.maxY - self.minY)) \
-               + 200) + self.extentY)
+        """
+        Computes the preferred size of the scenery size.
+        """
+        (w, h) = self.GetSize()        
+        return self.bounds.ComputePreferredSize((w, h))
 
 
     def SetupScrolling(self):
@@ -497,19 +378,22 @@ class PlanePart(wx.ScrolledWindow):
 
         clip = self.GetUpdateRegion().GetBox()
         (clip.x, clip.y) = self.CalcUnscrolledPosition(clip.x, clip.y)
+        
+        context = ui.views.DrawContext(dc, self.bounds)
 
         startTime = datetime.datetime.now()
         try:
-            self.PaintBackground(dc, clip)
-            self.PaintForeground(dc, clip)
+            self.PaintBackground(dc, clip, context)
+            self.PaintForeground(dc, clip, context)
         finally:
-            delta = datetime.datetime.now() - startTime
-            idelta = delta.days * 86400 + delta.seconds * 1000000 \
-                + delta.microseconds
-            self.logger.debug(u"Paint lasted %d \u00b5s" % idelta)
+            if self.logger.isEnabledFor(logging.DEBUG):
+                delta = datetime.datetime.now() - startTime
+                idelta = delta.days * 86400 + delta.seconds * 1000000 \
+                    + delta.microseconds
+                self.logger.debug(u"Paint lasted %d \u00b5s" % idelta)
 
 
-    def PaintBackground(self, dc, clip):
+    def PaintBackground(self, dc, clip, context):
         """
         Paints part background.
         """
@@ -568,91 +452,72 @@ class PlanePart(wx.ScrolledWindow):
         """
         Paints the borders around min/max.
         """
-        x = int((self.maxX - self.minX) * self.scale) + 100
-        y = int((self.maxY - self.minY) * self.scale) + 100
+        (x, y) = self.bounds.GetMinMax()
 
         oldPen = dc.GetPen()
         dc.SetPen(wx.Pen("#999999"))
         try:
-            dc.DrawLine(clip.x, 100, clip.x + clip.width, 100)
-
+            dc.DrawLine(clip.x, self.bounds.extentX, clip.x + clip.width, self.bounds.extentX)
             dc.DrawLine(x, clip.y, x, clip.y + clip.height)
-
             dc.DrawLine(clip.x, y, clip.x + clip.width, y)
-
-            dc.DrawLine(100, clip.y, 100, clip.y + clip.height)
+            dc.DrawLine(self.bounds.extentY, clip.y, self.bounds.extentY, clip.y + clip.height)
         finally:
             dc.SetPen(oldPen)
 
 
-    def PaintForeground(self, dc, clip):
+    def PaintForeground(self, dc, clip, context):
         """
         Paints foreground
         """
-        self.PaintTracks(dc, clip)
-        self.PaintSwitches(dc, clip)
-        self.PaintSelection(dc, clip)
-        self.PaintSnapPoint(dc, clip)
-        self.PaintBasePoint(dc, clip)
+        self.PaintTracks(dc, clip, context)
+        self.PaintSelection(dc, clip, context)
+        self.PaintSnapPoint(dc, clip, context)
+        self.PaintBasePoint(dc, clip, context)
         
         
-    def PaintTracks(self, dc, clip):
+    def PaintTracks(self, dc, clip, context):
         """
-        Paint rail tracks.
-        """        
-        oldPen = dc.GetPen()
-        try:
-            dc.SetPen(wx.Pen((34, 139, 34), \
-                3 if self.scale > 1.0 else 1))
-            for v in self.trackCache:
-                if v != self.selectedView:
-                    v.Draw(dc, clip)
-        finally:
-            dc.SetPen(oldPen)
+        Paint rail trackings.
+        """
+
+        (vx, vy) = self.GetViewStart()
+        (ux, uy) = self.GetScrollPixelsPerUnit()
+        (sx, sy) = self.GetSize()
+
+        p3a = self.ViewToModel((vx*ux, vy*uy))
+        p3b = self.ViewToModel((vx*ux + sx, vy*uy + sy))
+        
+        viewport = sptial.Cuboid.fromEndpoints([p3a, p3b])
+        elements = self.GetParent().scenery.Query(viewport)
+        
+        for t in elements:
+            ui.views.GetViewer(t).Draw(context)
             
             
-    def PaintSwitches(self, dc, clip):
+    def PaintSelection(self, dc, clip, context):
         """
         Paints rail switches.
         """
-        oldPen = dc.GetPen()
-        try:
-            dc.SetPen(wx.Pen((173, 255, 47), \
-                3 if self.scale > 1.0 else 1))
-            for v in self.switchCache:
-                if v != self.selectedView:
-                    v.Draw(dc, clip)
-        finally:
-            dc.SetPen(oldPen)
-
-
-    def PaintSelection(self, dc, clip):
-        """
-        Paints rail switches.
-        """
-        if self.selectedView == None:
-            return
-        oldPen = dc.GetPen()
-        try:
-            dc.SetPen(wx.Pen((255, 0, 0), \
-                3 if self.scale > 1.0 else 1))
-            self.selectedView.Draw(dc, clip)
-        finally:
-            dc.SetPen(oldPen)
+        if self.selected is not None:
+            try:
+                context.selected = True
+                ui.views.GetViewer(self.selected).Draw(context)
+            finally: 
+                context.selected = False
             
             
-    def PaintBasePoint(self, dc, clip):
-        self.basePointView.Draw(dc, clip)
+    def PaintBasePoint(self, dc, clip, context):
+        self.basePointView.Draw(context)
 
 
-    def PaintSnapPoint(self, dc, clip):
-        if self.snapData != None:
+    def PaintSnapPoint(self, dc, clip, context):
+        if self.snapData is not None:
             index = ui.views.getImageIndexByAngle(self.snapData.alpha)
-            snapImage = ui.views.SNAP_BASEPOINT_IMAGES[index]
+            snapImage = ui.views.GetSnapPointImages()[index]
 
-            dc.DrawBitmap(wx.BitmapFromImage(snapImage), \
-                self.snapData.p2d.x - snapImage.GetWidth()/2, \
-                self.snapData.p2d.y - snapImage.GetHeight()/2)
+            dc.DrawBitmap(wx.BitmapFromImage(snapImage),
+                self.snapData.p2d[0] - snapImage.GetWidth()/2,
+                self.snapData.p2d[1] - snapImage.GetHeight()/2)
 
 
     def OnMoveUpdateStatusBar(self, event):
@@ -669,154 +534,357 @@ class PlanePart(wx.ScrolledWindow):
         self.GetParent().leftRuler.UpdateMousePointer(opoint)
 
 
-    def SetSize(self, size):
-        wx.Panel.SetSize(size)
-
-
-
-
-class Ruler(wx.Control):
-    """
-    A ruler for scenery editor.
-    """
-
-    def __init__(self, parent, orientation, id = wx.ID_ANY, name = None):
-        wx.Window.__init__(self, parent, id = id, name = name)
-        self.SetBackgroundColour((255, 220, 153))
-        self.SetMinSize((24, 24))
-
-        self.orientation = orientation
-
-        self.Bind(wx.EVT_PAINT, self.OnPaint)
-        self.Bind(wx.EVT_SIZE, self.OnSize)
-
-        self.offset = 0
-        self.pick = None
-
-
-    def OnSize(self, event):        
-        """
-        Refresh.
-        """
+    def Resize(self):
+        size = self.ComputePreferredSize()
+        self.SetVirtualSize(size)
         self.Refresh()
-
-
-    def OnPaint(self, event):
-        """
-        Paints a control.
-        """
-        dc = wx.PaintDC(self)
-        clip = self.GetUpdateRegion().GetBox()
-
-        self.PaintScale(dc, clip)
-        self.PaintMousePointer(dc, clip)
-
-
-    def PaintScale(self, dc, clip):
-        """
-        Paints scale.
-        """
-        oldPen = dc.GetPen()
-        oldTextFg = dc.GetTextForeground()
-        oldFont = dc.GetFont()
-        try:
-            dc.SetPen(wx.Pen((0, 51, 153)))
-            dc.SetTextForeground((0, 51, 153))
-            dc.SetFont(wx.Font(8, wx.SWISS, wx.FONTSTYLE_NORMAL, \
-                wx.FONTWEIGHT_NORMAL))
-
-            part = self.GetParent().parts[0]
-            (unitX, unitY) = part.GetScrollPixelsPerUnit()
-            # Here is a problem with GetViewStart method under wxGTK
-            (vx, vy) = part.GetViewStart()
-            (w, h) = self.GetSize()
-            if self.orientation == wx.VERTICAL:
-                self.offset = vy
-            elif self.orientation == wx.HORIZONTAL:
-                self.offset = vx
-            (p2x, p2y) = part.CalcUnscrolledPosition((vx, vy))
-
-            if self.orientation == wx.VERTICAL:
-
-                y = -(self.offset * unitY % 100)
-                while y < h:
-                    p3d = part.ViewToModel((p2x, \
-                        y + self.offset * unitY))
-                    label = "%.2f" % p3d.y
-                    (tw, th) = dc.GetTextExtent(label)
-                    if y >= clip.y-tw/2-1 and y <= clip.y+clip.height+tw/2+1:
-                        dc.DrawRotatedText(label, 15-th, y + tw/2, 90)
-                        dc.DrawLine(16, y, clip.width, y)
-                    y += 100
-
-            elif self.orientation == wx.HORIZONTAL:
-
-                x = -(self.offset * unitX % 100)
-                while x < w:
-                    p3d = part.ViewToModel( \
-                         (x + self.offset*unitX, p2y))
-                    label = "%.2f" % p3d.x
-                    (tw, th) = dc.GetTextExtent(label)
-                    if x >= clip.x-tw/2-1 and x <= clip.x+clip.width+tw/2+1:
-                        dc.DrawText(label, x - tw/2, 15 - th)
-                        dc.DrawLine(x, 16, x, clip.height)
-                    x += 100
-
-        finally:
-            dc.SetPen(oldPen)
-            dc.SetTextForeground(oldTextFg)
-            dc.SetFont(oldFont)
-    
-
-    def PaintMousePointer(self, dc, clip):
-        """
-        Draws mouse pointer on ruler.
-        """
-        oldPen = dc.GetPen()
-        try:
-            dc.SetPen(wx.Pen('BLACK'))
-            if self.orientation == wx.HORIZONTAL and self.pick != None: 
-                dc.DrawLine(self.pick, 8, self.pick, 24)
-            elif self.orientation == wx.VERTICAL and self.pick != None:
-                dc.DrawLine(8, self.pick, 24, self.pick)
-        finally:
-            dc.SetPen(oldPen)
-
-
-    def HandleOnScroll(self, event):
-        """
-        Handles scrolled window events.
-        """
-        if event.GetOrientation() == self.orientation:
-            self.Refresh()
-        event.Skip()
-
-
-    def UpdateMousePointer(self, point):
-        """
-        Updates mouse pointers and requests repaint events.
-        """
-        if self.orientation == wx.HORIZONTAL:
-            if self.pick == None:
-                self.pick = point.x
-                self.RefreshRect(wx.Rect(point.x, 0, 1, 24))
-            else:
-                oldPick = self.pick
-                self.pick = point.x
-                self.RefreshRect(wx.Rect(min(self.pick, oldPick), 0, \
-                    abs(self.pick - oldPick)+1, 24))
-
-        elif self.orientation == wx.VERTICAL:
-            if self.pick == None:
-                self.pick = point.y
-                self.RefreshRect(wx.Rect(0, point.y, 24, 1))
-            else:
-                oldPick = self.pick
-                self.pick = point.y
-                self.RefreshRect(wx.Rect(0, min(self.pick, oldPick), 24, \
-                    abs(self.pick - oldPick)+1))
-
         
+        
+    def RedrawRect(self, dirtyRegion):
+        """
+        Redraws the dirty region.
+        Dirty region is expressed in virtual coordinates.
+        """
+        (vx, vy) = self.GetViewStart()
+        (ux, uy) = self.GetScrollPixelsPerUnit()
+        dirtyRegion.x = dirtyRegion.x - vx * ux
+        dirtyRegion.y = dirtyRegion.y - vy * uy
+        self.RefreshRect(dirtyRegion)
+
+
+
+
+class EditorBounds:
+    """
+    Class holding geometry of the editor in view coordinates.
+    """
+    
+    def __init__(self):
+        self.minX = -1000.0;
+        self.maxX = 1000.0;
+        self.minY = -1000.0;
+        self.maxY = 1000.0;
+        self.scale = Scale();
+        self.extentX = 100;
+        self.extentY = 100;
+        
+    
+    def ComputePreferredSize(self, actualSize):
+        """
+        Computes the preferred size of the scenery size.
+        
+        Examples:
+        >>> layout = EditorBounds()
+        >>> layout.ComputePreferredSize((800, 600))
+        (2200, 2200)
+        >>> layout.scale = Scale(SCALE_MIN)
+        >>> layout.ComputePreferredSize((800, 600))
+        (1000, 800)
+        >>> layout.scale = Scale(SCALE_MAX)
+        >>> layout.ComputePreferredSize((800, 600))
+        (4000200, 4000200)
+        """
+        (w, h) = actualSize
+        
+        return (max(w, int(self.scale.get() * float(self.maxX - self.minX))) + 2 * self.extentX,
+            max(h, int(self.scale.get() * float(self.maxY - self.minY))) + 2 * self.extentY)
+    
+    
+    def ViewToModel(self, point):
+        """
+        Converts 2D point of UI editor coordinates into 3D point
+        of scenery coordinates.
+        
+        Examples:
+        >>> layout = EditorBounds()
+        >>> layout.ViewToModel((1100, 1100))
+        (0.000,0.000,0.000)
+        >>> layout.scale = Scale(SCALE_MIN)
+        >>> layout.ViewToModel((1100, 1100))
+        (249000.000,-249000.000,0.000)
+        >>> layout.scale = Scale(SCALE_MAX)
+        >>> layout.ViewToModel((1100, 1100))
+        (-999.500,999.500,0.000)
+        """
+        p3d = Vec3(Decimal(str((point[0]-self.extentX)/self.scale.get() + float(self.minX))),
+            Decimal(str(-((point[1]-self.extentY)/self.scale.get() - float(self.maxY)))),
+            Decimal("0"))
+        return p3d
+
+
+    def ModelToView(self, point = Vec3()):
+        """
+        Converts 3D point of scenery coordinate into 2D point of
+        UI editor coordinates.
+        
+        Examples:
+        >>> layout = EditorBounds()
+        >>> layout.ModelToView()
+        (1100, 1100)
+        >>> layout.scale = Scale(0.5)
+        >>> layout.ModelToView()
+        (600, 600)
+        >>> layout.scale = Scale(2.0)
+        >>> layout.ModelToView()
+        (2100, 2100)
+        >>> layout.ModelToView(Vec3('-4.000', '540.000', '3.000'))
+        (2092, 1020)
+        """        
+        p2d = (int((float(point.x) - float(self.minX)) * self.scale.get() + self.extentX),
+            int((-float(point.y) + float(self.maxY)) * self.scale.get() + self.extentY))
+        return p2d
+    
+    
+    def GetMinMax(self):
+        """
+        Gets the point coordinates for max (x, y) bounds.
+        
+        Example:
+        >>> layout = EditorBounds()
+        >>> layout.GetMinMax()
+        (2100, 2100)
+        """
+        x = int(float(self.maxX - self.minX) * self.scale.get()) + self.extentX
+        y = int(float(self.maxY - self.minY) * self.scale.get()) + self.extentY
+        return (x, y)
+    
+    
+    def Update(self, point, maxPoint = None):
+        """
+        Updates the bounds with the cuboid and returns True if
+        the bounds changed.
+        
+        Example:
+        >>> bounds = EditorBounds()
+        >>> bounds.Update((-400, -1200, 43), (1500, 800, 4))
+        True
+        >>> (bounds.minX, bounds.maxX, bounds.minY, bounds.maxY)
+        (-1000.0, 1500.0, -1200.0, 1000.0)
+        >>> bounds.Update((-200, -1100, 34), (1500, -100, 0))
+        False
+        >>> (bounds.minX, bounds.maxX, bounds.minY, bounds.maxY)
+        (-1000.0, 1500.0, -1200.0, 1000.0)
+        
+        Now with single point:
+        
+        >>> bounds.Update((-2000, -2000))
+        True
+        >>> (bounds.minX, bounds.maxX, bounds.minY, bounds.maxY)
+        (-2000.0, 1500.0, -2000.0, 1000.0)
+        """
+        if (maxPoint is not None and (maxPoint[0] < point[0] or maxPoint[1] < point[1])):
+            raise ValueError            
+        
+        minX = min(self.minX, point[0])
+        if (maxPoint is not None):
+            maxX = max(self.maxX, maxPoint[0])
+        else:
+            maxX = max(self.maxX, point[0])
+            
+        minY = min(self.minY, point[1])
+        if (maxPoint is not None):
+            maxY = max(self.maxY, maxPoint[1])
+        else:
+            maxY = max(self.maxY, point[1])
+        
+        changed = False
+        if (minX != self.minX or maxX != self.maxX or minY != self.minY or maxY != self.maxY):
+            self.minX = float(minX)
+            self.maxX = float(maxX)
+            self.minY = float(minY)
+            self.maxY = float(maxY)
+            changed = True
+        
+        return changed
+    
+    
+    def GetBezierFlatnessFactor(self):
+        """
+        Gets the flatness of Bezier approximation algorithm
+        based on the scale.
+        
+        Example:
+        >>> bounds = EditorBounds()
+        >>> bounds.scale = Scale(1.0);
+        >>> bounds.GetBezierFlatnessFactor()
+        5
+        >>> bounds.scale = Scale(0.004)
+        >>> bounds.GetBezierFlatnessFactor()
+        16
+        >>> bounds.scale = Scale(1000.0)
+        >>> bounds.GetBezierFlatnessFactor()
+        3
+        """
+        return int(math.ceil(16 / (math.log10(self.scale.get() * 250) + 1)))
+    
+    
+    def GetHighlightRect(self, point):
+        """
+        Gets the hightlight cuboid.
+        
+        Example:
+        >>> bounds = EditorBounds()
+        >>> bounds.scale = Scale(0.5)
+        >>> bounds.GetHighlightRect(wx.Point(598, 602))
+        [(-14.000,6.000,0.000), (6.000,-14.000,0.000)]
+        """
+        p2d_1 = point - wx.Point(ui.views.HIGHLIGHT_DISTANCE, ui.views.HIGHLIGHT_DISTANCE)
+        p3d_1 = self.ViewToModel(p2d_1)
+        p2d_2 = point + wx.Point(ui.views.HIGHLIGHT_DISTANCE, ui.views.HIGHLIGHT_DISTANCE)
+        p3d_2 = self.ViewToModel(p2d_2)
+        return [p3d_1, p3d_2]
+
+
+
+
+class Scale:
+    """
+    The editor scale.
+
+    The editor scale is defined as mathematical number set:
+
+    .. math::
+        scale = {s : s \in \Re \vee (s \geq 0.4 \vedge s \leq 2000) \vee s = 0.04 \vee s = 0.004}
+
+    Example:
+    >>> s = Scale()
+    >>> s.increase()
+    >>> s.get()
+    2.0
+    >>> s.decrease()
+    >>> s.get()
+    1.0
+    >>> s.set(3000.0)
+    Traceback (most recent call last):
+        ...
+    ValueError
+    """
+
+    LSCALE_MAX = 0.4
+
+    __large_scales = [LSCALE_MAX, 0.04, SCALE_MIN]
+
+    def __init__(self, value = SCALE_DEFAULT):
+        self.set(value)
+
+
+    def increase(self):
+        """
+        Increases a scale.
+
+        Examples:
+        >>> s = Scale()
+        >>> s.increase()
+        >>> s
+        2px/m
+        >>> s.set(0.004)
+        >>> s.increase()
+        >>> s
+        1px/25.0m
+        >>> s.increase()
+        >>> s
+        1px/2.5m
+        >>> s.increase()
+        >>> s
+        1px/1.25m
+        >>> s.set(1000.0)
+        >>> s.increase()
+        >>> s
+        2000px/m
+        >>> s.increase()
+        >>> s
+        2000px/m
+        """
+        try:
+            idx = self.__large_scales.index(self.value)
+            if (idx == 0):
+                self.value = 2*self.LSCALE_MAX
+            else:
+                self.value = self.__large_scales[idx-1]
+        except ValueError:
+            n = self.value * 2
+            if (n >= SCALE_MAX):
+                self.value = SCALE_MAX
+            else:
+                self.value = n
+
+
+    def decrease(self):
+        """
+        Decreases the scale.
+
+        Examples:
+        >>> s = Scale()
+        >>> s.decrease()
+        >>> s
+        1px/2.0m
+        >>> s.set(0.6)
+        >>> s.decrease()
+        >>> s
+        1px/2.5m
+        """
+        try:
+            idx = self.__large_scales.index(self.value)
+            if (idx == len(self.__large_scales) - 1):
+                self.value = SCALE_MIN
+            else:
+                self.value = self.__large_scales[idx+1]
+        except ValueError:
+            n = self.value / 2
+            if (n <= self.LSCALE_MAX):
+                self.value = self.LSCALE_MAX
+            else:
+                self.value = n
+
+
+    def get(self):
+        return self.value
+
+
+    def set(self, value):
+        """
+        Sets the value for the scale.
+        It can raise ValueError.
+
+        Example:
+        >>> s = Scale()
+        >>> s.set(500.0)
+        >>> s
+        500px/m
+        >>> s.set(2001.0)
+        Traceback (most recent call last):
+            ...
+        ValueError
+        >>> s.set(0.002)
+        Traceback (most recent call last):
+            ...
+        ValueError
+        >>> s.set(0.04)
+        >>> s
+        1px/25.0m
+        >>> s.set(0.5)
+        >>> s
+        1px/2.0m
+        >>> s.set(0.4)
+        >>> s
+        1px/2.5m
+        """
+        if ((value < self.LSCALE_MAX or value > SCALE_MAX) and value not in self.__large_scales):
+            raise ValueError
+        self.value = value
+
+
+    def isLargeScale(self):
+        return self.value in self.__large_scales
+
+
+    def __repr__(self):
+        if (self.value <= 1.0):
+            return "1px/%sm" % float(1.0 / self.value)
+        else:
+            return "%dpx/m" % self.value
+
+
 
 
 class BasePoint:
@@ -836,7 +904,7 @@ class BasePoint:
     
     def __repr__(self):
         return u"BasePoint[point=(%.3f, %.3f, %.3f),alpha=%.2f,gradient=%.2f\u2030]" % \
-           (self.point.x, self.point.y, self.point.z, \
+           (self.point.x, self.point.y, self.point.z,
             self.alpha, self.gradient)
     
     
@@ -845,8 +913,8 @@ class BasePoint:
             return True
         if not isinstance(other, BasePoint):
             return False
-        return self.point == other.point and self.alpha == other.alpha and \
-            self.gradient == other.gradient
+        return (self.point == other.point and self.alpha == other.alpha
+                and self.gradient == other.gradient)
 
 
 
@@ -865,10 +933,10 @@ class BasePointMover:
     def OnMousePress(self, event):
         if not self.enabled:
             return
-        
+
         point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
-        
-        if self.editorPart.basePointView.IsSelectionPossible(point):
+
+        if self.editorPart.basePointView.IsSelectionPossible(point, self.editorPart.bounds):
             self.pressed = True
     
     
@@ -880,7 +948,7 @@ class BasePointMover:
         point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
         
         if self.pressed:
-            if snapData != None:
+            if snapData is not None:
                 self.editorPart.GetParent().basePoint.point = snapData.p3d
                 self.editorPart.GetParent().basePoint.alpha = snapData.alpha
                 self.editorPart.GetParent().basePoint.gradient = snapData.gradient
@@ -902,22 +970,29 @@ class BasePointMover:
             foundSnapData = None
             updateScreen = False
             
-            # This may be optimised by using scenery outline points
-            for v in self.editorPart.trackCache + self.editorPart.switchCache:
-                foundSnapData = v.GetSnapData(point)
-                if foundSnapData != None:
+            p2a = wx.Point(point.x - 5, point.y - 5)
+            p2b = wx.Point(point.x + 5, point.y + 5)
+            p3a = self.editorPart.ViewToModel(p2a)
+            p3b = self.editorPart.ViewToModel(p2b)            
+            
+            viewport = sptial.Cuboid.fromEndpoints([p3a, p3b])
+            elements = self.editorPart.GetParent().scenery.Query(viewport)
+            
+            for v in elements:
+                foundSnapData = ui.views.GetViewer(v).GetSnapData(self.editorPart.bounds, point)
+                if foundSnapData is not None:
                     self.editorPart.snapData = foundSnapData
                     break
  
-            if foundSnapData == None:
+            if foundSnapData is None:
                 self.editorPart.snapData = None
-            if oldSnapData != None:
-                self.editorPart.RefreshRect( \
-                    wx.Rect(oldSnapData.p2d.x-10, oldSnapData.p2d.y-10, 20, 20))
+            if oldSnapData is not None:
+                self.editorPart.RedrawRect(
+                    wx.Rect(oldSnapData.p2d[0]-10, oldSnapData.p2d[1]-10, 20, 20))
                 updateScreen = True
-            if foundSnapData != None:
-                self.editorPart.RefreshRect( \
-                    wx.Rect(foundSnapData.p2d.x-10, foundSnapData.p2d.y-10, 20, 20))
+            if foundSnapData is not None:
+                self.editorPart.RedrawRect(
+                    wx.Rect(foundSnapData.p2d[0]-10, foundSnapData.p2d[1]-10, 20, 20))
                 updateScreen = True
             if updateScreen:
                 self.editorPart.Update()
@@ -988,26 +1063,27 @@ class TrackClosurer:
             return # Return immediately
 
         point = self.__editor.CalcUnscrolledPosition(event.GetPosition())
+        rect = self.__editor.bounds.GetHighlightRect(point)
+        viewport = sptial.Cuboid.fromEndpoints(rect)
 
         startTime = datetime.datetime.now()
         try:
-            foundView = None
-            for v in self.__editor.trackCache + self.__editor.switchCache:
-                if v.IsSelectionPossible(point):
-                    foundView = v
-                    break
-            if foundView is None:
+            scenery = self.__editor.GetParent().GetScenery()
+            
+            elements = scenery.Query(viewport)
+            selectedElement = next((e for e in elements if self.IsSelectionPossible(e, point)), None)
+            
+            if selectedElement is None:
                 # Reset mode to default
                 self.__editor.SetMode(MODE_NORMAL)
             else:
-                snapData = foundView.GetSnapData(point)
-                snapElement = foundView.GetElement()
+                snapData = ui.views.GetViewer(selectedElement).GetSnapData(self.__editor.bounds, point)
 
                 if self.__startPoint is not None:
                     # Handle second point by creating closure track and adding it to scenery
                     _trackfc = ui.trackfc.TrackFactory(self.__editor)
-                    closureTrack = _trackfc.CreateClosureTrack( \
-                        self.__startElement, self.__startPoint, snapElement, snapData.p3d)
+                    closureTrack = _trackfc.CreateClosureTrack(
+                        self.__startElement, self.__startPoint, selectedElement, snapData.p3d)
                     scenery = self.__editor.GetParent().GetScenery()
                     scenery.AddRailTracking(closureTrack)
 
@@ -1016,12 +1092,16 @@ class TrackClosurer:
                 else:
                     # Handle first point (store it only)
                     self.__startPoint = snapData.p3d
-                    self.__startElement = snapElement
+                    self.__startElement = selectedElement
         finally:
             delta = datetime.datetime.now() - startTime
             idelta = delta.days * 86400 + delta.seconds * 1000000 \
                 + delta.microseconds
             self.__editor.logger.debug(u"Create closure track lasted %d \u00b5s" % idelta)
+            
+            
+    def IsSelectionPossible(self, element, point):
+        return ui.views.GetViewer(element).IsSelectionPossible(self.__editor.bounds, point)
 
 
 
@@ -1069,21 +1149,24 @@ class Highlighter:
     def OnMouseClick(self, event):
         if self.__enabled and not self.editorPart.basePointMover.pressed:
             point = self.editorPart.CalcUnscrolledPosition(event.GetPosition())
+            rect = self.editorPart.bounds.GetHighlightRect(point)
+            viewport = sptial.Cuboid.fromEndpoints(rect)
 
             startTime = datetime.datetime.now()
             try:
-                found = None
-                for v in self.editorPart.trackCache + self.editorPart.switchCache:
-                    if v.IsSelectionPossible(point):
-                        found = v
-                        break
-                if found != None:
-                    self.editorPart.GetParent().SetSelection(found.GetElement())
+                scenery = self.editorPart.GetScenery()
+                elements = scenery.Query(viewport)
+                selectedElement = next((e for e in elements if self.IsSelectionPossible(e, point)), None)
+                self.editorPart.GetParent().SetSelection(selectedElement)
             finally:
                 delta = datetime.datetime.now() - startTime
-                idelta = delta.days * 86400 + delta.seconds * 1000000 \
-                    + delta.microseconds
+                idelta = delta.days * 86400 + delta.seconds * 1000000 + delta.microseconds
                 self.editorPart.logger.debug(u"Selection lasted %d \u00b5s" % idelta)
+                
+                
+    def IsSelectionPossible(self, element, point):
+        return ui.views.GetViewer(element).IsSelectionPossible(self.editorPart.bounds, point)
+    
 
 
 
@@ -1100,24 +1183,25 @@ class WheelScaler:
         self.mouse_position = event.GetPosition()
         
     def OnMouseWheel(self, event):
-        print "Mouse wheel event"
-        #print "Wheel rotation:"
-        #print event.GetWheelRotation()
         delta = event.GetWheelRotation()
-        #Logical position of mouse is retrieved in unscrolled values
         mouse_logical_position_in_window = self.editor.CalcUnscrolledPosition(self.mouse_position)
                 
         scale = self.editor.GetScale()
+
         if delta < 0:
-            self.editor.SetScale(scale / 2, mouse_logical_position_in_window)
+            scale.increase()
+            self.editor.SetScale(scale, mouse_logical_position_in_window)
         else:
-            self.editor.SetScale(scale * 2, mouse_logical_position_in_window)
+            scale.decrease()
+            self.editor.SetScale(scale, mouse_logical_position_in_window)
+            
+        event.Skip()
 
 
 
 class SceneryListener(model.scenery.SceneryListener):
     """
-    Responds to the changs in scenery
+    Responds to the changes in scenery
     """
 
     def __init__(self, editor):
@@ -1126,86 +1210,26 @@ class SceneryListener(model.scenery.SceneryListener):
 
 
     def sceneryChanged(self, event):
+        scenery = event.GetScenery()
         element = event.GetElement()
         changeType = event.GetType()
 
-        if changeType == model.scenery.CHANGE_ADD \
-            and isinstance(element, model.groups.RailContainer):
-
-            self.sceneryAddGroup(element)
-        elif changeType == model.scenery.CHANGE_ADD:
-            self.sceneryAdd(element)
-        elif changeType == model.scenery.CHANGE_REMOVE:
-            self.sceneryRemove(element)
-      
-
-    def sceneryAdd(self, element):
+        if changeType == model.scenery.CHANGE_REMOVE:
+            if element == self.editor.GetSelection():
+                self.editor.SetSelection(None)
+            
         part = self.editor.parts[0]
-        (vx, vy) = part.GetViewStart()
-        (ux, uy) = part.GetScrollPixelsPerUnit()
-
-        view = part.AddView(element)
-
-        needPainting = part.ComputeMinMax()
-        if needPainting:
-            self.editor.Refresh()
-        else:
-            view.Scale(part.scale, part.minX, part.maxX, part.minY, part.maxY)
         
-            repaintRect = view.GetRepaintBounds()
-            repaintRect.x -= vx * ux
-            repaintRect.y -= vy * uy
-            part.RefreshRect(repaintRect)
-    
-
-    def sceneryRemove(self, element):
-        part = self.editor.parts[0]
-        (vx, vy) = part.GetViewStart()
-        (ux, uy) = part.GetScrollPixelsPerUnit()
-
-        if element == self.editor.GetSelection():
-            self.editor.SetSelection(None)
-        view = part.FindView(element)
-        if type(element) is model.tracks.Track:
-            part.trackCache.remove(view)
-        elif type(element) is model.tracks.Switch:
-            part.switchCache.remove(view)
-
-        needPainting = part.ComputeMinMax()
-        if needPainting:
-            self.editor.Refresh()
+        mbc = scenery.GetMbc()
+        resizeNeeded = part.bounds.Update(mbc.min(), mbc.max())
+        if resizeNeeded:
+            part.Resize()
         else:
-            repaintRect = view.GetRepaintBounds()
-            repaintRect.x -= vx * ux
-            repaintRect.y -= vy * uy
-            part.RefreshRect(repaintRect)
+            box = ui.views.GetViewer(element).GetBox(part.bounds)
+            part.RedrawRect(box)
 
 
-    def sceneryAddGroup(self, group):
-        part = self.editor.parts[0]
-        (vx, vy) = part.GetViewStart()
-        (ux, uy) = part.GetScrollPixelsPerUnit()
-
-        views = []
-        for track in group.tracks():
-            views.append(part.AddView(track))
-        for sw in group.switches():
-            views.append(part.AddView(sw))
-
-        needPainting = part.ComputeMinMax()
-        if needPainting:
-            self.editor.Refresh()
-        else:
-            repaintRect = None
-            for view in views:
-                view.Scale(part.scale, part.minX, part.maxX, part.minY, part.maxY)
-                nextRepaintRect = view.GetRepaintBounds()
-                if repaintRect is None:
-                    repaintRect = nextRepaintRect
-                else:
-                    repaintRect = repaintRect.Union(nextRepaintRect)
-
-            repaintRect.x -= vx * ux
-            repaintRect.y -= vy * uy
-            part.RefreshRect(repaintRect)
+if (__name__ == '__main__'):
+    import doctest
+    doctest.testmod()
 

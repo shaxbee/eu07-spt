@@ -111,3 +111,20 @@ Scales the vector by scale s.
     >>> Vec3("5", "0.45", "-0.002").scaled(0)
     (0.000,0.000,0.000)
 
+Internal representation of Decimal.
+
+    >>> seq = [Decimal("-3"), Decimal("3"), Decimal("-3.000")]
+    >>> [x.base() for x in seq]
+    [1000, 1000, 1000]
+    >>> [x.raw() for x in seq]
+    [-3000L, 3000L, -3000L]
+
+Test Decimal to_floor and to_ceiling.
+
+    >>> seq = [Decimal("-1.001"), Decimal("-1"), Decimal("-0.999"),
+    ...     Decimal("-0.001"), Decimal("0.000"), Decimal("0.001"),
+    ...     Decimal("0.999"), Decimal("1.000"), Decimal("1.001")] 
+    >>> [d.to_ceiling() for d in seq]
+    [-1L, -1L, 0L, 0L, 0L, 1L, 1L, 1L, 2L]
+    >>> [d.to_floor() for d in seq]
+    [-2L, -1L, -1L, -1L, 0L, 0L, 0L, 1L, 1L]

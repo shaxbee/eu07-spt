@@ -34,3 +34,14 @@ std::string Vec3::__repr__() const
 {
     return str(format("(%s,%s,%s)") % _x.__str__() % _y.__str__() % _z.__str__());
 };
+
+boost::int32_t Vec3::hash() const
+{
+    int seed = 17;
+
+    seed = seed * 31 + _x.hash();
+    seed = seed * 31 + _x.hash();
+    seed = seed * 31 + _x.hash();
+
+    return seed;
+}

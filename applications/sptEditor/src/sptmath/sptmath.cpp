@@ -51,11 +51,19 @@ BOOST_PYTHON_MODULE(_sptmath)
         .def("__mul__",  &Decimal::operator*)
         .def("__div__",  &Decimal::operator/)
         .def("__eq__",   &Decimal::operator==)
+        .def("__hash__", &Decimal::hash)
+        .def("compareTo",  &Decimal::compareTo, arg("other"))
         .def("__neg__",  decimal_neg_operator_ptr)
         .def("__nonzero__", &Decimal::operator bool)
 
         .def("__repr__", &Decimal::__repr__)
-        .def("__str__",  &Decimal::__str__);
+        .def("__str__",  &Decimal::__str__)
+
+        .def("to_ceiling", &Decimal::to_ceiling)
+        .def("to_floor", &Decimal::to_floor)
+
+        .def("base", &Decimal::base)
+        .def("raw", &Decimal::raw);
 
     Vec3 (Vec3::*vec3_sub_operator_ptr)(const Vec3&) const = &Vec3::operator-;
     Vec3 (Vec3::*vec3_neg_operator_ptr)() const = &Vec3::operator-;
@@ -63,6 +71,7 @@ BOOST_PYTHON_MODULE(_sptmath)
     class_<Vec3>("Vec3", init<>())
         .def(init<const std::string&, const std::string&, const std::string&>())
         .def(init<const Decimal&, const Decimal&, const Decimal&>())
+        .def(init<const boost::int64_t, const boost::int64_t, const boost::int64_t>())
         .def(init<const Vec3&>())
 
         .def_pickle(Vec3Pickle())
@@ -75,6 +84,7 @@ BOOST_PYTHON_MODULE(_sptmath)
         .def("__sub__",      vec3_sub_operator_ptr)
         .def("__neg__",      vec3_neg_operator_ptr)
         .def("__eq__",       &Vec3::operator==, arg("other"))
+        .def("__hash__",     &Vec3::hash)
 
         .def("__repr__",     &Vec3::__repr__)
 
