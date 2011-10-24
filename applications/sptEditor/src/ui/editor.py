@@ -423,19 +423,23 @@ class PlanePart(wx.ScrolledWindow):
             x = center2D[0]
             while x > clip.x:
                 x = x - 100
-                dc.DrawLine(x, clip.y, x, yoffset)
+                if (x <= xoffset):
+                    dc.DrawLine(x, clip.y, x, yoffset)
             x = center2D[0]
             while x < xoffset:
-                dc.DrawLine(x, clip.y, x, yoffset)
+                if (x >= clip.x):
+                    dc.DrawLine(x, clip.y, x, yoffset)
                 x = x + 100
         
             y = center2D[1]
             while y > clip.y:
                 y = y - 100
-                dc.DrawLine(clip.x, y, xoffset, y)
+                if (y <= yoffset):
+                    dc.DrawLine(clip.x, y, xoffset, y)
             y = center2D[1]
             while y < yoffset:
-                dc.DrawLine(clip.x, y, xoffset, y)
+                if (y >= clip.y):
+                    dc.DrawLine(clip.x, y, xoffset, y)
                 y = y + 100
         finally:
             dc.SetPen(oldPen)
