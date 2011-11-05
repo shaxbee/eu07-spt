@@ -43,7 +43,7 @@ private:
     void findPosition(osg::ref_ptr<osg::Vec3Array> points, osg::Vec3Array::const_iterator& iter, float& ratio) const;
 
     const RailTracking* _track;
-    const Path* _path;
+    std::auto_ptr<const Path> _path;
 
     float _distance;
 

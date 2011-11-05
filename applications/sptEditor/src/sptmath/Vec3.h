@@ -5,6 +5,7 @@
 #include <cmath>
 #include <boost/python/tuple.hpp>
 
+
 class Vec3
 {
 public:
@@ -12,6 +13,7 @@ public:
     Vec3(const Vec3& other): _x(other.getX()), _y(other.getY()), _z(other.getZ()) { };
     Vec3(const std::string& x, const std::string& y, const std::string& z): _x(x), _y(y), _z(z) { };
     Vec3(const Decimal& x, const Decimal& y, const Decimal& z): _x(x), _y(y), _z(z) { };
+    Vec3(const boost::int64_t x, const boost::int64_t y, const boost::int64_t z): _x(x), _y(y), _z(z) { };
 
     Vec3 operator+(const Vec3& other) const
     {
@@ -33,6 +35,8 @@ public:
         return (_x == other._x) && (_y == other._y) && (_z == other._z);
     };
 
+    boost::int32_t hash() const;
+
     void moveBy(const Vec3& other)
     {
         _x += other._x;
@@ -40,7 +44,7 @@ public:
         _z += other._z;
     };
 
-    Vec3 scale(double value)
+    Vec3 scaled(double value)
     {
         return scale_dec(Decimal(value));
     };
@@ -66,7 +70,7 @@ public:
         return double(_x * other._x + _y * other._y + _z * other._z);
     };
 
-    Vec3 normalize();
+    Vec3 normalized();
     float angleToJUnit() const;
 
     std::string __repr__() const;

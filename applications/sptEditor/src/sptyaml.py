@@ -30,8 +30,11 @@ def represent_Track(dumper, data):
 def represent_Switch(dumper, data):
     return __represent(dumper, data, "Switch", Switch_r_attrs)
 
-def represent_RailContainer(dumper, data):
-    return __represent(dumper, data, "RailContainer", ["name", "children"])
+def represent_RailContainer(dumper, data):    
+    return dumper.represent_mapping("RailContainer", \
+        {"name": data.name,
+         "children": list(data.children)})
+
 
 def represent_Scenery(dumper, data):
     return __represent(dumper, data, "Scenery", ["tracks"])

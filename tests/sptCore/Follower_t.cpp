@@ -28,8 +28,8 @@ void set_sector_data(Sector& sector, TracksContainerT& data, size_t index)
     Track* center = data[index];
     Track* right = data[(index + 1) % 3];
 
-    osg::Vec3f front(center->getDefaultPath().front());
-    osg::Vec3f back(center->getDefaultPath().back());
+    osg::Vec3f front(center->getDefaultPath()->front());
+    osg::Vec3f back(center->getDefaultPath()->back());
 
     boost::array<Connection, 2> connections =
     {{
@@ -127,23 +127,23 @@ TEST_F(FollowerTest, moveBackward)
 
 TEST_F(FollowerTest, getPosition)
 {
-    const Path& path = scenery.getTrack("track1").getDefaultPath();
+    std::auto_ptr<Path> path = scenery.getTrack("track1").getDefaultPath();
     Follower follower(scenery.getTrack("track1")); 
 
     // Begining of track
-    ASSERT_EQ(follower.getPosition(), path.front());
+    ASSERT_EQ(follower.getPosition(), path->front());
 
     // 1/2 of track
-    follower.move(path.length() * 0.5);
-    ASSERT_EQ(follower.getPosition(), path.front() * 0.5 + path.back() * 0.5);
+    follower.move(path->length() * 0.5);
+    ASSERT_EQ(follower.getPosition(), path->front() * 0.5 + path->back() * 0.5);
 
     // 3/4 of track
-    follower.move(path.length() * 0.25);
-    ASSERT_EQ(follower.getPosition(), path.front() * 0.25 + path.back() * 0.75);
+    follower.move(path->length() * 0.25);
+    ASSERT_EQ(follower.getPosition(), path->front() * 0.25 + path->back() * 0.75);
 
     // End of track
-    follower.move(path.length() * 0.25);
-    ASSERT_EQ(follower.getPosition(), path.back());
+    follower.move(path->length() * 0.25);
+    ASSERT_EQ(follower.getPosition(), path->back());
 }; 
 
 int main(int argc, char **argv) 

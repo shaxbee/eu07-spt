@@ -1,2 +1,2 @@
-add_subdirectory(sptCore)
-add_subdirectory(sptMover)
+#add_subdirectory(sptCore)
+#add_subdirectory(sptMover)

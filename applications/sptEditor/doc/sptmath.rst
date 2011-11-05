@@ -74,15 +74,15 @@ Moves this vector by given other v vector.
 
 Normalizes the vector.
 
-    >>> Vec3("1", "0", "0").normalize()
+    >>> Vec3("1", "0", "0").normalized()
     (1.000,0.000,0.000)
-    >>> Vec3("0", "-1", "0").normalize()
+    >>> Vec3("0", "-1", "0").normalized()
     (0.000,-1.000,0.000)
-    >>> Vec3("-1", "-1", "0").normalize()
+    >>> Vec3("-1", "-1", "0").normalized()
     (-0.707,-0.707,0.000)
-    >>> Vec3("0.001", "0", "0").normalize()
+    >>> Vec3("0.001", "0", "0").normalized()
     (1.000,0.000,0.000)
-    >>> Vec3("-0.001", "-0.001", "0.001").normalize()
+    >>> Vec3("-0.001", "-0.001", "0.001").normalized()
     (-0.577,-0.577,0.577)
 
 Returns the angle in radians to the unit vector J=(0, 1, 0).
@@ -102,12 +102,29 @@ Returns the angle in radians to the unit vector J=(0, 1, 0).
 
 Scales the vector by scale s.
 
-    >>> Vec3("1", "3", "0.5").scale(2)
+    >>> Vec3("1", "3", "0.5").scaled(2)
     (2.000,6.000,1.000)
-    >>> Vec3("-4", "0.001", "-0.999").scale(0.5)
+    >>> Vec3("-4", "0.001", "-0.999").scaled(0.5)
     (-2.000,0.001,-0.499)
-    >>> Vec3("0", "7", "-3").scale(-2)
+    >>> Vec3("0", "7", "-3").scaled(-2)
     (0.000,-14.000,6.000)
-    >>> Vec3("5", "0.45", "-0.002").scale(0)
+    >>> Vec3("5", "0.45", "-0.002").scaled(0)
     (0.000,0.000,0.000)
 
+Internal representation of Decimal.
+
+    >>> seq = [Decimal("-3"), Decimal("3"), Decimal("-3.000")]
+    >>> [x.base() for x in seq]
+    [1000, 1000, 1000]
+    >>> [x.raw() for x in seq]
+    [-3000L, 3000L, -3000L]
+
+Test Decimal to_floor and to_ceiling.
+
+    >>> seq = [Decimal("-1.001"), Decimal("-1"), Decimal("-0.999"),
+    ...     Decimal("-0.001"), Decimal("0.000"), Decimal("0.001"),
+    ...     Decimal("0.999"), Decimal("1.000"), Decimal("1.001")] 
+    >>> [d.to_ceiling() for d in seq]
+    [-1L, -1L, 0L, 0L, 0L, 1L, 1L, 1L, 2L]
+    >>> [d.to_floor() for d in seq]
+    [-2L, -1L, -1L, -1L, 0L, 0L, 0L, 1L, 1L]

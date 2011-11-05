@@ -65,12 +65,6 @@ void ExternalsManager::removeExternals(Scenery& scenery, const Sector& sector)
     {
         if(iter->offset == offset)
         {
-            ExternalConnectionsSet::iterator current = iter;
-            iter++;
-            _externals.erase(current);
-        }
-        else
-        {
             scenery.getSector(iter->offset).updateConnection(iter->position, &sector.getRailTracking(iter->index), NULL);
         }
     };

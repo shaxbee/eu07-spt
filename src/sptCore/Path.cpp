@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <iterator>
 
+#include <boost/assert.hpp>
+
 using namespace sptCore;
 
 namespace
@@ -70,25 +72,48 @@ osg::ref_ptr<osg::Vec3Array> createPoints(osg::Vec3 p1, osg::Vec3 cp1, osg::Vec3
 
 };
 
-
-struct FindBezierPathEntry
+class CurveLength
 {
+public:
+    CurveLength(const osg::Vec3& first): _previous(first), _length(0.0f) { };
 
-    FindBezierPathEntry(float resolution): _resolution(resolution) { };
-
-    template <typename PairT>
-    bool operator()(const PairT& entry)
+    void operator()(const osg::Vec3& current)
     {
-
-        return entry.first == _resolution;
-
+        _length += (current - _previous).length();
     };
 
-    float _resolution;
+    float result() const { return _length; }
 
-}; // class <anonymous>::FindBezierPathEntry
+private:
+    osg::Vec3 _previous;
+    float _length;
+};
+
+float calcLength(const osg::Vec3Array& points)
+{
+    BOOST_ASSERT(points.size() >= 2);
+
+    float result(0.0f);
+    osg::Vec3f previous(points.front());
+
+    for(osg::Vec3Array::const_iterator iter = points.begin() + 1; iter != points.end(); previous = *iter, iter++)
+    {
+        result += (*iter - previous).length();
+    };
+
+    return result;
+};
 
 }; // anonymous namespace
+
+StraightPath::~StraightPath()
+{
+};
+
+std::auto_ptr<Path> StraightPath::clone() const
+{
+    return std::auto_ptr<Path>(new StraightPath(front(), back()));
+};
 
 std::auto_ptr<Path> StraightPath::reverse() const
 {
@@ -120,6 +145,23 @@ osg::ref_ptr<osg::Vec3Array> StraightPath::points(float scale) const
     return result;
 };
 
+BezierPath::BezierPath(const osg::Vec3f& front, const osg::Vec3f& frontCP, const osg::Vec3f& back, const osg::Vec3f& backCP):
+    Path(front, back), _frontCP(frontCP), _backCP(backCP)
+{
+    _points = createPoints(front, frontCP, back, backCP, DEFAULT_SCALE);
+    _length = calcLength(*_points);
+};
+
+BezierPath::BezierPath(const osg::Vec3f& front, const osg::Vec3f& frontCP, const osg::Vec3f& back, const osg::Vec3f& backCP, const float length):
+    Path(front, back), _frontCP(frontCP), _backCP(backCP), _length(length)
+{
+    _points = createPoints(front, frontCP, back, backCP, DEFAULT_SCALE);
+};
+
+BezierPath::~BezierPath()
+{
+};
+
 osg::Vec3f BezierPath::frontDir() const
 {
     osg::Vec3f result(_frontCP - front());
@@ -136,19 +178,21 @@ osg::Vec3f BezierPath::backDir() const
     return result;
 };
 
+std::auto_ptr<Path> BezierPath::clone() const
+{
+    return std::auto_ptr<Path>(new BezierPath(front(), _frontCP, back(), _backCP));
+};
+
 std::auto_ptr<Path> BezierPath::reverse() const
 {
-    std::auto_ptr<BezierPath> result(new BezierPath(back(), _backCP, front(), _frontCP));
+    std::auto_ptr<BezierPath> result(new BezierPath(back(), _backCP, front(), _frontCP, _length));
 
     // if source path was initialized
-    if(_length)
+    if(_points.valid())
     {
-        // initialize length to avoid overhead
-        result->_length = _length;
-
         // reverse copy points
-        osg::ref_ptr<osg::Vec3Array> reversedPoints(new osg::Vec3Array(points()->rbegin(), points()->rend()));
-        result->_entries.push_back(Entry(DEFAULT_SCALE, reversedPoints));
+        osg::ref_ptr<osg::Vec3Array> reversed(new osg::Vec3Array(points()->rbegin(), points()->rend()));
+        result->_points = reversed;
     };
 
     return std::auto_ptr<Path>(result);
@@ -156,39 +200,17 @@ std::auto_ptr<Path> BezierPath::reverse() const
 
 float BezierPath::length() const
 {
-
-    // lazy initialization
-    if(!_length)
-    {
-        double length = 0.0f;
-
-        const osg::Vec3Array& pts = *(points());
-        for(osg::Vec3Array::const_iterator iter = pts.begin(); iter != pts.end() - 1; iter++)
-            length += (*(iter + 1) - *iter).length();
-
-        _length = length;
-    };
-
     return _length;
 };
 
 osg::ref_ptr<osg::Vec3Array> BezierPath::points(float scale) const
 {
-    Entries::iterator iter = std::find_if(_entries.begin(), _entries.end(), FindBezierPathEntry(scale));
-
-    osg::ref_ptr<osg::Vec3Array> result;
-
-    if(iter == _entries.end())
+    if(scale == DEFAULT_SCALE && _points.valid())
     {
-        result = createPoints(front(), _frontCP, back(), _backCP, scale);
-        _entries.push_back(std::make_pair(scale, result));
-    }
-    else
-    {
-        result = iter->second;
+        return _points;
     };
 
-    return result;
+    return createPoints(front(), frontCP(), back(), backCP(), scale);
 };
 
 const float Path::DEFAULT_SCALE = 1.0f;

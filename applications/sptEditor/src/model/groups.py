@@ -9,6 +9,7 @@ import logging
 
 import tracks
 import sptmath
+import sptial
 
 
 class RailContainer:
@@ -18,12 +19,12 @@ class RailContainer:
     
     def __init__(self, name = None):
         # Contains all children
-        self.children = []
+        self.children = sptial.RTree()
         # Outline trackings are at borders of this container and may attach
         # to some external trackings.
         self.outline_trackings = []
         # A map containing points and external trackings
-        self.connections = ListDict()
+        self.connections = {}
 
         self.name = name
 
@@ -31,7 +32,7 @@ class RailContainer:
     def __repr__(self):
         return "RailContainer[" \
             + "name=" + str(self.name) \
-            + ", children=" + str(self.children) \
+            + ", children=" + self.children.str() \
             + ", outlinePoints=" + str(self.connections.keys()) \
             + "]";
 
@@ -39,14 +40,24 @@ class RailContainer:
     def __eq__(self, other):
         if self is other:
             return True
-        if other == None:
+        if other is None:
             return False
         if not isinstance(other, RailContainer):
+            return False
+        if self.size() != other.size():
             return False
         for tracking in self.children:
             if tracking not in other.children:
                 return False
-        return self.size() == other.size()
+        return True
+
+
+    def __hash__(self):
+        """Hash is only computed on outline points"""
+        value = 1
+        for point in self.connections.keys():
+            value += 37*hash(point)
+        return value
 
     
     def size(self):
@@ -60,7 +71,10 @@ class RailContainer:
         """
         Checks if a group contains given rail tracking
         """
-        return tracking in self.children
+        geometry = tracking.getEndPoints()
+        cuboid = sptial.Cuboid.fromEndpoints(geometry)
+        found = self.children.query(cuboid)
+        return tracking in found
 
 
     def containsPoint(self, point):
@@ -143,8 +157,13 @@ class RailContainer:
         """
         Inserts given rail tracking into group.
         """
-        _logger = logging.getLogger("Group")
-        _logger.debug("Trying to insert " + str(tracking))
+        isDebug = logger.isEnabledFor(logging.DEBUG)
+
+        if isDebug:
+            logger.debug("Trying to insert " + str(tracking))
+
+        geometry = tracking.getEndPoints()
+        cuboid = sptial.Cuboid.fromEndpoints(geometry)
 
         if self.contains(tracking):
             raise ValueError, "Rail tracking is already in group"
@@ -153,38 +172,40 @@ class RailContainer:
             raise ValueError, "Connected rail tracking cannot " \
                 + "be inserted into group"
 
-        geometry = tracking.getEndPoints()
-
         i = 0
         founds = 0L
         for gpoint in geometry:
-            _logger.debug(("Processing %d geometry point " \
-                + tracks.coord2str(gpoint)) % i)
+            if isDebug:
+                logger.debug(("Processing %d geometry point " \
+                    + tracks.coord2str(gpoint)) % i)
 
-            for child in self.children:
+            for child in self.outline_trackings:
                 if child.containsPoint(gpoint):
-                    _logger.debug("Found following rail tracking that has " \
-                        + "geometry point " + str(child))
+                    if isDebug:
+                        logger.debug("Found following rail tracking that has " \
+                            + "geometry point " + str(child))
 
                     v_tracking_normal = tracking.getNormalVector(gpoint)
                     v_child_normal = child.getNormalVector(gpoint)
                     
-                    _logger.debug("Tracking normal is %s" % v_tracking_normal)
-                    _logger.debug("Child normal is %s" % v_child_normal)
+                    if isDebug:
+                        logger.debug("Tracking normal is %s" % v_tracking_normal)
+                        logger.debug("Child normal is %s" % v_child_normal)
                     
                     # Check if normal vectors may plug together
                     if sptmath.isNegativeVector(v_tracking_normal, v_child_normal):
 
                         # Check if connection to next rail tracking is empty
                         connInside = child.point2tracking(gpoint)
-                        connOutside = self.connections[gpoint]
+                        connOutside = self.connections.get(gpoint, None)
 
                         if connInside != None or connOutside != None:
                             # Connection in use, an error
                             raise Exception, "Inconsistent state"
 
-                        _logger.debug("Setting connections for both " \
-                            + "trackings")
+                        if isDebug:
+                            logger.debug("Setting connections for both " \
+                                + "trackings")
 
                         founds |= (1 << i)
 
@@ -195,59 +216,68 @@ class RailContainer:
                         # Remove rail tracking from outline if necessary
                         if child in self.outline_trackings \
                             and not self.isOutlineNow(child):
-                            _logger.debug("Child found in outline " \
-                                + "collections however it is inline now so " \
-                                + "removing it form outlines")
+                            if isDebug:
+                                logger.debug("Child found in outline " \
+                                    + "collections however it is inline now so " \
+                                    + "removing it from outlines")
                             self.outline_trackings.remove(child)
 
                         # Check geometry and remove outline point
                         if gpoint in self.connections:
-                            _logger.debug("Removing geometry point from " \
-                                + "outline points " \
-                                + tracks.coord2str(gpoint))
+                            if isDebug:
+                                logger.debug("Removing geometry point from " \
+                                    + "outline points " \
+                                    + tracks.coord2str(gpoint))
                             del self.connections[gpoint]
-                            break # Exit from for loop
+                        break # Exit from for loop
                     else:
-                        _logger.debug("At specified point " \
-                            + tracks.coord2str(gpoint) + " vectors aren't " \
-                            + "negative " \
-                            + tracks.coord2str(v_tracking_normal) \
-                            + ", " + tracks.coord2str(v_child_normal))
+                        if isDebug:
+                            logger.debug("At specified point " \
+                                + tracks.coord2str(gpoint) + " vectors aren't " \
+                                + "negative " \
+                                + tracks.coord2str(v_tracking_normal) \
+                                + ", " + tracks.coord2str(v_child_normal))
 
             if founds & (1 << i) == 0:
-                _logger.debug("Adding specified point " \
-                     + tracks.coord2str(gpoint) + " to outline points")
+                if isDebug:
+                    logger.debug("Adding specified point " \
+                        + tracks.coord2str(gpoint) + " to outline points")
                 self.connections[gpoint] = None
 
             i = i+1
 
         # Add whole rail tracking to outline trackings
         if sptmath.cardinality(founds, i) < len(geometry):
-            _logger.debug(("Not all geometry points where bound " \
-                + "to existing trackings. Found status %x. " \
-                + "Adding tracking to outlines") % founds)
-            self.outline_trackings.append(tracking)
+            if isDebug:
+                logger.debug(("Not all geometry points where bound " \
+                    + "to existing trackings. Found status %x. " \
+                    + "Adding tracking to outlines") % founds)
+            self.outline_trackings.insert(0, tracking)
 
         # Add to children
-        self.children.append(tracking)
+        self.children.insert(cuboid, tracking)
 
-        _logger.debug("Rail tracking " + str(tracking) + " has successfully " \
-            + "inserted into group")
+        if isDebug:
+            logger.debug("Rail tracking " + str(tracking) + " has been successfully " \
+                + "inserted into group")
 
-        _logger.debug(self)
+            logger.debug(self)
 
 
     def remove(self, tracking):
         """
         Removes rail tracking from group.
         """
-        _logger = logging.getLogger("Group")
-        _logger.debug("About to remove rail tracking " + str(tracking))
+        isDebug = logger.isEnabledFor(logging.DEBUG)
+
+        if isDebug:
+            logger.debug("About to remove rail tracking " + str(tracking))
 
         if not self.contains(tracking):
             raise ValueError, "Rail tracking is not in this group"
 
         geometry = tracking.getEndPoints()
+        cuboid = sptial.Cuboid.fromEndpoints(geometry)
 
         # Check if the points don't make existing group connections
         for gpoint in geometry:
@@ -257,48 +287,57 @@ class RailContainer:
 
         i = 0
         for gpoint in geometry:
-            _logger.debug(("Processing %d geometry point " \
-                + tracks.coord2str(gpoint)) % i)
+            if isDebug:
+                logger.debug(("Processing %d geometry point " \
+                    + tracks.coord2str(gpoint)) % i)
 
             previous = tracking.point2tracking(gpoint)
 
             if previous != None:
-                _logger.debug("Unbinding previous tracking " + str(previous) \
-                    + " found at point " + tracks.coord2str(gpoint))
+                if isDebug:
+                    logger.debug("Unbinding previous tracking " + str(previous) \
+                        + " found at point " + tracks.coord2str(gpoint))
 
                 previous.setTracking(gpoint, None)
                 tracking.setTracking(gpoint, None)
 
                 # Add previous tracking to outline if it becomes outline now
                 if previous not in self.outline_trackings:
-                    _logger.debug("Adding previous tracking " + str(previous) \
-                        + " to outlines")
+                    if isDebug:
+                       logger.debug("Adding previous tracking " + str(previous) \
+                           + " to outlines")
 
                     self.outline_trackings.append(previous)
 
-                _logger.debug("Adding point " + tracks.coord2str(gpoint) \
-                    + " to outline points now")
+                if isDebug:
+                    logger.debug("Adding point " + tracks.coord2str(gpoint) \
+                        + " to outline points now")
 
                 self.connections[gpoint] = None
             else:
-                _logger.debug("Removing point " + tracks.coord2str(gpoint) \
-                    + " from outline points, as there is no connected tracking")
+                if isDebug:
+                    logger.debug("Removing point " + tracks.coord2str(gpoint) \
+                        + " from outline points, as there is no connected tracking")
 
                 del self.connections[gpoint]
 
             i = i+1
 
         if tracking in self.outline_trackings:
-            _logger.debug("Removing tracking " + str(tracking) \
-                + " from outlines")
+            if isDebug:
+                logger.debug("Removing tracking " + str(tracking) \
+                    + " from outlines")
 
             self.outline_trackings.remove(tracking)
 
-        self.children.remove(tracking)
+        self.children.delete(cuboid, tracking)
 
-        _logger.debug("Tracking " + str(tracking) + " was removed from group")
+        if isDebug:
+            logger.debug("Tracking " + str(tracking) + " was removed from group")
 
-        _logger.debug(self)
+            logger.debug(self)
+
+
 
 
     def setTracking(self, point, tracking):
@@ -339,6 +378,22 @@ class RailContainer:
             elif isinstance(c, RailContainer):
                 for c in c.switches():
                     yield c
+
+
+    def rebuild(self):
+        """
+        Rebuilds the internal structures after applying 3D transformations.
+        """
+        items = self.connections.items()
+        self.connections = dict(items)
+        
+        children = iter(self.children)
+        tree = sptial.RTree()
+        for c in children:
+            geometry = c.getEndPoints()
+            cuboid = sptial.Cuboid.fromEndpoints(geometry)
+            tree.insert(cuboid, c)
+        self.children = tree
           
 
   
@@ -385,50 +440,12 @@ class RailGroup(RailContainer):
     def __repr__(self):
         return "RailGroup[" \
             + "name=" + str(self.name) \
-            + ", children=" + str(self.children) \
+            + ", children=" + self.children.str() \
             + ", outlinePoints=" + str(self.connections.keys()) \
             + "]";
 
 
 
 
-class ListDict(collections.MutableMapping):
-    """
-    Dictionary based on two lists of keys and values.
-    """
-
-    def __init__(self):
-        self.__keys = []
-        self.__values = []
-        self.__size = 0
-
-    def __len__(self):
-        return self.__size
-
-    def __getitem__(self, key):
-        for i in range(len(self.__keys)):
-            if self.__keys[i] == key:
-                return self.__values[i]
-        raise KeyError, key
-
-    def __setitem__(self, key, value):
-        for i in range(len(self.__keys)):
-            if self.__keys[i] == key:
-                self.__values[i] = value
-                return
-        self.__keys.append(key)
-        self.__values.append(value)
-        self.__size += 1
-
-    def __delitem__(self, key):
-        for i in range(len(self.__keys)):
-            if self.__keys[i] == key:
-                del self.__keys[i]
-                del self.__values[i]
-                self.__size -= 1
-                return
-        raise KeyError, key
-
-    def __iter__(self):
-        return iter(self.__keys)
+logger = logging.getLogger("Group")
 

@@ -4,6 +4,7 @@
 #include <string>
 #include <cmath>
 #include <boost/cstdint.hpp>
+#include <boost/functional/hash.hpp>
 
 class Decimal
 {
@@ -59,6 +60,16 @@ public:
         return _value == other._value;
     };
 
+    int32_t compareTo(const Decimal& other) const
+    {
+        return (int32_t) (_value - other._value);
+    }
+
+    boost::int32_t hash() const
+    {
+        return boost::hash_value(_value);
+    }
+
     operator bool() const
     {
         return _value != 0;
@@ -87,6 +98,9 @@ public:
     {
         return double(_value / _base) + (double(_value % _base) / _base);
     };
+
+    boost::int64_t to_floor() const { return (_value / _base) - ((_value < 0 && (_value % _base != 0)) ? 1 : 0); }
+    boost::int64_t to_ceiling() const { return (_value / _base) + ((_value % _base != 0) && (_value > 0) ? 1 : 0); }
 
     boost::uint8_t precision() const { return std::log10(float(_base)); }
     boost::uint32_t base() const { return _base; }

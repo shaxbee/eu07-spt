@@ -10,6 +10,7 @@ import copy
 
 from sptmath import Vec3, Decimal
 from model.tracks import Track
+import model.groups
 
 
 class TrackFactory:
@@ -141,6 +142,10 @@ class TrackFactory:
         # 7. Set the new position and vector of base point
         basePoint.point = Vec3(nextPoint.x, nextPoint.y, nextPoint.z)
 
+        # Rail container, if yes rebuild
+        if isinstance(tCopy, model.groups.RailContainer):
+            tCopy.rebuild()
+
         nVector = tCopy.getNormalVector(nextPoint)
         angle = nVector.angleToJUnit()
 
@@ -171,10 +176,10 @@ class TrackFactory:
 
         length = (startPoint - endPoint).length()
 
-        startVec = startVec.normalize()
-        startVec = startVec.scale(length * 0.333)
-        endVec = endVec.normalize()
-        endVec = endVec.scale(length * 0.333)
+        startVec.normalized()
+        startVec.scaled(length * 0.333)
+        endVec.normalized()
+        endVec.scaled(length * 0.333)
         t = Track(p1 = startPoint, v1 = startVec, v2 = endVec, p2 = endPoint)
         return t
 

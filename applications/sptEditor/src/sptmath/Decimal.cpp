@@ -72,3 +72,4 @@ std::string Decimal::__str__() const
 
     return result.str();
 };
+

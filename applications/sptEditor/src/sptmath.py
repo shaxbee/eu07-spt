@@ -15,6 +15,32 @@ except ImportError:
 VEC3_ZERO = Vec3("0", "0", "0")
 
 
+
+def _Vec3_getitem(self, index):
+    if (index == 0):
+        return self.x
+    elif (index == 1):
+        return self.y
+    elif (index == 2):
+        return self.z
+    else:
+        raise IndexError
+
+
+def _Decimal_compare(self, other):
+    if isinstance(other, int):
+        return self.compareTo(Decimal(other))
+    elif isinstance(other, float):
+        return self.compareTo(Decimal(other))
+    else:
+        return self.compareTo(other)
+
+
+Vec3.__getitem__ = _Vec3_getitem
+
+Decimal.__cmp__ = _Decimal_compare
+
+
 def isNegativeVector(a, b):
     """
     Checks if a spin of vector a is negative to spin of vector b.
@@ -76,12 +102,12 @@ def recursivelyToLineSegments(bezier, level, result):
     if level == 0:
         return
 
-    x12 = (bezier[0].x + bezier[1].x) / 2
-    y12 = (bezier[0].y + bezier[1].y) / 2
-    x23 = (bezier[1].x + bezier[2].x) / 2
-    y23 = (bezier[1].y + bezier[2].y) / 2
-    x34 = (bezier[2].x + bezier[3].x) / 2
-    y34 = (bezier[2].y + bezier[3].y) / 2
+    x12 = (bezier[0][0] + bezier[1][0]) / 2
+    y12 = (bezier[0][1] + bezier[1][1]) / 2
+    x23 = (bezier[1][0] + bezier[2][0]) / 2
+    y23 = (bezier[1][1] + bezier[2][1]) / 2
+    x34 = (bezier[2][0] + bezier[3][0]) / 2
+    y34 = (bezier[2][1] + bezier[3][1]) / 2
     x123 = (x12 + x23) / 2
     y123 = (y12 + y23) / 2
     x234 = (x23 + x34) / 2
@@ -89,11 +115,11 @@ def recursivelyToLineSegments(bezier, level, result):
     x1234 = (x123 + x234) / 2
     y1234 = (y123 + y234) / 2
 
-    dx = bezier[3].x - bezier[0].x
-    dy = bezier[3].y - bezier[0].y
+    dx = bezier[3][0] - bezier[0][0]
+    dy = bezier[3][1] - bezier[0][1]
 
-    d2 = abs((bezier[1].x - bezier[3].x) * dy - (bezier[1].y - bezier[3].y) * dx)
-    d3 = abs((bezier[2].x - bezier[3].x) * dy - (bezier[2].y - bezier[3].y) * dx)
+    d2 = abs((bezier[1][0] - bezier[3][0]) * dy - (bezier[1][1] - bezier[3][1]) * dx)
+    d3 = abs((bezier[2][0] - bezier[3][0]) * dy - (bezier[2][1] - bezier[3][1]) * dx)
 
     if (d2+d3)*(d2+d3) < BISECT_TOLERANCE*(dx*dx + dy*dy):
         result += [Point(x1234, y1234)]
@@ -109,18 +135,18 @@ def sqDistanceTo(line, point):
     Returns squared distance of line and point (defined as wx.Points)
 
     Example:    
-    >>> sqDistanceTo([Point(3,3), Point(3,-3)], Point(0,-1))
+    >>> sqDistanceTo([(3,3), (3,-3)], (0,-1))
     9.0
-    >>> sqDistanceTo([Point(3,3), Point(3,-3)], Point(5,1))
+    >>> sqDistanceTo([(3,3), (3,-3)], (5,1))
     4.0
-    >>> sqDistanceTo([Point(3,3), Point(3,-3)], Point(3,-5))
+    >>> sqDistanceTo([(3,3), (3,-3)], (3,-5))
     4.0
-    >>> sqDistanceTo([Point(3,3), Point(3,-3)], Point(3,0))
+    >>> sqDistanceTo([(3,3), (3,-3)], (3,0))
     0.0
     """
-    x1, y1 = line[0].x, line[0].y
-    x2, y2 = line[1].x, line[1].y
-    px, py = point.x, point.y
+    x1, y1 = line[0][0], line[0][1]
+    x2, y2 = line[1][0], line[1][1]
+    px, py = point[0], point[1]
     x2 -= x1
     y2 -= y1
     px -= x1
