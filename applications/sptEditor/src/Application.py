@@ -11,7 +11,7 @@ import logging.config
 #import wx
 import wx.xrc
 import wx.aui as AUI
-import wx.lib.agw.ribbon as RB
+#import wx.lib.agw.ribbon as RB
 import wx.lib.delayedresult as delayed
 import yaml
 import os.path

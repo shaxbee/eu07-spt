@@ -162,8 +162,8 @@ class PlanePart(wx.ScrolledWindow):
         eventManager.Register(self.basePointMover.OnMousePress, wx.EVT_LEFT_DOWN, self)
         eventManager.Register(self.basePointMover.OnMouseRelease, wx.EVT_LEFT_UP, self)
         eventManager.Register(self.highlighter.OnMouseClick, wx.EVT_LEFT_DOWN, self)
-        eventManager.Register(self.highlighter.OnMouseMove, wx.EVT_MOTION, self)
-        eventManager.Register(self.wheelScaler.OnMouseMove, wx.EVT_MOTION, self)
+        #eventManager.Register(self.highlighter.OnMouseMove, wx.EVT_MOTION, self)
+        #eventManager.Register(self.wheelScaler.OnMouseMove, wx.EVT_MOTION, self)
         eventManager.Register(self.sceneryDragger.OnMousePress, wx.EVT_MIDDLE_DOWN, self)
         eventManager.Register(self.sceneryDragger.MoveScenery, wx.EVT_MOTION, self)
         eventManager.Register(self.trackClosurer.OnMouseClick, wx.EVT_LEFT_UP, self)
@@ -276,8 +276,8 @@ class PlanePart(wx.ScrolledWindow):
 
 
     def SetSelection(self, selection):
-        (vx, vy) = self.GetViewStart()
-        (ux, uy) = self.GetScrollPixelsPerUnit()
+        #(vx, vy) = self.GetViewStart()
+        #(ux, uy) = self.GetScrollPixelsPerUnit()
 
         oldView = self.selected
         if (oldView is not None):
@@ -338,7 +338,7 @@ class PlanePart(wx.ScrolledWindow):
         self.CenterViewAt(new_screen_center_unscrolled)
         
         # 4) set Pen for displaying tracks
-        if self.scale > 1:
+        if self.bounds.scale > 1:
             self._pen_rail_tracking_width = 3
         else:
             self._pen_rail_tracking_width = 1
