@@ -932,7 +932,7 @@ class BasePoint:
     Defines a vector attached in some 3D world point that allows
     additions to the scenery.
 
-    Gradient is expressed in pro milles.
+    Gradient is expressed in promille's.
     """
     
     def __init__(self, p=Vec3(), alpha = 0, gradient = 0):
@@ -955,7 +955,14 @@ class BasePoint:
         return (self.point == other.point and self.alpha == other.alpha
                 and self.gradient == other.gradient)
 
-
+    def SetPosition(self, point):
+        self.point = point
+        
+    def SetAlpha(self, alpha):
+        self.alpha = alpha
+        
+    def SetGradient(self, gradient):
+        self.gradient = gradient
 
 
 class BasePointMover:

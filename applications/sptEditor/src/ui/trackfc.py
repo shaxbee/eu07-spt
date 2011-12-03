@@ -1,5 +1,5 @@
 """
-Module containg various classes and functions that operates
+Module containing various classes and functions that operates
 on tracks within editor.
 
 @author Adammo
@@ -18,15 +18,22 @@ class TrackFactory:
     Factory methods for tracks.
     """
 
-    def __init__(self, editor):
-        self.editor = editor
-
-
-    def CreateStraight(self, length):
+    def __init__(self):
+        #self.editor = editor
+        self.basePoint = None
+        pass
+    
+    def GetBasePoint(self):
+        """
+        Returning basePoint modified by Creating functions
+        """
+        return self.basePoint
+    
+    def CreateStraight(self, length, basePoint):
         p2 = Vec3("0", str(length), "0")
         p1 = Vec3()
 
-        basePoint = self.editor.basePoint
+        
 
         tr = BasePointTransform(basePoint)
         tr.Transform([p1, p2], [])
@@ -37,12 +44,13 @@ class TrackFactory:
         basePoint.point = Vec3(p2.x, p2.y, p2.z)
 
         # Refresh editor
-        self.editor.SetBasePoint(basePoint, True)
-
+        #self.editor.SetBasePoint(basePoint, True)
+        self.basePoint = basePoint
+        
         return Track(p1, v1, v2, p2)
 
 
-    def CreateCurve(self, length, radius, isLeft):
+    def CreateCurve(self, length, radius, isLeft, basePoint):
         """
         Creates curve track
         """
@@ -74,7 +82,7 @@ class TrackFactory:
             else RightTrackTransform(length, radius)
         tr.Transform([p1, p2], [v1, v2])
 
-        basePoint = self.editor.basePoint
+        #basePoint = self.editor.basePoint
 
         tr = BasePointTransform(basePoint)
         tr.Transform([p1, p2], [v1, v2])
@@ -86,12 +94,13 @@ class TrackFactory:
             basePoint.alpha += degrees(angle)
 
         # Refresh editor
-        self.editor.SetBasePoint(basePoint, True)
+        #self.editor.SetBasePoint(basePoint, True)
+        self.basePoint = basePoint
 
         return Track(p1, v1, v2, p2)
 
 
-    def CopyRailTracking(self, template, startPoint):
+    def CopyRailTracking(self, template, startPoint, basePoint):
         """
         Copies template rail tracking (single one or a group)
         into scenery.
@@ -100,7 +109,7 @@ class TrackFactory:
         startPoint = Vec3 point within that template which is the insertation point.
         """
 
-        basePoint = self.editor.basePoint
+        #basePoint = self.editor.basePoint
         
         # 1. Make a copy of template
         tCopy = copy.deepcopy(template)
@@ -151,7 +160,9 @@ class TrackFactory:
 
         basePoint.alpha = degrees(angle)
 
-        self.editor.SetBasePoint(basePoint, True)
+        #self.editor.SetBasePoint(basePoint, True)
+        self.basePoint = basePoint
+
 
         # Return copy
         return tCopy
@@ -176,10 +187,10 @@ class TrackFactory:
 
         length = (startPoint - endPoint).length()
 
-        startVec.normalized()
-        startVec.scaled(length * 0.333)
-        endVec.normalized()
-        endVec.scaled(length * 0.333)
+        startVec = startVec.normalized()
+        startVec = startVec.scaled(length * 0.333)
+        endVec = endVec.normalized()
+        endVec = endVec.scaled(length * 0.333)
         t = Track(p1 = startPoint, v1 = startVec, v2 = endVec, p2 = endPoint)
         return t
 

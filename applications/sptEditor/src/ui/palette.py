@@ -176,10 +176,10 @@ class TrackTool(wx.Panel):
        
     def ChangedDirectionOfTrack(self, event):
         
-        
-        
-        self.GetSizer().Replace(1,self.tools[self._rb.GetSelection()]())
-        
+        try:
+            self.GetSizer().Add(self.tools[self._rb.GetSelection()]())
+        except KeyError:   
+            pass 
         self.Layout()
         
     def LoadStraightTrackPalette(self):
@@ -190,7 +190,7 @@ class TrackTool(wx.Panel):
         
         sizer_slider = wx.FlexGridSizer(1,2,5,5)
         #sizer_slider_km = wx.BoxSizer(wx.HORIZONTAL)
-        sl_km = wx.Slider(self,wx.ID_ANY,0,0,10, size=(250,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
+        sl_km = wx.Slider(self,wx.ID_ANY,0,0,10, size=(200,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
         sl_km.SetTickFreq(1)
         l_km = wx.StaticText(self,wx.ID_ANY,"Km")
         
@@ -205,7 +205,7 @@ class TrackTool(wx.Panel):
         '''
         
         #sizer_slider_100m = wx.BoxSizer(wx.HORIZONTAL)
-        sl_100m = wx.Slider(self,wx.ID_ANY,0,0,10, size=(250,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
+        sl_100m = wx.Slider(self,wx.ID_ANY,0,0,10, size=(200,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
         sl_100m.SetTickFreq(1)
         l_100m = wx.StaticText(self,wx.ID_ANY,"100m")
         
@@ -219,7 +219,7 @@ class TrackTool(wx.Panel):
         '''
         
         #sizer_slider_1m = wx.BoxSizer(wx.HORIZONTAL)
-        sl_1m = wx.Slider(self,wx.ID_ANY,0,0,100, size=(250,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
+        sl_1m = wx.Slider(self,wx.ID_ANY,0,0,100, size=(200,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
         sl_1m.SetTickFreq(5)
         l_1m = wx.StaticText(self,wx.ID_ANY,"1m")
         
