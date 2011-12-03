@@ -49,8 +49,28 @@ class TrackFactory:
         
         return Track(p1, v1, v2, p2)
 
+    def CreateStraightOnStation(self, length, basePoint):
+        p2 = Vec3("0", str(length), "0")
+        p1 = Vec3()
 
-    def CreateCurve(self, length, radius, isLeft, basePoint):
+        
+
+        tr = BasePointTransform(basePoint)
+        tr.Transform([p1, p2], [])
+
+        v1 = Vec3()
+        v2 = Vec3()
+
+        basePoint.point = Vec3(p2.x, p2.y, p2.z)
+
+        # Refresh editor
+        #self.editor.SetBasePoint(basePoint, True)
+        self.basePoint = basePoint
+        
+        return Track(p1, v1, v2, p2)
+
+    
+    def CreateHorizontalArc(self, length, radius, isLeft, basePoint):
         """
         Creates curve track
         """
@@ -99,6 +119,54 @@ class TrackFactory:
 
         return Track(p1, v1, v2, p2)
 
+    def CreateArcOnStation(self, length, radius, isLeft, basePoint):
+        """
+        Creates curve track
+        """
+        angle = length / radius
+        half = 0.5 * angle
+        sin_a = sin(half)
+        cos_a = cos(half)
+
+        p1 = Vec3()
+        p2 = Vec3()
+        v1 = Vec3()
+        v2 = Vec3()
+
+        p1.x = Decimal(-radius * cos_a)
+        p1.y = Decimal(radius * sin_a)
+        p2.x = Decimal(-radius * cos_a)
+        p2.y = Decimal(-radius * sin_a)
+
+        ctrlX = -radius * (4.0 - cos_a) / 3.0
+        ctrlY = -radius * (1.0 - cos_a) * (cos_a - 3.0) / (3.0 * sin_a)
+
+        v1.x = Decimal(ctrlX) - p1.x
+        v1.y = Decimal(ctrlY) - p1.y
+        v2.x = Decimal(ctrlX) - p2.x
+        v2.y = Decimal(-ctrlY) - p2.y
+
+        # Left or right
+        tr = LeftTrackTransform(length, radius) if isLeft \
+            else RightTrackTransform(length, radius)
+        tr.Transform([p1, p2], [v1, v2])
+
+        #basePoint = self.editor.basePoint
+
+        tr = BasePointTransform(basePoint)
+        tr.Transform([p1, p2], [v1, v2])
+        
+        basePoint.point = Vec3(p2.x, p2.y, p2.z)
+        if isLeft:
+            basePoint.alpha -= degrees(angle)
+        else:
+            basePoint.alpha += degrees(angle)
+
+        # Refresh editor
+        #self.editor.SetBasePoint(basePoint, True)
+        self.basePoint = basePoint
+
+        return Track(p1, v1, v2, p2)
 
     def CopyRailTracking(self, template, startPoint, basePoint):
         """
