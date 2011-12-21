@@ -5,7 +5,8 @@ on tracks within editor.
 @author Adammo
 """
 
-from math import sin, cos, atan, radians, pi, degrees
+from math import sin, cos, tan, atan, radians, pi, degrees
+import math
 import copy
 
 from sptmath import Vec3, Decimal
@@ -70,11 +71,12 @@ class TrackFactory:
         return Track(p1, v1, v2, p2)
 
     
-    def CreateHorizontalArc(self, length, radius, isLeft, basePoint):
+    def CreateHorizontalArc(self, angle, radius, isLeft, basePoint):
         """
         Creates curve track
         """
-        angle = length / radius
+        #angle = length / radius
+        length = angle * radius
         half = 0.5 * angle
         sin_a = sin(half)
         cos_a = cos(half)
@@ -119,11 +121,11 @@ class TrackFactory:
 
         return Track(p1, v1, v2, p2)
 
-    def CreateArcOnStation(self, length, radius, isLeft, basePoint):
+    def CreateArcOnStation(self, angle, radius, isLeft, basePoint):
         """
         Creates curve track
         """
-        angle = length / radius
+        length = radius * angle
         half = 0.5 * angle
         sin_a = sin(half)
         cos_a = cos(half)
@@ -168,6 +170,49 @@ class TrackFactory:
 
         return Track(p1, v1, v2, p2)
 
+
+    def CreateVerticalArc(self, target_gradient, radius, basePoint):
+        """
+        Create curve on change of gradient of line
+        """
+        alfa_home = math.atan2(basePoint.gradient,1000.0)
+        alfa_target = math.atan2(target_gradient,1000.0)
+        
+        alfa = alfa_target - alfa_home
+
+        T = math.fabs(radius * tan(alfa / 2))
+        
+        p1 = Vec3()
+        p2 = Vec3()
+        v1 = Vec3()
+        v2 = Vec3()
+
+        p1.x = Decimal(0)
+        p1.y = Decimal(0)
+        p1.z = Decimal(0)
+        p2.x = Decimal(0)
+        p2.y = Decimal(T + T*cos(alfa))
+        p2.z = Decimal(T*sin(alfa))
+        
+        Lvec = 4.0/3.0*radius*tan(alfa/4.0)
+        
+        v1.x = p1.x
+        v1.y = p1.y + Decimal(Lvec)
+        v1.z = p1.z
+        
+        v2.x = p2.x
+        v2.y = -Decimal(Lvec*cos(alfa))
+        v2.z = -Decimal(Lvec*sin(alfa))
+         
+        tr = BasePointTransform(basePoint)
+        tr.Transform([p1, p2], [v1, v2])
+        
+        basePoint.point = Vec3(p2.x, p2.y, p2.z)
+        basePoint.gradient = target_gradient
+        self.basePoint = basePoint
+        
+        return Track(p1, v1, v2, p2)
+    
     def CopyRailTracking(self, template, startPoint, basePoint):
         """
         Copies template rail tracking (single one or a group)

@@ -79,7 +79,7 @@ class TrackFactoryTest(unittest.TestCase):
         
         tf = ui.trackfc.TrackFactory()
         
-        track = tf.CreateHorizontalArc(math.radians(55)*300, 300, False, basePoint)
+        track = tf.CreateHorizontalArc(math.radians(55), 300, False, basePoint)
         
         testedPoint = Vec3(Decimal("187.172"),Decimal("204.262"),Decimal("6.336"))
         testedVec = Vec3(Decimal("-91.977"),Decimal("-33.477"),Decimal("-2.153"))
@@ -104,7 +104,7 @@ class TrackFactoryTest(unittest.TestCase):
         
         tf = ui.trackfc.TrackFactory()
         
-        track = tf.CreateArcOnStation(math.radians(55)*300, 300, False, basePoint)
+        track = tf.CreateArcOnStation(math.radians(55), 300, False, basePoint)
         
         testedPoint = Vec3(Decimal("187.156"),Decimal("204.205"),Decimal("5.405"))
         testedVec = Vec3(Decimal("-91.973"),Decimal("-33.464"),Decimal("-1.235"))
@@ -116,7 +116,27 @@ class TrackFactoryTest(unittest.TestCase):
         
         self.assertEquals(55,alfa)
 
+    def testCreateKrzywaPrzejsciowa(self):
+        
+        pass
 
+    def testCreateVerticalArc(self):
+        
+        basePoint = ui.editor.BasePoint()
+        
+        #basePoint.SetPosition(Vec3(Decimal("-10.293"), Decimal("106.952"), Decimal("0")))
+        basePoint.SetPosition(Vec3(Decimal("0"), Decimal("0"), Decimal("0")))
+        basePoint.SetAlpha(15)
+        basePoint.SetGradient(10)
+        
+        tf = ui.trackfc.TrackFactory()
+        
+        track = tf.CreateVerticalArc(22, 2500, basePoint)
+        
+        testedPoint = Vec3(Decimal("7.761"),Decimal("28.965"),Decimal("0.479"))
+        testedVec = Vec3(Decimal("-2.586"),Decimal("-9.654"),Decimal("-0.220"))
+        self.assertEquals(testedPoint,basePoint.point)
+    
 
 if __name__ == "__main__":
     unittest.main()
