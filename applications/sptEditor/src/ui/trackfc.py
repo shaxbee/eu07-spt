@@ -14,6 +14,12 @@ from model.tracks import Track
 import model.groups
 
 
+class Vec3f:
+    def __init__(self, x=0.0, y=0.0, z=0.0):
+        self.x = x
+        self.y = y
+        self.z = z
+
 class TrackFactory:
     """
     Factory methods for tracks.
@@ -31,10 +37,9 @@ class TrackFactory:
         return self.basePoint
     
     def CreateStraight(self, length, basePoint):
+        
         p2 = Vec3("0", str(length), "0")
         p1 = Vec3()
-
-        
 
         tr = BasePointTransform(basePoint)
         tr.Transform([p1, p2], [])
@@ -51,25 +56,24 @@ class TrackFactory:
         return Track(p1, v1, v2, p2)
 
     def CreateStraightOnStation(self, length, basePoint):
-        p2 = Vec3("0", str(length), "0")
-        p1 = Vec3()
+        
+        p2 = Vec3f(0, length, 0)
+        p1 = Vec3f()
+        v1 = Vec3f()
+        v2 = Vec3f()
+        
+        tr = BasePointTransform(basePoint)
+        (p1, v1, v2, p2) = tr.TransformF([p1, p2], [v1, v2])
 
         
 
-        tr = BasePointTransform(basePoint)
-        tr.Transform([p1, p2], [])
-
-        v1 = Vec3()
-        v2 = Vec3()
-
-        basePoint.point = Vec3(p2.x, p2.y, p2.z)
+        basePoint.point = Vec3((p2.x), (p2.y), (p2.z))
 
         # Refresh editor
         #self.editor.SetBasePoint(basePoint, True)
         self.basePoint = basePoint
         
         return Track(p1, v1, v2, p2)
-
     
     def CreateHorizontalArc(self, angle, radius, isLeft, basePoint):
         """
@@ -182,27 +186,27 @@ class TrackFactory:
 
         T = math.fabs(radius * tan(alfa / 2))
         
-        p1 = Vec3()
-        p2 = Vec3()
-        v1 = Vec3()
-        v2 = Vec3()
+        p1 = Vec3f()
+        p2 = Vec3f()
+        v1 = Vec3f()
+        v2 = Vec3f()
 
-        p1.x = Decimal(0)
-        p1.y = Decimal(0)
-        p1.z = Decimal(0)
-        p2.x = Decimal(0)
-        p2.y = Decimal(T + T*cos(alfa))
-        p2.z = Decimal(T*sin(alfa))
+        p1.x = (0)
+        p1.y = (0)
+        p1.z = (0)
+        p2.x = (0)
+        p2.y = (T + T*cos(alfa))
+        p2.z = (T*sin(alfa))
         
         Lvec = 4.0/3.0*radius*tan(alfa/4.0)
         
         v1.x = p1.x
-        v1.y = p1.y + Decimal(Lvec)
+        v1.y = p1.y + (Lvec)
         v1.z = p1.z
         
         v2.x = p2.x
-        v2.y = -Decimal(Lvec*cos(alfa))
-        v2.z = -Decimal(Lvec*sin(alfa))
+        v2.y = -(Lvec*cos(alfa))
+        v2.z = -(Lvec*sin(alfa))
          
         tr = BasePointTransform(basePoint)
         tr.Transform([p1, p2], [v1, v2])
@@ -407,21 +411,68 @@ class BasePointTransform(AbstractTransform):
         cos_b = cos(self.beta)
 
         # Matrices for 3D transformations 
-        matrix = [ \
-            [cos_a, -sin_a, 0.0], \
-            [cos_b*sin_a, cos_a*cos_b, -sin_b], \
-            [sin_a*sin_b, sin_b*cos_a, cos_b]]
+        matrix_x =[\
+            [1,0,0], \
+            [0, cos_b, -sin_b], \
+            [0, sin_b, cos_b]]
+
+        matrix_z =[\
+            [cos_a,-sin_a,0], \
+            [sin_a, cos_a, 0], \
+            [0, 0, 1]]
 
         for p in points:
-            transformVec3(matrix, p)
+            transformVec3(matrix_x, p)
+            transformVec3(matrix_z, p)
             p.x = p.x + self.point.x
             p.y = p.y + self.point.y
             p.z = p.z + self.point.z
         for v in vectors:
-            transformVec3(matrix, v)
+            transformVec3(matrix_x, v)
+            transformVec3(matrix_z, v)
 
+    def TransformF(self, points, vectors):
+        sin_a = sin(self.alpha)
+        cos_a = cos(self.alpha)
+        sin_b = sin(self.beta)
+        cos_b = cos(self.beta)
 
+        # Matrices for 3D transformations 
 
+        matrix_x =[\
+            [1,0,0], \
+            [0, cos_b, -sin_b], \
+            [0, sin_b, cos_b]]
+
+        matrix_z =[\
+            [cos_a,-sin_a,0], \
+            [sin_a, cos_a, 0], \
+            [0, 0, 1]]
+
+        for p in points:
+            transformVec3f(matrix_x, p)
+            transformVec3f(matrix_z, p)
+            p.x = p.x + float(self.point.x)
+            p.y = p.y + float(self.point.y)
+            p.z = p.z + float(self.point.z)
+        for v in vectors:
+            transformVec3f(matrix_x, v)
+            transformVec3f(matrix_z, v)
+
+        pointsD = [Vec3(), Vec3()]
+        i = 0
+        for p in points:
+            pointsD[i] = Vec3(Decimal(points[i].x), Decimal(points[i].y), Decimal(points[i].z))
+            #p.x = Decimal(points[i].x)
+            i = i+1
+        
+        vectorsD = [Vec3(), Vec3()]
+        i = 0   
+        for v in vectors:
+            vectors[i] = Vec3(Decimal(v.x), Decimal(v.y), Decimal(v.z))
+            i = i+1
+        
+        return pointsD[0], vectorsD[0], vectorsD[1], pointsD[1]
 
 def transformVec3(m, vec3):
     """
@@ -432,6 +483,18 @@ def transformVec3(m, vec3):
     vec3.x = Decimal(m[0][0] * x + m[0][1] * y + m[0][2] * z)
     vec3.y = Decimal(m[1][0] * x + m[1][1] * y + m[1][2] * z)
     vec3.z = Decimal(m[2][0] * x + m[2][1] * y + m[2][2] * z)
+
+
+
+def transformVec3f(m, vec):
+    """
+    Transforms Vec3 using matrix 3x3
+    """
+    x, y, z = float(vec.x), float(vec.y), float(vec.z)
+
+    vec.x = (m[0][0] * x + m[0][1] * y + m[0][2] * z)
+    vec.y = (m[1][0] * x + m[1][1] * y + m[1][2] * z)
+    vec.z = (m[2][0] * x + m[2][1] * y + m[2][2] * z)
 
 
 def transformVec3_4(m, vec3):

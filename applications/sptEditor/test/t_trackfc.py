@@ -60,9 +60,9 @@ class TrackFactoryTest(unittest.TestCase):
         
         tf = ui.trackfc.TrackFactory()
         
-        strack = tf.CreateStraight(58.651, basePoint)
+        strack = tf.CreateStraightOnStation(58.651, basePoint)
         
-        testedPoint = Vec3(Decimal("48.032"),Decimal("33.633"),Decimal("1.290"))
+        testedPoint = Vec3(Decimal("48.032"),Decimal("33.632"),Decimal("1.290"))
         
         self.assertEquals(testedPoint,basePoint.point)       
         
