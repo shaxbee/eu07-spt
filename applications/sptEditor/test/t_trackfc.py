@@ -43,7 +43,7 @@ class TrackFactoryTest(unittest.TestCase):
         
         testedPoint = Vec3(Decimal("48.044"),Decimal("33.641"),Decimal("1.290"))
         
-        self.assertEquals(testedPoint,basePoint.point)
+        self.assertEquals(testedPoint,strack.p2)
 
 
  
@@ -64,7 +64,7 @@ class TrackFactoryTest(unittest.TestCase):
         
         testedPoint = Vec3(Decimal("48.032"),Decimal("33.632"),Decimal("1.290"))
         
-        self.assertEquals(testedPoint,basePoint.point)       
+        self.assertEquals(testedPoint,strack.p2)       
         
         
         
@@ -106,15 +106,15 @@ class TrackFactoryTest(unittest.TestCase):
         
         track = tf.CreateArcOnStation(math.radians(55), 300, False, basePoint)
         
-        testedPoint = Vec3(Decimal("187.156"),Decimal("204.205"),Decimal("5.405"))
-        testedVec = Vec3(Decimal("-91.973"),Decimal("-33.464"),Decimal("-1.235"))
-        self.assertEquals(testedPoint,basePoint.point)
-        self.assertEquals(testedVec, track.v2)
-        #return angle in degrees in two digits float 
-        alfa = math.ceil(math.degrees(math.atan(track.v2[0]/track.v2[1]))*100)/100
+        testedPoint = Vec3(Decimal("187.156"),Decimal("204.204"),Decimal("5.405"))
+        testedVec1 = Vec3(Decimal("25.326"),Decimal("94.521"),Decimal("2.152"))
+        testedVec2 = Vec3(Decimal("-91.973"),Decimal("-33.463"),Decimal("-1.234"))
+        self.assertEquals(testedPoint,track.p2)
+        self.assertEquals(testedVec1, track.v1)
+        self.assertEquals(testedVec2, track.v2)#return angle in degrees in two digits float 
+        #alfa = math.ceil(math.degrees(math.atan(track.v2[0]/track.v2[1]))*100)/100
         
-        
-        self.assertEquals(55,alfa)
+        self.assertEquals(70,basePoint.alpha)
 
     def testCreateKrzywaPrzejsciowa(self):
         
@@ -125,7 +125,7 @@ class TrackFactoryTest(unittest.TestCase):
         basePoint = ui.editor.BasePoint()
         
         #basePoint.SetPosition(Vec3(Decimal("-10.293"), Decimal("106.952"), Decimal("0")))
-        basePoint.SetPosition(Vec3(Decimal("0"), Decimal("0"), Decimal("0")))
+        basePoint.SetPosition(Vec3(0,0,0))
         basePoint.SetAlpha(15)
         basePoint.SetGradient(10)
         
@@ -133,10 +133,12 @@ class TrackFactoryTest(unittest.TestCase):
         
         track = tf.CreateVerticalArc(22, 2500, basePoint)
         
-        testedPoint = Vec3(Decimal("7.761"),Decimal("28.965"),Decimal("0.479"))
-        testedVec = Vec3(Decimal("-2.586"),Decimal("-9.654"),Decimal("-0.220"))
-        self.assertEquals(testedPoint,basePoint.point)
-    
+        testedPoint2 = Vec3(Decimal(7.7611),Decimal(28.9661),Decimal(0.4791))
+        testedVec2 = Vec3(Decimal(-2.5861),Decimal(-9.6541),Decimal(-0.2191))
+        testedVec1 = Vec3(Decimal(2.5871),Decimal(9.6561),Decimal(0.0991))
+        self.assertEquals(testedPoint2,track.p2)
+        self.assertEquals(testedVec2,track.v2)
+        self.assertEquals(testedVec1,track.v1)
 
 if __name__ == "__main__":
     unittest.main()

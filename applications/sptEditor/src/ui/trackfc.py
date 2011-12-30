@@ -38,16 +38,18 @@ class TrackFactory:
     
     def CreateStraight(self, length, basePoint):
         
-        p2 = Vec3("0", str(length), "0")
-        p1 = Vec3()
+        p2 = Vec3f(0, length, 0)
+        p1 = Vec3f()
 
         tr = BasePointTransform(basePoint)
-        tr.Transform([p1, p2], [])
+        tr.TransformF([p1, p2], [])
 
-        v1 = Vec3()
-        v2 = Vec3()
+        v1 = Vec3f()
+        v2 = Vec3f()
 
-        basePoint.point = Vec3(p2.x, p2.y, p2.z)
+        [p1, p2, v1, v2] = convertVec3ftoVec3([p1, p2, v1, v2])
+        
+        basePoint.point = p2
 
         # Refresh editor
         #self.editor.SetBasePoint(basePoint, True)
@@ -63,11 +65,12 @@ class TrackFactory:
         v2 = Vec3f()
         
         tr = BasePointTransform(basePoint)
-        (p1, v1, v2, p2) = tr.TransformF([p1, p2], [v1, v2])
-
+        tr.TransformF([p1, p2], [v1, v2])
+        #tr.TransformF([p1, p2], [v1, v2])
         
+        [p1, p2, v1, v2] = convertVec3ftoVec3([p1, p2, v1, v2])
 
-        basePoint.point = Vec3((p2.x), (p2.y), (p2.z))
+        basePoint.point = p2
 
         # Refresh editor
         #self.editor.SetBasePoint(basePoint, True)
@@ -85,23 +88,23 @@ class TrackFactory:
         sin_a = sin(half)
         cos_a = cos(half)
 
-        p1 = Vec3()
-        p2 = Vec3()
-        v1 = Vec3()
-        v2 = Vec3()
+        p1 = Vec3f()
+        p2 = Vec3f()
+        v1 = Vec3f()
+        v2 = Vec3f()
 
-        p1.x = Decimal(-radius * cos_a)
-        p1.y = Decimal(radius * sin_a)
-        p2.x = Decimal(-radius * cos_a)
-        p2.y = Decimal(-radius * sin_a)
+        p1.x = (-radius * cos_a)
+        p1.y = (radius * sin_a)
+        p2.x = (-radius * cos_a)
+        p2.y = (-radius * sin_a)
 
         ctrlX = -radius * (4.0 - cos_a) / 3.0
         ctrlY = -radius * (1.0 - cos_a) * (cos_a - 3.0) / (3.0 * sin_a)
 
-        v1.x = Decimal(ctrlX) - p1.x
-        v1.y = Decimal(ctrlY) - p1.y
-        v2.x = Decimal(ctrlX) - p2.x
-        v2.y = Decimal(-ctrlY) - p2.y
+        v1.x = (ctrlX) - p1.x
+        v1.y = (ctrlY) - p1.y
+        v2.x = (ctrlX) - p2.x
+        v2.y = (-ctrlY) - p2.y
 
         # Left or right
         tr = LeftTrackTransform(length, radius) if isLeft \
@@ -111,9 +114,11 @@ class TrackFactory:
         #basePoint = self.editor.basePoint
 
         tr = BasePointTransform(basePoint)
-        tr.Transform([p1, p2], [v1, v2])
+        tr.TransformF([p1, p2], [v1, v2])
         
-        basePoint.point = Vec3(p2.x, p2.y, p2.z)
+        [p1, p2, v1, v2] = convertVec3ftoVec3([p1, p2, v1, v2])
+        
+        basePoint.point = p2
         if isLeft:
             basePoint.alpha -= degrees(angle)
         else:
@@ -134,23 +139,23 @@ class TrackFactory:
         sin_a = sin(half)
         cos_a = cos(half)
 
-        p1 = Vec3()
-        p2 = Vec3()
-        v1 = Vec3()
-        v2 = Vec3()
+        p1 = Vec3f()
+        p2 = Vec3f()
+        v1 = Vec3f()
+        v2 = Vec3f()
 
-        p1.x = Decimal(-radius * cos_a)
-        p1.y = Decimal(radius * sin_a)
-        p2.x = Decimal(-radius * cos_a)
-        p2.y = Decimal(-radius * sin_a)
+        p1.x = (-radius * cos_a)
+        p1.y = (radius * sin_a)
+        p2.x = (-radius * cos_a)
+        p2.y = (-radius * sin_a)
 
         ctrlX = -radius * (4.0 - cos_a) / 3.0
         ctrlY = -radius * (1.0 - cos_a) * (cos_a - 3.0) / (3.0 * sin_a)
 
-        v1.x = Decimal(ctrlX) - p1.x
-        v1.y = Decimal(ctrlY) - p1.y
-        v2.x = Decimal(ctrlX) - p2.x
-        v2.y = Decimal(-ctrlY) - p2.y
+        v1.x = (ctrlX) - p1.x
+        v1.y = (ctrlY) - p1.y
+        v2.x = (ctrlX) - p2.x
+        v2.y = (-ctrlY) - p2.y
 
         # Left or right
         tr = LeftTrackTransform(length, radius) if isLeft \
@@ -160,9 +165,11 @@ class TrackFactory:
         #basePoint = self.editor.basePoint
 
         tr = BasePointTransform(basePoint)
-        tr.Transform([p1, p2], [v1, v2])
+        tr.TransformF([p1, p2], [v1, v2])
         
-        basePoint.point = Vec3(p2.x, p2.y, p2.z)
+        [p1, p2, v1, v2] = convertVec3ftoVec3([p1, p2, v1, v2])
+        
+        basePoint.point = p2
         if isLeft:
             basePoint.alpha -= degrees(angle)
         else:
@@ -191,10 +198,10 @@ class TrackFactory:
         v1 = Vec3f()
         v2 = Vec3f()
 
-        p1.x = (0)
-        p1.y = (0)
-        p1.z = (0)
-        p2.x = (0)
+        #p1.x = (0)
+        #p1.y = (0)
+        #p1.z = (0)
+        #p2.x = (0)
         p2.y = (T + T*cos(alfa))
         p2.z = (T*sin(alfa))
         
@@ -209,9 +216,11 @@ class TrackFactory:
         v2.z = -(Lvec*sin(alfa))
          
         tr = BasePointTransform(basePoint)
-        tr.Transform([p1, p2], [v1, v2])
+        tr.TransformF([p1, p2], [v1, v2])
         
-        basePoint.point = Vec3(p2.x, p2.y, p2.z)
+        [p1, p2, v1, v2] = convertVec3ftoVec3([p1, p2, v1, v2])
+        
+        basePoint.point = p2
         basePoint.gradient = target_gradient
         self.basePoint = basePoint
         
@@ -348,10 +357,10 @@ class RightTrackTransform(AbstractTransform):
             [0.0, 0.0, 1.0]]
 
         for p in points:
-            transformVec3(matrix, p)
-            p.x = p.x + Decimal(self.radius)
+            transformVec3f(matrix, p)
+            p.x = p.x + (self.radius)
         for v in vectors:
-            transformVec3(matrix, v)
+            transformVec3f(matrix, v)
 
         self.Swap(points[0], points[1])
         self.Swap(vectors[0], vectors[1])
@@ -384,10 +393,10 @@ class LeftTrackTransform(AbstractTransform):
             [0.0, 0.0, 1.0]]
 
         for p in points:
-            transformVec3(matrix, p)
-            p.x = p.x + Decimal(-self.radius)
+            transformVec3f(matrix, p)
+            p.x = p.x + (-self.radius)
         for v in vectors:
-            transformVec3(matrix, v)
+            transformVec3f(matrix, v)
 
 
 
@@ -411,25 +420,25 @@ class BasePointTransform(AbstractTransform):
         cos_b = cos(self.beta)
 
         # Matrices for 3D transformations 
-        matrix_x =[\
+        matrix_gradient =[\
             [1,0,0], \
             [0, cos_b, -sin_b], \
             [0, sin_b, cos_b]]
 
-        matrix_z =[\
+        matrix_angle =[\
             [cos_a,-sin_a,0], \
             [sin_a, cos_a, 0], \
             [0, 0, 1]]
 
         for p in points:
-            transformVec3(matrix_x, p)
-            transformVec3(matrix_z, p)
+            transformVec3(matrix_angle, p)
+            transformVec3(matrix_gradient, p)
             p.x = p.x + self.point.x
             p.y = p.y + self.point.y
             p.z = p.z + self.point.z
         for v in vectors:
-            transformVec3(matrix_x, v)
-            transformVec3(matrix_z, v)
+            transformVec3(matrix_angle, v)
+            transformVec3(matrix_gradient, v)
 
     def TransformF(self, points, vectors):
         sin_a = sin(self.alpha)
@@ -439,41 +448,66 @@ class BasePointTransform(AbstractTransform):
 
         # Matrices for 3D transformations 
 
-        matrix_x =[\
+        matrix_gradient =[\
             [1,0,0], \
             [0, cos_b, -sin_b], \
             [0, sin_b, cos_b]]
 
-        matrix_z =[\
+        matrix_angle =[\
             [cos_a,-sin_a,0], \
             [sin_a, cos_a, 0], \
             [0, 0, 1]]
-
+        
+        matrix_all = [\
+                      [cos_a, sin_a,0],\
+                      [cos_b*-sin_a, cos_b*cos_a, -sin_b],\
+                      [sin_b*-sin_a, sin_b*cos_a, cos_b]]
+        
         for p in points:
-            transformVec3f(matrix_x, p)
-            transformVec3f(matrix_z, p)
+            transformVec3by2matrices(matrix_gradient,matrix_angle,p)
+            #transformVec3f(matrix_all, p)
             p.x = p.x + float(self.point.x)
             p.y = p.y + float(self.point.y)
             p.z = p.z + float(self.point.z)
-        for v in vectors:
-            transformVec3f(matrix_x, v)
-            transformVec3f(matrix_z, v)
-
-        pointsD = [Vec3(), Vec3()]
-        i = 0
-        for p in points:
-            pointsD[i] = Vec3(Decimal(points[i].x), Decimal(points[i].y), Decimal(points[i].z))
-            #p.x = Decimal(points[i].x)
-            i = i+1
         
-        vectorsD = [Vec3(), Vec3()]
-        i = 0   
         for v in vectors:
-            vectors[i] = Vec3(Decimal(v.x), Decimal(v.y), Decimal(v.z))
-            i = i+1
-        
-        return pointsD[0], vectorsD[0], vectorsD[1], pointsD[1]
+            transformVec3by2matrices(matrix_gradient,matrix_angle,v)
+            #transformVec3f(matrix_gradient, v)
+            #transformVec3(matrix_angle, v)
 
+def convertVec3ftoVec3(listVec3f):
+    
+    listVec3 = []
+    
+    for v in listVec3f:
+        listVec3.append(Vec3(Decimal(v.x), Decimal(v.y), Decimal(v.z)))
+        
+    return listVec3
+
+def transformVec3by2matrices(m1, m2, vec):
+    """
+    Transform Vec3 by multiplaying by matrices m1 and next m2
+    """
+    
+    #Convert vec3 to vec3f
+    
+    vec_f = Vec3f(float(vec.x), float(vec.y), float(vec.z))
+    
+    #rotating by matrix m1
+    
+    transformVec3f(m1, vec_f)
+    
+    #rotating by matrix m2
+    
+    transformVec3f(m2, vec_f)
+    
+    #Convert vec3f to vec3
+    
+    vec.x = (vec_f.x)
+    vec.y = (vec_f.y)
+    vec.z = (vec_f.z)
+    
+        
 def transformVec3(m, vec3):
     """
     Transforms Vec3 using matrix 3x3
@@ -495,7 +529,7 @@ def transformVec3f(m, vec):
     vec.x = (m[0][0] * x + m[0][1] * y + m[0][2] * z)
     vec.y = (m[1][0] * x + m[1][1] * y + m[1][2] * z)
     vec.z = (m[2][0] * x + m[2][1] * y + m[2][2] * z)
-
+    pass
 
 def transformVec3_4(m, vec3):
     """
