@@ -16,7 +16,7 @@ Vec3 Vec3::normalized()
     double y(_y);
     double z(_z);
 
-    return Vec3(Decimal(x / len), Decimal(y / len), Decimal(z / len));
+    return Vec3(Decimal(float(x / len)), Decimal(float(y / len)), Decimal(float(z / len)));
 };
 
 float Vec3::angleToJUnit() const
@@ -25,9 +25,9 @@ float Vec3::angleToJUnit() const
     double theta = div <= -1.0 ? double(M_PI) : acos(div);
 
     if(double(_x) < -0.0)
-        return 2 * double(M_PI) - theta;
+        return float(2 * double(M_PI) - theta);
 
-    return theta;
+    return (float)theta;
 };
 
 std::string Vec3::__repr__() const

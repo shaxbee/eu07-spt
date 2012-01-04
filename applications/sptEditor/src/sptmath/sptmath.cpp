@@ -8,7 +8,7 @@ namespace
 
 float dotProduct(const Vec3& left, const Vec3& right)
 {
-    return left.dotProduct(right);
+    return (float)left.dotProduct(right);
 };
 
 struct DecimalPickle: boost::python::pickle_suite
@@ -42,6 +42,7 @@ BOOST_PYTHON_MODULE(_sptmath)
     class_<Decimal>("Decimal", init<std::string>())
         .def(init<>())
         .def(init<float>())
+		//.def(init<boost::int64_t>())
 
         .def_pickle(DecimalPickle())
 
@@ -71,7 +72,8 @@ BOOST_PYTHON_MODULE(_sptmath)
     class_<Vec3>("Vec3", init<>())
         .def(init<const std::string&, const std::string&, const std::string&>())
         .def(init<const Decimal&, const Decimal&, const Decimal&>())
-        .def(init<const boost::int64_t, const boost::int64_t, const boost::int64_t>())
+        //.def(init<const boost::int64_t, const boost::int64_t, const boost::int64_t>())
+		.def(init<const float, const float, const float>())
         .def(init<const Vec3&>())
 
         .def_pickle(Vec3Pickle())

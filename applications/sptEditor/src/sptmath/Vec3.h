@@ -13,7 +13,8 @@ public:
     Vec3(const Vec3& other): _x(other.getX()), _y(other.getY()), _z(other.getZ()) { };
     Vec3(const std::string& x, const std::string& y, const std::string& z): _x(x), _y(y), _z(z) { };
     Vec3(const Decimal& x, const Decimal& y, const Decimal& z): _x(x), _y(y), _z(z) { };
-    Vec3(const boost::int64_t x, const boost::int64_t y, const boost::int64_t z): _x(x), _y(y), _z(z) { };
+    Vec3(const boost::int64_t x, const boost::int64_t y, const boost::int64_t z): _x((float)x), _y((float)y), _z((float)z) { };
+	Vec3(const float x, const float y, const float z): _x(x), _y(y), _z(z) { };
 
     Vec3 operator+(const Vec3& other) const
     {
@@ -46,7 +47,7 @@ public:
 
     Vec3 scaled(double value)
     {
-        return scale_dec(Decimal(value));
+        return scale_dec(Decimal((float)value));
     };
 
     Decimal getX() const { return _x; }
