@@ -61,7 +61,6 @@ class TrackFactoryTest(unittest.TestCase):
         tf = ui.trackfc.TrackFactory()
         
         strack = tf.CreateStraightOnStation(58.651, basePoint)
-        
         testedPoint = Vec3(48.032, 33.633, 1.290)
         
         self.assertEquals(testedPoint,strack.p2)       
@@ -72,7 +71,6 @@ class TrackFactoryTest(unittest.TestCase):
         
         basePoint = ui.editor.BasePoint()
         
-        #basePoint.SetPosition(Vec3(Decimal("-10.293"), Decimal("106.952"), Decimal("0")))
         basePoint.SetPosition(Vec3())
         basePoint.SetAlpha(15)
         basePoint.SetGradient(22)
@@ -81,7 +79,7 @@ class TrackFactoryTest(unittest.TestCase):
         
         track = tf.CreateHorizontalArc(math.radians(55), 300, False, basePoint)
         
-        testedPoint = Vec3(187.172, 204.262, 6.336)
+        testedPoint = Vec3(229.813, 192.836, 6.336)
         testedVec = Vec3(-91.977, -33.477, -2.153)
         self.assertEquals(testedPoint,basePoint.point)
         self.assertEquals(testedVec, track.v2)
@@ -89,7 +87,7 @@ class TrackFactoryTest(unittest.TestCase):
         alfa = math.ceil(math.degrees(math.atan(track.v2[0]/track.v2[1]))*100)/100
         
         
-        self.assertEquals(55,alfa)
+        self.assertEquals(70,alfa)
 
 
 

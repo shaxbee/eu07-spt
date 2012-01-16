@@ -38,11 +38,11 @@ class TrackFactory:
     
     def CreateStraight(self, length, basePoint):
         
-        p2 = Vec3f(0, length, 0)
+        p2 = Vec3f(0, length, length * basePoint.gradient / 1000.0)
         p1 = Vec3f()
 
         tr = BasePointTransform(basePoint)
-        tr.TransformF([p1, p2], [])
+        tr.RotateByAngle([p1, p2], [])
 
         v1 = Vec3f()
         v2 = Vec3f()
@@ -80,41 +80,47 @@ class TrackFactory:
     
     def CreateHorizontalArc(self, angle, radius, isLeft, basePoint):
         """
-        Creates curve track
+        Creates curve track / helisa
         """
+        
+        length = radius * angle
         #angle = length / radius
-        length = angle * radius
+        if isLeft:
+            angle = -angle
+        
         half = 0.5 * angle
-        sin_a = sin(half)
-        cos_a = cos(half)
+        sin_a = sin(angle)
+        cos_a = cos(angle)
+        sin_h = sin(half)
+        cos_h = cos(half)
 
+        
         p1 = Vec3f()
         p2 = Vec3f()
         v1 = Vec3f()
         v2 = Vec3f()
 
-        p1.x = (-radius * cos_a)
-        p1.y = (radius * sin_a)
-        p2.x = (-radius * cos_a)
-        p2.y = (-radius * sin_a)
+        p2.x = (radius * cos_a)
+        p2.y = (radius * sin_a)
 
-        ctrlX = -radius * (4.0 - cos_a) / 3.0
-        ctrlY = -radius * (1.0 - cos_a) * (cos_a - 3.0) / (3.0 * sin_a)
-
-        v1.x = (ctrlX) - p1.x
-        v1.y = (ctrlY) - p1.y
-        v2.x = (ctrlX) - p2.x
-        v2.y = (-ctrlY) - p2.y
-
-        # Left or right
-        tr = LeftTrackTransform(length, radius) if isLeft \
-            else RightTrackTransform(length, radius)
-        tr.Transform([p1, p2], [v1, v2])
+        ctrl = 4.0 / 3.0 * radius * tan(angle * 0.25)
+        #ctrlX = -radius * (4.0 - cos_h) / 3.0
+        #ctrlY = -radius * (1.0 - cos_h) * (cos_h - 3.0) / (3.0 * sin_h)
+        #ctrl_length = math.sqrt(math.pow(ctrlX,2) + math.pow(ctrlY,2))
+        
+        v1.x = p1.x
+        v1.y = ctrl
+        v2.x = -ctrl * sin_a
+        v2.y = -ctrl * cos_a
+        
+        p2.z = length * basePoint.gradient / 1000.0
+        v1.z = ctrl * basePoint.gradient / 1000.0
+        v2.z = ctrl * -basePoint.gradient / 1000.0
 
         #basePoint = self.editor.basePoint
 
         tr = BasePointTransform(basePoint)
-        tr.TransformF([p1, p2], [v1, v2])
+        tr.RotateByAngle([p1, p2], [v1, v2])
         
         [p1, p2, v1, v2] = convertVec3ftoVec3([p1, p2, v1, v2])
         
@@ -474,13 +480,39 @@ class BasePointTransform(AbstractTransform):
             transformVec3by2matrices(matrix_gradient,matrix_angle,v)
             #transformVec3f(matrix_gradient, v)
             #transformVec3(matrix_angle, v)
+    
+    
+    def RotateByAngle(self, points, vectors):
+        """
+        Rotate give'd points and vectors by angle of basepoint.
+        Move give'd points to point of basepoint.
+        """
+        
+        sin_a = sin(self.alpha)
+        cos_a = cos(self.alpha)
+
+        # Matrices for 3D transformations 
+
+        matrix_angle =[\
+            [cos_a,-sin_a,0], \
+            [sin_a, cos_a, 0], \
+            [0, 0, 1]]
+        
+        for p in points:
+            transformVec3f(matrix_angle,p)
+            p.x = p.x + float(self.point.x)
+            p.y = p.y + float(self.point.y)
+            p.z = p.z + float(self.point.z)
+        
+        for v in vectors:
+            transformVec3f(matrix_angle,v)
 
 def convertVec3ftoVec3(listVec3f):
     
     listVec3 = []
     
     for v in listVec3f:
-        listVec3.append(Vec3(Decimal(v.x), Decimal(v.y), Decimal(v.z)))
+        listVec3.append(Vec3(v.x, v.y, v.z))
         
     return listVec3
 
@@ -491,7 +523,7 @@ def transformVec3by2matrices(m1, m2, vec):
     
     #Convert vec3 to vec3f
     
-    vec_f = Vec3f(float(vec.x), float(vec.y), float(vec.z))
+    vec_f = Vec3f(vec.x.__float__(), vec.y.__float__(), vec.z.__float__())
     
     #rotating by matrix m1
     
@@ -526,10 +558,9 @@ def transformVec3f(m, vec):
     """
     x, y, z = float(vec.x), float(vec.y), float(vec.z)
 
-    vec.x = (m[0][0] * x + m[0][1] * y + m[0][2] * z)
-    vec.y = (m[1][0] * x + m[1][1] * y + m[1][2] * z)
-    vec.z = (m[2][0] * x + m[2][1] * y + m[2][2] * z)
-    pass
+    vec.x = m[0][0] * x + m[0][1] * y + m[0][2] * z
+    vec.y = m[1][0] * x + m[1][1] * y + m[1][2] * z
+    vec.z = m[2][0] * x + m[2][1] * y + m[2][2] * z
 
 def transformVec3_4(m, vec3):
     """
