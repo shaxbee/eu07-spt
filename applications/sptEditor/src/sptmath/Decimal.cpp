@@ -24,7 +24,7 @@ Decimal::Decimal(const string& value, uint8_t precision)
         if(separator != string::npos)
         {
             string fract_str = value.substr(separator + 1);
-            float fractional = lexical_cast<float>(fract_str) * pow(float(10), int(-(fract_str.size()) + precision));
+            float fractional = lexical_cast<float>(fract_str) * pow(float(10), int(precision - fract_str.size()));
             _value = decimal * _base + int64_t(floor(fractional+0.5));
         }
         else
