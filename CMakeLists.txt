@@ -21,14 +21,13 @@ IF(WIN32)
     include_directories(SYSTEM ${SPT_DEP_DIR}/include)
     link_directories(${SPT_DEP_DIR}/lib)
     set(BOOST_ROOT ${SPT_DEP_DIR})
-    
     set(CMAKE_PREFIX_PATH ${SPT_DEP_DIR})
     
     #disable MSVC safety warning triggered in boost
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996")
 ENDIF(WIN32)
 
-find_package(Boost 1.42.0 REQUIRED)
+find_package(Boost 1.42.0 REQUIRED python)
 find_package(OpenSceneGraph 2.8.3 REQUIRED osgDB osgUtil osgViewer)
 find_package(PythonLibs 2.7 REQUIRED)
 
