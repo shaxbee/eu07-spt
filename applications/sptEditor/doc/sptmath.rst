@@ -16,6 +16,10 @@ Create Vec3:
     Decimal('-5.000')
     >>> Decimal('0')
     Decimal('0.000')
+    >>> Decimal(-4.3344)
+    Decimal('-4.334')
+    >>> Decimal(-4.3345)
+    Decimal('-4.335')
 
 Copy it:
     >>> import copy

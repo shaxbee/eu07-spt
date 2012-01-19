@@ -162,7 +162,7 @@ class TrackTool(wx.Panel):
         
         
         self.Bind(wx.EVT_RADIOBOX, self.ChangedDirectionOfTrack)
-        
+        self._tool_panel = None
 
         self.tools = {
                       ID_TRACK_TOOL_STRAIGHT: self.LoadStraightTrackPalette
@@ -173,15 +173,36 @@ class TrackTool(wx.Panel):
         self.SetSizer(s)
         
         self._rb.SetSelection(1)
+        self.ChangedDirectionOfTrack(None)
        
     def ChangedDirectionOfTrack(self, event):
+        """
+        Function that is called within tool selected radio buttons in menu.
+        It bind id of button with appriopriate Tools panel to load.
+        Bind is stored in tools variable
+        """
+        
+        if self._tool_panel != None:
+            self.UnloadToolPanel()
         
         try:
-            self.GetSizer().Add(self.tools[self._rb.GetSelection()]())
+            self._tool_panel = self.GetSizer().Add(self.tools[self._rb.GetSelection()]())
         except KeyError:   
             pass 
         self.Layout()
         
+    def UnloadToolPanel(self):
+        """
+        Remove tools panel from sizer and then destroy him
+        """
+        
+        if self.GetSizer().Remove(self._tool_panel):
+            #self._tool_panel.Destroy()
+            self._tool_panel = None
+            
+            #Refresh
+            self.Layout()
+    
     def LoadStraightTrackPalette(self):
             
         '''
@@ -230,6 +251,70 @@ class TrackTool(wx.Panel):
         
         #self.GetSizer().Add(sizer_slider,0,wx.EXPAND)
         return sizer_slider
+
+
+class TrackToolStraight(wx.Panel):
+    def __init__(self, parent, id = wx.ID_ANY):
+        wx.Panel.__init__(self, parent, id)
+        
+        
+        s = wx.BoxSizer(wx.VERTICAL)
+        '''
+        Km slider
+        '''
+        
+        sizer_slider = wx.FlexGridSizer(1,2,5,5)
+        #sizer_slider_km = wx.BoxSizer(wx.HORIZONTAL)
+        sl_km = wx.Slider(self,wx.ID_ANY,0,0,10, size=(200,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
+        sl_km.SetTickFreq(1)
+        l_km = wx.StaticText(self,wx.ID_ANY,"Km")
+        
+        #sizer_slider_km.Add(l_km,0,wx.SHAPED, wx.RIGHT)
+        #sizer_slider_km.Add(sl_km,1,wx.SHAPED)
+        
+        sizer_slider.Add(l_km,0, wx.SHAPED, wx.ALIGN_CENTER)
+        sizer_slider.Add(sl_km,1, wx.SHAPED, wx.ALIGN_CENTER)
+        
+        '''
+        100 m slider
+        '''
+        
+        #sizer_slider_100m = wx.BoxSizer(wx.HORIZONTAL)
+        sl_100m = wx.Slider(self,wx.ID_ANY,0,0,10, size=(200,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
+        sl_100m.SetTickFreq(1)
+        l_100m = wx.StaticText(self,wx.ID_ANY,"100m")
+        
+        #sizer_slider_100m.Add(l_100m,0,wx.SHAPED, wx.ALIGN_CENTER_VERTICAL)
+        #sizer_slider_100m.Add(sl_100m,1,wx.SHAPED)
+        
+        sizer_slider.Add(l_100m,0, wx.SHAPED, wx.ALIGN_CENTER)
+        sizer_slider.Add(sl_100m,1, wx.SHAPED, wx.ALIGN_CENTER)
+        '''
+        1 [m]
+        '''
+        
+        #sizer_slider_1m = wx.BoxSizer(wx.HORIZONTAL)
+        sl_1m = wx.Slider(self,wx.ID_ANY,0,0,100, size=(200,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
+        sl_1m.SetTickFreq(5)
+        l_1m = wx.StaticText(self,wx.ID_ANY,"1m")
+        
+        #sizer_slider_1m.Add(l_1m,0,wx.SHAPED, wx.ALIGN_CENTER_VERTICAL)
+        #sizer_slider_1m.Add(sl_1m,1,wx.SHAPED)
+        sizer_slider.Add(l_1m,0, wx.SHAPED, wx.ALIGN_CENTER)
+        sizer_slider.Add(sl_1m,1, wx.SHAPED, wx.ALIGN_CENTER)
+
+
+        s.Add(sizer_slider)
+        self.SetSizer()
+
+
+
+
+
+
+
+
+
         
 class TrackPalette(wx.ScrolledWindow):
     """

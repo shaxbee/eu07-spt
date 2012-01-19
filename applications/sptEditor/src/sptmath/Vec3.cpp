@@ -16,18 +16,18 @@ Vec3 Vec3::normalized()
     double y(_y);
     double z(_z);
 
-    return Vec3(Decimal(float(x / len)), Decimal(float(y / len)), Decimal(float(z / len)));
+    return Vec3(x / len, y / len, z / len);
 };
 
-float Vec3::angleToJUnit() const
+double Vec3::angleToJUnit() const
 {
     double div = double(_y) / length();
     double theta = div <= -1.0 ? double(M_PI) : acos(div);
 
     if(double(_x) < -0.0)
-        return float(2 * double(M_PI) - theta);
+        return 2 * double(M_PI) - theta;
 
-    return (float)theta;
+    return theta;
 };
 
 std::string Vec3::__repr__() const

@@ -11,30 +11,19 @@ class Decimal
 public:
     static const boost::uint8_t DEFAULT_PRECISION = 3;
 
-    Decimal(): _value(0), _base(boost::int32_t(std::pow(float(10), DEFAULT_PRECISION))) { };
+    Decimal(): _value(0), _base(boost::int32_t(std::pow(10.0, DEFAULT_PRECISION))) { };
     Decimal(const Decimal& other): _value(other._value), _base(other._base) { };
     explicit Decimal(const std::string& value, boost::uint8_t precision = DEFAULT_PRECISION);
-    explicit Decimal(float value, boost::uint8_t precision = DEFAULT_PRECISION)
+    explicit Decimal(double value, boost::uint8_t precision = DEFAULT_PRECISION)
     {
-		_base = boost::int32_t(std::pow(float(10), precision));
-		boost::int32_t ceiling_base = boost::int32_t(std::pow(float(10), precision+1));
+		_base = boost::int32_t(std::pow(10.0, precision));
+		boost::int32_t ceiling_base = boost::int32_t(std::pow(10.0, precision+1));
 		boost::int64_t ceiling_value = boost::int64_t(value * ceiling_base);
 		_value = boost::int64_t(value * _base) + boost::int64_t((value >= 0 && (ceiling_value % 10 >= 5)) ? 1 : 0)
 			- boost::int64_t((value < 0 && (ceiling_value % 10 <= -5)) ? 1 : 0);
     };
-	//explicit Decimal(boost::int64_t value, boost::uint8_t precision = DEFAULT_PRECISION)
-	//{
-	//	_base = boost::int32_t(std::pow(float(10), precision+1));
-	//	_value = value;
-	//};
-	//explicit Decimal(double value, boost::uint8_t precision = DEFAULT_PRECISION)
-	//{
-	//	_base = boost::int32_t(std::pow(float(10), precision+1));
-	//	_value = boost::int64_t(value * _base);
-	//};
 
-
-	//explicit Decimal(boost::int64_t value, boost::int32_t base): _value(value), _base(base) { };
+	explicit Decimal(boost::int64_t value, boost::int32_t base = 1000): _value(value), _base(base) { };
 
     Decimal operator+(const Decimal& other) const
     {
@@ -117,7 +106,7 @@ public:
     boost::int64_t to_floor() const { return (_value / _base) - ((_value < 0 && (_value % _base != 0)) ? 1 : 0); }
     boost::int64_t to_ceiling() const { return (_value / _base) + ((_value % _base != 0) && (_value > 0) ? 1 : 0); }
 
-	boost::uint8_t precision() const { return boost::uint8_t(std::log10(float(_base))); }
+	boost::uint8_t precision() const { return boost::uint8_t(std::log10((float)_base)); }
     boost::uint32_t base() const { return _base; }
     boost::int64_t raw() const { return _value; }
 
@@ -128,7 +117,6 @@ public:
 private:
     boost::int64_t _value;
     boost::uint32_t _base;
-	Decimal(boost::int64_t value, boost::int32_t base): _value(value), _base(base) { };
 }; // class Decimal
 
 #endif // header guard
