@@ -6,7 +6,7 @@
 namespace
 {
 
-float dotProduct(const Vec3& left, const Vec3& right)
+double dotProduct(const Vec3& left, const Vec3& right)
 {
     return left.dotProduct(right);
 };
@@ -29,7 +29,11 @@ struct Vec3Pickle: boost::python::pickle_suite
 
 };
 
+#ifdef NDEBUG
 BOOST_PYTHON_MODULE(_sptmath)
+#else
+BOOST_PYTHON_MODULE(_sptmathd)
+#endif
 {
     using namespace boost::python;
 
@@ -71,7 +75,7 @@ BOOST_PYTHON_MODULE(_sptmath)
     class_<Vec3>("Vec3", init<>())
         .def(init<const std::string&, const std::string&, const std::string&>())
         .def(init<const Decimal&, const Decimal&, const Decimal&>())
-        .def(init<const boost::int64_t, const boost::int64_t, const boost::int64_t>())
+//        .def(init<const boost::int64_t, const boost::int64_t, const boost::int64_t>())
         .def(init<const Vec3&>())
 
         .def_pickle(Vec3Pickle())

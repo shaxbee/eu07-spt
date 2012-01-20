@@ -19,7 +19,7 @@ Vec3 Vec3::normalized()
     return Vec3(Decimal(x / len), Decimal(y / len), Decimal(z / len));
 };
 
-float Vec3::angleToJUnit() const
+double Vec3::angleToJUnit() const
 {
     double div = double(_y) / length();
     double theta = div <= -1.0 ? double(M_PI) : acos(div);
