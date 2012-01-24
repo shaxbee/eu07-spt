@@ -5,7 +5,7 @@ endif(WIN32)
 include_directories(${PYTHON_INCLUDE_PATH})
 
 macro(python_module TRGTNAME)
-    add_library(${TRGTNAME} SHARED ${PYTHON_MODULE_SRC})
+    add_library(${TRGTNAME} SHARED ${PYTHON_MODULE_SRC} ${PYTHON_MODULE_HEADERS})
     link_internal(${TRGTNAME} ${PYTHON_MODULE_LIBS})
     target_link_libraries(${TRGTNAME} ${Boost_PYTHON_LIBRARY} ${PYTHON_LIBRARIES})
     
