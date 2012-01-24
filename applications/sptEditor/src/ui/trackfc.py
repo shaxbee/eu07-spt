@@ -120,6 +120,7 @@ class TrackFactory:
         """
         Creates curve track
         """
+        
         length = radius * angle
         half = 0.5 * angle
         sin_a = sin(half)
@@ -133,7 +134,7 @@ class TrackFactory:
 
         v1 = Vec3f(ctrlX - p1.x, ctrlY - p1.y, (0))
         v2 = Vec3f(ctrlX - p2.x, -ctrlY - p2.y, (0))
-
+        
         # Left or right
         tr = LeftTrackTransform(length, radius) if isLeft \
             else RightTrackTransform(length, radius)
@@ -144,7 +145,7 @@ class TrackFactory:
         tr = BasePointTransform(basePoint)
         tr.TransformF([p1, p2], [v1, v2])
         
-        #[p1, p2, v1, v2] = convertVec3ftoVec3([p1, p2, v1, v2])
+        [p1, p2, v1, v2] = convertVec3ftoVec3([p1, p2, v1, v2])
         
         basePoint.point = p2
         if isLeft:

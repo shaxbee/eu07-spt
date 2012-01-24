@@ -194,16 +194,20 @@ class TrackTool(wx.Panel):
         s.Add(sb,0,wx.EXPAND, wx.ALIGN_CENTER)
         
     def AddElement(self, event):
-        print "Adding element"
+        """
+        Adding new element
+        """
+        
         if self._rb.GetSelection() == 1 :
             tf = ui.trackfc.TrackFactory()
             editor = self.TopLevelParent.editor
             track = tf.CreateStraight(100, editor.basePoint)
-            #rail = tf.CopyRailTracking(template, self.point)
-            #rail.name = name
 
-            editor.scenery.AddRailTracking(track)
-        pass
+        #adding newly created track to scenery
+        editor.scenery.AddRailTracking(track)
+            
+        #setting up new position of basepoint
+        editor.SetBasePoint(editor.basePoint)
     
     def ChangedDirectionOfTrack(self, event):
         """
