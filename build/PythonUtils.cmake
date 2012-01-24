@@ -2,17 +2,10 @@ if(WIN32)
     set(Boost_USE_STATIC_LIBS OFF)
 endif(WIN32)
 
-if(NOT UNIX)
-    find_package(Boost 1.40.0 REQUIRED COMPONENTS Python)
-else(NOT UNIX)
-    set(Boost_PYTHON_LIBRARY boost_python)
-endif(NOT UNIX)
-
-find_package(PythonLibs 2.7 REQUIRED)
 include_directories(${PYTHON_INCLUDE_PATH})
 
 macro(python_module TRGTNAME)
-    add_library(${TRGTNAME} SHARED ${PYTHON_MODULE_SRC})
+    add_library(${TRGTNAME} SHARED ${PYTHON_MODULE_SRC} ${PYTHON_MODULE_HEADERS})
     link_internal(${TRGTNAME} ${PYTHON_MODULE_LIBS})
     target_link_libraries(${TRGTNAME} ${Boost_PYTHON_LIBRARY} ${PYTHON_LIBRARIES})
     

@@ -45,6 +45,8 @@ public:
         return Decimal(temp / _base, _base);
     };
 
+	Decimal operator*(double other) const;
+
     Decimal operator/(const Decimal& other) const
     {
         return Decimal((_value * _base) / other._value, _base);
@@ -57,7 +59,8 @@ public:
 
     boost::int32_t compareTo(const Decimal& other) const
     {
-        return boost::int32_t(_value - other._value);
+		boost::int64_t diff = _value - other._value;
+        return diff < 0 ? -1 : (diff > 0 ? 1 : 0);
     }
 
     boost::int32_t hash() const
@@ -82,11 +85,6 @@ public:
         _value *= _base;
         _value /= other._value;
         return *this;
-    };
-
-    operator float() const
-    {
-        return float(_value / _base) + (float(_value % _base) / _base);
     };
 
     operator double() const

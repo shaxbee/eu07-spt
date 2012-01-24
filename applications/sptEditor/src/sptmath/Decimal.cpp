@@ -72,6 +72,22 @@ Decimal::Decimal(double value, boost::uint8_t precision):
 		iround(abs(fractional) + tweaker) * sign(value); // fractional part, rounded symmetrically
 };
 
+Decimal Decimal::operator*(double other) const
+{
+	double integral = double(_value / _base) * other;
+	double remainder = integral - floor(integral);
+	integral -= remainder;
+
+	double fractional = double((_value % _base)) * other + remainder * _base;
+	const double tweaker = 0.005; // tweaker use to overcome floating number approximation issues
+
+	int64_t value = 
+		int64_t(integral) * _base + // integral part
+		iround(abs(fractional) + tweaker) * sign(value);
+
+	return Decimal(value, _base);
+};
+
 std::string Decimal::__repr__() const
 {
     return str(format("Decimal(\'%s\')") % __str__());
