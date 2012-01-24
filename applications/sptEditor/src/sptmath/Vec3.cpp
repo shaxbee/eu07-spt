@@ -16,7 +16,7 @@ Vec3 Vec3::normalized()
     double y(_y);
     double z(_z);
 
-    return Vec3(x / len, y / len, z / len);
+    return Vec3(Decimal(x / len), Decimal(y / len), Decimal(z / len));
 };
 
 double Vec3::angleToJUnit() const

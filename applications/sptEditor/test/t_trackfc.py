@@ -97,12 +97,12 @@ class TrackFactoryTest(unittest.TestCase):
         
         #basePoint.SetPosition(Vec3(Decimal("-10.293"), Decimal("106.952"), Decimal("0")))
         basePoint.SetPosition(Vec3())
-        basePoint.SetAlpha(15)
+        basePoint.SetAlpha(5)
         basePoint.SetGradient(22)
         
         tf = ui.trackfc.TrackFactory()
         
-        track = tf.CreateArcOnStation(math.radians(55), 300, False, basePoint)
+        track = tf.CreateArcOnStation(math.radians(55), 150000000, False, basePoint)
         
         testedPoint = Vec3(187.156, 204.205, 5.405)
         testedVec1 = Vec3(25.327, 94.521, 2.153)

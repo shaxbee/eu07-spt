@@ -304,7 +304,7 @@ class RailContainer:
                 # Add previous tracking to outline if it becomes outline now
                 if previous not in self.outline_trackings:
                     if isDebug:
-                       logger.debug("Adding previous tracking " + str(previous) \
+                        logger.debug("Adding previous tracking " + str(previous) \
                            + " to outlines")
 
                     self.outline_trackings.append(previous)

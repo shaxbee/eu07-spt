@@ -12,14 +12,9 @@ public:
     Vec3() { };
     Vec3(const Vec3& other): _x(other.getX()), _y(other.getY()), _z(other.getZ()) { };
     Vec3(const std::string& x, const std::string& y, const std::string& z): _x(x), _y(y), _z(z) { };
-    Vec3(const Decimal& x, const Decimal& y, const Decimal& z)
-	{
-		_x = x;
-		_y = y;
-		_z = z;
-	};
-    Vec3(const boost::int64_t x, const boost::int64_t y, const boost::int64_t z): _x(x), _y(y), _z(z) { };
-	Vec3(const double x, const double y, const double z): _x(x), _y(y), _z(z) { };
+    Vec3(const Decimal& x, const Decimal& y, const Decimal& z): _x(x), _y(y), _z(z) { };
+	Vec3(const double& x, const double& y, const double& z): _x(x), _y(y), _z(z) { };
+//    Vec3(const boost::int64_t x, const boost::int64_t y, const boost::int64_t z): _x(x), _y(y), _z(z) { };
 
     Vec3 operator+(const Vec3& other) const
     {

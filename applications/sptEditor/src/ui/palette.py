@@ -161,20 +161,50 @@ class TrackTool(wx.Panel):
                           )
         
         
-        self.Bind(wx.EVT_RADIOBOX, self.ChangedDirectionOfTrack)
-        self._tool_panel = None
+        #self.Bind(wx.EVT_RADIOBOX, self.ChangedDirectionOfTrack)
+        
+        #self._tool_panel = None
 
-        self.tools = {
-                      ID_TRACK_TOOL_STRAIGHT: self.LoadStraightTrackPalette
-                      }
+        #self.tools = {
+        #              #ID_TRACK_TOOL_STRAIGHT: self.LoadStraightTrackPalette
+        #              ID_TRACK_TOOL_STRAIGHT: TrackToolStraight
+        #              }
         
         s.Add(self._rb,0,wx.SHAPED, wx.ALIGN_CENTER)
         
         self.SetSizer(s)
         
+        #Default we check straight
         self._rb.SetSelection(1)
-        self.ChangedDirectionOfTrack(None)
-       
+        #self.ChangedDirectionOfTrack(None)
+        
+        #Adding button for apply and cancel
+        self._bOK = wx.Button(self, wx.ID_ANY, "Add")
+        self.Bind(wx.EVT_BUTTON, self.AddElement)
+        #self._bCancel = wx.Button(self, wx.ID_ANY, "Cancel")        
+        sb = wx.StdDialogButtonSizer()
+        
+        sb.AddButton(self._bOK)
+        #sb.AddButton(self._bCancel)
+        
+        sb.SetAffirmativeButton(self._bOK)
+        #sb.SetCancelButton(self._bCancel)
+        sb.Realize()
+        s.AddSpacer(8)
+        s.Add(sb,0,wx.EXPAND, wx.ALIGN_CENTER)
+        
+    def AddElement(self, event):
+        print "Adding element"
+        if self._rb.GetSelection() == 1 :
+            tf = ui.trackfc.TrackFactory()
+            editor = self.TopLevelParent.editor
+            track = tf.CreateStraight(100, editor.basePoint)
+            #rail = tf.CopyRailTracking(template, self.point)
+            #rail.name = name
+
+            editor.scenery.AddRailTracking(track)
+        pass
+    
     def ChangedDirectionOfTrack(self, event):
         """
         Function that is called within tool selected radio buttons in menu.
@@ -184,75 +214,33 @@ class TrackTool(wx.Panel):
         
         if self._tool_panel != None:
             self.UnloadToolPanel()
-        
+            
         try:
-            self._tool_panel = self.GetSizer().Add(self.tools[self._rb.GetSelection()]())
+            #self._tool_panel = self.GetSizer().Add(self.tools[self._rb.GetSelection()](self),0,wx.EXPAND).GetWindow()
+            self._tool_panel = self.GetSizer().Insert(1,self.tools[self._rb.GetSelection()](self),0,wx.EXPAND).GetWindow()
+            #self._tool_panel = self.GetSizer().Add(self.tools[self._rb.GetSelection()]()).GetSizer()
         except KeyError:   
             pass 
         self.Layout()
-        
+
     def UnloadToolPanel(self):
         """
         Remove tools panel from sizer and then destroy him
         """
         
         if self.GetSizer().Remove(self._tool_panel):
-            #self._tool_panel.Destroy()
+            self._tool_panel.Destroy()
             self._tool_panel = None
             
             #Refresh
             self.Layout()
+        
+    def HideToolPanel(self):
+        
+        self._tool_panel.Hide()
+        self.Layout()
+
     
-    def LoadStraightTrackPalette(self):
-            
-        '''
-        Km slider
-        '''
-        
-        sizer_slider = wx.FlexGridSizer(1,2,5,5)
-        #sizer_slider_km = wx.BoxSizer(wx.HORIZONTAL)
-        sl_km = wx.Slider(self,wx.ID_ANY,0,0,10, size=(200,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
-        sl_km.SetTickFreq(1)
-        l_km = wx.StaticText(self,wx.ID_ANY,"Km")
-        
-        #sizer_slider_km.Add(l_km,0,wx.SHAPED, wx.RIGHT)
-        #sizer_slider_km.Add(sl_km,1,wx.SHAPED)
-        
-        sizer_slider.Add(l_km,0, wx.SHAPED, wx.ALIGN_CENTER)
-        sizer_slider.Add(sl_km,1, wx.SHAPED, wx.ALIGN_CENTER)
-        
-        '''
-        100 m slider
-        '''
-        
-        #sizer_slider_100m = wx.BoxSizer(wx.HORIZONTAL)
-        sl_100m = wx.Slider(self,wx.ID_ANY,0,0,10, size=(200,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
-        sl_100m.SetTickFreq(1)
-        l_100m = wx.StaticText(self,wx.ID_ANY,"100m")
-        
-        #sizer_slider_100m.Add(l_100m,0,wx.SHAPED, wx.ALIGN_CENTER_VERTICAL)
-        #sizer_slider_100m.Add(sl_100m,1,wx.SHAPED)
-        
-        sizer_slider.Add(l_100m,0, wx.SHAPED, wx.ALIGN_CENTER)
-        sizer_slider.Add(sl_100m,1, wx.SHAPED, wx.ALIGN_CENTER)
-        '''
-        1 [m]
-        '''
-        
-        #sizer_slider_1m = wx.BoxSizer(wx.HORIZONTAL)
-        sl_1m = wx.Slider(self,wx.ID_ANY,0,0,100, size=(200,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
-        sl_1m.SetTickFreq(5)
-        l_1m = wx.StaticText(self,wx.ID_ANY,"1m")
-        
-        #sizer_slider_1m.Add(l_1m,0,wx.SHAPED, wx.ALIGN_CENTER_VERTICAL)
-        #sizer_slider_1m.Add(sl_1m,1,wx.SHAPED)
-        sizer_slider.Add(l_1m,0, wx.SHAPED, wx.ALIGN_CENTER)
-        sizer_slider.Add(sl_1m,1, wx.SHAPED, wx.ALIGN_CENTER)
-        
-        #self.GetSizer().Add(sizer_slider,0,wx.EXPAND)
-        return sizer_slider
-
-
 class TrackToolStraight(wx.Panel):
     def __init__(self, parent, id = wx.ID_ANY):
         wx.Panel.__init__(self, parent, id)
@@ -273,7 +261,7 @@ class TrackToolStraight(wx.Panel):
         #sizer_slider_km.Add(sl_km,1,wx.SHAPED)
         
         sizer_slider.Add(l_km,0, wx.SHAPED, wx.ALIGN_CENTER)
-        sizer_slider.Add(sl_km,1, wx.SHAPED, wx.ALIGN_CENTER)
+        sizer_slider.Add(sl_km,1, wx.EXPAND, wx.ALIGN_CENTER)
         
         '''
         100 m slider
@@ -288,7 +276,7 @@ class TrackToolStraight(wx.Panel):
         #sizer_slider_100m.Add(sl_100m,1,wx.SHAPED)
         
         sizer_slider.Add(l_100m,0, wx.SHAPED, wx.ALIGN_CENTER)
-        sizer_slider.Add(sl_100m,1, wx.SHAPED, wx.ALIGN_CENTER)
+        sizer_slider.Add(sl_100m,1, wx.EXPAND, wx.ALIGN_CENTER)
         '''
         1 [m]
         '''
@@ -301,11 +289,11 @@ class TrackToolStraight(wx.Panel):
         #sizer_slider_1m.Add(l_1m,0,wx.SHAPED, wx.ALIGN_CENTER_VERTICAL)
         #sizer_slider_1m.Add(sl_1m,1,wx.SHAPED)
         sizer_slider.Add(l_1m,0, wx.SHAPED, wx.ALIGN_CENTER)
-        sizer_slider.Add(sl_1m,1, wx.SHAPED, wx.ALIGN_CENTER)
+        sizer_slider.Add(sl_1m,1, wx.EXPAND, wx.ALIGN_CENTER)
 
 
-        s.Add(sizer_slider)
-        self.SetSizer()
+        s.Add(sizer_slider,1,wx.EXPAND)
+        self.SetSizer(s)
 
 
 
