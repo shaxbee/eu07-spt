@@ -46,7 +46,7 @@ public:
 
     Vec3 scaled(double value)
     {
-        return scale_dec(Decimal(value));
+        return Vec3(_x * value, _y * value, _z * value);
     };
 
     Decimal getX() const { return _x; }
