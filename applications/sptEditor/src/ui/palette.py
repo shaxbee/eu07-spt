@@ -12,6 +12,7 @@ import model.tracks
 import ui.dialog
 import ui.trackfc
 import sptyaml
+import math
 
 import ui.flatmenu as FM
 from wx.lib.agw.artmanager import ArtManager
@@ -19,15 +20,16 @@ from wx.lib.agw.artmanager import ArtManager
 from wx.lib.agw.fmresources import FM_OPT_SHOW_TOOLBAR, FM_OPT_MINIBAR, FM_OPT_IS_LCD
 
 from ui.uitools import ResizeBitmap #, FindItemById, SelectButton, DeselectButton 
+from sptmath import Vec3, dotProduct
 
 #from ui.toolbar import ID_INSERT_TRACK, ID_INSERT_CURVE, ID_INSERT_SWITCH
 
 #from Application import ID_TRACK_TOOL, ID_SWITCH_TOOL
 ID_TRACK_TOOL = 1
 ID_SWITCH_TOOL = 2
-ID_TRACK_TOOL_LEFT = 0
-ID_TRACK_TOOL_STRAIGHT = 1
-ID_TRACK_TOOL_RIGHT = 2
+ID_TRACK_PROPERTIES_GRADIENT = 0
+ID_TRACK_PROPERTIES_STRAIGHT = 1
+ID_TRACK_PROPERTIES_ARC = 2
 
 class ToolsPalette(wx.Panel):
     def __init__(self, parent, id=wx.ID_ANY):
@@ -112,24 +114,92 @@ class ToolsPalette(wx.Panel):
             self.Layout()
 
 
+class TrackTool(wx.Panel):
+    def __init__(self, parent, id = wx.ID_ANY):
+        wx.Panel.__init__(self, parent, id)
+
+        s = wx.BoxSizer(wx.VERTICAL)
+        
+        #Radio bos with direction selection
+        self._rb = wx.RadioBox(self,wx.ID_ANY,"Direction",style=wx.RA_SPECIFY_COLS,majorDimension=3, \
+                          choices=["Left","Straight","Right"], size=wx.Size(-1,50) \
+                          )
+        
+        s.Add(self._rb,0,wx.SHAPED, wx.ALIGN_CENTER)
+        
+        self.SetSizer(s)
+        
+        #Default we set straight track
+        self._rb.SetSelection(1)
+        
+        #Adding button for apply and cancel
+        self._bOK = wx.Button(self, wx.ID_ANY, "Add")
+        self.Bind(wx.EVT_BUTTON, self.AddElement)
+        sb = wx.StdDialogButtonSizer()
+        
+        sb.AddButton(self._bOK)
+        
+        sb.SetAffirmativeButton(self._bOK)
+        sb.Realize()
+        s.AddSpacer(8)
+        s.Add(sb,0,wx.EXPAND, wx.ALIGN_CENTER)
+        
+    def AddElement(self, event):
+        """
+        Adding new element
+        """
+        
+        if self._rb.GetSelection() == 1 :
+            tf = ui.trackfc.TrackFactory()
+            editor = self.TopLevelParent.editor
+            track = tf.CreateStraight(100.0, editor.basePoint)
+
+        #adding newly created track to scenery
+        editor.scenery.AddRailTracking(track)
+            
+        #setting up new position of basepoint
+        editor.SetBasePoint(editor.basePoint)
+        editor.SetSelection(track)
+
 
 class PropertiesPalette(wx.ScrolledWindow):
     """
     Base class for all properties palettes for tools
     """
-    def __init__(self, parent, id = wx.ID_ANY, w=200, h=400):
+    def __init__(self, parent, id = Application.ID_PROPERTIES_PALLETE, w=200, h=400):
         wx.ScrolledWindow.__init__(self, parent, id)
         self.SetSizer(wx.BoxSizer(wx.VERTICAL))
 
         self._panels = {
+                        ID_TRACK_PROPERTIES_STRAIGHT: TrackPropertiesStraight,
                         }    
 
+        self._properties_panel = None
+
+    def LoadToolPropertiesByType(self, object):
+        """
+        Loads properties by checking whatkind of track we have
+        """
+        #first, unload previous panels
+        if self._properties_panel != None:
+            self.UnloadToolProperties()
+        
+        #check if object is track
+        if isinstance(object, model.tracks.Track):
+
+            #check what kind of track object is
+            if object.v1 == Vec3() and object.v2 == Vec3():
+                try:
+                    self.LoadToolProperties(self._panels[ID_TRACK_PROPERTIES_STRAIGHT](self, object))
+                except KeyError:
+                    pass
+        
     def LoadToolProperties(self, panel):
         """
         Loaded properties panel under the menu.
         """
         
-        self._properties_panel = self.GetSizer().Add(panel(self),1,wx.EXPAND).GetWindow()
+        self._properties_panel = self.GetSizer().Add(panel,1,wx.EXPAND).GetWindow()
         
         #Refresh
         self.Layout()
@@ -146,164 +216,75 @@ class PropertiesPalette(wx.ScrolledWindow):
             #Refresh
             self.Layout()
         
-
-class TrackTool(wx.Panel):
-    def __init__(self, parent, id = wx.ID_ANY):
+    
+class TrackPropertiesStraight(wx.Panel):
+    def __init__(self, parent, track, id = wx.ID_ANY):
         wx.Panel.__init__(self, parent, id)
-
-        #self.searchTextCtrl = wx.TextCtrl(self, wx.ID_ANY)
-      
-        #wx.SpinCtrl(self)
+        
         s = wx.BoxSizer(wx.VERTICAL)
-        #s.Add(self._menu, 0, wx.EXPAND)
-        self._rb = wx.RadioBox(self,wx.ID_ANY,"Direction",style=wx.RA_SPECIFY_COLS,majorDimension=3, \
-                          choices=["Left","Straight","Right"], size=wx.Size(-1,50) \
-                          )
-        
-        
-        #self.Bind(wx.EVT_RADIOBOX, self.ChangedDirectionOfTrack)
-        
-        #self._tool_panel = None
-
-        #self.tools = {
-        #              #ID_TRACK_TOOL_STRAIGHT: self.LoadStraightTrackPalette
-        #              ID_TRACK_TOOL_STRAIGHT: TrackToolStraight
-        #              }
-        
-        s.Add(self._rb,0,wx.SHAPED, wx.ALIGN_CENTER)
-        
+        #making layout
+        self.MakeUI(s)
         self.SetSizer(s)
-        
-        #Default we check straight
-        self._rb.SetSelection(1)
-        #self.ChangedDirectionOfTrack(None)
-        
-        #Adding button for apply and cancel
-        self._bOK = wx.Button(self, wx.ID_ANY, "Add")
-        self.Bind(wx.EVT_BUTTON, self.AddElement)
-        #self._bCancel = wx.Button(self, wx.ID_ANY, "Cancel")        
-        sb = wx.StdDialogButtonSizer()
-        
-        sb.AddButton(self._bOK)
-        #sb.AddButton(self._bCancel)
-        
-        sb.SetAffirmativeButton(self._bOK)
-        #sb.SetCancelButton(self._bCancel)
-        sb.Realize()
-        s.AddSpacer(8)
-        s.Add(sb,0,wx.EXPAND, wx.ALIGN_CENTER)
-        
-    def AddElement(self, event):
-        """
-        Adding new element
-        """
-        
-        if self._rb.GetSelection() == 1 :
-            tf = ui.trackfc.TrackFactory()
-            editor = self.TopLevelParent.editor
-            track = tf.CreateStraight(100, editor.basePoint)
 
-        #adding newly created track to scenery
-        editor.scenery.AddRailTracking(track)
-            
-        #setting up new position of basepoint
-        editor.SetBasePoint(editor.basePoint)
-    
-    def ChangedDirectionOfTrack(self, event):
-        """
-        Function that is called within tool selected radio buttons in menu.
-        It bind id of button with appriopriate Tools panel to load.
-        Bind is stored in tools variable
-        """
+        #read lenght and angle of track
+        length = math.sqrt(dotProduct(track.p2, track.p2))
+        angle = math.degrees(math.atan2(float(track.p2.x - track.p1.x), float(track.p2.y - track.p1.y)))
         
-        if self._tool_panel != None:
-            self.UnloadToolPanel()
-            
-        try:
-            #self._tool_panel = self.GetSizer().Add(self.tools[self._rb.GetSelection()](self),0,wx.EXPAND).GetWindow()
-            self._tool_panel = self.GetSizer().Insert(1,self.tools[self._rb.GetSelection()](self),0,wx.EXPAND).GetWindow()
-            #self._tool_panel = self.GetSizer().Add(self.tools[self._rb.GetSelection()]()).GetSizer()
-        except KeyError:   
-            pass 
-        self.Layout()
+        main = length // 1000
+        rest = math.fmod(length, 1000)
+        self.sl_km.SetValue(main)
 
-    def UnloadToolPanel(self):
-        """
-        Remove tools panel from sizer and then destroy him
-        """
-        
-        if self.GetSizer().Remove(self._tool_panel):
-            self._tool_panel.Destroy()
-            self._tool_panel = None
-            
-            #Refresh
-            self.Layout()
-        
-    def HideToolPanel(self):
-        
-        self._tool_panel.Hide()
-        self.Layout()
+        main = rest // 100
+        rest = math.fmod(length, 100)
+        self.sl_100m.SetValue(main)
 
-    
-class TrackToolStraight(wx.Panel):
-    def __init__(self, parent, id = wx.ID_ANY):
-        wx.Panel.__init__(self, parent, id)
+        main = rest // 1
+        self.sl_1m.SetValue(main)
+
+
+
+    def MakeUI(self, s):
+        """
+        Function in wich we make some GUI for changing properties of straight track
+        """
         
-        
-        s = wx.BoxSizer(wx.VERTICAL)
         '''
         Km slider
         '''
         
         sizer_slider = wx.FlexGridSizer(1,2,5,5)
-        #sizer_slider_km = wx.BoxSizer(wx.HORIZONTAL)
-        sl_km = wx.Slider(self,wx.ID_ANY,0,0,10, size=(200,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
-        sl_km.SetTickFreq(1)
+        self.sl_km = wx.Slider(self,wx.ID_ANY,0,0,10, size=(200,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
+        self.sl_km.SetTickFreq(1)
         l_km = wx.StaticText(self,wx.ID_ANY,"Km")
         
-        #sizer_slider_km.Add(l_km,0,wx.SHAPED, wx.RIGHT)
-        #sizer_slider_km.Add(sl_km,1,wx.SHAPED)
-        
         sizer_slider.Add(l_km,0, wx.SHAPED, wx.ALIGN_CENTER)
-        sizer_slider.Add(sl_km,1, wx.EXPAND, wx.ALIGN_CENTER)
+        sizer_slider.Add(self.sl_km,1, wx.EXPAND, wx.ALIGN_CENTER)
         
         '''
         100 m slider
         '''
         
-        #sizer_slider_100m = wx.BoxSizer(wx.HORIZONTAL)
-        sl_100m = wx.Slider(self,wx.ID_ANY,0,0,10, size=(200,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
-        sl_100m.SetTickFreq(1)
+        self.sl_100m = wx.Slider(self,wx.ID_ANY,0,0,10, size=(200,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
+        self.sl_100m.SetTickFreq(1)
         l_100m = wx.StaticText(self,wx.ID_ANY,"100m")
         
-        #sizer_slider_100m.Add(l_100m,0,wx.SHAPED, wx.ALIGN_CENTER_VERTICAL)
-        #sizer_slider_100m.Add(sl_100m,1,wx.SHAPED)
         
         sizer_slider.Add(l_100m,0, wx.SHAPED, wx.ALIGN_CENTER)
-        sizer_slider.Add(sl_100m,1, wx.EXPAND, wx.ALIGN_CENTER)
+        sizer_slider.Add(self.sl_100m,1, wx.EXPAND, wx.ALIGN_CENTER)
+        
         '''
         1 [m]
         '''
         
-        #sizer_slider_1m = wx.BoxSizer(wx.HORIZONTAL)
-        sl_1m = wx.Slider(self,wx.ID_ANY,0,0,100, size=(200,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
-        sl_1m.SetTickFreq(5)
+        self.sl_1m = wx.Slider(self,wx.ID_ANY,0,0,100, size=(200,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
+        self.sl_1m.SetTickFreq(5)
         l_1m = wx.StaticText(self,wx.ID_ANY,"1m")
         
-        #sizer_slider_1m.Add(l_1m,0,wx.SHAPED, wx.ALIGN_CENTER_VERTICAL)
-        #sizer_slider_1m.Add(sl_1m,1,wx.SHAPED)
         sizer_slider.Add(l_1m,0, wx.SHAPED, wx.ALIGN_CENTER)
-        sizer_slider.Add(sl_1m,1, wx.EXPAND, wx.ALIGN_CENTER)
+        sizer_slider.Add(self.sl_1m,1, wx.EXPAND, wx.ALIGN_CENTER)
 
 
         s.Add(sizer_slider,1,wx.EXPAND)
-        self.SetSizer(s)
-
-
-
-
-
-
 
 
 

@@ -101,6 +101,8 @@ class SceneryEditor(wx.Panel):
         self.selection = selection
         self.parts[0].SetSelection(selection)
 
+        #load properties of selected object
+        self.TopLevelParent.propertiesPaletteFrame.LoadToolPropertiesByType(selection)
 
     def GetSelection(self):
         return self.selection

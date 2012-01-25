@@ -36,7 +36,7 @@ ID_EDITOR = wx.ID_HIGHEST             + 4
 ID_MAIN_FRAME = wx.ID_HIGHEST         + 5
 #ID_MODE_TRACK_NORMAL = wx.ID_HIGHEST  + 6
 #ID_MODE_TRACK_CLOSURE = wx.ID_HIGHEST + 7
-
+ID_PROPERTIES_PALLETE = wx.ID_HIGHEST + 8
 
 NAME_TRACK_PALETTE = "Tools palette"
 NAME_TRACTION_PALETTE = "Traction palette"
@@ -108,8 +108,9 @@ class MainWindow(wx.Frame):
 
 
         self.CreateStatusBar()
-        self.CreateContent()
         self.CreatePalette()
+        self.CreateContent()
+
         #self.RestorePerspective()
 
 
