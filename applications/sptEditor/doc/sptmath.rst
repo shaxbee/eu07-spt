@@ -5,7 +5,7 @@ First import necessary classes
 
 >>> from sptmath import Vec3, Decimal
 
-Create Vec3:
+Create Decimal:
     >>> Decimal('-4.434')
     Decimal('-4.434')
     >>> Vec3('3.343', '-4.434', '6.454')
@@ -16,8 +16,18 @@ Create Vec3:
     Decimal('-5.000')
     >>> Decimal('0')
     Decimal('0.000')
+    >>> Decimal(0.5)
+    Decimal('0.500')
 
-Copy it:
+Test Decimal operations:
+    >>> Decimal(0.5) * 0.5
+    Decimal('0.250')
+    >>> Decimal(0.5) * -0.5
+    Decimal('-0.250')
+    >>> Decimal(2) * 1.25
+    Decimal('2.500')
+
+Copy Vec3:
     >>> import copy
     >>> vec = Vec3('1.0', '-1.0', '0.0')
     >>> vec == copy.deepcopy(vec)
@@ -105,7 +115,7 @@ Scales the vector by scale s.
     >>> Vec3("1", "3", "0.5").scaled(2)
     (2.000,6.000,1.000)
     >>> Vec3("-4", "0.001", "-0.999").scaled(0.5)
-    (-2.000,0.001,-0.499)
+    (-2.000,0.001,-0.500)
     >>> Vec3("0", "7", "-3").scaled(-2)
     (0.000,-14.000,6.000)
     >>> Vec3("5", "0.45", "-0.002").scaled(0)
