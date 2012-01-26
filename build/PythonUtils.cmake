@@ -3,6 +3,7 @@ if(WIN32)
 endif(WIN32)
 
 include_directories(${PYTHON_INCLUDE_PATH})
+message(${PYTHON_INCLUDE_PATH})
 
 macro(python_module TRGTNAME)
     add_library(${TRGTNAME} SHARED ${PYTHON_MODULE_SRC} ${PYTHON_MODULE_HEADERS})

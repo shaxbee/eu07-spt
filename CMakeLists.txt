@@ -28,7 +28,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 find_package(Boost 1.42.0 REQUIRED python)
-find_package(OpenSceneGraph 2.8.3 REQUIRED osgDB osgUtil osgViewer)
+find_package(OpenSceneGraph 2.8.3 REQUIRED osg osgDB osgGA osgUtil osgViewer)
 find_package(PythonLibs 2.7 REQUIRED)
 
 add_subdirectory(src)
