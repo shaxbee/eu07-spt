@@ -29,10 +29,10 @@ struct Vec3Pickle: boost::python::pickle_suite
 
 };
 
-#ifdef NDEBUG
-BOOST_PYTHON_MODULE(_sptmath)
-#else
+#ifdef DEBUG
 BOOST_PYTHON_MODULE(_sptmathd)
+#else
+BOOST_PYTHON_MODULE(_sptmath)
 #endif
 {
     using namespace boost::python;
@@ -77,7 +77,7 @@ BOOST_PYTHON_MODULE(_sptmathd)
     class_<Vec3>("Vec3", init<>())
         .def(init<const std::string&, const std::string&, const std::string&>())
         .def(init<const Decimal&, const Decimal&, const Decimal&>())
-//        .def(init<const boost::int64_t, const boost::int64_t, const boost::int64_t>())
+        .def(init<const boost::int64_t, const boost::int64_t, const boost::int64_t>())
         .def(init<const Vec3&>())
 
         .def_pickle(Vec3Pickle())
