@@ -224,6 +224,7 @@ class TrackPropertiesStraight(wx.Panel):
         s = wx.BoxSizer(wx.VERTICAL)
         #making layout
         self.MakeUI(s)
+        self.BindEvents()
         self.SetSizer(s)
 
         #read lenght and angle of track
@@ -241,6 +242,8 @@ class TrackPropertiesStraight(wx.Panel):
         main = rest // 1
         self.sl_1m.SetValue(main)
 
+        #we need this to make changes
+        self.track = track
 
 
     def MakeUI(self, s):
@@ -287,8 +290,34 @@ class TrackPropertiesStraight(wx.Panel):
         s.Add(sizer_slider,1,wx.EXPAND)
 
 
+    def BindEvents(self):
+        """
+        Function to bind events with sliders
+        """
+        self.Bind(wx.EVT_SCROLL_CHANGED, self.SliderMove)
+        #self.Bind(wx.EVT_SCROLL_THUMBTRACK, self.SliderMove)
+        pass
 
+
+    def SliderMove(self, event):
+        pass
+        print "slider move"
         
+        editor = self.TopLevelParent.editor
+        point = self.track.nextPoint(editor.basePoint.point)
+
+        #change place of basepoint to start of track
+        editor.basePoint.point = point
+        #create new track
+        new_track = ui.trackfc.TrackFactory().CreateStraight(self.sl_km.GetValue()*1000 + \
+                                                             self.sl_100m.GetValue()*100 + \
+                                                             self.sl_1m.GetValue(), editor.basePoint)
+        #delete old track
+        editor.scenery.RemoveRailTracking(self.track)
+        #add new
+        editor.scenery.AddRailTracking(new_track)
+        
+            
 class TrackPalette(wx.ScrolledWindow):
     """
     Base class for palette with buttons to quick inserting buttons in editor
