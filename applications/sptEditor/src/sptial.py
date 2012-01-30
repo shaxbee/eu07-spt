@@ -822,11 +822,17 @@ class RTree:
             for c in node.children:
                 if pred(c):
                     for s in self._query(c.index, pred):
-                        yield s
+                        try:
+                            yield s
+                        except GeneratorExit:
+                            pass
         else:
             for c in node.children:
                 if pred(c):
-                    yield c.obj
+                    try:
+                        yield c.obj
+                    except GeneratorExit:
+                        pass
 
 
     def queryPoint(self, x, y, z):

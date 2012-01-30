@@ -103,6 +103,7 @@ class SceneryEditor(wx.Panel):
 
         #load properties of selected object
         self.TopLevelParent.propertiesPaletteFrame.LoadToolPropertiesByType(selection)
+        
 
     def GetSelection(self):
         return self.selection
@@ -1261,10 +1262,6 @@ class SceneryListener(model.scenery.SceneryListener):
         element = event.GetElement()
         changeType = event.GetType()
 
-        if changeType == model.scenery.CHANGE_REMOVE:
-            if element == self.editor.GetSelection():
-                self.editor.SetSelection(None)
-            
         part = self.editor.parts[0]
         
         mbc = scenery.GetMbc()

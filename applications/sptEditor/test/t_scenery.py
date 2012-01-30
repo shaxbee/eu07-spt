@@ -10,8 +10,8 @@ from sptmath import Vec3
 import yaml
 import sptyaml
 import sptial
-
-
+import ui.trackfc
+import ui.editor
 
 class SceneryTest(unittest.TestCase):
 
@@ -93,7 +93,22 @@ class SceneryTest(unittest.TestCase):
                 v2 = Vec3('-3.076', '-6.307', '0.000'), \
                 p2 = Vec3('54.649', '15.368', '0.000')) in l)
 
+    def testAddDelete(self):
+        
+        basePoint = ui.editor.BasePoint()
+        
+        basePoint.SetPosition(Vec3())
+        basePoint.SetAlpha(0)
+        basePoint.SetGradient(0)
+        tf = ui.trackfc.TrackFactory()
+        track = tf.CreateStraight(100, basePoint)
 
+        scn = model.scenery.Scenery()
+        
+        scn.AddRailTracking(track)
+        
+        scn.RemoveRailTracking(track)
+        pass
 
 if __name__ == '__main__':
      unittest.main()
