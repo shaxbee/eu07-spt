@@ -585,7 +585,8 @@ class MainWindow(wx.Frame):
         Zooms in the scenery by increasing scale.
         """
         scale = self.editor.parts[0].GetScale()
-        self.editor.parts[0].SetScale(scale * 2)        
+        scale.increase()
+        self.editor.parts[0].SetScale(scale)
 
 
     def OnZoomOut(self, event):
@@ -593,7 +594,8 @@ class MainWindow(wx.Frame):
         Zooms out the scenery by decreasing scale.
         """
         scale = self.editor.parts[0].GetScale()
-        self.editor.parts[0].SetScale(scale / 2)
+        scale.decrease()
+        self.editor.parts[0].SetScale(scale)
 
 
     def OnToggleFramePalette(self, event):
@@ -645,7 +647,7 @@ if __name__ == "__main__":
     app = Application()
     frame = MainWindow(None, ID_MAIN_FRAME)
     
-    preview = osgwx.Preview3DFrame(frame, "Preview")
+    # preview = osgwx.Preview3DFrame(frame, "Preview")
     
     app.MainLoop()
 

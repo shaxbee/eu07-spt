@@ -8,5 +8,7 @@ set(LIB_PUBLIC_HEADERS
 add_library(${LIB_NAME}
     ${LIB_PUBLIC_HEADERS}
     Extruder.cpp)
+
+target_link_libraries(${LIB_NAME} ${OSGUTIL_LIBRARY})
     
 install(TARGETS ${LIB_NAME} ARCHIVE DESTINATION ${spt_SOURCE_DIR}/lib)

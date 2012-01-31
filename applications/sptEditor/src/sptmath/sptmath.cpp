@@ -6,7 +6,7 @@
 namespace
 {
 
-float dotProduct(const Vec3& left, const Vec3& right)
+double dotProduct(const Vec3& left, const Vec3& right)
 {
     return left.dotProduct(right);
 };
@@ -29,7 +29,11 @@ struct Vec3Pickle: boost::python::pickle_suite
 
 };
 
+#ifdef DEBUG
+BOOST_PYTHON_MODULE(_sptmathd)
+#else
 BOOST_PYTHON_MODULE(_sptmath)
+#endif
 {
     using namespace boost::python;
 
@@ -45,17 +49,27 @@ BOOST_PYTHON_MODULE(_sptmath)
 
         .def_pickle(DecimalPickle())
 
-        .def("__float__", &Decimal::operator float)
-        .def("__add__",  &Decimal::operator+)
-        .def("__sub__",  decimal_sub_operator_ptr)
-        .def("__mul__",  &Decimal::operator*)
-        .def("__div__",  &Decimal::operator/)
-        .def("__eq__",   &Decimal::operator==)
-        .def("__neg__",  decimal_neg_operator_ptr)
-        .def("__nonzero__", &Decimal::operator bool)
+        .def("__float__", &Decimal::operator double)
+        .def(self + self)
+        .def(self - self)
+        .def(self * self)
+		.def(self * double())
+        .def(self / self)
+        .def(self == self)
+        .def(-self)
+		.def(!self)
 
         .def("__repr__", &Decimal::__repr__)
-        .def("__str__",  &Decimal::__str__);
+        .def("__str__",  &Decimal::__str__)
+
+        .def("__hash__", &Decimal::hash)
+        .def("compareTo",  &Decimal::compareTo, arg("other"))
+
+        .def("to_ceiling", &Decimal::to_ceiling)
+        .def("to_floor", &Decimal::to_floor)
+
+        .def("base", &Decimal::base)
+        .def("raw", &Decimal::raw);
 
     Vec3 (Vec3::*vec3_sub_operator_ptr)(const Vec3&) const = &Vec3::operator-;
     Vec3 (Vec3::*vec3_neg_operator_ptr)() const = &Vec3::operator-;
@@ -63,6 +77,7 @@ BOOST_PYTHON_MODULE(_sptmath)
     class_<Vec3>("Vec3", init<>())
         .def(init<const std::string&, const std::string&, const std::string&>())
         .def(init<const Decimal&, const Decimal&, const Decimal&>())
+        .def(init<const boost::int64_t, const boost::int64_t, const boost::int64_t>())
         .def(init<const Vec3&>())
 
         .def_pickle(Vec3Pickle())
@@ -71,11 +86,12 @@ BOOST_PYTHON_MODULE(_sptmath)
         .add_property("y",   &Vec3::getY, &Vec3::setY)
         .add_property("z",   &Vec3::getZ, &Vec3::setZ)
 
-        .def("__add__",      &Vec3::operator+)
-        .def("__sub__",      vec3_sub_operator_ptr)
-        .def("__neg__",      vec3_neg_operator_ptr)
-        .def("__eq__",       &Vec3::operator==, arg("other"))
+        .def(self + self)
+        .def(self - self)
+        .def(-self)
+        .def(self == self)
 
+        .def("__hash__",     &Vec3::hash)
         .def("__repr__",     &Vec3::__repr__)
 
         .def("to_tuple",     &Vec3::to_tuple)

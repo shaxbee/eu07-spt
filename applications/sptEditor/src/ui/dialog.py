@@ -7,9 +7,13 @@ This module contains all dialogs defined in editor application.
 import math
 import wx
 import wx.xrc
+import wx.lib.delayedresult as delayed
 import yaml
 from sptmath import Decimal
 import os.path
+import sys
+import traceback
+import logging
 
 from model.tracks import Track, Switch
 import ui.editor
@@ -36,7 +40,7 @@ class CenterAtDialog(wx.Dialog):
         self.y = wx.xrc.XRCCTRL(self, "y")
         self.z = wx.xrc.XRCCTRL(self, "z")
         self.zoom = wx.xrc.XRCCTRL(self, "zoom")
-        self.zoom.SetValue(str(editor.parts[0].GetScale())) 
+        self.zoom.SetValue(str(editor.parts[0].GetScale().get())) 
 
         self.Bind(wx.EVT_BUTTON, self.OnButton, id=wx.ID_OK)
 
@@ -58,7 +62,7 @@ class CenterAtDialog(wx.Dialog):
             pScale = float(self.zoom.GetValue())
 
             editor = self.GetParent().editor
-            editor.parts[0].SetScale(pScale)
+            editor.parts[0].SetScale(ui.editor.Scale(pScale))
             (vx, vy) = editor.parts[0].ModelToView(Vec3(px, py, pz))
             editor.parts[0].CenterViewAt((vx, vy))
 
@@ -295,7 +299,7 @@ class InsertRailSwitch(wx.Dialog):
             if index == wx.NOT_FOUND:
                 return
             if name.strip() == "":
-                wx.MessageBox("Rail switch must have a name.", \
+                wx.MessageBox("Rail switch must have a name.",
                     self.GetTitle(), wx.OK | wx.ICON_ERROR, self)
                 return
 
@@ -354,7 +358,7 @@ class NameDialog(wx.Dialog):
     def OnButton(self, event):
         name = self.nameCtrl.GetValue()
         if name.strip() == "":
-            wx.MessageBox("This rail tracking must have a name.", \
+            wx.MessageBox("This rail tracking must have a name.",
                 self.GetTitle(), wx.OK | wx.ICON_ERROR, self)
             return
 
@@ -368,8 +372,7 @@ class NameDialog(wx.Dialog):
 
 
 class ExportDialog(wx.Dialog):
-    """
-    Export dialog that contains the name of scenery to export and
+    """Export dialog that contains the name of scenery to export and
     the directory to export.
     """
 
@@ -378,8 +381,6 @@ class ExportDialog(wx.Dialog):
         self.PostCreate(w)
 
         self.FillContent()
-
-        print 
 
         self.Bind(wx.EVT_BUTTON, self.OnButton, id=wx.ID_OK)
         self.Bind(wx.EVT_BUTTON, self.OnSelect, id=wx.xrc.XRCID("directorySelect"))
@@ -391,6 +392,7 @@ class ExportDialog(wx.Dialog):
     def FillContent(self):
         self.nameCtrl = wx.xrc.XRCCTRL(self, "name")
         self.dirCtrl = wx.xrc.XRCCTRL(self, "directory")
+        self.progress = wx.xrc.XRCCTRL(self, "progress")
 
         config = wx.FileConfig.Get()
         lastName = config.Read("/ExportDialog/name", "untitled")
@@ -403,18 +405,18 @@ class ExportDialog(wx.Dialog):
         name = self.nameCtrl.GetValue()
         
         if name.strip() == "":
-            wx.MessageBox("Missing scenery name.", \
+            wx.MessageBox("Missing scenery name.",
                 self.GetTitle(), wx.OK | wx.ICON_ERROR, self)
             return
             
         dir = self.dirCtrl.GetValue()
         if dir.strip() == "":
-            wx.MessageBox("Missing directory.", \
+            wx.MessageBox("Missing directory.",
                 self.GetTitle(), wx.OK | wx.ICON_ERROR, self)
             return
             
         if not os.path.isdir(dir):
-            wx.MessageBox("Invalid directory.", \
+            wx.MessageBox("Invalid directory.",
                 self.GetTitle(), wx.OK | wx.ICON_ERROR, self)
             return
             
@@ -422,13 +424,8 @@ class ExportDialog(wx.Dialog):
         if not os.path.exists(dest):
             os.mkdir(dest)
 
-        self.Export(dest)
+        self.Export(dest, dir, name)
 
-        config = wx.FileConfig.Get()
-        config.Write("/ExportDialog/name", name)
-        config.Write("/ExportDialog/dir", dir)
-
-        self.Destroy()
         
 
     def OnSelect(self, event):
@@ -442,21 +439,102 @@ class ExportDialog(wx.Dialog):
             self.lastPath = dirDialog.GetPath()
 
 
-    def Export(self, dir):
-        """
-        Do the right export.
-        """
-        progress = wx.ProgressDialog("Scenery export", \
-            "Exporting scenery to binary format", parent=self)
-        try:
-            
-            trackings = self.GetParent().editor.GetScenery().tracks
-            db.export.exportScenery(dir, trackings.tracks(), trackings.switches(), progress.Update)
+    def Export(self, dest, dir, name):
+        """Does the right export."""
+        self.Enable(False)
+
+        trackings = self.GetParent().editor.GetScenery().tracks
+        delayed.startWorker(self.ExportComplete,
+            self.ExportWorkerJob,
+            cargs = (dir, name),
+            wargs = (dest, trackings.tracks(), trackings.switches(),
+                self.UpdatePercent))
 #            writer = db.sctwriter.SectorWriter(file(filename, "w"), sptmath.Vec3())
 #            scenery = self.editor.GetScenery()
 #            for t in scenery.tracks.tracks():
 #                writer.addTrack(t)
 #            writer.writeToFile()
+
+
+    def UpdatePercent(self, percent):
+        """Callback that updates progress bar in GUI thread."""
+        # Optimise it by making event handler for this
+        wx.CallAfter(self.__UpdatePercent, percent)
+
+
+    def __UpdatePercent(self, *args):
+        """Updates progress bar."""
+        self.progress.SetValue(args[0])
+
+
+    def ExportWorkerJob(self, *wargs):
+        """Job run in separate thread."""
+        (directory, tracks, switches, updateCallback) = wargs
+        db.export.exportScenery(directory, tracks, switches, updateCallback)
+        return True
+
+    
+    def ExportComplete(self, delayedResult, *cargs):
+        """Completes the scenery export routine."""
+        try:
+            delayedResult.get()
+            self.__UpdatePercent(100)
+
+            config = wx.FileConfig.Get()
+            config.Write("/ExportDialog/name", cargs[1])
+            config.Write("/ExportDialog/dir", cargs[0])
+
+        except Exception, inst:
+            raise inst
+            self.__UpdatePercent(100)
+            logging.exception("Error during scenery export")
+            logging.error("Scenery error Traceback", inst.extraInfo)
+            wx.MessageBox("Error during scenery export.",
+                "Export scenery error", wx.OK | wx.ICON_ERROR, self)
         finally:
-            progress.Update(100)
+            self.Enable(True)
+
+
+
+
+class TracingBackProducer(delayed.Producer):
+    """Custom Producer that provides traceback from producer thread."""
+
+    def __init__(self, sender, workerFn, args=(), kwargs={},
+            name=None, group=None, daemon=False,
+            sendReturn=True, senderArg=None):
+        delayed.Producer.__init__(self, sender, workerFn,
+            args, kwargs, name, group, daemon, sendReturn, senderArg)
+
+
+    def _extraInfo(self, exception):
+        return traceback.extract_tb(sys.exc_info()[2])
+
+
+def startWorker(
+    consumer, workerFn, 
+    cargs=(), ckwargs={}, 
+    wargs=(), wkwargs={},
+    jobID=None, group=None, daemon=False, 
+    sendReturn=True, senderArg=None):
+    """
+    See for reference delayed.startWorker procedure.
+    This is a derived method.
+    """
+    
+    if isinstance(consumer, wx.EvtHandler):
+        eventClass = cargs[0]
+        sender = delayed.SenderWxEvent(consumer, eventClass,
+            jobID=jobID, **ckwargs)
+    else:
+        sender = delayed.SenderCallAfter(consumer, jobID,
+            args=cargs, kwargs=ckwargs)
+        
+    thread = TracingBackProducer(
+        sender, workerFn, args=wargs, kwargs=wkwargs, 
+        name=jobID, group=group, daemon=daemon, 
+        senderArg=senderArg, sendReturn=sendReturn)
+        
+    thread.start() 
+    return thread
 

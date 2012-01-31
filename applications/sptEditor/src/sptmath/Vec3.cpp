@@ -19,7 +19,7 @@ Vec3 Vec3::normalized()
     return Vec3(Decimal(x / len), Decimal(y / len), Decimal(z / len));
 };
 
-float Vec3::angleToJUnit() const
+double Vec3::angleToJUnit() const
 {
     double div = double(_y) / length();
     double theta = div <= -1.0 ? double(M_PI) : acos(div);
@@ -34,3 +34,14 @@ std::string Vec3::__repr__() const
 {
     return str(format("(%s,%s,%s)") % _x.__str__() % _y.__str__() % _z.__str__());
 };
+
+boost::int32_t Vec3::hash() const
+{
+    int seed = 17;
+
+    seed = seed * 31 + _x.hash();
+    seed = seed * 31 + _x.hash();
+    seed = seed * 31 + _x.hash();
+
+    return seed;
+}

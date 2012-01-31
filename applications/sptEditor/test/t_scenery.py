@@ -9,6 +9,7 @@ import model.groups
 from sptmath import Vec3
 import yaml
 import sptyaml
+import sptial
 
 
 
@@ -54,38 +55,43 @@ class SceneryTest(unittest.TestCase):
 
         self.assertEquals(len(sceneryAfterRead.tracks.children), 3)
 
-        self.assertEquals(sceneryAfterRead.tracks.children[0].children[0], \
+        l = list(sceneryAfterRead.tracks.children.query(sptial.Cuboid((26, -52, 0), (46, -15, 0))))
+        ll = list(l[0].children)
+        self.assertTrue( \
             model.tracks.Track( \
                 p1 = Vec3('26.250', '-51.250', '0.000'), \
-                p2 = Vec3('28.880', '-45.857', '0.000') ))
-        self.assertEquals(sceneryAfterRead.tracks.children[0].children[1], \
+                p2 = Vec3('28.880', '-45.857', '0.000') ) in ll)
+        self.assertTrue( \
             model.tracks.Switch( \
                 pc = Vec3('28.880', '-45.857', '0.000'), \
                 p1 = Vec3('43.446', '-15.989', '0.000'), \
                 p2 = Vec3('45.068', '-16.856', '0.000'), \
                 vc2 = Vec3('4.856', '9.958', '0.000'), \
-                v2 = Vec3('-5.928', '-9.361', '0.000')) )
+                v2 = Vec3('-5.928', '-9.361', '0.000')) in ll)
 
-        self.assertEquals(sceneryAfterRead.tracks.children[1].children[0], \
+        l = list(sceneryAfterRead.tracks.children.query(sptial.Cuboid((43, -16, 0), (70, 46, 0))))
+        ll = list(l[1].children)
+        self.assertTrue( \
             model.tracks.Track( \
                 p1 = Vec3('43.446', '-15.989', '0.000'), \
                 v1 = Vec3('4.856', '9.958', '0.000'), \
                 v2 = Vec3('-3.726', '-10.435', '0.000'), \
-                p2 = Vec3('56.330', '14.623', '0.000')))
-        self.assertEquals(sceneryAfterRead.tracks.children[1].children[1], \
+                p2 = Vec3('56.330', '14.623', '0.000')) in ll)
+        self.assertTrue( \
             model.tracks.Switch( \
                 pc = Vec3('69.214', '45.235', '0.000'), \
                 p1 = Vec3('54.649', '15.368', '0.000'), \
                 p2 = Vec3('56.330', '14.623', '0.000'), \
                 vc2 = Vec3('-4.856', '-9.958', '0.000'), \
-                v2 = Vec3('3.726', '10.435', '0.000')))
+                v2 = Vec3('3.726', '10.435', '0.000')) in ll)
 
-        self.assertEquals(sceneryAfterRead.tracks.children[2], \
+        l = list(sceneryAfterRead.tracks.children.query(sptial.Cuboid((44, -4, 0), (55, 16, 0))))
+        self.assertTrue( \
             model.tracks.Track( \
                 p1 = Vec3('44.395', '-3.000', '0.000'), \
                 v1 = Vec3('3.755', '5.929', '0.000'), \
                 v2 = Vec3('-3.076', '-6.307', '0.000'), \
-                p2 = Vec3('54.649', '15.368', '0.000')) )
+                p2 = Vec3('54.649', '15.368', '0.000')) in l)
 
 
 

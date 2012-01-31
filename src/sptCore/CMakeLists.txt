@@ -12,7 +12,7 @@ set(LIB_PUBLIC_HEADERS
     ${HEADER_PATH}/SimpleTrack.h
     ${HEADER_PATH}/TrackVisitor.h)    
 
-add_library(${LIB_NAME} 
+add_library(${LIB_NAME}
     ${LIB_PUBLIC_HEADERS}
     Follower.cpp
     Path.cpp 

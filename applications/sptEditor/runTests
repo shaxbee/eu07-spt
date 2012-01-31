@@ -7,7 +7,7 @@ PYTHON=/usr/bin/python2.7
 PYTHONPATH=${PYTHONPATH}:src/
 
 if [[ -x $NOSETESTS_PATH ]]; then
-  $NOSETESTS_PATH --verbosity=2 --with-doctest --doctest-extension=rst --with-xunit test/*.py src/sptmath.py doc/*.rst
+  $NOSETESTS_PATH --verbosity=2 --with-doctest --doctest-extension=rst --with-xunit test/*.py test/ui/*.py src/ doc/*.rst
 else
   PYTHONPATH=".:"`pwd`"/src/"
   export PYTHONPATH
@@ -18,6 +18,8 @@ else
   $PYTHON t_switches.py
   $PYTHON t_tracks.py
   $PYTHON t_scenery.py
+  $PYTHON t_sptial.py
+  $PYTHON ui/t_views.py
 
   popd
 
