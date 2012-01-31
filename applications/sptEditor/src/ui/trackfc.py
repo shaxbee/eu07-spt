@@ -12,7 +12,7 @@ import copy
 from sptmath import Vec3, Decimal
 from model.tracks import Track
 import model.groups
-
+import ui.editor
 
 class Vec3f:
     def __init__(self, x=0.0, y=0.0, z=0.0):
@@ -78,50 +78,61 @@ class TrackFactory:
         
         return Track(p1, v1, v2, p2)
     
-    def CreateHorizontalArc(self, angle, radius, isLeft, basePoint):
+    def CreateArc(self, angle, radius, isLeft, basePoint):
         """
         Creates curve track / helisa
         """
-        
-        length = radius * angle
-        #angle = length / radius
-        if isLeft:
-            angle = -angle
-        
-        sin_a = sin(angle)
-        cos_a = cos(angle)
-        
-        p1 = Vec3f()
-        p2 = Vec3f(radius * cos_a, radius * sin_a, length * basePoint.gradient / 1000.0)
+        length = radius * angle        
+        bp = ui.editor.BasePoint(basePoint.point, basePoint.alpha, 0)
 
+        track = self.CreateArcOnStation(angle, radius, isLeft, bp)
+
+        track.p2.z = Decimal(length * basePoint.gradient / 1000.0)
         ctrl = 4.0 / 3.0 * radius * tan(angle * 0.25)
-        
-        v1 = Vec3f(p1.x, Decimal(ctrl), Decimal(ctrl * basePoint.gradient / 1000.0))
-        v2 = Vec3f(-ctrl * sin_a, -ctrl * cos_a, ctrl * -basePoint.gradient / 1000.0)
+        track.v1.z = Decimal(ctrl * basePoint.gradient / 1000.0)
+        track.v2.z = Decimal(ctrl * -basePoint.gradient / 1000.0)
 
-        tr = BasePointTransform(basePoint)
-        tr.RotateByAngleF([p1, p2], [v1, v2])
-        
-        [p1, p2, v1, v2] = convertVec3ftoVec3([p1, p2, v1, v2])
-        
-        basePoint.point = p2
-        if isLeft:
-            basePoint.alpha -= degrees(angle)
-        else:
-            basePoint.alpha += degrees(angle)
+        basePoint.SetAlpha(bp.alpha)
+        basePoint.SetPosition(bp.point)
 
-        # Refresh editor
-        #self.editor.SetBasePoint(basePoint, True)
-        self.basePoint = basePoint
+        ##angle = length / radius
+        #
+        #sin_a = sin(angle)
+        #cos_a = cos(angle)
+        #
+        #p1 = Vec3f()
+        #p2 = Vec3f(-radius * cos_a + radius, radius * sin_a, length * basePoint.gradient / 1000.0)
 
-        return Track(p1, v1, v2, p2)
+        #
+
+        #v1 = Vec3f(p1.x, ctrl, ctrl * basePoint.gradient / 1000.0)
+        #v2 = Vec3f(-ctrl * sin_a, -ctrl * cos_a, ctrl * -basePoint.gradient / 1000.0)
+
+        ##swap point to left
+        #if isLeft:
+        #    p2.x = p2.x.__neg__
+        #    p2.y = p2.y.__neg__
+
+        #tr = BasePointTransform(basePoint)
+        #tr.RotateByAngleF([p1, p2], [v1, v2])
+        #
+        #[p1, p2, v1, v2] = convertVec3ftoVec3([p1, p2, v1, v2])
+        #
+        #basePoint.point = p2
+        #basePoint.alpha += degrees(angle)
+
+        ## Refresh editor
+        ##self.editor.SetBasePoint(basePoint, True)
+        #self.basePoint = basePoint
+
+        #return Track(p1, v1, v2, p2)
+        return track
 
     def CreateArcOnStation(self, angle, radius, isLeft, basePoint):
         """
         Creates curve track
         """
         
-        length = radius * angle
         half = 0.5 * angle
         sin_a = sin(half)
         cos_a = cos(half)
@@ -136,8 +147,8 @@ class TrackFactory:
         v2 = Vec3f(ctrlX - p2.x, -ctrlY - p2.y, (0))
         
         # Left or right
-        tr = LeftTrackTransform(length, radius) if isLeft \
-            else RightTrackTransform(length, radius)
+        tr = LeftTrackTransform(angle, radius) if isLeft \
+            else RightTrackTransform(angle, radius)
         tr.TransformF([p1, p2], [v1, v2])
 
         #basePoint = self.editor.basePoint
@@ -160,7 +171,7 @@ class TrackFactory:
         return Track(p1, v1, v2, p2)
 
 
-    def CreateVerticalArc(self, target_gradient, radius, basePoint):
+    def CreateChangeOfGradient(self, target_gradient, radius, basePoint):
         """
         Create curve on change of gradient of line
         """
@@ -176,10 +187,6 @@ class TrackFactory:
         v1 = Vec3f()
         v2 = Vec3f()
 
-        #p1.x = (0)
-        #p1.y = (0)
-        #p1.z = (0)
-        #p2.x = (0)
         p2.y = (T + T*cos(alfa))
         p2.z = (T*sin(alfa))
         
@@ -318,10 +325,10 @@ class AbstractTransform:
 
 class RightTrackTransform(AbstractTransform):
 
-    def __init__(self, length, radius):
+    def __init__(self, angle, radius):
         AbstractTransform.__init__(self)
         self.radius = radius
-        self.angle = length / radius
+        self.angle = angle
 
 
     def Transform(self, points, vectors):
@@ -372,10 +379,10 @@ class RightTrackTransform(AbstractTransform):
 
 class LeftTrackTransform(AbstractTransform):
 
-    def __init__(self, length, radius):
+    def __init__(self, angle, radius):
         AbstractTransform.__init__(self)
         self.radius = radius
-        self.angle = length / radius
+        self.angle = angle
 
 
     def Transform(self, points, vectors):

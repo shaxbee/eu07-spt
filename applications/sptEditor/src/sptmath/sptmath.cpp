@@ -29,10 +29,10 @@ struct Vec3Pickle: boost::python::pickle_suite
 
 };
 
-#ifdef NDEBUG
-BOOST_PYTHON_MODULE(_sptmath)
-#else
+#ifdef DEBUG
 BOOST_PYTHON_MODULE(_sptmathd)
+#else
+BOOST_PYTHON_MODULE(_sptmath)
 #endif
 {
     using namespace boost::python;
@@ -56,6 +56,7 @@ BOOST_PYTHON_MODULE(_sptmathd)
 		.def(self * double())
         .def(self / self)
         .def(self == self)
+		.def(self != self)
         .def(-self)
 		.def(!self)
 
@@ -78,7 +79,7 @@ BOOST_PYTHON_MODULE(_sptmathd)
         .def(init<const std::string&, const std::string&, const std::string&>())
         .def(init<const Decimal&, const Decimal&, const Decimal&>())
 		.def(init<const float&, const float&, const float&>())
-//        .def(init<const boost::int64_t, const boost::int64_t, const boost::int64_t>())
+        //.def(init<const boost::int64_t, const boost::int64_t, const boost::int64_t>())
         .def(init<const Vec3&>())
 
         .def_pickle(Vec3Pickle())
@@ -91,6 +92,7 @@ BOOST_PYTHON_MODULE(_sptmathd)
         .def(self - self)
         .def(-self)
         .def(self == self)
+		.def(self != self)
 
         .def("__hash__",     &Vec3::hash)
         .def("__repr__",     &Vec3::__repr__)

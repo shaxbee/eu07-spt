@@ -77,9 +77,9 @@ class TrackFactoryTest(unittest.TestCase):
         
         tf = ui.trackfc.TrackFactory()
         
-        track = tf.CreateHorizontalArc(math.radians(55), 300, False, basePoint)
+        track = tf.CreateArc(math.radians(55), 300, False, basePoint)
         
-        testedPoint = Vec3(229.813, 192.836, 6.336)
+        testedPoint = Vec3(187.172, 204.262, 6.336)
         testedVec = Vec3(-91.977, -33.477, -2.153)
         self.assertEquals(testedPoint,basePoint.point)
         self.assertEquals(testedVec, track.v2)
@@ -118,7 +118,7 @@ class TrackFactoryTest(unittest.TestCase):
         
         pass
 
-    def testCreateVerticalArc(self):
+    def testCreateChangeOfGradient(self):
         
         basePoint = ui.editor.BasePoint()
         
@@ -129,7 +129,7 @@ class TrackFactoryTest(unittest.TestCase):
         
         tf = ui.trackfc.TrackFactory()
         
-        track = tf.CreateVerticalArc(22, 2500, basePoint)
+        track = tf.CreateChangeOfGradient(22, 2500, basePoint)
         
         p = 28.966
         #testedPoint2 = Vec3(Decimal(7.761),Decimal(28.966),Decimal(0.479))

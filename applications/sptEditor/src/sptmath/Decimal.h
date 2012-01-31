@@ -57,6 +57,11 @@ public:
         return _value == other._value;
     };
 
+	bool operator!=(const Decimal& other) const
+	{
+		return _value != other._value;
+	};
+
     boost::int32_t compareTo(const Decimal& other) const
     {
 		boost::int64_t diff = _value - other._value;

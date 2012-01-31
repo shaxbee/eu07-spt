@@ -14,7 +14,7 @@ public:
     Vec3(const std::string& x, const std::string& y, const std::string& z): _x(x), _y(y), _z(z) { };
     Vec3(const Decimal& x, const Decimal& y, const Decimal& z): _x(x), _y(y), _z(z) { };
 	Vec3(const double& x, const double& y, const double& z): _x(x), _y(y), _z(z) { };
-//    Vec3(const boost::int64_t x, const boost::int64_t y, const boost::int64_t z): _x(x), _y(y), _z(z) { };
+    //Vec3(const boost::int64_t x, const boost::int64_t y, const boost::int64_t z): _x(x), _y(y), _z(z) { };
 
     Vec3 operator+(const Vec3& other) const
     {
@@ -35,6 +35,11 @@ public:
     {
         return (_x == other._x) && (_y == other._y) && (_z == other._z);
     };
+
+	bool operator!=(const Vec3& other) const
+	{
+		return (_x != other._x) || (_y != other._y) || (_z != other._z);
+	};
 
     boost::int32_t hash() const;
 
