@@ -13,7 +13,7 @@ enable_testing()
 include(build/SptUtils.cmake)
 include(build/PythonUtils.cmake)
 
-include_directories(include)
+include_directories(${SPT_SOURCE_DIR}/include)
 
 IF(WIN32)
     include_directories(SYSTEM ${SPT_DEP_DIR}/include)
