@@ -234,13 +234,76 @@ class PropertiesPalette(wx.ScrolledWindow):
 class BasePointProperties(wx.Panel):
     def __init__(self, parent, id=wx.ID_ANY):
         wx.Panel.__init__(self, parent, id)
+        
         s = wx.BoxSizer(wx.VERTICAL)
 
-        spctr = wx.SpinCtrl(self)
+        '''
+        Angle degres
+        '''
+        
+        sizer_slider = wx.FlexGridSizer(1,2,5,5)
+        
+        self.sp_angle = wx.SpinCtrl(self)
+        l_angle = wx.StaticText(self,wx.ID_ANY,"Angle (deg)")
+        self.sp_angle.SetRange(0,359) 
+               
+        sizer_slider.Add(l_angle,0, wx.EXPAND, wx.ALIGN_CENTER)
+        sizer_slider.Add(self.sp_angle,1, wx.EXPAND, wx.ALIGN_CENTER)
+        
+        '''Angle min'''
 
-        s.Add(spctr)
+        self.sp_angle_min = wx.SpinCtrl(self)
+        l_angle_min = wx.StaticText(self,wx.ID_ANY,"Angle (min)")
+        self.sp_angle_min.SetRange(0,100)
+
+        sizer_slider.Add(l_angle_min,0, wx.EXPAND, wx.ALIGN_CENTER)
+        sizer_slider.Add(self.sp_angle_min,1, wx.EXPAND, wx.ALIGN_CENTER)
+
+        '''Gradient'''
+
+        self.sp_grad = wx.SpinCtrl(self)
+        l_grad = wx.StaticText(self,wx.ID_ANY,"Gradient (promiles)")
+        self.sp_grad.SetRange(-100,100)
+
+        sizer_slider.Add(l_grad,0, wx.EXPAND, wx.ALIGN_CENTER)
+        sizer_slider.Add(self.sp_grad,1, wx.EXPAND, wx.ALIGN_CENTER)
+
+        #making sizer
+        s.AddSpacer(5)
+        s.Add(sizer_slider)
+
         self.SetSizer(s)
+        #binding events
+        self.Bind(wx.EVT_SHOW, self.OnShow)
+        self.Bind(wx.EVT_SPINCTRL, self.OnChange)
+
+    def OnShow(self, event):
+        """
+        Class invoking when show event where arrive
+        """
+        
+        #get basepoint
+        editor = self.TopLevelParent.editor
+        bp = editor.basePoint        
+        #calc deg and min
+        main = int(bp.alpha)
+        rest = int(bp.alpha * 100) - main * 100
+        #setting values
+        self.sp_angle.SetValue(bp.alpha)
+        self.sp_angle_min.SetValue(rest)
+        self.sp_grad.SetValue(bp.gradient)
     
+    def OnChange(self, event):
+
+        #get basepoint
+        editor = self.TopLevelParent.editor
+        bp = editor.basePoint        
+
+        bp.alpha = float(self.sp_angle.GetValue()) + float(self.sp_angle_min.GetValue() / 100.0)
+        bp.gradient = self.sp_grad.GetValue()
+
+        editor.SetBasePoint(bp,True)
+
 class TrackPropertiesStraight(wx.Panel):
     def __init__(self, parent, id = wx.ID_ANY):
         wx.Panel.__init__(self, parent, id)
@@ -287,7 +350,7 @@ class TrackPropertiesStraight(wx.Panel):
         self.sl_km.SetTickFreq(1)
         l_km = wx.StaticText(self,wx.ID_ANY,"Km")
         
-        sizer_slider.Add(l_km,0, wx.SHAPED, wx.ALIGN_CENTER)
+        sizer_slider.Add(l_km,0, wx.EXPAND, wx.ALIGN_CENTER)
         sizer_slider.Add(self.sl_km,1, wx.EXPAND, wx.ALIGN_CENTER)
         
         '''
@@ -299,7 +362,7 @@ class TrackPropertiesStraight(wx.Panel):
         l_100m = wx.StaticText(self,wx.ID_ANY,"100m")
         
         
-        sizer_slider.Add(l_100m,0, wx.SHAPED, wx.ALIGN_CENTER)
+        sizer_slider.Add(l_100m,0, wx.EXPAND, wx.ALIGN_CENTER)
         sizer_slider.Add(self.sl_100m,1, wx.EXPAND, wx.ALIGN_CENTER)
         
         '''
@@ -310,10 +373,10 @@ class TrackPropertiesStraight(wx.Panel):
         self.sl_1m.SetTickFreq(5)
         l_1m = wx.StaticText(self,wx.ID_ANY,"1m")
         
-        sizer_slider.Add(l_1m,0, wx.SHAPED, wx.ALIGN_CENTER)
+        sizer_slider.Add(l_1m,0, wx.EXPAND, wx.ALIGN_CENTER)
         sizer_slider.Add(self.sl_1m,1, wx.EXPAND, wx.ALIGN_CENTER)
 
-
+        s.AddSpacer(5)
         s.Add(sizer_slider,1,wx.EXPAND)
 
 
@@ -322,8 +385,6 @@ class TrackPropertiesStraight(wx.Panel):
         Function to bind events with sliders
         """
         self.Bind(wx.EVT_SCROLL_CHANGED, self.SliderMove)
-        #self.Bind(wx.EVT_SCROLL_THUMBTRACK, self.SliderMove)
-        pass
 
 
     def SliderMove(self, event):
