@@ -95,37 +95,6 @@ class TrackFactory:
         basePoint.SetAlpha(bp.alpha)
         basePoint.SetPosition(bp.point)
 
-        ##angle = length / radius
-        #
-        #sin_a = sin(angle)
-        #cos_a = cos(angle)
-        #
-        #p1 = Vec3f()
-        #p2 = Vec3f(-radius * cos_a + radius, radius * sin_a, length * basePoint.gradient / 1000.0)
-
-        #
-
-        #v1 = Vec3f(p1.x, ctrl, ctrl * basePoint.gradient / 1000.0)
-        #v2 = Vec3f(-ctrl * sin_a, -ctrl * cos_a, ctrl * -basePoint.gradient / 1000.0)
-
-        ##swap point to left
-        #if isLeft:
-        #    p2.x = p2.x.__neg__
-        #    p2.y = p2.y.__neg__
-
-        #tr = BasePointTransform(basePoint)
-        #tr.RotateByAngleF([p1, p2], [v1, v2])
-        #
-        #[p1, p2, v1, v2] = convertVec3ftoVec3([p1, p2, v1, v2])
-        #
-        #basePoint.point = p2
-        #basePoint.alpha += degrees(angle)
-
-        ## Refresh editor
-        ##self.editor.SetBasePoint(basePoint, True)
-        #self.basePoint = basePoint
-
-        #return Track(p1, v1, v2, p2)
         return track
 
     def CreateArcOnStation(self, angle, radius, isLeft, basePoint):

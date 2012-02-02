@@ -822,10 +822,10 @@ class RTree:
             for c in node.children:
                 if pred(c):
                     for s in self._query(c.index, pred):
-                        try:
-                            yield s
-                        except GeneratorExit:
-                            pass
+                        #try:
+                        yield s
+                        #except GeneratorExit:
+                        #    pass
         else:
             for c in node.children:
                 if pred(c):

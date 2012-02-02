@@ -30,6 +30,7 @@ ID_SWITCH_TOOL = 2
 ID_TRACK_PROPERTIES_GRADIENT = 0
 ID_TRACK_PROPERTIES_STRAIGHT = 1
 ID_TRACK_PROPERTIES_ARC = 2
+ID_BASEPOINT_PROPERTIES = 3
 
 class ToolsPalette(wx.Panel):
     def __init__(self, parent, id=wx.ID_ANY):
@@ -176,6 +177,7 @@ class PropertiesPalette(wx.ScrolledWindow):
 
         self._panels = {
                         ID_TRACK_PROPERTIES_STRAIGHT: TrackPropertiesStraight(self),
+                        ID_BASEPOINT_PROPERTIES: BasePointProperties(self),
                         }    
 
         self._properties_panel = None
@@ -199,7 +201,11 @@ class PropertiesPalette(wx.ScrolledWindow):
                     self._properties_panel.SetTrack(selection)
                 except KeyError:
                     pass
-
+        else:
+            try:
+                self.LoadToolProperties(self._panels[ID_BASEPOINT_PROPERTIES])
+            except KeyError:
+                pass
 
     def LoadToolProperties(self, panel):
         """
@@ -228,7 +234,12 @@ class PropertiesPalette(wx.ScrolledWindow):
 class BasePointProperties(wx.Panel):
     def __init__(self, parent, id=wx.ID_ANY):
         wx.Panel.__init__(self, parent, id)
+        s = wx.BoxSizer(wx.VERTICAL)
 
+        spctr = wx.SpinCtrl(self)
+
+        s.Add(spctr)
+        self.SetSizer(s)
     
 class TrackPropertiesStraight(wx.Panel):
     def __init__(self, parent, id = wx.ID_ANY):
