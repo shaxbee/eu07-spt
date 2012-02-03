@@ -6,7 +6,7 @@ find_package(PythonLibs 2.7 REQUIRED)
 include_directories(${PYTHON_INCLUDE_PATH})
 
 macro(setup_python_module TARGET)
-    target_link_libraries(${TARGET} ${BOOST_PYTHON_LIBRARIES})
+    target_link_libraries(${TARGET} ${Boost_PYTHON_LIBRARIES})
 
     set_target_properties(${TARGET} PROPERTIES PREFIX "")
     if(WIN32)
