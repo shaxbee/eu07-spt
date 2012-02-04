@@ -178,10 +178,12 @@ class PropertiesPalette(wx.ScrolledWindow):
         self._panels = {
                         ID_TRACK_PROPERTIES_STRAIGHT: TrackPropertiesStraight(self),
                         ID_BASEPOINT_PROPERTIES: BasePointProperties(self),
+                        ID_TRACK_PROPERTIES_ARC: TrackPropertiesArc(self),
                         }    
 
-        self._properties_panel = None
-
+        self.LoadToolProperties(self._panels[ID_TRACK_PROPERTIES_ARC])
+        self.UnloadToolProperties()
+        self.Layout()
 
     def LoadToolPropertiesByType(self, selection):
         """
@@ -198,6 +200,12 @@ class PropertiesPalette(wx.ScrolledWindow):
             if selection.v1 == Vec3() and selection.v2 == Vec3():
                 try:
                     self.LoadToolProperties(self._panels[ID_TRACK_PROPERTIES_STRAIGHT])
+                    self._properties_panel.SetTrack(selection)
+                except KeyError:
+                    pass
+            else:
+                try:
+                    self.LoadToolProperties(self._panels[ID_TRACK_PROPERTIES_ARC])
                     self._properties_panel.SetTrack(selection)
                 except KeyError:
                     pass
@@ -235,6 +243,8 @@ class BasePointProperties(wx.Panel):
     def __init__(self, parent, id=wx.ID_ANY):
         wx.Panel.__init__(self, parent, id)
         
+        self.Hide()
+
         s = wx.BoxSizer(wx.VERTICAL)
 
         '''
@@ -308,6 +318,7 @@ class TrackPropertiesStraight(wx.Panel):
     def __init__(self, parent, id = wx.ID_ANY):
         wx.Panel.__init__(self, parent, id)
         
+        self.Hide()
         s = wx.BoxSizer(wx.VERTICAL)
         #making layout
         self.MakeUI(s)
@@ -389,31 +400,34 @@ class TrackPropertiesStraight(wx.Panel):
 
     def SliderMove(self, event):
         
-        editor = self.TopLevelParent.editor
-        bp = editor.basePoint
-        point = self.track.nextPoint(bp.point) 
-        #change place of basepoint to start of track
-        bp.point = point
-        #create new track
-        new_track = ui.trackfc.TrackFactory().CreateStraight(self.sl_km.GetValue()*1000 + \
-                                                             self.sl_100m.GetValue()*100 + \
-                                                             self.sl_1m.GetValue(), bp)
-        #delete old track
-        editor.scenery.RemoveRailTracking(self.track)
-        #add new
-        if new_track.p1 != new_track.p2:
-            #new track have length
-            editor.scenery.AddRailTracking(new_track)
-            editor.SetBasePoint(bp)
-            editor.SetSelection(new_track)
-        else:
-            editor.SetBasePoint(bp)
-            editor.SetSelection(None)
+        if self.sl_km.GetValue() != 0 or self.sl_100m.GetValue() != 0 \
+            or self.sl_1m.GetValue() != 0:
+            editor = self.TopLevelParent.editor
+            bp = editor.basePoint
+            point = self.track.nextPoint(bp.point) 
+            #change place of basepoint to start of track
+            bp.point = point
+            #create new track
+            new_track = ui.trackfc.TrackFactory().CreateStraight(self.sl_km.GetValue()*1000 + \
+                                                                 self.sl_100m.GetValue()*100 + \
+                                                                 self.sl_1m.GetValue(), bp)
+            #delete old track
+            editor.scenery.RemoveRailTracking(self.track)
+            #add new
+            if new_track.p1 != new_track.p2:
+                #new track have length
+                editor.scenery.AddRailTracking(new_track)
+                editor.SetBasePoint(bp)
+                editor.SetSelection(new_track)
+            else:
+                editor.SetBasePoint(bp)
+                editor.SetSelection(None)
 
 class TrackPropertiesArc(wx.Panel):
     def __init__(self, parent, id = wx.ID_ANY):
         wx.Panel.__init__(self, parent, id)
         
+        self.Hide()
         s = wx.BoxSizer(wx.VERTICAL)
         #making layout
         self.MakeUI(s)
@@ -421,22 +435,28 @@ class TrackPropertiesArc(wx.Panel):
         self.SetSizer(s)
 
     def SetTrack(self, track):
-        #read lenght and angle of track
-        #length = math.sqrt(math.pow(float(track.p2.x - track.p1.x),2) + math.pow(float(track.p2.y - track.p1.y),2))
-        #angle = math.degrees(math.atan2(float(track.p2.x - track.p1.x), float(track.p2.y - track.p1.y)))
-        #a1 = track.p1.angleToJUnit()
-        #a2 = track.p2.angleToJUnit()
-        #
-        #main = length // 1000
-        #rest = math.fmod(length, 1000)
-        #self.sl_km.SetValue(main)
+        
+        #first we calc angle bettwen two vectors
+        self.isLeft = False
+        a1 = math.degrees(math.atan2(track.v1.x, track.v1.y))
+        a2 = math.degrees(math.atan2(track.v2.x, track.v2.y))+180
+        angle = a2 - a1
+        if angle > 180:
+            angle = 360 - angle
+            self.isLeft = True
+        
+        #first we calc radius from lenght of vector
+        T = track.v1.length()
+        R = T * 3.0 / 4.0 / (math.tan(math.radians(angle) * 0.25))
+        
+        #calc deg and min
+        main = int(angle)
+        rest = int(angle * 100) - main * 100
+        #setting values
+        self.sp_angle.SetValue(main)
+        self.sp_angle_min.SetValue(rest)
 
-        #main = rest // 100
-        #rest = math.fmod(length, 100)
-        #self.sl_100m.SetValue(main)
-
-        #main = rest // 1
-        #self.sl_1m.SetValue(main)
+        self.sp_rad.SetValue(R)
 
         #we need this to make changes
         self.track = track
@@ -448,41 +468,37 @@ class TrackPropertiesArc(wx.Panel):
         """
         
         '''
-        Km slider
+        Angle degres
         '''
         
         sizer_slider = wx.FlexGridSizer(1,2,5,5)
-        self.sl_km = wx.Slider(self,wx.ID_ANY,0,0,10, size=(200,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
-        self.sl_km.SetTickFreq(1)
-        l_km = wx.StaticText(self,wx.ID_ANY,"Km")
         
-        sizer_slider.Add(l_km,0, wx.SHAPED, wx.ALIGN_CENTER)
-        sizer_slider.Add(self.sl_km,1, wx.EXPAND, wx.ALIGN_CENTER)
+        self.sp_angle = wx.SpinCtrl(self)
+        l_angle = wx.StaticText(self,wx.ID_ANY,"Angle (deg)")
+        self.sp_angle.SetRange(0,359) 
+               
+        sizer_slider.Add(l_angle,0, wx.EXPAND, wx.ALIGN_CENTER)
+        sizer_slider.Add(self.sp_angle,1, wx.EXPAND, wx.ALIGN_CENTER)
         
-        '''
-        100 m slider
-        '''
-        
-        self.sl_100m = wx.Slider(self,wx.ID_ANY,0,0,10, size=(200,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
-        self.sl_100m.SetTickFreq(1)
-        l_100m = wx.StaticText(self,wx.ID_ANY,"100m")
-        
-        
-        sizer_slider.Add(l_100m,0, wx.SHAPED, wx.ALIGN_CENTER)
-        sizer_slider.Add(self.sl_100m,1, wx.EXPAND, wx.ALIGN_CENTER)
-        
-        '''
-        1 [m]
-        '''
-        
-        self.sl_1m = wx.Slider(self,wx.ID_ANY,0,0,100, size=(200,-1), style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
-        self.sl_1m.SetTickFreq(5)
-        l_1m = wx.StaticText(self,wx.ID_ANY,"1m")
-        
-        sizer_slider.Add(l_1m,0, wx.SHAPED, wx.ALIGN_CENTER)
-        sizer_slider.Add(self.sl_1m,1, wx.EXPAND, wx.ALIGN_CENTER)
+        '''Angle min'''
 
+        self.sp_angle_min = wx.SpinCtrl(self)
+        l_angle_min = wx.StaticText(self,wx.ID_ANY,"Angle (min)")
+        self.sp_angle_min.SetRange(0,100)
 
+        sizer_slider.Add(l_angle_min,0, wx.EXPAND, wx.ALIGN_CENTER)
+        sizer_slider.Add(self.sp_angle_min,1, wx.EXPAND, wx.ALIGN_CENTER)
+
+        '''Gradient'''
+
+        self.sp_rad = wx.SpinCtrl(self)
+        l_rad = wx.StaticText(self,wx.ID_ANY,"Radius (m)")
+        self.sp_rad.SetRange(50,25000)
+
+        sizer_slider.Add(l_rad,0, wx.EXPAND, wx.ALIGN_CENTER)
+        sizer_slider.Add(self.sp_rad,1, wx.EXPAND, wx.ALIGN_CENTER)        
+        
+        s.AddSpacer(5)
         s.Add(sizer_slider,1,wx.EXPAND)
 
 
@@ -492,20 +508,23 @@ class TrackPropertiesArc(wx.Panel):
         """
         #self.Bind(wx.EVT_SCROLL_CHANGED, self.SliderMove)
         #self.Bind(wx.EVT_SCROLL_THUMBTRACK, self.SliderMove)
+        self.Bind(wx.EVT_SPINCTRL, self.OnChange)
         pass
 
 
-    def SliderMove(self, event):
+    def OnChange(self, event):
         
         editor = self.TopLevelParent.editor
         bp = editor.basePoint
         point = self.track.nextPoint(bp.point) 
         #change place of basepoint to start of track
         bp.point = point
+        v = self.track.getNormalVector(point)
+        alpha = math.degrees(math.atan2(v.x, v.y))+180
+        bp.alpha = alpha
         #create new track
-        new_track = ui.trackfc.TrackFactory().CreateStraight(self.sl_km.GetValue()*1000 + \
-                                                             self.sl_100m.GetValue()*100 + \
-                                                             self.sl_1m.GetValue(), bp)
+        angle = math.radians(float(self.sp_angle.GetValue()) + float(self.sp_angle_min.GetValue() / 100.0))
+        new_track = ui.trackfc.TrackFactory().CreateArc(angle, self.sp_rad.GetValue(), self.isLeft, bp)
         #delete old track
         editor.scenery.RemoveRailTracking(self.track)
         #add new

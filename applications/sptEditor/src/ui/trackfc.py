@@ -95,6 +95,8 @@ class TrackFactory:
         basePoint.SetAlpha(bp.alpha)
         basePoint.SetPosition(bp.point)
 
+        self.basePoint = basePoint
+
         return track
 
     def CreateArcOnStation(self, angle, radius, isLeft, basePoint):
@@ -127,12 +129,8 @@ class TrackFactory:
         
         [p1, p2, v1, v2] = convertVec3ftoVec3([p1, p2, v1, v2])
         
+        basePoint.alpha = degrees(math.atan2(v2.x, v2.y))+180
         basePoint.point = p2
-        if isLeft:
-            basePoint.alpha -= degrees(angle)
-        else:
-            basePoint.alpha += degrees(angle)
-
         # Refresh editor
         #self.editor.SetBasePoint(basePoint, True)
         self.basePoint = basePoint
