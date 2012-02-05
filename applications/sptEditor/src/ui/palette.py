@@ -255,7 +255,7 @@ class BasePointProperties(wx.Panel):
         
         self.sp_angle = wx.SpinCtrl(self)
         l_angle = wx.StaticText(self,wx.ID_ANY,"Angle (deg)")
-        self.sp_angle.SetRange(0,359) 
+        self.sp_angle.SetRange(-360,360) 
                
         sizer_slider.Add(l_angle,0, wx.EXPAND, wx.ALIGN_CENTER)
         sizer_slider.Add(self.sp_angle,1, wx.EXPAND, wx.ALIGN_CENTER)
@@ -264,7 +264,7 @@ class BasePointProperties(wx.Panel):
 
         self.sp_angle_min = wx.SpinCtrl(self)
         l_angle_min = wx.StaticText(self,wx.ID_ANY,"Angle (min)")
-        self.sp_angle_min.SetRange(0,100)
+        self.sp_angle_min.SetRange(-100,100)
 
         sizer_slider.Add(l_angle_min,0, wx.EXPAND, wx.ALIGN_CENTER)
         sizer_slider.Add(self.sp_angle_min,1, wx.EXPAND, wx.ALIGN_CENTER)
@@ -308,8 +308,7 @@ class BasePointProperties(wx.Panel):
         #get basepoint
         editor = self.TopLevelParent.editor
         bp = editor.basePoint        
-
-        bp.alpha = float(self.sp_angle.GetValue()) + float(self.sp_angle_min.GetValue() / 100.0)
+        bp.alpha = math.fmod(float(self.sp_angle.GetValue())+360,360.0) + math.fmod(float(self.sp_angle_min.GetValue() / 100.0)+100,100.0)
         bp.gradient = self.sp_grad.GetValue()
 
         editor.SetBasePoint(bp,True)
@@ -439,13 +438,21 @@ class TrackPropertiesArc(wx.Panel):
         #first we calc angle bettwen two vectors
         self.isLeft = False
         a1 = math.degrees(math.atan2(track.v1.x, track.v1.y))
-        a2 = math.degrees(math.atan2(track.v2.x, track.v2.y))+180
-        angle = a2 - a1
-        if angle > 180:
-            angle = 360 - angle
-            self.isLeft = True
+        a2 = math.degrees(math.atan2(-track.v2.x, -track.v2.y))
         
-        #first we calc radius from lenght of vector
+        #we count all to 180 degrees and then take rest of divide to 360 to have
+        #good calcs
+        x = 180.0 - a1
+        a1 = math.fmod(a1+x,360.0)
+        a2 = math.fmod(a2+x,360.0)
+        
+        #if angle of a1 id greater than a2 it menas that is left arc
+        if a1 > a2:
+            angle = a1 - a2
+            self.isLeft = True
+        else:
+            angle = a2 - a1
+        #second we calc radius from lenght of vector
         T = track.v1.length()
         R = T * 3.0 / 4.0 / (math.tan(math.radians(angle) * 0.25))
         
