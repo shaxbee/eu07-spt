@@ -92,7 +92,7 @@ std::auto_ptr<Path> readPath(BinaryReader& reader)
     return std::auto_ptr<Path>(NULL);
 }; // ::readPath(reader)
 
-osg::Vec3d readHeader(BinaryReader& reader)
+osg::Vec3f readHeader(BinaryReader& reader)
 {
     reader.expectChunk("HEAD");
 
@@ -258,13 +258,13 @@ std::auto_ptr<Sector> readSector(std::ifstream& input, Scenery& scenery, const o
 };
 #endif
 
-Sector& readSector(std::istream& input, Scenery& scenery)
+osg::Vec3f readSector(std::istream& input, Scenery& scenery)
 {
     BinaryReader reader(input);
 
     reader.expectChunk("SECT");
 
-    osg::Vec3d position = readHeader(reader);
+    osg::Vec3f position = readHeader(reader);
 
     // TRLS - Tracks List
     SimpleTracks simpleTracks;
@@ -296,7 +296,7 @@ Sector& readSector(std::istream& input, Scenery& scenery)
 
     scenery.addSector(std::auto_ptr<Sector>(new Sector(position, tracks)));
 
-    return scenery.getSector(position);
+    return position;
 
 };
 

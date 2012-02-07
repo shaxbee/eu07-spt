@@ -1,6 +1,8 @@
 #include "SectorNode.h"
+#include "SceneryAccess.h"
 
-#include <typeinfo>
+//#include <typeinfo>
+#include <limits>
 
 #include <osg/Geometry>
 #include <osgUtil/SmoothingVisitor>
@@ -15,6 +17,11 @@
 
 namespace
 {
+
+static osg::Vec3f INVALID_VEC3F = osg::Vec3f(
+	std::numeric_limits<float>::infinity(),
+	std::numeric_limits<float>::infinity(),
+	std::numeric_limits<float>::infinity());
 
 osg::Geometry* createProfile()
 {
@@ -86,8 +93,30 @@ private:
 
 };
 
-SectorNode::SectorNode(sptCore::Sector& sector): _sector(sector)
+SectorNode::SectorNode():
+	Node(),
+	_sector(INVALID_VEC3F),
+	_geode()
 {
-    TrackGeometryVisitor visitor(this, createProfile());
-    sector.accept(visitor);
+}
+
+SectorNode::SectorNode(const SectorNode& other, const osg::CopyOp& copyop):
+	Node(),
+	_sector(other._sector),
+	_geode(new osg::Geode(*other._geode, copyop))
+{
+}
+
+SectorNode::SectorNode(const osg::Vec3f& sector):
+	Node(),
+	_sector(sector),
+	_geode(new osg::Geode())
+{
+	TrackGeometryVisitor visitor(_geode, createProfile());
+    getSceneryInstance().getSector(_sector).accept(visitor);
+}
+
+void SectorNode::traverse(osg::NodeVisitor& visitor)
+{
+	_geode->accept(visitor);
 }
