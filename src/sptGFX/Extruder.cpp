@@ -1,9 +1,11 @@
 #include <sptGFX/Extruder.h>
-
-#include <iostream>
-#include <osgUtil/SmoothingVisitor>
-
 #include <sptUtil/Math.h>
+
+#include <cassert>
+
+//#include <iterator>
+//#include <iostream>
+//#include <osg/io_utils>
 
 using namespace sptGFX;
 
@@ -11,11 +13,13 @@ Extruder::Extruder(osg::Geometry* profile, const Settings& settings):
     _profile(profile),
     _settings(settings)
 {
-
-    if(_settings.vertex.to == std::numeric_limits<unsigned int>::max())
-        _settings.vertex.to = profile->getVertexArray()->getNumElements() - 1;
-
 }; // Extruder::Extruder
+
+const osg::Vec3f& Extruder::getVertex(size_t index) const
+{
+    assert(_vertices);
+    return (*_vertices)[index];
+};
 
 void Extruder::setGeometry(osg::Geometry* geometry)
 {
@@ -27,13 +31,13 @@ void Extruder::setGeometry(osg::Geometry* geometry)
 
 };
 
-void Extruder::extrude(const sptCore::Path& path, const osg::Vec3& position, const osg::Vec3& offset, double texCoordOffset)
+void Extruder::extrude(const sptCore::Path& path, const osg::Vec3& position)
 {
 
-    size_t numProfileVerts = vertsCount();
+    size_t numProfileVerts = _profile->getVertexArray()->getNumElements();
 
     osg::ref_ptr<osg::Vec3Array> points(path.points());
-    size_t numPathVerts = points->getNumElements();
+    size_t numPathVerts = points->getNumElements() - 1;
 
     // resize vertices and texture coordinate arrays
     {
@@ -43,10 +47,8 @@ void Extruder::extrude(const sptCore::Path& path, const osg::Vec3& position, con
         _texCoords->reserve(_texCoords->size() + numVerts);
     }
 
-    double texCoordV = texCoordOffset;
-
     // first profile
-    transformProfile(path.front(), offset, path.frontDir(), texCoordV);
+    transformProfile(path.front(), path.frontDir());
 
     osg::Vec3 prev = path.front();
 
@@ -55,46 +57,60 @@ void Extruder::extrude(const sptCore::Path& path, const osg::Vec3& position, con
     {
         osg::Vec3 point = (*points)[row];
         osg::Vec3 dir = point - prev;
-        texCoordV += dir.length();
+        _state.texCoordT += dir.length();
 
-        transformProfile(point, offset, dir, texCoordV);
+        transformProfile(point, dir);
 
         prev = point;
     };
 
     // last profile
-    texCoordV += (path.back() - prev).length();
-    transformProfile(path.back(), offset, path.backDir(), texCoordV);
+    _state.texCoordT += (path.back() - prev).length();
+    transformProfile(path.back(), path.backDir());
 
-    // create faces index arrays
-    for(size_t face = 0; face < numProfileVerts - 1; face++)
+//    std::copy(_vertices->begin(), _vertices->end(), std::ostream_iterator<osg::Vec3f>(std::cout, "\n"));
+
+    size_t numFaces = (numProfileVerts - 1) * (numPathVerts - 1);
+
+    osg::Vec3Array* normals = new osg::Vec3Array(numFaces * 2);
+    osg::DrawElementsUInt* primitiveSet = new osg::DrawElementsUInt(osg::PrimitiveSet::TRIANGLES, 0);
+
+    for(size_t row = 0; row < numPathVerts - 1; row++)
     {
-        osg::DrawElementsUInt* primitiveSet = new osg::DrawElementsUInt(GL_TRIANGLE_STRIP, numPathVerts * 2);
+    	for(size_t face = 0; face < numProfileVerts - 2; face++)
+    	{
+    		size_t index = row * numProfileVerts + face;
 
-        for(size_t row=0; row < numPathVerts; row++)
-        {
-            size_t index = row * numProfileVerts + face;
+			// first triangle
+			primitiveSet->push_back(index);
+			primitiveSet->push_back(index + 1);
+			primitiveSet->push_back(index + numProfileVerts);
 
-            primitiveSet->push_back(index);
-            primitiveSet->push_back(index + 1);
-        };
+			// second triangle
+			primitiveSet->push_back(index + 1);
+			primitiveSet->push_back(index + numProfileVerts);
+			primitiveSet->push_back(index + numProfileVerts + 1);
 
-        _geometry->addPrimitiveSet(primitiveSet);
+			// normal - cross product of face X and Z axis edges
+			osg::Vec3f normal(
+				(getVertex(index + 1) - getVertex(index)) ^ // X edge
+				(getVertex(index) - getVertex(index + numProfileVerts)) // Z edge;
+			);
+
+			// normal vector should have length of 1
+			normal.normalize();
+
+			// same normal vector for two triangles per face
+			normals->push_back(-normal);
+			normals->push_back(-normal);
+    	};
     };
 
-    // create normal vectors
-    // TODO: change this to some native implementation
-    #if 0
-    osgUtil::SmoothingVisitor::smooth(*_geometry);
-    osg::Vec3Array* normals = static_cast<osg::Vec3Array*>(_geometry->getNormalArray());
-
-    for(osg::Vec3Array::iterator iter = normals->begin(); iter != normals->end(); iter++)
-        *iter = -(*iter);
-    #endif
-
+    // _geometry->setNormalArray(normals);
+    _geometry->addPrimitiveSet(primitiveSet);
 }; // Extruder::createPrimitiveSet
 
-void Extruder::transformProfile(const osg::Vec3& position, const osg::Vec3& offset, osg::Vec3 direction, double texCoordV)
+void Extruder::transformProfile(const osg::Vec3& position, osg::Vec3 direction)
 {
 
     osg::Vec3Array& profileVertices = static_cast<osg::Vec3Array&>(*(_profile->getVertexArray()));
@@ -102,10 +118,14 @@ void Extruder::transformProfile(const osg::Vec3& position, const osg::Vec3& offs
 
     osg::Matrix transform(sptUtil::rotationMatrix(direction));
 
-    for(size_t index = _settings.vertex.from; index < _settings.vertex.to; index++)
+    for(size_t index = 0; index < profileVertices.getNumElements(); index++)
     {
-        _vertices->push_back(transform * (profileVertices[index] + offset) + position);
-        _texCoords->push_back(profileTexCoords[index] + osg::Vec2(0, texCoordV));
+        _vertices->push_back(transform * (profileVertices[index] + _settings.vertex.offset) + position);
+
+        osg::Vec2f texCoord(profileTexCoords[index] + osg::Vec2(0, _state.texCoordT) + _settings.texture.offset);
+        _texCoords->push_back(osg::Vec2f(
+        	texCoord.x() * _settings.texture.scale.x(),
+        	texCoord.y() * _settings.texture.scale.y()));
     };
 
 };

@@ -1,11 +1,12 @@
 #include "SectorNode.h"
 #include "SceneryAccess.h"
 
-//#include <typeinfo>
 #include <limits>
 
 #include <osg/Geometry>
-#include <osgUtil/SmoothingVisitor>
+#include <osg/Texture2D>
+
+#include <osgDB/ReadFile>
 
 #include <sptGFX/Extruder.h>
 
@@ -54,13 +55,8 @@ void extrude(osg::Geode* target, osg::Geometry* profile, std::auto_ptr<sptCore::
     geometry->setVertexArray(new osg::Vec3Array);
     geometry->setTexCoordArray(0, new osg::Vec2Array);
 
-    osg::Vec4Array* colors = new osg::Vec4Array;
-    colors->push_back(osg::Vec4(1.0f, 0.0f, 0.0f, 1.0f));
-    geometry->setColorArray(colors);
-    geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
-
     sptGFX::Extruder::Settings settings;
-//    settings.vertex.to = profile->getVertexArray()->getNumElements() - 2;
+    settings.texture.scale = osg::Vec2f(1.0f, 0.25f);
     sptGFX::Extruder extruder(profile, settings);
     extruder.setGeometry(geometry.get());
 
@@ -112,6 +108,10 @@ SectorNode::SectorNode(const osg::Vec3f& sector):
 	_sector(sector),
 	_geode(new osg::Geode())
 {
+    osg::ref_ptr<osg::Texture2D> texture(new osg::Texture2D(osgDB::readImageFile("tpd-oil1.tga")));
+    texture->setWrap(osg::Texture2D::WRAP_T, osg::Texture2D::REPEAT);
+    _geode->getOrCreateStateSet()->setTextureAttribute(0, texture.get());
+
 	TrackGeometryVisitor visitor(_geode, createProfile());
     getSceneryInstance().getSector(_sector).accept(visitor);
 }
