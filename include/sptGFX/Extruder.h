@@ -1,8 +1,6 @@
 #ifndef SPTGFX_EXTRUDER_H
 #define SPTGFX_EXTRUDER_H 1
 
-#include <limits>
-
 #include <osg/Vec2d>
 #include <osg/Geometry>
 
@@ -21,7 +19,7 @@ public:
     //! \param profile geometry representing profile 
     //! \param settings vertex and texture settings 
     //! \warning PrimitiveSet used for extrusion must be osg::DrawElements instance in POLYGON mode 
-    Extruder(osg::Geometry* profile, const Settings& settings);
+    Extruder(const osg::Geometry* profile, osg::Geometry* output, const Settings& settings);
     
     const Settings& getSettings() const { return _settings; }
 
@@ -31,20 +29,13 @@ public:
     //! \param position vector added to all points
     //! \param offset deviation from axis of path
     //! \param texCoordOffset initial offset for texture coordinates
-    void extrude(const sptCore::Path& path, const osg::Vec3& position = osg::Vec3());
-
-    //! \brief Set output geometry
-    void setGeometry(osg::Geometry* geometry);
+    osg::ref_ptr<osg::PrimitiveSet> extrude(const sptCore::Path& path, const osg::Vec3& position = osg::Vec3());
     
     //! \brief Extruding settings
     struct Settings
     {
 
-    	enum Mode
-    	{
-    		LOOP,
-    		STRIP
-    	};
+    	Settings(): vertex(), texture() { };
 
         struct Vertex 
         {
@@ -68,11 +59,27 @@ public:
             osg::Vec2d scale;
         };
 
-        Mode mode;
         Vertex vertex;
         Texture texture;
         
     }; // sptGFX::Extruder::Settings
+
+	struct Profile
+	{
+		Profile(const osg::Geometry* profile);
+
+		const osg::Vec3Array& vertices;
+		const osg::Vec2Array& texCoords;
+	};
+
+	struct Output
+	{
+		Output(osg::Geometry* output);
+
+		osg::Vec3Array& vertices;
+		osg::Vec3Array& normals;
+		osg::Vec2Array& texCoords;
+	};
 
     struct State
     {
@@ -85,15 +92,11 @@ public:
 private:
     //! Generate vertex and texture positions
     void transformProfile(const osg::Vec3& position, osg::Vec3 direction);
-    const osg::Vec3f& getVertex(size_t index) const;
 
-    osg::ref_ptr<osg::Geometry> _profile;
-    osg::ref_ptr<osg::Geometry> _geometry;
+    const Settings _settings;
 
-    osg::ref_ptr<osg::Vec3Array> _vertices;
-    osg::ref_ptr<osg::Vec2Array> _texCoords;
-
-    Settings _settings;
+    const Profile _profile;
+    Output _output;
     State _state;
 
 }; // class sptGFX::Extruder

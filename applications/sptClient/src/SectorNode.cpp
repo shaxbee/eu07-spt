@@ -34,7 +34,6 @@ osg::Geometry* createProfile()
     vertices->push_back(osg::Vec3(-0.8f, 0.0f, 0.5f));
     vertices->push_back(osg::Vec3( 0.8f, 0.0f, 0.5f));
     vertices->push_back(osg::Vec3( 1.2f, 0.0f, 0.0f));
-    vertices->push_back(osg::Vec3(-1.2f, 0.0f, 0.0f));
     geometry->setVertexArray(vertices);
 
     osg::Vec2Array* texCoords = new osg::Vec2Array;
@@ -42,7 +41,6 @@ osg::Geometry* createProfile()
     texCoords->push_back(osg::Vec2(0.7f / 3.0f, 0.0f));
     texCoords->push_back(osg::Vec2(2.3f / 3.0f, 0.0f));
     texCoords->push_back(osg::Vec2(1.0f, 0.0f));
-    texCoords->push_back(osg::Vec2(0.0f, 0.0f));
     geometry->setTexCoordArray(0, texCoords);
 
     return geometry;
@@ -53,15 +51,15 @@ void extrude(osg::Geode* target, osg::Geometry* profile, std::auto_ptr<sptCore::
 {
     osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
     geometry->setVertexArray(new osg::Vec3Array);
+    geometry->setNormalArray(new osg::Vec3Array);
+    geometry->setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
     geometry->setTexCoordArray(0, new osg::Vec2Array);
 
     sptGFX::Extruder::Settings settings;
     settings.texture.scale = osg::Vec2f(1.0f, 0.25f);
-    sptGFX::Extruder extruder(profile, settings);
-    extruder.setGeometry(geometry.get());
+    sptGFX::Extruder extruder(profile, geometry.get(), settings);
 
-    extruder.extrude(*path);
-
+    geometry->addPrimitiveSet(extruder.extrude(*path));
     target->addDrawable(geometry.get());
 };
 
