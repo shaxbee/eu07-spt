@@ -3,7 +3,6 @@
 
 #include <vector>
 
-#include <boost/cstdint.hpp>
 #include <boost/tr1/unordered_map.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 

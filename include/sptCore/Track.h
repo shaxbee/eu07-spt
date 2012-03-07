@@ -1,6 +1,8 @@
 #ifndef SPTCORE_TRACK_H
 #define SPTCORE_TRACK_H 1
 
+#include <cstdint>
+
 #include <osg/Vec3>
 #include <osg/Matrix>
 

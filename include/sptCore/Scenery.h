@@ -9,7 +9,6 @@
 #include <stdexcept>
 
 #include <boost/ptr_container/ptr_map.hpp>
-#include <boost/cstdint.hpp>
 #include <boost/scoped_ptr.hpp>
 
 #include <osg/Vec3d>

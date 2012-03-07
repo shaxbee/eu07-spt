@@ -16,6 +16,8 @@ size_t hash_value(const osg::Vec3f& value)
 	boost::hash_combine(result, value.x());
 	boost::hash_combine(result, value.y());
 	boost::hash_combine(result, value.z());
+
+	return result;
 }
 };
 

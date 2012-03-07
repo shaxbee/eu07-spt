@@ -3,18 +3,19 @@
 
 #include <string>
 #include <cmath>
-#include <boost/cstdint.hpp>
+#include <cstdint>
+
 #include <boost/functional/hash.hpp>
 
 class Decimal
 {
 public:
-    static const boost::uint8_t DEFAULT_PRECISION = 3;
+    static const std::uint8_t DEFAULT_PRECISION = 3;
 
     Decimal();
     Decimal(const Decimal& other): _value(other._value), _base(other._base) { };
-    explicit Decimal(const std::string& value, boost::uint8_t precision = DEFAULT_PRECISION);
-    explicit Decimal(double value, boost::uint8_t precision = DEFAULT_PRECISION);
+    explicit Decimal(const std::string& value, std::uint8_t precision = DEFAULT_PRECISION);
+    explicit Decimal(double value, std::uint8_t precision = DEFAULT_PRECISION);
 
     Decimal operator+(const Decimal& other) const
     {
