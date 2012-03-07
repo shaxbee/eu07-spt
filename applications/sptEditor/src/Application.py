@@ -647,7 +647,7 @@ if __name__ == "__main__":
     app = Application()
     frame = MainWindow(None, ID_MAIN_FRAME)
     
-    # preview = osgwx.Preview3DFrame(frame, "Preview")
+    preview = osgwx.Preview3DFrame(frame, "Preview")
     
     app.MainLoop()
 

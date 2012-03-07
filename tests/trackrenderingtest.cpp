@@ -9,10 +9,30 @@
 
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
+
 #include <osgViewer/Viewer>
 
 #include "sptCore/Path.h"
 #include "sptGFX/Extruder.h"
+
+#if 0
+namespace sptView
+{
+
+struct TrackMaterialComponent
+{
+	sptGFX::Extruder::Settings settings;
+	sptGFX::Extruder::Profile profile;
+	osg::ref_ptr<osg::StateSet> stateSet;
+};
+
+struct TrackMaterial
+{
+	typedef std::vector<TrackMaterialComponent> Components;
+	Components components;
+};
+}
+#endif
 
 osg::Geometry* createProfile()
 {
