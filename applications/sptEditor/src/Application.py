@@ -82,13 +82,14 @@ class MainWindow(wx.Frame):
         self.SetMinSize((300, 200))
 
         # Load resource file
-        self.xRes = wx.xrc.XmlResource("Application.xrc")
+        self.xRes = wx.xrc.XmlResource(os.path.join(os.path.dirname(__file__),"Application.xrc"))
 
         self.SetIcons(self.PrepareApplicationIcons())
 
         self.modified = False
         self.path = None
-
+        self.editor = None
+        
         self.UpdateTitle()
 
         self.CreateMenu()
@@ -105,8 +106,7 @@ class MainWindow(wx.Frame):
         
         # Prepare pane manager
         self._paneManager = AUI.AuiManager(self.main_content_panel)
-
-
+        
         self.CreateStatusBar()
         self.CreatePalette()
         self.CreateContent()
@@ -144,7 +144,7 @@ class MainWindow(wx.Frame):
         self.MenuChangeEditorMode(ui.editor.MODE_NORMAL)
 
     def OnMouseWheel(self, event):
-        '''Tracks mouse wheel event trought many windows'''
+        '''Tracks mouse wheel event trough many windows'''
         self.editor.OnMouseWheel(event)
 
     def PrepareApplicationIcons(self):

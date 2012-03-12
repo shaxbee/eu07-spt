@@ -327,9 +327,9 @@ class TrackPropertiesStraight(wx.Panel):
     def SetTrack(self, track):
         #read lenght and angle of track
         length = math.sqrt(math.pow(float(track.p2.x - track.p1.x),2) + math.pow(float(track.p2.y - track.p1.y),2))
-        angle = math.degrees(math.atan2(float(track.p2.x - track.p1.x), float(track.p2.y - track.p1.y)))
-        a1 = track.p1.angleToJUnit()
-        a2 = track.p2.angleToJUnit()
+#        angle = math.degrees(math.atan2(float(track.p2.x - track.p1.x), float(track.p2.y - track.p1.y)))
+#        a1 = track.p1.angleToJUnit()
+#        a2 = track.p2.angleToJUnit()
         
         main = length // 1000
         rest = math.fmod(length, 1000)
@@ -435,7 +435,7 @@ class TrackPropertiesArc(wx.Panel):
 
     def SetTrack(self, track):
         
-        #first we calc angle bettwen two vectors
+        #first we calc angle between two vectors
         self.isLeft = False
         a1 = math.degrees(math.atan2(track.v1.x, track.v1.y))
         a2 = math.degrees(math.atan2(-track.v2.x, -track.v2.y))
@@ -446,13 +446,13 @@ class TrackPropertiesArc(wx.Panel):
         a1 = math.fmod(a1+x,360.0)
         a2 = math.fmod(a2+x,360.0)
         
-        #if angle of a1 id greater than a2 it menas that is left arc
+        #if angle of a1 id greater than a2 it means that is left arc
         if a1 > a2:
             angle = a1 - a2
             self.isLeft = True
         else:
             angle = a2 - a1
-        #second we calc radius from lenght of vector
+        #second we calc radius from length of vector
         T = track.v1.length()
         R = T * 3.0 / 4.0 / (math.tan(math.radians(angle) * 0.25))
         
@@ -471,11 +471,11 @@ class TrackPropertiesArc(wx.Panel):
 
     def MakeUI(self, s):
         """
-        Function in wich we make some GUI for changing properties of straight track
+        Function in which we make some GUI for changing properties of straight track
         """
         
         '''
-        Angle degres
+        Angle degrees
         '''
         
         sizer_slider = wx.FlexGridSizer(1,2,5,5)

@@ -6,6 +6,7 @@ Module containing views of scenery elements.
 
 import math
 import os.path
+import sys
 import wx
 from sptmath import Decimal
 
@@ -56,14 +57,14 @@ SNAP_BASEPOINT_IMAGES = None
 def GetBasePointImages():
     global BASEPOINT_IMAGES
     if BASEPOINT_IMAGES is None:
-        BASEPOINT_IMAGES = loadImages(os.path.join("icons", "canvas", "basepoint.png"), 72)
+        BASEPOINT_IMAGES = loadImages(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),"icons", "canvas", "basepoint.png"), 72)
     return BASEPOINT_IMAGES
 
 
 def GetSnapPointImages():
     global SNAP_BASEPOINT_IMAGES
     if SNAP_BASEPOINT_IMAGES is None:
-        SNAP_BASEPOINT_IMAGES = loadImages(os.path.join("icons", "canvas", "snappoint.png"), 72)
+        SNAP_BASEPOINT_IMAGES = loadImages(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),"icons", "canvas", "snappoint.png"), 72)
     return SNAP_BASEPOINT_IMAGES
 
 
