@@ -6,9 +6,9 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <cstdint>
 
 #include <boost/format.hpp>
-#include <boost/cstdint.hpp>
 
 #include <osg/Vec3f>
 #include <osg/Vec3d>
@@ -23,8 +23,8 @@ class ChunkWatcher
 {
 
 public:
-    void check(boost::uint32_t bytes);
-    void push(const std::string& chunk, boost::uint32_t size);
+    void check(std::uint32_t bytes);
+    void push(const std::string& chunk, std::uint32_t size);
     void pop(const std::string& chunk);
     const std::string& current() const;
 
@@ -32,8 +32,8 @@ private:
     struct Chunk
     {
         std::string name;
-        boost::uint32_t size;
-        boost::uint32_t left;
+        std::uint32_t size;
+        std::uint32_t left;
     };
 
     typedef std::stack<Chunk> ChunkStack;
@@ -42,10 +42,10 @@ private:
 
 struct Version
 {
-    Version(boost::uint8_t major_, boost::uint8_t minor_): major(major_), minor(minor_) { };
+    Version(std::uint8_t major_, std::uint8_t minor_): major(major_), minor(minor_) { };
 
-    boost::uint8_t major;
-    boost::uint8_t minor;
+    std::uint8_t major;
+    std::uint8_t minor;
     
     bool operator<(const Version& other) const;
     bool operator==(const Version& other) const;
@@ -69,6 +69,9 @@ public:
     void read(osg::Vec3d& output);
     void readVersion();
 
+    template <typename T>
+    T read();
+
     std::string readChunk();
     void expectChunk(const std::string& type);
     void endChunk(const std::string& type);
@@ -87,7 +90,7 @@ private:
     template <typename T>
     void readOsgVec(T& output);
 
-    void checkEof(boost::uint32_t bytes)
+    void checkEof(std::uint32_t bytes)
     {
         if(_input.eof())
             throw std::runtime_error(boost::str(boost::format("Unexpected file end at index %d in chunk %s") % _position % _watcher.current()));
@@ -105,9 +108,17 @@ void BinaryReader::read(T& output)
 };
 
 template <typename T>
+T BinaryReader::read()
+{
+    T result;
+    read(result);
+    return result;
+};
+
+template <typename T>
 void BinaryReader::read(std::vector<T>& output)
 {
-    boost::uint32_t count;
+    std::uint32_t count;
     read(count);
 
     const unsigned int elementSize = sizeof(T);
@@ -132,7 +143,7 @@ void BinaryReader::read(std::vector<T>& output)
 template <typename T>
 void BinaryReader::readOsgVec(T& output)
 {
-    const boost::uint32_t size = T::num_components * sizeof(typename T::value_type);
+    const std::uint32_t size = T::num_components * sizeof(typename T::value_type);
     _watcher.check(size);
     _input.read(reinterpret_cast<char*>(output.ptr()), size);
     checkEof(size);

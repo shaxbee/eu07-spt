@@ -9,6 +9,7 @@
 #include <sptCore/Scenery.h>
 #include <sptCore/Sector.h>
 #include <sptCore/Track.h>
+#include <sptCore/SimpleTrack.h>
 #include <sptCore/Switch.h>
 
 #include <sptDB/BinaryReader.h>
@@ -29,9 +30,8 @@ enum PathType
     BEZIER = 1
 };
 
-typedef boost::ptr_vector<Track> Tracks;
+typedef boost::ptr_vector<SimpleTrack> SimpleTracks;
 typedef boost::ptr_vector<Switch> Switches;
-typedef boost::ptr_vector<RailTracking> RailTrackings;
 
 void print_vec(const osg::Vec3f& vec)
 {
@@ -92,11 +92,11 @@ std::auto_ptr<Path> readPath(BinaryReader& reader)
     return std::auto_ptr<Path>(NULL);
 }; // ::readPath(reader)
 
-osg::Vec3d readHeader(BinaryReader& reader)
+osg::Vec3f readHeader(BinaryReader& reader)
 {
     reader.expectChunk("HEAD");
 
-    reader.expectVersion(Version(1, 1));
+    reader.expectVersion(Version(1, 2));
     osg::Vec3f result;
     reader.read(result);
 
@@ -105,7 +105,7 @@ osg::Vec3d readHeader(BinaryReader& reader)
     return result;
 }; // ::readHeader(reader)
 
-void readTracks(Sector& sector, BinaryReader& reader, Tracks& output)
+void readTracks(osg::Vec3f sector, BinaryReader& reader, SimpleTracks& output)
 {
     reader.expectChunk("TRLS");
 
@@ -118,7 +118,14 @@ void readTracks(Sector& sector, BinaryReader& reader, Tracks& output)
         {
 //            std::cout << "TRACK ";
             std::auto_ptr<Path> path = readStraightPath(reader);
-            std::auto_ptr<Track> track(new Track(sector, path));
+
+            uint32_t front;
+            reader.read(front);
+
+            uint32_t back;
+            reader.read(back);
+
+            std::auto_ptr<SimpleTrack> track(new SimpleTrack(sector, path, TrackId(front), TrackId(back)));
 
             output.push_back(track);
 //            std::cout << std::endl;
@@ -134,7 +141,14 @@ void readTracks(Sector& sector, BinaryReader& reader, Tracks& output)
         {
 //            std::cout << "TRACK ";
             std::auto_ptr<Path> path = readBezierPath(reader);
-            std::auto_ptr<Track> track(new Track(sector, path));
+
+            uint32_t front;
+            reader.read(front);
+
+            uint32_t back;
+            reader.read(back);
+
+            std::auto_ptr<SimpleTrack> track(new SimpleTrack(sector, path, TrackId(front), TrackId(back)));
 
             output.push_back(track);
 //            std::cout << std::endl;
@@ -144,7 +158,7 @@ void readTracks(Sector& sector, BinaryReader& reader, Tracks& output)
     reader.endChunk("TRLS");
 }; // ::readTracks(sector, reader, output)
 
-void readSwitches(Sector& sector, BinaryReader& reader, Switches& output)
+void readSwitches(const osg::Vec3f& sector, BinaryReader& reader, Switches& output)
 {
     reader.expectChunk("SWLS");
     uint32_t count;
@@ -159,10 +173,14 @@ void readSwitches(Sector& sector, BinaryReader& reader, Switches& output)
         std::string position_str(position ? "DIVERTED" : "STRAIGHT");
 //        std::cout << "POS_" << position_str << " ";
 
-        std::auto_ptr<Path> straight = readPath(reader);
-        std::auto_ptr<Path> diverted = readPath(reader);
-
-        std::auto_ptr<Switch> switch_(new Switch(sector, straight, diverted, position_str));
+        std::auto_ptr<Switch> switch_(new Switch(
+            sector, 
+            readPath(reader), // straight
+            readPath(reader), // diverted
+            TrackId(reader.read<uint32_t>()), // commonId
+            TrackId(reader.read<uint32_t>()), // straightId
+            TrackId(reader.read<uint32_t>()), // divertedId,
+            position_str));
 
         output.push_back(switch_);
 //        std::cout << std::endl;
@@ -178,65 +196,12 @@ void readCustomTracking(Sector& sector, BinaryReader& reader, Tracks& tracks, Sw
     reader.read(count);
 
     if(count != 0)
-        throw std::logic_error("Custom RailTracking reading not implemented");
+        throw std::logic_error("Custom Track reading not implemented");
 
     reader.endChunk("RTLS");
 };
 
-void readConnections(BinaryReader& reader, const osg::Vec3f& offset, const RailTrackings& trackings, Connections& connections, ExternalConnections& externals)
-{
-    reader.expectChunk("CNLS");
-
-    uint32_t count;
-    reader.read(count);
-
-    while(count--)
-    {
-        osg::Vec3f position;
-        reader.read(position);
-
-        uint32_t left;
-        reader.read(left);
-
-        uint32_t right;
-        reader.read(right);
-
-        if(right != std::numeric_limits<size_t>::max())
-        {
-            Connection connection =
-            {
-                position,
-                &trackings.at(left),
-                &trackings.at(right)
-            };
-
-            connections.push_back(connection);
-        }
-        else
-        {
-            Connection connection =
-            {
-                position,
-                &trackings.at(left),
-                NULL
-            };
-
-            ExternalConnection external =
-            {
-                offset,
-                position,
-                left
-            };
-
-            connections.push_back(connection);
-            externals.push_back(external);
-        };
-    };
-
-    reader.endChunk("CNLS");
-}; // ::readConnections(reader, trackings, output)
-
-void readTrackNames(Scenery& scenery, BinaryReader& reader, Tracks& tracks)
+void readTrackNames(Scenery& scenery, BinaryReader& reader, SimpleTracks& tracks)
 {
     reader.expectChunk("TRNM");
     uint32_t count;
@@ -293,54 +258,45 @@ std::auto_ptr<Sector> readSector(std::ifstream& input, Scenery& scenery, const o
 };
 #endif
 
-Sector& readSector(std::istream& input, Scenery& scenery)
+osg::Vec3f readSector(std::istream& input, Scenery& scenery)
 {
     BinaryReader reader(input);
 
     reader.expectChunk("SECT");
 
-    osg::Vec3d position = readHeader(reader);
-    std::auto_ptr<Sector> sector(new Sector(position));
+    osg::Vec3f position = readHeader(reader);
 
     // TRLS - Tracks List
-    Tracks tracks;
-    readTracks(*sector, reader, tracks);
+    SimpleTracks simpleTracks;
+    readTracks(position, reader, simpleTracks);
 
     // SWLS - Switches List
     Switches switches;
-    readSwitches(*sector, reader, switches);
+    readSwitches(position, reader, switches);
 
 #if 0
-    // RTLS - Custom RailTracking List
+    // RTLS - Custom Track List
     readCustomTracking(*sector, reader, tracks, switches);
 #endif
 
     // TRNM - Track Names
-    readTrackNames(scenery, reader, tracks);
+    readTrackNames(scenery, reader, simpleTracks);
 
     // SWNM - Switch Names
     readSwitchNames(scenery, reader, switches);
 
-    RailTrackings trackings;
-    trackings.reserve(tracks.size() + switches.size());
-    trackings.transfer(trackings.begin(), tracks);
-    trackings.transfer(trackings.end() - 1, switches);
-
-    // RTCN - RailTracking Connections
-    Connections connections;
-    ExternalConnections externals;
-    readConnections(reader, position, trackings, connections, externals);
+    Tracks tracks;
+    tracks.reserve(simpleTracks.size() + switches.size());
+    tracks.transfer(tracks.begin(), simpleTracks);
+    tracks.transfer(tracks.end() - 1, switches);
 
 //    connections.insert(connections.end(), externals.begin(), externals.end());
 
-    sector->setData(trackings, connections, externals);
-
     reader.endChunk("SECT");
 
-    Sector& sectorRef = *sector;
-    scenery.addSector(sector);
+    scenery.addSector(std::auto_ptr<Sector>(new Sector(position, tracks)));
 
-    return sectorRef;
+    return position;
 
 };
 

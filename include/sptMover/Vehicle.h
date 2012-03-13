@@ -88,7 +88,7 @@ public:
     Vehicle(const std::string& name, const VehicleTraits& traits);
     ~Vehicle();
 
-    void place(sptCore::Track& track, float distance = 0.0f);
+    void place(sptCore::SimpleTrack& track, float distance = 0.0f);
     bool isPlaced() const { return !_followers.empty(); }
 
     const std::string& getName() const { return _name; }

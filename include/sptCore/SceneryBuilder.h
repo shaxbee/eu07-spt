@@ -9,8 +9,8 @@
 namespace sptCore
 {
 
-class RailTracking;
 class Track;
+class SimpleTrack;
 class Switch;
 
 class DynamicScenery;
@@ -35,12 +35,12 @@ public:
     DynamicSector& getCurrentSector() { return *_sector; }
     DynamicSector& setCurrentSector(const osg::Vec3& position);
 
-    Track& createTrack(const osg::Vec3& p1, const osg::Vec3& p2);
-    Track& createTrack(const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2);
-    Track& createTrack(const std::string& name, const osg::Vec3& p1, const osg::Vec3& p2);
-    Track& createTrack(const std::string& name, const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2);
+    SimpleTrack& createTrack(const osg::Vec3& p1, const osg::Vec3& p2);
+    SimpleTrack& createTrack(const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2);
+    SimpleTrack& createTrack(const std::string& name, const osg::Vec3& p1, const osg::Vec3& p2);
+    SimpleTrack& createTrack(const std::string& name, const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2);
 
-    void removeTrack(Track& track);
+    void removeTrack(SimpleTrack& track);
     void removeTrack(const std::string& name);
 
     Switch& createSwitch(const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2, const osg::Vec3& p3, const osg::Vec3& cp3);
@@ -55,7 +55,7 @@ private:
     std::auto_ptr<DynamicScenery> _scenery;
     DynamicSector* _sector;
 
-    void addConnection(const osg::Vec3& position, const RailTracking& track);
+    void addConnection(const osg::Vec3& position, const Track& track);
     DynamicSector& createSector(const osg::Vec3& position);
 
 }; // class sptCore::SceneryBuilder

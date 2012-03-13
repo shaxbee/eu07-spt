@@ -1,19 +1,19 @@
 #ifndef SPTGFX_TRACKRENDERER_H
 #define SPTGFX_TRACKRENDERER_H 1
 
-#include <sptGFX/RailTrackingRenderer.h>
+#include <sptGFX/TrackRenderer.h>
 
 namespace sptGFX
 {
 
-class TrackRenderer: public RailTrackingRenderer
+class TrackRenderer: public TrackRenderer
 {
 
 public:
     TrackRenderer(): _output(NULL) { }
 
     virtual void setOutput(osg::Geometry* output) { _output = output; }
-    virtual void render(sptCore::RailTracking* tracking, Profile* profile);
+    virtual void render(sptCore::Track* tracking, Profile* profile);
 
 private:
     osg::ref_ptr<osg::Geometry> _output;

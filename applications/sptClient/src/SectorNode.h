@@ -5,23 +5,23 @@
 #include <osg/NodeVisitor>
 #include <sptCore/Sector.h>
 
-class SectorNode: public osg::Geode
+class SectorNode: public osg::Node
 {
 
 public:
-    SectorNode(sptCore::Sector& sector);
+	SectorNode();
+	SectorNode(const SectorNode& other, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
+    SectorNode(const osg::Vec3f& sector);
 
-    virtual osg::Object* cloneType() const { return NULL; } 
-    virtual osg::Object* clone(const osg::CopyOp& copyop) const { return NULL; }
-    virtual bool isSameKindAs(const osg::Object* obj) const { return dynamic_cast<const SectorNode*>(obj) != NULL; }
-    virtual const char* className() const { return "SectorNode"; }
-    virtual const char* libraryName() const { return "sptDB"; }
-    virtual void accept(osg::NodeVisitor& nv) { if (nv.validNodeMask(*this)) { nv.pushOntoNodePath(this); nv.apply(*this); nv.popFromNodePath(); } }
+    virtual void traverse(osg::NodeVisitor& visitor);
 
-    const sptCore::Sector& getSector() const { return _sector; }
+    META_Node(, SectorNode);
+
+    const sptCore::Sector& getSector() const;
 
 private:
-    const sptCore::Sector& _sector;
+    const osg::Vec3f& _sector;
+    osg::ref_ptr<osg::Geode> _geode;
 
 }; // class SectorNode
 

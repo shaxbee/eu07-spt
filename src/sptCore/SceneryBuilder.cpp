@@ -58,7 +58,7 @@ DynamicSector& SceneryBuilder::setCurrentSector(const osg::Vec3& position)
 
 }; // SceneryBuilder::setCurrentSector
 
-void SceneryBuilder::addConnection(const osg::Vec3& position, const RailTracking& track)
+void SceneryBuilder::addConnection(const osg::Vec3& position, const Track& track)
 {
 
     osg::Vec3 offset(floor(position.x() / Sector::SIZE), floor(position.y() / Sector::SIZE), 0);
@@ -75,14 +75,14 @@ void SceneryBuilder::addConnection(const osg::Vec3& position, const RailTracking
 
 }; // SceneryBuilder::addConnection
 
-Track& SceneryBuilder::createTrack(const osg::Vec3& p1, const osg::Vec3& p2)
+SimpleTrack& SceneryBuilder::createTrack(const osg::Vec3& p1, const osg::Vec3& p2)
 {
 
     std::auto_ptr<Path> path(new StraightPath(p1, p2));
-    std::auto_ptr<Track> trackPtr(new Track(getCurrentSector(), path));
-    Track& track = *trackPtr;
+    std::auto_ptr<SimpleTrack> trackPtr(new SimpleTrack(getCurrentSector(), path));
+    SimpleTrack& track = *trackPtr;
 
-    _sector->addTrack(std::auto_ptr<RailTracking>(trackPtr));
+    _sector->addTrack(std::auto_ptr<Track>(trackPtr));
 
     addConnection(p1, track);
     addConnection(p2, track);
@@ -91,14 +91,14 @@ Track& SceneryBuilder::createTrack(const osg::Vec3& p1, const osg::Vec3& p2)
 
 };
 
-Track& SceneryBuilder::createTrack(const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2)
+SimpleTrack& SceneryBuilder::createTrack(const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2)
 {
 
     std::auto_ptr<Path> path(new BezierPath(p1, cp1, p2, cp2));
-    std::auto_ptr<Track> trackPtr(new Track(getCurrentSector(), path));
-    Track& track = *trackPtr;
+    std::auto_ptr<SimpleTrack> trackPtr(new SimpleTrack(getCurrentSector(), path));
+    SimpleTrack& track = *trackPtr;
 
-    _sector->addTrack(std::auto_ptr<RailTracking>(trackPtr));
+    _sector->addTrack(std::auto_ptr<Track>(trackPtr));
     addConnection(p1, track);
     addConnection(p2, track);
 
@@ -106,25 +106,25 @@ Track& SceneryBuilder::createTrack(const osg::Vec3& p1, const osg::Vec3& cp1, co
 
 };
 
-Track& SceneryBuilder::createTrack(const std::string& name, const osg::Vec3& p1, const osg::Vec3& p2)
+SimpleTrack& SceneryBuilder::createTrack(const std::string& name, const osg::Vec3& p1, const osg::Vec3& p2)
 {
 
-    Track& track = createTrack(p1, p2);
+    SimpleTrack& track = createTrack(p1, p2);
     _scenery->addTrack(name, track);
     return track;
 
 };
 
-Track& SceneryBuilder::createTrack(const std::string& name, const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2)
+SimpleTrack& SceneryBuilder::createTrack(const std::string& name, const osg::Vec3& p1, const osg::Vec3& cp1, const osg::Vec3& p2, const osg::Vec3& cp2)
 {
 
-    Track& track = createTrack(p1, cp1, p2, cp2);
+    SimpleTrack& track = createTrack(p1, cp1, p2, cp2);
     _scenery->addTrack(name, track);
     return track;
 
 };
 
-void SceneryBuilder::removeTrack(Track& track)
+void SceneryBuilder::removeTrack(SimpleTrack& track)
 {
 
     DynamicSector& sector = dynamic_cast<DynamicSector&>(track.getSector());
@@ -151,7 +151,7 @@ Switch& SceneryBuilder::createSwitch(const osg::Vec3& p1, const osg::Vec3& cp1, 
     std::auto_ptr<Switch> resultPtr(new Switch(getCurrentSector(), new BezierPath(p1, cp1, p2, cp2), new BezierPath(p1, cp1, p3, cp3)));
     Switch& result = *resultPtr;
 
-    _sector->addTrack(std::auto_ptr<RailTracking>(resultPtr));
+    _sector->addTrack(std::auto_ptr<Track>(resultPtr));
     addConnection(p1, result);
     addConnection(p2, result);
     addConnection(p3, result);

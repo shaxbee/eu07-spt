@@ -39,12 +39,12 @@ void extrude(osg::Geode* target, osg::Geometry* profile, std::auto_ptr<sptCore::
 
 void createSectorGeometry(osg::Geode* target, osg::Geometry* profile, const sptCore::Sector& sector)
 {
-    for(unsigned int index = 0; index != sector.getRailTrackingCount(); index++)
+    for(unsigned int index = 0; index != sector.getTrackCount(); index++)
     {
-        const sptCore::RailTracking& tracking = sector.getRailTracking(index);
-        if(typeid(tracking) == typeid(sptCore::Track))
+        const sptCore::Track& tracking = sector.getTrack(index);
+        if(typeid(tracking) == typeid(sptCore::SimpleTrack))
         {
-            const sptCore::Track& track = static_cast<const sptCore::Track&>(tracking);
+            const sptCore::SimpleTrack& track = static_cast<const sptCore::SimpleTrack&>(tracking);
             extrude(target, profile, track.getDefaultPath());
         };
     };

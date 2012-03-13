@@ -9,7 +9,7 @@
 
 #include <sptCore/Scenery.h>
 #include <sptCore/Sector.h>
-#include <sptCore/Track.h>
+#include <sptCore/SimpleTrack.h>
 
 using namespace sptCore;
 
@@ -19,14 +19,14 @@ namespace
 template <typename TracksContainerT>
 void set_sector_data(Sector& sector, TracksContainerT& data, size_t index)
 {
-    boost::array<RailTracking*, 1> trackings = 
+    boost::array<SimpleTrack*, 1> trackings = 
     {{ 
         data[index] 
     }};
 
-    Track* left = data[index ? (index - 1) : 2 % 3];
-    Track* center = data[index];
-    Track* right = data[(index + 1) % 3];
+    SimpleTrack* left = data[index ? (index - 1) : 2 % 3];
+    SimpleTrack* center = data[index];
+    SimpleTrack* right = data[(index + 1) % 3];
 
     osg::Vec3f front(center->getDefaultPath()->front());
     osg::Vec3f back(center->getDefaultPath()->back());
@@ -61,11 +61,11 @@ public:
         std::auto_ptr<Sector> sector2(new Sector(osg::Vec3d(Sector::SIZE, 0, 0)));
         std::auto_ptr<Sector> sector3(new Sector(osg::Vec3d(Sector::SIZE, Sector::SIZE, 0)));
         
-        boost::array<Track*, 3> tracks = 
+        boost::array<SimpleTrack*, 3> tracks = 
         {{ 
-            new Track(*sector1, new StraightPath(point1, point2)),
-            new Track(*sector2, new StraightPath(point1, point3)),
-            new Track(*sector3, new StraightPath(point1, point4))
+            new SimpleTrack(*sector1, new StraightPath(point1, point2), 2, 1),
+            new SimpleTrack(*sector2, new StraightPath(point1, point3), 0, 2),
+            new SimpleTrack(*sector3, new StraightPath(point1, point4), 1, 0)
         }};
 
         set_sector_data(*sector1, tracks, 0);
@@ -93,36 +93,36 @@ protected:
 
 TEST_F(FollowerTest, moveForward)
 {
-    Follower follower(scenery.getTrack("track1"), 0.1f);
+    Follower follower(scenery.getSimpleTrack("track1"), 0.1f);
 
     follower.move(follower.getPath().length());
     ASSERT_EQ(&follower.getSector(), &scenery.getSector(osg::Vec3(Sector::SIZE, 0, 0)));
-    ASSERT_EQ(&follower.getTrack(), &scenery.getTrack("track2"));
+    ASSERT_EQ(&follower.getSimpleTrack(), &scenery.getSimpleTrack("track2"));
 
     follower.move(follower.getPath().length());
     ASSERT_EQ(&follower.getSector(), &scenery.getSector(osg::Vec3(Sector::SIZE, Sector::SIZE, 0)));
-    ASSERT_EQ(&follower.getTrack(), &scenery.getTrack("track3"));
+    ASSERT_EQ(&follower.getSimpleTrack(), &scenery.getSimpleTrack("track3"));
 
     follower.move(follower.getPath().length());
     ASSERT_EQ(&follower.getSector(), &scenery.getSector(osg::Vec3(0, 0, 0)));
-    ASSERT_EQ(&follower.getTrack(), &scenery.getTrack("track1"));
+    ASSERT_EQ(&follower.getSimpleTrack(), &scenery.getSimpleTrack("track1"));
 };
 
 TEST_F(FollowerTest, moveBackward)
 {
-    Follower follower(scenery.getTrack("track1"), 0.1f);
+    Follower follower(scenery.getSimpleTrack("track1"), 0.1f);
 
     follower.move(-follower.getPath().length());
     ASSERT_EQ(&follower.getSector(), &scenery.getSector(osg::Vec3(Sector::SIZE, Sector::SIZE, 0)));
-    ASSERT_EQ(&follower.getTrack(), &scenery.getTrack("track3"));
+    ASSERT_EQ(&follower.getSimpleTrack(), &scenery.getSimpleTrack("track3"));
 
     follower.move(-follower.getPath().length());
     ASSERT_EQ(&follower.getSector(), &scenery.getSector(osg::Vec3(Sector::SIZE, 0, 0)));
-    ASSERT_EQ(&follower.getTrack(), &scenery.getTrack("track2"));
+    ASSERT_EQ(&follower.getSimpleTrack(), &scenery.getSimpleTrack("track2"));
 
     follower.move(-follower.getPath().length());
     ASSERT_EQ(&follower.getSector(), &scenery.getSector(osg::Vec3(0, 0, 0)));
-    ASSERT_EQ(&follower.getTrack(), &scenery.getTrack("track1"));
+    ASSERT_EQ(&follower.getSimpleTrack(), &scenery.getSimpleTrack("track1"));
 };
 
 TEST_F(FollowerTest, getPosition)

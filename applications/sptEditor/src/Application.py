@@ -11,13 +11,10 @@ import logging.config
 import wx
 import wx.xrc
 import wx.aui as AUI
-import wx.lib.agw.ribbon as RB
-import wx.lib.delayedresult as delayed
 import yaml
 import os.path
 import sys
 import optparse
-#import run
 
 import model.tracks
 import model.groups
@@ -28,7 +25,9 @@ import ui.palette
 import sptyaml
 import sptmath
 import ui.ribbon
+import osgwx
 
+import wx.lib.agw.ribbon as RB
 
 # Stock items
 ID_CENTER_AT = wx.ID_HIGHEST          + 1
@@ -49,7 +48,7 @@ class Application(wx.App):
     """
     
     def __init__(self):
-        wx.App.__init__(self) 
+        wx.App.__init__(self, redirect=False) 
 
     
     def OnInit(self):
@@ -359,66 +358,34 @@ class MainWindow(wx.Frame):
 
             try:
                 wx.BeginBusyCursor()
-                # Make a separate worker (long running)
-                delayed.startWorker(self.OpenComplete,
-                    self.OpenWorkerJob,
-                    cargs = (path, ),
-                    wargs = (path, ))
+                sceneryFile = file(path, "r")
+                try:                    
+                    scenery = yaml.load(sceneryFile, sptyaml.SptLoader)
+                    if not isinstance(scenery, model.scenery.Scenery):
+                        raise Exception("Input file is not scenery")
+                    self.editor.SetScenery(scenery)
+                    self.modified = False
+                    self.path = path
+                    self.UpdateTitle()
+                finally:
+                    sceneryFile.close()
+                    wx.EndBusyCursor()
+            except yaml.YAMLError, inst:
+                logging.warning("Error while parsing scenery file: ", exc_info=inst)
+                mark_str = ""
+                if hasattr(inst, "problem_mark"):
+                    mark = inst.problem_mark
+                    mark_str = "Line: %d, Column: %d" % (mark.line+1, mark.column+1)
+                wx.MessageBox("Error while parsing scenery file:\n" \
+                    + inst.problem + "\n" + mark_str, \
+                    "Parsing error", wx.OK | wx.ICON_ERROR, self)
             except Exception, inst:
-                logging.exception("Error while reading scenery file: "
-                    + path)
-                wx.MessageBox("Error while reading scenery file:\n"
-                    + str(inst),
-                    "Open file error", wx.OK | wx.ICON_ERROR, self)
+                logging.exception("Error while reading scenery file:")
+                wx.MessageBox("Error while reading scenery file:\n" \
+                    + str(inst), \
+                    "Open file error", wx.OK | wx.ICON_ERROR, self)            
 
         self.workingDirectory = openDialog.GetDirectory()
-
-
-    def OpenComplete(self, delayedResult, *cargs):
-        """
-        Completes the open scenery routine as a result
-        of finishing opening worker job.
-        """
-        path = cargs[0]
-        try:
-            scenery = delayedResult.get()
-            if not isinstance(scenery, model.scenery.Scenery):
-                raise Exception("Input file is not scenery")
-            self.editor.SetScenery(scenery)
-            self.modified = False
-            self.path = path
-            self.UpdateTitle()
-        except yaml.YAMLError, inst:
-            logging.warning("Error while parsing scenery file: ", exc_info=inst)
-            mark_str = ""
-            if hasattr(inst, "problem_mark"):
-                mark = inst.problem_mark
-                mark_str = "Line: %d, Column: %d" % (mark.line+1, mark.column+1)
-            wx.MessageBox("Error while parsing scenery file:\n"
-                + inst.problem + "\n" + mark_str,
-                "Parsing error", wx.OK | wx.ICON_ERROR, self)
-        except Exception, inst:
-            logging.exception("Error while reading scenery file: " + path)
-            wx.MessageBox("Error while reading scenery file:\n"
-                + str(inst),
-                "Open file error", wx.OK | wx.ICON_ERROR, self) 
-        finally:
-            wx.EndBusyCursor()
-
-
-    def OpenWorkerJob(self, *wargs):
-        """
-        Worker job that opens the scenery.
-        """
-        path = wargs[0]
-        f = None
-        try:
-            f = file(path, "r")
-            scenery = yaml.load(f, sptyaml.SptLoader)
-            return scenery
-        finally:
-            if f is not None:
-                f.close()
 
 
     def OnSave(self, event):
@@ -442,57 +409,24 @@ class MainWindow(wx.Frame):
         """
         try:
             wx.BeginBusyCursor()
-            # Make a separate worker
-            delayed.startWorker(self.SaveComplete,
-                self.SaveWorkerJob,
-                cargs = (path, ),
-                wargs = (path, self.editor.scenery))
-        except Exception, inst:
-            logging.exception("Error while writing scenery into file:"
-                + path)
-            wx.MessageBox("Error while writing scenery into file:\n"
-                + str(inst),
-                "Save file error", wx.OK | wx.ICON_ERROR, self)
-            wx.EndBusyCursor()
+            scenery_file = open(path, "w")            
+            try:
+                scenery_file.write(yaml.dump(self.editor.scenery))
+                self.path = path
+                self.modified = False
+                self.UpdateTitle()
+            finally:
+                scenery_file.close()              
+                wx.EndBusyCursor()            
 
-
-    def SaveComplete(self, delayedResult, *cargs):
-        """
-        Completes the save scenery routing as a result of
-        finishing saving worker job.
-        """
-        path = cargs[0]
-        try:
-            success = delayedResult.get()
-            self.path = path
-            self.modified = False
-            self.UpdateTitle()
             return True
         except Exception, inst:
-            logging.exception("Error while writing scenery into file:"
+            logging.exception("Error while writing scenery into file:" \
                 + path)
-            wx.MessageBox("Error while writing scenery into file:\n"
-                + str(inst),
+            wx.MessageBox("Error while writing scenery into file:\n" \
+                + str(inst), \
                 "Save file error", wx.OK | wx.ICON_ERROR, self)
             return False
-        finally:
-            wx.EndBusyCursor()
-
-
-    def SaveWorkerJob(self, *wargs):
-        """
-        Worker job that saves the scenery.
-        """
-        path = wargs[0]
-        scenery = wargs[1]
-        f = None
-        try:
-            f = file(path, "w")
-            f.write(yaml.dump(scenery))
-            return True
-        finally:
-            if f is not None:
-                f.close()
 
 
     def OnExport(self, event):
@@ -521,8 +455,8 @@ class MainWindow(wx.Frame):
         Returns true if the action may be called.      
         """
         if self.modified:
-            answer = wx.MessageBox("There are unsaved changes in "
-                + "scenery.\nDo you want to save them?", "Save the file",
+            answer = wx.MessageBox("There are unsaved changes in " \
+                + "scenery.\nDo you want to save them?", "Save the file", \
                 wx.YES_NO_CANCEL | wx.ICON_QUESTION, self)
             if answer == wx.NO:
                 return True
@@ -555,7 +489,7 @@ class MainWindow(wx.Frame):
             path = saveDialog.GetPath()
 
             if os.path.exists(path):
-                answer = wx.MessageBox("Overwrite existing file?", "Confirm",
+                answer = wx.MessageBox("Overwrite existing file?", "Confirm", \
                     wx.YES_NO | wx.ICON_QUESTION, self)
                 if answer == wx.NO:
                     return False
@@ -700,8 +634,6 @@ class MainWindow(wx.Frame):
         self.trackPaletteMenuEntry.Check(False)
 
 
-
-
 if __name__ == "__main__":
     usage = "Usage: %prog [options]"
     parser = optparse.OptionParser(usage=usage)
@@ -714,41 +646,8 @@ if __name__ == "__main__":
     
     app = Application()
     frame = MainWindow(None, ID_MAIN_FRAME)
+    
+    preview = osgwx.Preview3DFrame(frame, "Preview")
+    
     app.MainLoop()
 
-'''
-#----------------------------------------------------------------------
-# ONLY FOR TESTS PURPOSES, DO NOT DELETE
-#----------------------------------------------------------------------
-class TestPanel(wx.Panel):
-    def __init__(self, parent, log):
-        self.log = log
-        wx.Panel.__init__(self, parent, -1)
-
-        b1 = wx.Button(self, -1, " Pure-Python RibbonBar ", (50,50))
-        self.Bind(wx.EVT_BUTTON, self.OnButton1, b1)
-
-
-    def OnButton1(self, event):
-        self.win = MainWindow(self, ID_MAIN_FRAME)
-
-
-#----------------------------------------------------------------------
-
-def runTest(frame, nb, log):
-
-    win = MainWindow(None,ID_MAIN_FRAME)
-    #win = TestPanel(nb, log)
-    return win
-
-#----------------------------------------------------------------------
-
-
-overview = RB.__doc__
-
-
-if __name__ == '__main__':
-    import sys,os
-    import run
-    run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])
-'''

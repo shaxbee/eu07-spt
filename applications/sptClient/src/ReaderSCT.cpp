@@ -41,8 +41,9 @@ public:
     {
         try
         {
-            sptCore::Sector& sector = sptDB::readSector(fin, getSceneryInstance());
-            return ReadResult(new SectorNode(sector));
+        	osg::Vec3f sector = sptDB::readSector(fin, getSceneryInstance());
+            osg::ref_ptr<SectorNode> result = new SectorNode(sector);
+            return ReadResult(result);
         }
         catch(std::exception& exc)
         {
