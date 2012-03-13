@@ -1212,16 +1212,16 @@ class SceneryListener(model.scenery.SceneryListener):
         model.scenery.SceneryListener.__init__(self)
         self.editor = editor
 
+    def Remove(self, scenery, element):
+        if element == self.editor.GetSelection():
+            self.editor.SetSelection(None)
 
-    def sceneryChanged(self, event):
-        scenery = event.GetScenery()
-        element = event.GetElement()
-        changeType = event.GetType()
+        self.__refresh(scenery, element)
 
-        if changeType == model.scenery.CHANGE_REMOVE:
-            if element == self.editor.GetSelection():
-                self.editor.SetSelection(None)
-            
+    def Add(self, scenery, element):
+        self.__refresh(scenery, element)
+
+    def __refresh(self, scenery, element):
         part = self.editor.parts[0]
         
         mbc = scenery.GetMbc()
