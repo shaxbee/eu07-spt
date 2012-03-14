@@ -3,9 +3,11 @@ Module containing dedicated math operations.
 
 First import necessary classes
 
->>> from sptmath import Vec3, Decimal
+.. code-block:: python
+    >>> from sptmath import Vec3, Decimal
 
 Create Decimal:
+.. code-block:: python
     >>> Decimal('-4.434')
     Decimal('-4.434')
     >>> Vec3('3.343', '-4.434', '6.454')
@@ -20,6 +22,7 @@ Create Decimal:
     Decimal('0.500')
 
 Test Decimal operations:
+.. code-block:: python
     >>> Decimal(0.5) * 0.5
     Decimal('0.250')
     >>> Decimal(0.5) * -0.5
@@ -28,13 +31,14 @@ Test Decimal operations:
     Decimal('2.500')
 
 Copy Vec3:
+.. code-block:: python
     >>> import copy
     >>> vec = Vec3('1.0', '-1.0', '0.0')
     >>> vec == copy.deepcopy(vec)
     True
 
 Test Vec3 core operations: 
-
+.. code-block:: python
     >>> Vec3('0.001', '-0.001', '0.000')
     (0.001,-0.001,0.000)
     >>> a = Vec3('0.0001', '-0.0001', '0.000')
@@ -64,7 +68,7 @@ Test Vec3 core operations:
     (-0.011,27.137,0.000)
 
 Check Vec3 equality
-
+.. code-block:: python
     >>> Vec3("0.000", "-0.000", "0.000") == Vec3("-0.0", "0", "-0")
     True
     >>> Vec3("1.0", "-1.0", "0.001") == Vec3("1.000", "-1", "0.001")
@@ -73,7 +77,7 @@ Check Vec3 equality
     False
 
 Moves this vector by given other v vector.
-
+.. code-block:: python
     >>> a = Vec3('5.67', '34.43', '-898')
     >>> v = Vec3('-6', '34.44', '0.0004')
     >>> a.moveBy(-v)
@@ -83,7 +87,7 @@ Moves this vector by given other v vector.
     '-898.000'
 
 Normalizes the vector.
-
+.. code-block:: python
     >>> Vec3("1", "0", "0").normalized()
     (1.000,0.000,0.000)
     >>> Vec3("0", "-1", "0").normalized()
@@ -97,6 +101,7 @@ Normalizes the vector.
 
 Returns the angle in radians to the unit vector J=(0, 1, 0).
 
+.. code-block:: python
     >>> str(Vec3("0", "1", "0").angleToJUnit())
     '0.0'
     >>> str(round(Vec3("1", "0", "0").angleToJUnit(), 6))
@@ -112,6 +117,7 @@ Returns the angle in radians to the unit vector J=(0, 1, 0).
 
 Scales the vector by scale s.
 
+.. code-block:: python
     >>> Vec3("1", "3", "0.5").scaled(2)
     (2.000,6.000,1.000)
     >>> Vec3("-4", "0.001", "-0.999").scaled(0.5)
@@ -123,6 +129,7 @@ Scales the vector by scale s.
 
 Internal representation of Decimal.
 
+.. code-block:: python
     >>> seq = [Decimal("-3"), Decimal("3"), Decimal("-3.000")]
     >>> [x.base() for x in seq]
     [1000, 1000, 1000]
@@ -131,6 +138,7 @@ Internal representation of Decimal.
 
 Test Decimal to_floor and to_ceiling.
 
+.. code-block:: python
     >>> seq = [Decimal("-1.001"), Decimal("-1"), Decimal("-0.999"),
     ...     Decimal("-0.001"), Decimal("0.000"), Decimal("0.001"),
     ...     Decimal("0.999"), Decimal("1.000"), Decimal("1.001")] 
