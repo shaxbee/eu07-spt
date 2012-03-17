@@ -1,12 +1,13 @@
 #ifndef SPTDB_BINARY_READER
 #define SPTDB_BINARY_READER 1
 
+#include <stdint.h>
+
 #include <stack>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <stdexcept>
-#include <cstdint>
 
 #include <boost/format.hpp>
 
@@ -23,8 +24,8 @@ class ChunkWatcher
 {
 
 public:
-    void check(std::uint32_t bytes);
-    void push(const std::string& chunk, std::uint32_t size);
+    void check(uint32_t bytes);
+    void push(const std::string& chunk, uint32_t size);
     void pop(const std::string& chunk);
     const std::string& current() const;
 
@@ -32,8 +33,8 @@ private:
     struct Chunk
     {
         std::string name;
-        std::uint32_t size;
-        std::uint32_t left;
+        uint32_t size;
+        uint32_t left;
     };
 
     typedef std::stack<Chunk> ChunkStack;
@@ -42,10 +43,10 @@ private:
 
 struct Version
 {
-    Version(std::uint8_t major_, std::uint8_t minor_): major(major_), minor(minor_) { };
+    Version(uint8_t major_, uint8_t minor_): major(major_), minor(minor_) { };
 
-    std::uint8_t major;
-    std::uint8_t minor;
+    uint8_t major;
+    uint8_t minor;
     
     bool operator<(const Version& other) const;
     bool operator==(const Version& other) const;
@@ -90,7 +91,7 @@ private:
     template <typename T>
     void readOsgVec(T& output);
 
-    void checkEof(std::uint32_t bytes)
+    void checkEof(uint32_t bytes)
     {
         if(_input.eof())
             throw std::runtime_error(boost::str(boost::format("Unexpected file end at index %d in chunk %s") % _position % _watcher.current()));
@@ -118,7 +119,7 @@ T BinaryReader::read()
 template <typename T>
 void BinaryReader::read(std::vector<T>& output)
 {
-    std::uint32_t count;
+    uint32_t count;
     read(count);
 
     const unsigned int elementSize = sizeof(T);
@@ -143,7 +144,7 @@ void BinaryReader::read(std::vector<T>& output)
 template <typename T>
 void BinaryReader::readOsgVec(T& output)
 {
-    const std::uint32_t size = T::num_components * sizeof(typename T::value_type);
+    const uint32_t size = T::num_components * sizeof(typename T::value_type);
     _watcher.check(size);
     _input.read(reinterpret_cast<char*>(output.ptr()), size);
     checkEof(size);
