@@ -25,7 +25,7 @@ class Scenery:
         Adds a new rail tracking to the scenery.
         """
         self.tracks.insert(tracking)
-        self.FireSceneryChange(SceneryEvent(self, CHANGE_ADD, tracking))
+        self.FireSceneryChange(SceneryListener.Add, tracking)
 
 
     def RemoveRailTracking(self, tracking):
@@ -33,7 +33,7 @@ class Scenery:
             return
 
         self.tracks.remove(tracking)
-        self.FireSceneryChange(SceneryEvent(self, CHANGE_REMOVE, tracking))
+        self.FireSceneryChange(SceneryListener.Remove, tracking)
 
 
     def RailTrackingIterator(self):
@@ -67,15 +67,12 @@ class Scenery:
         self.listeners.remove(listener)
 
 
-    def FireSceneryChange(self, event):
+    def FireSceneryChange(self, event, element):
         """
         Notifies registered listeners about the change.
         """
         for l in self.listeners:
-            l.sceneryChanged(event)
-
-
-
+            event(l, self, element)
 
 class SceneryListener:
     """
@@ -85,42 +82,9 @@ class SceneryListener:
     def __init__(self):
         pass
 
-
-    def sceneryChanged(self, event):
-        """
-        Implementators should override this method.
-        """
+    def Add(self, scenery, element):
         pass
 
-
-
-
-# The constants for scenery event
-CHANGE_ADD = 1
-CHANGE_REMOVE = 2
-
-class SceneryEvent:
-    """
-    This object encapsulates single modification of scenery.
-
-    Note that class contract may be extended for example to several
-    changes at once.
-    """
-
-    def __init__(self, scenery, type, element):
-        self.scenery = scenery
-        self.type = type
-        self.element = element
-
-
-    def GetScenery(self):
-        return self.scenery
-
-
-    def GetType(self):
-        return self.type
-
-
-    def GetElement(self):
-        return self.element
+    def Remove(self, scenery, element):
+        pass
 

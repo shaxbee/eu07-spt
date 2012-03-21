@@ -83,7 +83,7 @@ Decimal Decimal::operator*(double other) const
 
 	int64_t value = 
 		int64_t(integral) * _base + // integral part
-		iround(abs(fractional) + tweaker) * sign(value);
+		iround(abs(fractional) + tweaker) * sign(fractional);
 
 	return Decimal(value, _base);
 };

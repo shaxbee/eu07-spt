@@ -1,29 +1,49 @@
 #include "sptCore/Track.h"
 
+#include <limits>
+
 using namespace sptCore;
 
-osg::Vec3 Track::getExit(const osg::Vec3& entry) const
+TrackId::TrackId(uint32_t value):
+    _value(value)
+{
+}
+
+bool TrackId::operator==(TrackId other) const
+{
+    return _value == other._value;
+}
+
+bool TrackId::isNull() const
+{
+    return *this == null();
+}
+
+bool TrackId::isExternal() const
+{
+    return *this == external();
+}
+
+uint32_t TrackId::value() const
+{
+    return _value;
+}
+
+TrackId TrackId::null()
+{
+    return TrackId(std::numeric_limits<uint32_t>::max());
+}
+
+TrackId TrackId::external() 
+{
+    return TrackId(std::numeric_limits<uint32_t>::max() - 1);
+}
+Track::Track(const osg::Vec3f& sector):
+	_sector(sector)
 {
 
-    // if entrance == track begin
-    if(entry == _path->front())
-        return _path->back();
+}
 
-    // if entrance == track end
-    if(entry == _path->back())
-        return _path->front();
-
-    throw UnknownEntryException() << PositionInfo(entry);
-
-}; // Track::getNext
-
-std::auto_ptr<Path> Track::getPath(const osg::Vec3& entry) const
+Track::~Track()
 {
-    if(entry == _path->front())
-        return _path->clone();
-
-    if(entry == _path->back())
-        return _path->reverse();
-
-    throw UnknownEntryException() << PositionInfo(entry);
-}; // Track::getPath
+};

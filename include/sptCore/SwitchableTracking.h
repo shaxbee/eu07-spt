@@ -1,7 +1,7 @@
 #ifndef SPTCORE_SWITCHABLETRACKING_H
 #define SPTCORE_SWITCHABLETRACKING_H
 
-#include <sptCore/RailTracking.h>
+#include <sptCore/Track.h>
 
 #include <string>
 #include <vector>
@@ -13,11 +13,11 @@ namespace sptCore
 
 //! \brief Base class for tracking with switchable connections
 //! \author Zbyszek "ShaXbee" Mandziejewicz
-class SwitchableTracking: public RailTracking
+class SwitchableTracking: public Track
 {
 
 public:
-    SwitchableTracking(Sector& sector): RailTracking(sector) { };
+    SwitchableTracking(const osg::Vec3f& sector): Track(sector) { };
     virtual ~SwitchableTracking() { };
 
     std::string getPosition() const { return _position; };

@@ -485,6 +485,7 @@ class ExportDialog(wx.Dialog):
             config.Write("/ExportDialog/dir", cargs[0])
 
         except Exception, inst:
+            raise inst
             self.__UpdatePercent(100)
             logging.exception("Error during scenery export")
             logging.error("Scenery error Traceback", inst.extraInfo)

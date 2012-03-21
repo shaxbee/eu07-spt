@@ -1,17 +1,17 @@
-#ifndef SPTGFX_RAILTRACKINGRENDERER_H
-#define SPTGFX_RAILTRACKINGRENDERER_H 1
+#ifndef SPTGFX_TRACKRENDERER_H
+#define SPTGFX_TRACKRENDERER_H 1
 
 #include <osg/Geometry>
 
 #include <sptCore/Track.h>
-#include <sptGFX/RailTrackingProfile.h>
+#include <sptGFX/TrackProfile.h>
 
 namespace sptGFX
 {
 
-//! \brief Geometry generator for RailTracking objects
+//! \brief Geometry generator for Track objects
 //! \author Zbyszek "ShaXbee" Mandziejewicz
-class RailTrackingRenderer
+class TrackRenderer
 {
 
 public:
@@ -19,9 +19,9 @@ public:
     virtual void setOutput(osg::Geometry* output) = 0;
 
     //! Render tracking to geometry
-    virtual void render(sptCore::RailTracking* tracking, RailTrackingProfile* profile) = 0;
+    virtual void render(sptCore::Track* tracking, TrackProfile* profile) = 0;
 
-}; // class sptGFX::RailTrackingRenderer    
+}; // class sptGFX::TrackRenderer    
 
 }; // namespace sptGFX
 

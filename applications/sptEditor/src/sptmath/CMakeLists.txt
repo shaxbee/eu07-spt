@@ -1,12 +1,9 @@
-set(PYTHON_MODULE_SRC
+add_library(_sptmath SHARED
     Decimal.cpp
     Vec3.cpp
-    sptmath.cpp)
-    
-set(PYTHON_MODULE_HEADERS
+    sptmath.cpp
     Decimal.h
     Vec3.h)
     
-set(PYTHON_MODULE_COPY ${SPT_SOURCE_DIR}/applications/sptEditor/src/_sptmath)
-    
-python_module(_sptmath)
+set(PYTHON_MODULE_COPY applications/sptEditor/src/)
+setup_python_module(_sptmath)

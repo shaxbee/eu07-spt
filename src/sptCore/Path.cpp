@@ -213,4 +213,4 @@ osg::ref_ptr<osg::Vec3Array> BezierPath::points(float scale) const
     return createPoints(front(), frontCP(), back(), backCP(), scale);
 };
 
-const float Path::DEFAULT_SCALE = 1.0f;
+const float sptCore::Path::DEFAULT_SCALE = 1.4f;
