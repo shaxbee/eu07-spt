@@ -29,10 +29,10 @@ struct Vec3Pickle: boost::python::pickle_suite
 
 };
 
-#ifdef NDEBUG
-BOOST_PYTHON_MODULE(_sptmath)
-#else
+#ifdef DEBUG
 BOOST_PYTHON_MODULE(_sptmathd)
+#else
+BOOST_PYTHON_MODULE(_sptmath)
 #endif
 {
     using namespace boost::python;

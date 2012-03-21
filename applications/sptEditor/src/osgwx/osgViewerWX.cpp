@@ -347,10 +347,10 @@ void* extract_swig_wrapped_pointer(PyObject* obj)
     return pointer;
 }
 
-#ifdef NDEBUG
-BOOST_PYTHON_MODULE(_osgwx)
-#else
+#ifdef DEBUG
 BOOST_PYTHON_MODULE(_osgwxd)
+#else
+BOOST_PYTHON_MODULE(_osgwx)
 #endif
 {
 	using namespace boost::python;
