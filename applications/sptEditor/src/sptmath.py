@@ -5,8 +5,9 @@ Module containing dedicated math operations.
 '''
 
 from wx import Point
+
 try:
-    from _sptmath import *
+    from _sptmath import dotProduct, Vec3, Decimal
 except ImportError:
     from _sptmathd import dotProduct, Vec3, Decimal
 
