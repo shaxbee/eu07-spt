@@ -1,7 +1,7 @@
-#include "boost/python.hpp"
-
 #include "Decimal.h"
 #include "Vec3.h"
+
+#include "boost/python.hpp"
 
 namespace
 {
@@ -77,7 +77,7 @@ BOOST_PYTHON_MODULE(_sptmathd)
     class_<Vec3>("Vec3", init<>())
         .def(init<const std::string&, const std::string&, const std::string&>())
         .def(init<const Decimal&, const Decimal&, const Decimal&>())
-        .def(init<const boost::int64_t, const boost::int64_t, const boost::int64_t>())
+//        .def(init<const boost::int64_t, const boost::int64_t, const boost::int64_t>())
         .def(init<const Vec3&>())
 
         .def_pickle(Vec3Pickle())
