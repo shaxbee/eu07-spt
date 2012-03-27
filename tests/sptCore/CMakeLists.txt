@@ -13,7 +13,6 @@ if(UNIX)
     target_link_libraries(${TEST_NAME} pthread)
 endif(UNIX)
 
-link_internal(${TEST_NAME} osg OpenThreads)
-target_link_libraries(${TEST_NAME} ${GTEST_BOTH_LIBRARIES} libgtest_main.a sptCore)
+target_link_libraries(${TEST_NAME} ${OPENSCENEGRAPH_LIBRARIES} ${GTEST_BOTH_LIBRARIES} sptCore)
 
 gtest_add_tests(${TEST_NAME} "" ${TEST_SRC})
