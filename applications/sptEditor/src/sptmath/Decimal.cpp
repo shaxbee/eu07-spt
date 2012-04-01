@@ -1,5 +1,7 @@
 #include "Decimal.h"
 
+#include <stdint.h>
+
 #include <iostream>
 #include <stdexcept>
 #include <cmath>
@@ -11,9 +13,8 @@
 #include <boost/math/special_functions/sign.hpp>
 #include <boost/math/special_functions/round.hpp>
 
-using namespace std;
-using namespace boost;
-using namespace boost::math;
+using boost::math::sign;
+using boost::math::iround;
 
 namespace
 {
@@ -29,20 +30,20 @@ Decimal::Decimal():
 { 
 };
 
-Decimal::Decimal(const string& value, uint8_t precision):
+Decimal::Decimal(const std::string& value, uint8_t precision):
 	_base(pow10(precision))
 {
     size_t separator = value.find('.');
 
     try
     {
-        int64_t decimal = abs(long(lexical_cast<int64_t>(value.substr(0, separator))));
+        int64_t decimal = abs(long(boost::lexical_cast<int64_t>(value.substr(0, separator))));
 
         // extract fractional part if present
-        if(separator != string::npos)
+        if(separator != std::string::npos)
         {
-            string fract_str = value.substr(separator + 1);
-            double fractional = lexical_cast<float>(fract_str) * pow(float(10.0), int32_t(precision - fract_str.size()));
+            std::string fract_str = value.substr(separator + 1);
+            double fractional = boost::lexical_cast<float>(fract_str) * pow(float(10.0), int32_t(precision - fract_str.size()));
             _value = decimal * _base + int64_t(floor(fractional + 0.5));
         }
         else
@@ -53,13 +54,13 @@ Decimal::Decimal(const string& value, uint8_t precision):
         if(value[0] == '-' && _value > 0)
             _value = -_value;
     }
-    catch(bad_lexical_cast&)
+    catch(boost::bad_lexical_cast&)
     {
-        throw runtime_error(str(format("Decimal::Decimal(value): Value \"%s\" cannot be converted to decimal number") % value));
+        throw std::runtime_error(boost::str(boost::format("Decimal::Decimal(value): Value \"%s\" cannot be converted to decimal number") % value));
     };
 };
 
-Decimal::Decimal(double value, boost::uint8_t precision):
+Decimal::Decimal(double value, uint8_t precision):
 	_base(pow10(precision))
 {
     int64_t integral = int64_t(value);
@@ -90,7 +91,7 @@ Decimal Decimal::operator*(double other) const
 
 std::string Decimal::__repr__() const
 {
-    return str(format("Decimal(\'%s\')") % __str__());
+    return boost::str(boost::format("Decimal(\'%s\')") % __str__());
 };
 
 std::string Decimal::__str__() const
@@ -98,7 +99,7 @@ std::string Decimal::__str__() const
     int64_t fractional = _value % _base;
     int64_t decimal = (_value - fractional) / _base;
 
-    ostringstream result;
+    std::ostringstream result;
 
     if(decimal >= 0 && fractional < 0)
     {
@@ -107,7 +108,7 @@ std::string Decimal::__str__() const
 
     result << decimal << ".";
 
-    string fraction_str = boost::lexical_cast<string>(abs(int(fractional)));
+    std::string fraction_str = boost::lexical_cast<std::string>(abs(int(fractional)));
     uint8_t prec = precision();
 
     if(fraction_str.size() < prec)

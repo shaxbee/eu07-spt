@@ -1,7 +1,7 @@
-#include "boost/python.hpp"
-
 #include "Decimal.h"
 #include "Vec3.h"
+
+#include "boost/python.hpp"
 
 namespace
 {
