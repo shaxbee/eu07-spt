@@ -2,12 +2,10 @@ Module containing dedicated math operations.
 =============================================
 
 First import necessary classes
-.. code-block:: python
 
     >>> from sptmath import Vec3, Decimal
 
 Create Decimal:
-.. code-block:: python
 
     >>> Decimal('-4.434')
     Decimal('-4.434')
@@ -23,7 +21,6 @@ Create Decimal:
     Decimal('0.500')
 
 Test Decimal operations:
-.. code-block:: python
 
     >>> Decimal(0.5) * 0.5
     Decimal('0.250')
@@ -33,7 +30,6 @@ Test Decimal operations:
     Decimal('2.500')
 
 Copy Vec3:
-.. code-block:: python
 
     >>> import copy
     >>> vec = Vec3('1.0', '-1.0', '0.0')
@@ -41,7 +37,6 @@ Copy Vec3:
     True
 
 Test Vec3 core operations: 
-.. code-block:: python
 
     >>> Vec3('0.001', '-0.001', '0.000')
     (0.001,-0.001,0.000)
@@ -72,7 +67,6 @@ Test Vec3 core operations:
     (-0.011,27.137,0.000)
 
 Check Vec3 equality
-.. code-block:: python
 
     >>> Vec3("0.000", "-0.000", "0.000") == Vec3("-0.0", "0", "-0")
     True
@@ -82,7 +76,6 @@ Check Vec3 equality
     False
 
 Moves this vector by given other v vector.
-.. code-block:: python
 
     >>> a = Vec3('5.67', '34.43', '-898')
     >>> v = Vec3('-6', '34.44', '0.0004')
@@ -93,7 +86,6 @@ Moves this vector by given other v vector.
     '-898.000'
 
 Normalizes the vector.
-.. code-block:: python
 
     >>> Vec3("1", "0", "0").normalized()
     (1.000,0.000,0.000)
@@ -107,7 +99,6 @@ Normalizes the vector.
     (-0.577,-0.577,0.577)
 
 Returns the angle in radians to the unit vector J=(0, 1, 0).
-.. code-block:: python
 
     >>> str(Vec3("0", "1", "0").angleToJUnit())
     '0.0'
@@ -123,7 +114,6 @@ Returns the angle in radians to the unit vector J=(0, 1, 0).
     '5.497787'
 
 Scales the vector by scale s.
-.. code-block:: python
 
     >>> Vec3("1", "3", "0.5").scaled(2)
     (2.000,6.000,1.000)
@@ -135,7 +125,6 @@ Scales the vector by scale s.
     (0.000,0.000,0.000)
 
 Internal representation of Decimal.
-.. code-block:: python
 
     >>> seq = [Decimal("-3"), Decimal("3"), Decimal("-3.000")]
     >>> [x.base() for x in seq]
@@ -144,7 +133,6 @@ Internal representation of Decimal.
     [-3000L, 3000L, -3000L]
 
 Test Decimal to_floor and to_ceiling.
-.. code-block:: python
 
     >>> seq = [Decimal("-1.001"), Decimal("-1"), Decimal("-0.999"),
     ...     Decimal("-0.001"), Decimal("0.000"), Decimal("0.001"),
