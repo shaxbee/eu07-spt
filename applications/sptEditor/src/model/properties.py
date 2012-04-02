@@ -37,7 +37,7 @@ class PropertiesBase(type):
     """
 
     def __new__(cls, name, bases, data):
-        properties = dict()
+        properties = dict() 
 
         for (key, value) in data.iteritems():
             if isinstance(value, Property):
