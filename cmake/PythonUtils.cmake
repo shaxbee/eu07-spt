@@ -13,13 +13,11 @@ macro(setup_python_module TARGET)
         set_target_properties(${TARGET} PROPERTIES SUFFIX ".pyd")
     endif(WIN32)
 
-    get_target_property(TARGET_LOCATION ${TARGET} LOCATION_${CMAKE_BUILD_TYPE})
-
     if(PYTHON_MODULE_COPY)
         add_custom_command(
             TARGET ${TARGET}
             POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy ${TARGET_LOCATION} ${PROJECT_BINARY_DIR}/${PYTHON_MODULE_COPY}
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${TARGET}> ${PROJECT_BINARY_DIR}/${PYTHON_MODULE_COPY}
         )
     endif(PYTHON_MODULE_COPY)
 endmacro(setup_python_module)
