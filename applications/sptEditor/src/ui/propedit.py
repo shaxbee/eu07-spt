@@ -1,4 +1,5 @@
 import wx
+import functools
 import logging
 
 from abc import ABCMeta, abstractmethod
@@ -50,6 +51,7 @@ class PropertiesEditor(wx.Panel):
 
     def __init__(self, parent, contextType, **args):
         super(PropertiesEditor, self).__init__(parent, **args)
+        self.SetExtraStyle(wx.WS_EX_VALIDATE_RECURSIVELY)
 
         if contextType not in PropertiesEditor.__descriptors:
             raise PropertiesEditorError("No descriptor found for %s type" % str(contextType))
@@ -64,6 +66,12 @@ class PropertiesEditor(wx.Panel):
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         sizer = wx.FlexGridSizer(rows = len(properties), cols = 2, vgap = 9, hgap = 9)
 
+        def propGetter(name):
+            return getattr(self.GetContext(), name)
+
+        def propSetter(name, value):
+            return setattr(self.GetContext(), name, value)
+
         for name, prop in properties.iteritems():
             propertyType = type(prop)
             if propertyType not in PropertiesEditor.__factories:
@@ -72,9 +80,9 @@ class PropertiesEditor(wx.Panel):
             # create property label
             label = wx.StaticText(self, label = prop.getLabel())
 
-            # bind context and property name to getter and setter
-            getter = lambda: getattr(self.GetContext(), name)
-            setter = lambda value: setattr(self.GetContext(), name, value) 
+            # bind property name to accessors
+            getter = functools.partial(propGetter, name)
+            setter = functools.partial(propSetter, name)
 
             # create input control
             ctrl = PropertiesEditor.__factories[propertyType](self, getter, setter)
@@ -92,7 +100,7 @@ class PropertiesEditor(wx.Panel):
         # bind context-checking initialization code
         self.Bind(wx.EVT_INIT_DIALOG, self.OnInit)
 
-    def GetContext(self, context):
+    def GetContext(self):
         return self.__context
 
     def SetContext(self, context):
@@ -109,7 +117,7 @@ class PropertiesEditor(wx.Panel):
         if self.__context is None:
             raise ValueError("Context for properties editor is not set")
 
-        self.TransferDataToWindow()
+        self.Validate()
 
     @classmethod
     def registerType(cls, contextType, descriptor, policy = NoopPolicy()):
@@ -124,12 +132,18 @@ class Formatter(wx.PyValidator):
     """
 
     def __init__(self, getter, setter, coercer, formatter = str):
+        wx.PyValidator.__init__(self)
+
         self.__formatter = formatter
         self.__coercer = coercer
         self.__getter = getter
         self.__setter = setter
 
-        wx.PyValidator.__init__(self)
+    def Clone(self):
+        return Formatter(self.__getter, self.__setter, self.__coercer, self.__formatter)
+
+    def Validate(self, parent):
+        return True 
 
     def TransferFromWindow(self):
         try:
@@ -165,7 +179,7 @@ class Formatter(wx.PyValidator):
 
     def SetControlValue(self, value):
         ctrl = self.GetWindow()
-        if not hasattr(ctrl, SetValue):
+        if not hasattr(ctrl, "SetValue"):
             raise AttributeError("Control doesn't define SetValue method")
 
         ctrl.SetValue(value)
