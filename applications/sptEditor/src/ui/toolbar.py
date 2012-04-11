@@ -83,18 +83,6 @@ class ToolBarPanel(wx.Panel):
         self._mb.AddTool(wx.ID_ZOOM_IN, "Zoom In", icon_zoomin)
         self._mb.AddTool(wx.ID_ZOOM_OUT, "Zoom Out", icon_zoomout)
         
-        # This will'be not needed
-        '''
-        self._mb.AddSeparator()
-        
-        icon_insert_track = wx.Bitmap(os.path.join(self.bitmap_action_dir, "insert_straight.png"), wx.BITMAP_TYPE_PNG)
-        icon_insert_switch = wx.Bitmap(os.path.join(self.bitmap_action_dir, "insert_switch.png"), wx.BITMAP_TYPE_PNG)
-        icon_insert_curve = wx.Bitmap(os.path.join(self.bitmap_action_dir, "insert_curve.png"), wx.BITMAP_TYPE_PNG)
-        
-        self._mb.AddTool(ID_INSERT_TRACK, "Insert track", icon_insert_track)
-        self._mb.AddTool(ID_INSERT_CURVE, "Insert curve", icon_insert_curve)
-        self._mb.AddTool(ID_INSERT_SWITCH, "Insert switch", icon_insert_switch)
-        '''
         self._mb.AddSeparator()
         
         icon_normal = wx.Bitmap(os.path.join(self.bitmap_action_dir, "transform-crop-and-resize.png"), wx.BITMAP_TYPE_PNG)
@@ -104,10 +92,6 @@ class ToolBarPanel(wx.Panel):
         self._mb.AddRadioTool(ID_MODE_TRACK_CLOSURE, "Mode closure (flex)", icon_closure)
         
     def BindButtons(self):
-        #InsertPanel
-        self.Bind(FM.EVT_FLAT_MENU_SELECTED, self.GetParent().OnInsertStraightTrack, id=ID_INSERT_TRACK)
-        self.Bind(FM.EVT_FLAT_MENU_SELECTED, self.GetParent().OnInsertCurveTrack, id=ID_INSERT_CURVE)
-        self.Bind(FM.EVT_FLAT_MENU_SELECTED, self.GetParent().OnInsertRailSwitch, id=ID_INSERT_SWITCH)
         
         #HistoryPanel
         self.Bind(FM.EVT_FLAT_MENU_SELECTED, self.GetParent().OnDelete, id=wx.ID_DELETE)

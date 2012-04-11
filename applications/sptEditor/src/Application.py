@@ -106,6 +106,10 @@ class MainWindow(wx.Frame):
         
         # Prepare pane manager
         self._paneManager = AUI.AuiManager(self.main_content_panel)
+        self._paneManager.SetFlags(AUI.AUI_MGR_ALLOW_FLOATING |
+                                   AUI.AUI_MGR_HINT_FADE |
+                                   AUI.AUI_MGR_NO_VENETIAN_BLINDS_FADE|
+                                   AUI.AUI_MGR_RECTANGLE_HINT)
         
         self.CreateStatusBar()
         self.CreatePalette()
@@ -172,34 +176,6 @@ class MainWindow(wx.Frame):
         #self._menubar = ui.ribbon.RibbonPanel(self)
         self._menubar = ui.toolbar.ToolBarPanel(self)
 
-        '''# from XRC file
-        mainMenu = self.xRes.LoadMenuBar("MainMenu")
-        self.SetMenuBar(mainMenu)
-
-        # Events
-        wx.EVT_MENU(self, wx.ID_NEW, self.OnNew)
-        wx.EVT_MENU(self, wx.ID_OPEN, self.OnOpen)
-        wx.EVT_MENU(self, wx.ID_SAVE, self.OnSave)
-        wx.EVT_MENU(self, wx.ID_SAVEAS, self.OnSaveAs)
-        wx.EVT_MENU(self, wx.xrc.XRCID('ID_EXPORT'), self.OnExport)
-        wx.EVT_MENU(self, wx.ID_CLOSE, self.OnExit)
-        wx.EVT_MENU(self, wx.xrc.XRCID('ID_CENTER_AT'), self.OnCenterAt)
-        wx.EVT_MENU(self, wx.ID_ZOOM_IN, self.OnZoomIn)
-        wx.EVT_MENU(self, wx.ID_ZOOM_OUT, self.OnZoomOut)
-        wx.EVT_MENU(self, wx.xrc.XRCID('ID_BASEPOINT_EDIT'), self.OnBasePointEdit)
-        wx.EVT_MENU(self, wx.xrc.XRCID('ID_INSERT_STRAIGHT_TRACK'), self.OnInsertStraightTrack)
-        wx.EVT_MENU(self, wx.xrc.XRCID('ID_INSERT_CURVE_TRACK'), self.OnInsertCurveTrack)
-        wx.EVT_MENU(self, wx.xrc.XRCID('ID_INSERT_RAIL_SWITCH'), self.OnInsertRailSwitch)
-        wx.EVT_MENU(self, wx.xrc.XRCID('ID_MODE_TRACK_NORMAL'), self.OnChangeEditorMode)
-        wx.EVT_MENU(self, wx.xrc.XRCID('ID_TRACK_PALETTE'), self.OnToggleFramePalette )
-        wx.EVT_MENU(self, wx.xrc.XRCID('ID_MODE_TRACK_CLOSURE'), self.OnChangeEditorMode)
-        wx.EVT_MENU(self, wx.ID_DELETE, self.OnDelete)
-        wx.EVT_MENU(self, wx.ID_ABOUT, self.OnAbout)
-
-        # Creating palette with track making tools
-        self.trackPaletteMenuEntry = mainMenu.FindItemById(wx.xrc.XRCID('ID_TRACK_PALETTE'))
-        '''
-        pass
     
     def CreateStatusBar(self):
 
@@ -211,75 +187,43 @@ class MainWindow(wx.Frame):
         self.SetStatusBar(bar)
 
     def CreatePalette(self):
-        # Preparing pane infos for new panes
-        self.PrepareTrackPalettePaneInfo()
 
         # Create palette
-#        self.trackPaletteFrame = ui.palette.TrackPalette(self.main_content_panel,ID_TRACK_PALETTE,250,400)
-        #self.trackPaletteFrame = ui.palette.TrackPalette(self.main_content_panel,ID_TRACK_PALETTE)
         self.trackPaletteFrame = ui.palette.ToolsPalette(self.main_content_panel,ID_TRACK_PALETTE)
         self.propertiesPaletteFrame = ui.palette.PropertiesPalette(self.main_content_panel,wx.ID_ANY)
+#        self.previewPaletteFrame = osgwx.Preview3DFrame(self.main_content_panel,"Preview")
+        
         # Adding palette pane to manager as child
-        self._paneManager.AddPane(self.trackPaletteFrame,self._trackPalettePaneInfo)
+        self._paneManager.AddPane(self.trackPaletteFrame,AUI.AuiPaneInfo().CloseButton(). \
+                                  Dockable().PinButton().MinimizeButton().MaximizeButton(). \
+                                  FloatingSize(wx.Size(300, 300)).MinSize(wx.Size(250,80)). \
+                                  CaptionVisible().Caption(NAME_TRACK_PALETTE).Name(NAME_TRACK_PALETTE))
+        
         self._paneManager.AddPane(self.propertiesPaletteFrame, AUI.AuiPaneInfo().Dockable().CloseButton(). \
                                   PinButton().MinimizeButton().MaximizeButton().CaptionVisible(). \
-                                  Caption("Properties"))
-        #self.trackPaletteMenuEntry.Check(True)
+                                  FloatingSize(wx.Size(300, 300)).Caption("Properties"))
+
+#        self._paneManager.AddPane(self.previewPaletteFrame, AUI.AuiPaneInfo().Dockable().CloseButton(). \
+#                                  PinButton().MinimizeButton().MaximizeButton().CaptionVisible(). \
+#                                  Caption("Properties"))
+
         self._paneManager.Update()
         
         # Bypass bug in wxWidgets, that initialization size is wrong
         self._paneManager.GetPane(self.trackPaletteFrame).MinSize(wx.Size(0,0))
-        # bind close event for panes
-        #self.Bind(AUI.EVT_AUI_PANE_CLOSE, self.OnPaneClose)
 
     def CreateContent(self):
         """
         Creates main content of application.
         """
-        #rootSizer = wx.GridSizer(1, 1)
 
-        # Preparing pane infos for new panes
-        self.PrepareEditorPaneInfo()
         # Creating new palette pane
         self.editor = ui.editor.SceneryEditor(self.main_content_panel, self, ID_EDITOR)
-        self._paneManager.AddPane(self.editor,self._editorPaneInfo)
+        self._paneManager.AddPane(self.editor, AUI.AuiPaneInfo(). Name(NAME_MAIN_EDITOR_TOP_VIEW). \
+                                  Caption(NAME_MAIN_EDITOR_TOP_VIEW).Center().CenterPane())
         
         self._paneManager.Update()
         self.NewScenery()
-
-    def PrepareEditorPaneInfo(self):
-        self._editorPaneInfo = AUI.AuiPaneInfo()
-        self._editorPaneInfo.Name(NAME_MAIN_EDITOR_TOP_VIEW)
-        self._editorPaneInfo.Caption(NAME_MAIN_EDITOR_TOP_VIEW)
-        self._editorPaneInfo.Center()
-        self._editorPaneInfo.CenterPane()
-
-    def PrepareTrackPalettePaneInfo(self):
-        self._trackPalettePaneInfo = AUI.AuiPaneInfo()
-        #self._palettePaneInfo.Floatable()
-        #self._palettePaneInfo.Dockable()
-        self._trackPalettePaneInfo.CloseButton()
-        self._trackPalettePaneInfo.Dockable()
-        #self._palettePaneInfo.IsMovable()
-        self._trackPalettePaneInfo.PinButton()
-        self._trackPalettePaneInfo.MinimizeButton()
-        self._trackPalettePaneInfo.MaximizeButton()
-        #self._palettePaneInfo.Gripper()
-        #self._palettePaneInfo.GripperTop()
-        #self._palettePaneInfo.ToolbarPane()
-        self._trackPalettePaneInfo.FloatingSize(wx.Size(300, 300))
-        self._trackPalettePaneInfo.MinSize(wx.Size(250,80))
-        self._trackPalettePaneInfo.CaptionVisible()
-        self._trackPalettePaneInfo.Caption(NAME_TRACK_PALETTE)
-        self._trackPalettePaneInfo.Name(NAME_TRACK_PALETTE)
-#        self._trackPalettePaneInfo.Hide()
-
-    def PrepareMainToolBarPaneInfo(self):
-        self._mainToolbarPaneInfo = AUI.AuiPaneInfo()
-        self._mainToolbarPaneInfo.ToolbarPane()
-        self._mainToolbarPaneInfo.Name("Main Toolbar")
-        self._mainToolbarPaneInfo.Gripper()
-        self._mainToolbarPaneInfo.Direction(wx.TOP)
 
 
     def RestorePerspective(self, name):
@@ -340,6 +284,7 @@ class MainWindow(wx.Frame):
             config.Write("/EIApp/exportDirectory", self.exportDirectory)
 #            config.WriteInt("/EIFrame/framesPalette", self.trackPaletteMenuEntry.IsChecked())
         finally:
+            self._paneManager.UnInit()
             self.Destroy()
 
 
@@ -532,8 +477,6 @@ class MainWindow(wx.Frame):
         else:
             return self.SaveScenery(self.path)
 
-    
-
 
     def UpdateTitle(self):
         """
@@ -561,26 +504,6 @@ class MainWindow(wx.Frame):
         dialog = ui.dialog.CenterAtDialog(self)
         dialog.Show(True)
         
-        
-    def OnBasePointEdit(self, event):
-        dialog = ui.dialog.BasePointDialog(self)
-        dialog.Show(True)
-
-
-    def OnInsertStraightTrack(self, event):
-        dialog = ui.dialog.InsertStraightTrack(self)
-        dialog.Show(True)
-
-
-    def OnInsertCurveTrack(self, event):
-        dialog = ui.dialog.InsertCurveTrack(self)
-        dialog.Show(True)
-
-
-    def OnInsertRailSwitch(self, event):
-        dialog = ui.dialog.InsertRailSwitch(self)
-        dialog.Show(True)
-
 
     def OnDelete(self, event):
         selection = self.editor.GetSelection()
@@ -675,7 +598,7 @@ if __name__ == "__main__":
     app = Application()
     frame = MainWindow(None, ID_MAIN_FRAME)
     
-    preview = osgwx.Preview3DFrame(frame, "Preview")
+    #preview = osgwx.Preview3DFrame(frame, "Preview")
     
     app.MainLoop()
 
