@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6.3)
+cmake_minimum_required(VERSION 2.8.5)
 project(SPT)
 
 set(SPT_DEP_DIR ${SPT_SOURCE_DIR}/ext)
@@ -10,8 +10,8 @@ set(CMAKE_MINSIZEREL_POSTFIX "s" CACHE STRING "add a postfix, usually empty on w
 
 enable_testing()
 
-include(build/SptUtils.cmake)
-include(build/PythonUtils.cmake)
+include(cmake/SptUtils.cmake)
+include(cmake/PythonUtils.cmake)
 
 include_directories(${SPT_SOURCE_DIR}/include)
 
