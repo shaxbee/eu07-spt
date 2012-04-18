@@ -185,9 +185,10 @@ class PropertiesPalette(wx.ScrolledWindow):
         self.UnloadToolProperties()
         self.Layout()
 
+
     def LoadToolPropertiesByType(self, selection):
         """
-        Loads properties by checking whatkind of track we have
+        Loads properties by checking what kind of track we have
         """
         #first, unload previous panels
         if self._properties_panel != None:
@@ -201,19 +202,23 @@ class PropertiesPalette(wx.ScrolledWindow):
                 try:
                     self.LoadToolProperties(self._panels[ID_TRACK_PROPERTIES_STRAIGHT])
                     self._properties_panel.SetTrack(selection)
+                    self.TopLevelParent.ChangePaneCaption(self,"Track Properties")
                 except KeyError:
                     pass
             else:
                 try:
                     self.LoadToolProperties(self._panels[ID_TRACK_PROPERTIES_ARC])
                     self._properties_panel.SetTrack(selection)
+                    self.TopLevelParent.ChangePaneCaption(self,"Arc Properties")
                 except KeyError:
                     pass
         else:
             try:
                 self.LoadToolProperties(self._panels[ID_BASEPOINT_PROPERTIES])
+                self.TopLevelParent.ChangePaneCaption(self,"Basepoint Properties")
             except KeyError:
-                pass
+                self.TopLevelParent.ChangePaneCaption(self,"Properties")
+
 
     def LoadToolProperties(self, panel):
         """
@@ -281,6 +286,16 @@ class BasePointProperties(wx.Panel):
         #making sizer
         s.AddSpacer(5)
         s.Add(sizer_slider)
+
+        self._bOK = wx.Button(self, wx.ID_ANY, "Apply")
+
+        sb = wx.StdDialogButtonSizer()
+        sb.AddButton(self._bOK)
+        sb.SetAffirmativeButton(self._bOK)
+        sb.Realize()
+
+        s.AddSpacer(8)
+        s.Add(sb,0,wx.EXPAND)
 
         self.SetSizer(s)
         #binding events
@@ -387,7 +402,17 @@ class TrackPropertiesStraight(wx.Panel):
         sizer_slider.Add(self.sl_1m,1, wx.EXPAND, wx.ALIGN_CENTER)
 
         s.AddSpacer(5)
-        s.Add(sizer_slider,1,wx.EXPAND)
+        s.Add(sizer_slider,0,wx.EXPAND)
+
+        self._bOK = wx.Button(self, wx.ID_ANY, "Apply")
+
+        sb = wx.StdDialogButtonSizer()
+        sb.AddButton(self._bOK)
+        sb.SetAffirmativeButton(self._bOK)
+        sb.Realize()
+
+        s.AddSpacer(8)
+        s.Add(sb,0,wx.EXPAND)
 
 
     def BindEvents(self):
@@ -484,8 +509,8 @@ class TrackPropertiesArc(wx.Panel):
         l_angle = wx.StaticText(self,wx.ID_ANY,"Angle (deg)")
         self.sp_angle.SetRange(0,359) 
                
-        sizer_slider.Add(l_angle,0, wx.EXPAND, wx.ALIGN_CENTER)
-        sizer_slider.Add(self.sp_angle,1, wx.EXPAND, wx.ALIGN_CENTER)
+        sizer_slider.Add(l_angle,0, wx.EXPAND | wx.ALIGN_CENTER)
+        sizer_slider.Add(self.sp_angle,1, wx.EXPAND | wx.ALIGN_CENTER)
         
         '''Angle min'''
 
@@ -493,30 +518,40 @@ class TrackPropertiesArc(wx.Panel):
         l_angle_min = wx.StaticText(self,wx.ID_ANY,"Angle (min)")
         self.sp_angle_min.SetRange(0,100)
 
-        sizer_slider.Add(l_angle_min,0, wx.EXPAND, wx.ALIGN_CENTER)
-        sizer_slider.Add(self.sp_angle_min,1, wx.EXPAND, wx.ALIGN_CENTER)
+        sizer_slider.Add(l_angle_min,0, wx.EXPAND | wx.ALIGN_CENTER)
+        sizer_slider.Add(self.sp_angle_min,1, wx.EXPAND | wx.ALIGN_CENTER)
 
-        '''Gradient'''
+        '''Radius'''
 
         self.sp_rad = wx.SpinCtrl(self)
         l_rad = wx.StaticText(self,wx.ID_ANY,"Radius (m)")
         self.sp_rad.SetRange(50,25000)
 
-        sizer_slider.Add(l_rad,0, wx.EXPAND, wx.ALIGN_CENTER)
-        sizer_slider.Add(self.sp_rad,1, wx.EXPAND, wx.ALIGN_CENTER)        
+        sizer_slider.Add(l_rad,0, wx.EXPAND | wx.ALIGN_CENTER)
+        sizer_slider.Add(self.sp_rad,1, wx.EXPAND | wx.ALIGN_CENTER)        
         
         s.AddSpacer(5)
-        s.Add(sizer_slider,1,wx.EXPAND)
+        s.Add(sizer_slider,0,wx.EXPAND)
+        
+        self._bOK = wx.Button(self, wx.ID_ANY, "Apply")
 
+        sb = wx.StdDialogButtonSizer()
+        sb.AddButton(self._bOK)
+        sb.SetAffirmativeButton(self._bOK)
+        sb.Realize()
 
+        s.AddSpacer(8)
+        s.Add(sb,0,wx.EXPAND)
+        
+        
     def BindEvents(self):
         """
         Function to bind events with sliders
         """
         #self.Bind(wx.EVT_SCROLL_CHANGED, self.SliderMove)
         #self.Bind(wx.EVT_SCROLL_THUMBTRACK, self.SliderMove)
-        self.Bind(wx.EVT_SPINCTRL, self.OnChange)
-        pass
+        #self.Bind(wx.EVT_SPINCTRL, self.OnChange)
+        self.Bind(wx.EVT_BUTTON, self.OnChange)        
 
 
     def OnChange(self, event):

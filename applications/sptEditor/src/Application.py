@@ -245,6 +245,10 @@ class MainWindow(wx.Frame):
         if name == NAME_TRACK_PALETTE:
             self.trackPaletteMenuEntry.Check(False)
 
+    def ChangePaneCaption(self, pallete, caption):
+        pal = self._paneManager.GetPane(pallete)
+        pal.caption = caption
+        self._paneManager.Update()
 
     def OnAbout(self, event):
         """
