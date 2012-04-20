@@ -253,7 +253,7 @@ class BasePointProperties(wx.Panel):
         s = wx.BoxSizer(wx.VERTICAL)
 
         '''
-        Angle degres
+        Angle degrees
         '''
         
         sizer_slider = wx.FlexGridSizer(1,2,5,5)
@@ -300,7 +300,9 @@ class BasePointProperties(wx.Panel):
         self.SetSizer(s)
         #binding events
         self.Bind(wx.EVT_SHOW, self.OnShow)
-        self.Bind(wx.EVT_SPINCTRL, self.OnChange)
+#        self.Bind(wx.EVT_SPINCTRL, self.OnChange)
+        self.Bind(wx.EVT_BUTTON, self.OnChange)        
+
 
     def OnShow(self, event):
         """
@@ -419,7 +421,8 @@ class TrackPropertiesStraight(wx.Panel):
         """
         Function to bind events with sliders
         """
-        self.Bind(wx.EVT_SCROLL_CHANGED, self.SliderMove)
+#        self.Bind(wx.EVT_SCROLL_CHANGED, self.SliderMove)
+        self.Bind(wx.EVT_BUTTON, self.SliderMove)        
 
 
     def SliderMove(self, event):
