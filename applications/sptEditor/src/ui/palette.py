@@ -6,6 +6,7 @@ import os.path
 import sys
 import yaml
 import wx
+import wx.combo
 
 import Application
 import model.tracks
@@ -47,7 +48,6 @@ class ToolsPalette(wx.Panel):
         
         ArtManager.Get().SetMBVerticalGradient(True)
         ArtManager.Get().SetRaiseToolbar(False)
-        
         
         s = wx.BoxSizer(wx.VERTICAL)
         s.Add(self._menu, 0, wx.EXPAND)
@@ -167,18 +167,351 @@ class TrackTool(wx.Panel):
         editor.SetSelection(track)
 
 
+
+class TreeCtrlComboPopup(wx.combo.ComboPopup):
+    """
+    This class is a popup containing a TreeCtrl.  This time we'll 
+    use a has-a style (instead of is-a like above.)
+    """
+    # overridden ComboPopup methods
+    
+    def Init(self):
+        self.value = None
+        self.curitem = None
+
+        
+    def Create(self, parent):
+        self.tree = wx.TreeCtrl(parent, style=wx.TR_HIDE_ROOT
+                                |wx.TR_HAS_BUTTONS
+                                |wx.TR_SINGLE
+                                |wx.TR_LINES_AT_ROOT
+                                |wx.SIMPLE_BORDER)
+        self.tree.Bind(wx.EVT_MOTION, self.OnMotion)
+        self.tree.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
+        
+
+    def GetControl(self):
+        return self.tree
+
+
+    def GetStringValue(self):
+        if self.value:
+            return self.tree.GetItemText(self.value)
+        return ""
+
+
+    def OnPopup(self):
+        if self.value:
+            self.tree.EnsureVisible(self.value)
+            self.tree.SelectItem(self.value)
+
+
+    def SetStringValue(self, value):
+        # this assumes that item strings are unique...
+        root = self.tree.GetRootItem()
+        if not root:
+            return
+        found = self.FindItem(root, value)
+        if found:
+            self.value = found
+            self.tree.SelectItem(found)
+
+
+    def GetAdjustedSize(self, minWidth, prefHeight, maxHeight):
+        return wx.Size(minWidth, min(200, maxHeight))
+                       
+
+    # helpers
+    
+    def FindItem(self, parentItem, text):        
+        item, cookie = self.tree.GetFirstChild(parentItem)
+        while item:
+            if self.tree.GetItemText(item) == text:
+                return item
+            if self.tree.ItemHasChildren(item):
+                item = self.FindItem(item, text)
+            item, cookie = self.tree.GetNextChild(parentItem, cookie)
+        return wx.TreeItemId();
+
+
+    def AddItem(self, value, parent=None):
+        if not parent:
+            root = self.tree.GetRootItem()
+            if not root:
+                root = self.tree.AddRoot("<hidden root>")
+            parent = root
+
+        item = self.tree.AppendItem(parent, value)
+        return item
+
+    
+    def OnMotion(self, evt):
+        # have the selection follow the mouse, like in a real combobox
+        item, flags = self.tree.HitTest(evt.GetPosition())
+        if item and flags & wx.TREE_HITTEST_ONITEMLABEL:
+            self.tree.SelectItem(item)
+            self.curitem = item
+        evt.Skip()
+
+
+    def OnLeftDown(self, evt):
+        # do the combobox selection
+        item, flags = self.tree.HitTest(evt.GetPosition())
+        if item and flags & wx.TREE_HITTEST_ONITEMLABEL:
+            self.curitem = item
+            self.value = item
+            self.Dismiss()
+        evt.Skip()
+        
+        
+class ListCtrlComboPopup(wx.ListCtrl, wx.combo.ComboPopup):
+        
+    def __init__(self):
+        # Since we are using multiple inheritance, and don't know yet
+        # which window is to be the parent, we'll do 2-phase create of
+        # the ListCtrl instead, and call its Create method later in
+        # our Create method.  (See Create below.)
+        self.PostCreate(wx.PreListCtrl())
+
+        # Also init the ComboPopup base class.
+        wx.combo.ComboPopup.__init__(self)
+        
+
+    def AddItem(self, txt):
+        self.InsertStringItem(self.GetItemCount(), txt)
+
+    def OnMotion(self, evt):
+        item, flags = self.HitTest(evt.GetPosition())
+        if item >= 0:
+            self.Select(item)
+            self.curitem = item
+
+    def OnLeftDown(self, evt):
+        self.value = self.curitem
+        self.Dismiss()
+
+
+    # The following methods are those that are overridable from the
+    # ComboPopup base class.  Most of them are not required, but all
+    # are shown here for demonstration purposes.
+
+
+    # This is called immediately after construction finishes.  You can
+    # use self.GetCombo if needed to get to the ComboCtrl instance.
+    def Init(self):
+        self.value = -1
+        self.curitem = -1
+
+
+    # Create the popup child control.  Return true for success.
+    def Create(self, parent):
+        wx.ListCtrl.Create(self, parent,
+                           style=wx.LC_LIST|wx.LC_SINGLE_SEL|wx.SIMPLE_BORDER)
+        self.Bind(wx.EVT_MOTION, self.OnMotion)
+        self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
+        return True
+
+
+    # Return the widget that is to be used for the popup
+    def GetControl(self):
+        #self.log.write("ListCtrlComboPopup.GetControl")
+        return self
+
+    # Called just prior to displaying the popup, you can use it to
+    # 'select' the current item.
+    def SetStringValue(self, val):
+        idx = self.FindItem(-1, val)
+        if idx != wx.NOT_FOUND:
+            self.Select(idx)
+
+    # Return a string representation of the current item.
+    def GetStringValue(self):
+        if self.value >= 0:
+            return self.GetItemText(self.value)
+        return ""
+
+    # Called immediately after the popup is shown
+    def OnPopup(self):
+        wx.combo.ComboPopup.OnPopup(self)
+
+    # Called when popup is dismissed
+    def OnDismiss(self):
+        wx.combo.ComboPopup.OnDismiss(self)
+
+    # This is called to custom paint in the combo control itself
+    # (ie. not the popup).  Default implementation draws value as
+    # string.
+    def PaintComboControl(self, dc, rect):
+        wx.combo.ComboPopup.PaintComboControl(self, dc, rect)
+
+    # Receives key events from the parent ComboCtrl.  Events not
+    # handled should be skipped, as usual.
+    def OnComboKeyEvent(self, event):
+        wx.combo.ComboPopup.OnComboKeyEvent(self, event)
+
+    # Implement if you need to support special action when user
+    # double-clicks on the parent wxComboCtrl.
+    def OnComboDoubleClick(self):
+        wx.combo.ComboPopup.OnComboDoubleClick(self)
+
+    # Return final size of popup. Called on every popup, just prior to OnPopup.
+    # minWidth = preferred minimum width for window
+    # prefHeight = preferred height. Only applies if > 0,
+    # maxHeight = max height for window, as limited by screen size
+    #   and should only be rounded down, if necessary.
+    def GetAdjustedSize(self, minWidth, prefHeight, maxHeight):
+        return wx.combo.ComboPopup.GetAdjustedSize(self, minWidth, prefHeight, maxHeight)
+
+    # Return true if you want delay the call to Create until the popup
+    # is shown for the first time. It is more efficient, but note that
+    # it is often more convenient to have the control created
+    # immediately.    
+    # Default returns false.
+    def LazyCreate(self):
+        return wx.combo.ComboPopup.LazyCreate(self)
+
+
+
+
+class BaseParametersForLineandStationPalette(wx.ScrolledWindow):
+    """
+    Class with properties for lines and station tracks
+    """
+    def __init__(self, parent, id = wx.ID_ANY, w=200, h=400):
+        wx.ScrolledWindow.__init__(self, parent, id)
+        
+        s = wx.BoxSizer(wx.VERTICAL)
+        
+        self.__PARAMS_LINE_PL = "Poland"
+        self.__PARAMS_LINE_MAIN = "Main line"
+        self.__PARAMS_LINE_FIRST_LEVEL = "First level line"
+        self.__PARAMS_LINE_SEC_LEVEL = "Second level line"
+        self.__PARAMS_LINE_LOCAL = "Local line"
+        self.__PARAMS_STATION_MAIN = "Main track"
+        self.__PARAMS_STATION_MAIN_ADD = "Main add track"
+        self.__PARAMS_STATION_OTHER = "Other track"
+        self.__PARAMS_TERRAIN_FLAT = "Flat terrain"
+        self.__PARAMS_TERRAIN_MIDDLE = "Middle flat terrain"
+        self.__PARAMS_TERRAIN_HIGHLANDS = "Highlands terrain"
+        
+        self.MakeUI(s)
+        self.CreateContent()
+        self.SetSizer(s)
+        self.Layout()
+        
+        self.palletes = []
+        
+
+    def MakeUI(self, s):
+        """
+        Function in which we make some GUI for changing 
+        properties of straight track
+        """
+        
+        '''
+        Angle degrees
+        '''
+        
+#        fgs = wx.FlexGridSizer(cols=3, hgap=10, vgap=10)
+        fgs = wx.FlexGridSizer(1,2,5,5)
+
+        self.cc_line = wx.combo.ComboCtrl(self, style=wx.CB_READONLY, size=(150,-1))
+
+        fgs.Add(wx.StaticText(self,wx.ID_ANY,"Line"),0, wx.EXPAND | wx.LEFT)
+        fgs.Add(self.cc_line,1, wx.EXPAND | wx.ALIGN_CENTER)
+
+        self.cc_station = wx.combo.ComboCtrl(self, style=wx.CB_READONLY, size=(150,-1))
+        
+        fgs.Add(wx.StaticText(self,wx.ID_ANY,"Station"),0, wx.EXPAND | wx.LEFT)
+        fgs.Add(self.cc_station,1, wx.EXPAND | wx.ALIGN_CENTER)
+
+#        self.cc_bocznica = wx.combo.ComboCtrl(self, style=wx.CB_READONLY, size=(150,-1))
+#        
+#        fgs.Add(wx.StaticText(self,wx.ID_ANY,"Bocznica"),0, wx.EXPAND | wx.LEFT)
+#        fgs.Add(self.cc_bocznica,1, wx.EXPAND | wx.ALIGN_CENTER)
+
+        self.cc_terrain = wx.combo.ComboCtrl(self, style=wx.CB_READONLY, size=(150,-1))
+        
+        fgs.Add(wx.StaticText(self,wx.ID_ANY,"Terrain"),0, wx.EXPAND | wx.LEFT)
+        fgs.Add(self.cc_terrain,1, wx.EXPAND | wx.ALIGN_CENTER)
+
+        s.AddSpacer(5)
+        s.Add(fgs,0,wx.EXPAND)
+
+        self._bOK = wx.Button(self, wx.ID_ANY, "Apply")
+
+        sb = wx.StdDialogButtonSizer()
+        sb.AddButton(self._bOK)
+        sb.SetAffirmativeButton(self._bOK)
+        sb.Realize()
+
+        s.AddSpacer(8)
+        s.Add(sb,0,wx.EXPAND)
+
+    def CreateContent(self):
+        # Add some items to the line listctrl.
+        tcp = TreeCtrlComboPopup()
+        self.cc_line.SetPopupControl(tcp)
+#        tcp = self.cc_line.GetPopupControl()
+        item = tcp.AddItem(self.__PARAMS_LINE_PL)
+        
+        tcp.AddItem(self.__PARAMS_LINE_MAIN, item)
+        tcp.AddItem(self.__PARAMS_LINE_FIRST_LEVEL, item)
+        tcp.AddItem(self.__PARAMS_LINE_SEC_LEVEL, item)
+        tcp.AddItem(self.__PARAMS_LINE_LOCAL, item)
+        
+        tcp_st = TreeCtrlComboPopup()
+        self.cc_station.SetPopupControl(tcp_st)
+        
+        item = tcp_st.AddItem(self.__PARAMS_LINE_PL)
+        tcp_st.AddItem(self.__PARAMS_STATION_MAIN, item)
+        tcp_st.AddItem(self.__PARAMS_STATION_MAIN_ADD, item)
+        tcp_st.AddItem(self.__PARAMS_STATION_OTHER, item)
+        
+        lcp = ListCtrlComboPopup()
+        self.cc_terrain.SetPopupControl(lcp)
+        
+        lcp.AddItem(self.__PARAMS_TERRAIN_FLAT)
+        lcp.AddItem(self.__PARAMS_TERRAIN_MIDDLE)
+        lcp.AddItem(self.__PARAMS_TERRAIN_HIGHLANDS)
+
+    def BindEvents(self):
+        """
+        Function to bind events with combos
+        """
+        self.Bind(wx.EVT_BUTTON, self.OnParametersChange)        
+
+    def OnParametersChange(self, evt):
+        """
+        Function to which we change parameters based on what is 
+        selected by user
+        """
+        
+        for p in self.palletes:
+            p.OnBaseParametersChange()
+    
+    def RegisterPalletesForChangingParametersIn(self, palette):
+        """
+        Function in which we registers classes to which we send
+        information that base parameters was changed
+        """
+        
+        self.palletes.append(palette)
+        palette.SetBaseParametersStoreClass(self)
+        
+
 class PropertiesPalette(wx.ScrolledWindow):
     """
     Base class for all properties palettes for tools
     """
-    def __init__(self, parent, id = wx.ID_ANY, w=200, h=400):
+    def __init__(self, parent, editor=None, id = wx.ID_ANY, w=200, h=400):
         wx.ScrolledWindow.__init__(self, parent, id)
         self.SetSizer(wx.BoxSizer(wx.VERTICAL))
 
         self._panels = {
-                        ID_TRACK_PROPERTIES_STRAIGHT: TrackPropertiesStraight(self),
-                        ID_BASEPOINT_PROPERTIES: BasePointProperties(self),
-                        ID_TRACK_PROPERTIES_ARC: TrackPropertiesArc(self),
+                        ID_TRACK_PROPERTIES_STRAIGHT: TrackPropertiesStraight(self, editor=editor),
+                        ID_BASEPOINT_PROPERTIES: BasePointProperties(self, editor=editor),
+                        ID_TRACK_PROPERTIES_ARC: TrackPropertiesArc(self, editor=editor),
                         }    
 
         self.LoadToolProperties(self._panels[ID_TRACK_PROPERTIES_ARC])
@@ -245,13 +578,21 @@ class PropertiesPalette(wx.ScrolledWindow):
         
 
 class BasePointProperties(wx.Panel):
-    def __init__(self, parent, id=wx.ID_ANY):
+    def __init__(self, parent, editor=None, id=wx.ID_ANY):
         wx.Panel.__init__(self, parent, id)
         
         self.Hide()
 
         s = wx.BoxSizer(wx.VERTICAL)
+        self.MakeUI(s)
 
+        self.SetSizer(s)
+        #binding events
+        self.Bind(wx.EVT_SHOW, self.OnShow)
+#        self.Bind(wx.EVT_SPINCTRL, self.OnChange)
+        self.Bind(wx.EVT_BUTTON, self.OnChange)        
+
+    def MakeUI(self, s):
         '''
         Angle degrees
         '''
@@ -297,12 +638,6 @@ class BasePointProperties(wx.Panel):
         s.AddSpacer(8)
         s.Add(sb,0,wx.EXPAND)
 
-        self.SetSizer(s)
-        #binding events
-        self.Bind(wx.EVT_SHOW, self.OnShow)
-#        self.Bind(wx.EVT_SPINCTRL, self.OnChange)
-        self.Bind(wx.EVT_BUTTON, self.OnChange)        
-
 
     def OnShow(self, event):
         """
@@ -331,7 +666,7 @@ class BasePointProperties(wx.Panel):
         editor.SetBasePoint(bp,True)
 
 class TrackPropertiesStraight(wx.Panel):
-    def __init__(self, parent, id = wx.ID_ANY):
+    def __init__(self, parent, editor=None, id = wx.ID_ANY):
         wx.Panel.__init__(self, parent, id)
         
         self.Hide()
@@ -449,9 +784,16 @@ class TrackPropertiesStraight(wx.Panel):
             else:
                 editor.SetBasePoint(bp)
                 editor.SetSelection(None)
-
+                
+    def SetBaseParametersStoreClass(self, store):
+        self.param_store = store 
+        
+    def OnBaseParametersChange(self):
+        pass
+    
+    
 class TrackPropertiesArc(wx.Panel):
-    def __init__(self, parent, id = wx.ID_ANY):
+    def __init__(self, parent, editor=None, id = wx.ID_ANY):
         wx.Panel.__init__(self, parent, id)
         
         self.Hide()
@@ -551,9 +893,6 @@ class TrackPropertiesArc(wx.Panel):
         """
         Function to bind events with sliders
         """
-        #self.Bind(wx.EVT_SCROLL_CHANGED, self.SliderMove)
-        #self.Bind(wx.EVT_SCROLL_THUMBTRACK, self.SliderMove)
-        #self.Bind(wx.EVT_SPINCTRL, self.OnChange)
         self.Bind(wx.EVT_BUTTON, self.OnChange)        
 
 
@@ -581,3 +920,9 @@ class TrackPropertiesArc(wx.Panel):
         else:
             editor.SetBasePoint(bp)
             editor.SetSelection(None)
+            
+    def SetBaseParametersStoreClass(self, store):
+        self.param_store = store 
+        
+    def OnBaseParametersChange(self):
+        pass

@@ -8,7 +8,7 @@ Created on 2009-03-01
 
 #import logging
 import logging.config
-#import wx
+import wx
 import wx.xrc
 import wx.aui as AUI
 #import wx.lib.agw.ribbon as RB
@@ -191,6 +191,7 @@ class MainWindow(wx.Frame):
         # Create palette
         self.trackPaletteFrame = ui.palette.ToolsPalette(self.main_content_panel,ID_TRACK_PALETTE)
         self.propertiesPaletteFrame = ui.palette.PropertiesPalette(self.main_content_panel,wx.ID_ANY)
+        self.parametersPaletteFrame = ui.palette.BaseParametersForLineandStationPalette(self.main_content_panel,wx.ID_ANY)
 #        self.previewPaletteFrame = osgwx.Preview3DFrame(self.main_content_panel,"Preview")
         
         # Adding palette pane to manager as child
@@ -203,9 +204,9 @@ class MainWindow(wx.Frame):
                                   PinButton().MinimizeButton().MaximizeButton().CaptionVisible(). \
                                   FloatingSize(wx.Size(300, 300)).Caption("Properties"))
 
-#        self._paneManager.AddPane(self.previewPaletteFrame, AUI.AuiPaneInfo().Dockable().CloseButton(). \
-#                                  PinButton().MinimizeButton().MaximizeButton().CaptionVisible(). \
-#                                  Caption("Properties"))
+        self._paneManager.AddPane(self.parametersPaletteFrame, AUI.AuiPaneInfo().Dockable().CloseButton(). \
+                                  PinButton().MinimizeButton().MaximizeButton().CaptionVisible(). \
+                                  FloatingSize(wx.Size(300, 300)).Caption("Parameters"))
 
         self._paneManager.Update()
         

@@ -137,6 +137,27 @@ class TrackFactory:
 
         return Track(p1, v1, v2, p2)
 
+    def CreateTransitionCurve(self, angle, radius, isLeft, basePoint, vmax=120):
+        """
+        Creates transition curve based on arc properties
+        """
+        
+        length = radius * angle        
+        bp = ui.editor.BasePoint(basePoint.point, basePoint.alpha, 0)
+
+        track = self.CreateArcOnStation(angle, radius, isLeft, bp)
+
+        track.p2.z = Decimal(length * basePoint.gradient / 1000.0)
+        ctrl = 4.0 / 3.0 * radius * tan(angle * 0.25)
+        track.v1.z = Decimal(ctrl * basePoint.gradient / 1000.0)
+        track.v2.z = Decimal(ctrl * -basePoint.gradient / 1000.0)
+
+        basePoint.SetAlpha(bp.alpha)
+        basePoint.SetPosition(bp.point)
+
+        self.basePoint = basePoint
+        
+        return track
 
     def CreateChangeOfGradient(self, target_gradient, radius, basePoint):
         """
