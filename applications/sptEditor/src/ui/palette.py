@@ -33,7 +33,15 @@ ID_TRACK_PROPERTIES_STRAIGHT = 1
 ID_TRACK_PROPERTIES_ARC = 2
 ID_BASEPOINT_PROPERTIES = 3
 
-class ToolsPalette(wx.Panel):
+class PropertiesBaseClass:
+    def OnBaseParametersChange(self):
+        pass
+
+    def SetBaseParametersStoreClass(self, store):
+        pass
+
+
+class ToolsPalette(wx.Panel, PropertiesBaseClass):
     def __init__(self, parent, id=wx.ID_ANY):
         wx.Panel.__init__(self,parent,id)
     
@@ -114,8 +122,14 @@ class ToolsPalette(wx.Panel):
             #Refresh
             self.Layout()
 
+    def OnBaseParametersChange(self):
+        pass
 
-class TrackTool(wx.Panel):
+    def SetBaseParametersStoreClass(self, store):
+        self.param_store = store 
+
+
+class TrackTool(wx.Panel, PropertiesBaseClass):
     def __init__(self, parent, id = wx.ID_ANY):
         wx.Panel.__init__(self, parent, id)
 
@@ -166,6 +180,11 @@ class TrackTool(wx.Panel):
         editor.SetBasePoint(editor.basePoint)
         editor.SetSelection(track)
 
+    def OnBaseParametersChange(self):
+        pass
+
+    def SetBaseParametersStoreClass(self, store):
+        self.param_store = store 
 
 
 class TreeCtrlComboPopup(wx.combo.ComboPopup):
@@ -396,9 +415,10 @@ class BaseParametersForLineandStationPalette(wx.ScrolledWindow):
         
         self.MakeUI(s)
         self.CreateContent()
+        self.BindEvents()
         self.SetSizer(s)
         self.Layout()
-        
+
         self.palletes = []
         
 
@@ -434,6 +454,14 @@ class BaseParametersForLineandStationPalette(wx.ScrolledWindow):
         
         fgs.Add(wx.StaticText(self,wx.ID_ANY,"Terrain"),0, wx.EXPAND | wx.LEFT)
         fgs.Add(self.cc_terrain,1, wx.EXPAND | wx.ALIGN_CENTER)
+
+        self.sl_V = wx.Slider(self,wx.ID_ANY,120,0,250, size=(150,-1), \
+                              style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
+        self.sl_V.SetTickFreq(10)
+        
+        fgs.Add(wx.StaticText(self,wx.ID_ANY,"Velocity"),0, wx.EXPAND | wx.LEFT)
+        fgs.Add(self.sl_V,1, wx.EXPAND | wx.ALIGN_CENTER)
+
 
         s.AddSpacer(5)
         s.Add(fgs,0,wx.EXPAND)
@@ -487,6 +515,46 @@ class BaseParametersForLineandStationPalette(wx.ScrolledWindow):
         selected by user
         """
         
+        # Set max speed
+        self.maxVel = self.sl_V.GetValue()
+        
+        # Set min and max radius for line
+        l = self.cc_line.GetValue()
+        t = self.cc_terrain.GetValue()
+        
+        if l==self.__PARAMS_LINE_PL or l==self.__PARAMS_LINE_MAIN:
+            self.maxR = 15000.0
+            if t==self.__PARAMS_TERRAIN_FLAT:
+                self.minR = 1500.0
+            elif t==self.__PARAMS_TERRAIN_MIDDLE:
+                self.minR = 1200.0
+            elif t==self.__PARAMS_TERRAIN_HIGHLANDS:
+                self.minR = 600.0
+        elif l==self.__PARAMS_LINE_FIRST_LEVEL:
+            self.maxR = 15000.0
+            if t==self.__PARAMS_TERRAIN_FLAT:
+                self.minR = 1200.0
+            elif t==self.__PARAMS_TERRAIN_MIDDLE:
+                self.minR = 600.0
+            elif t==self.__PARAMS_TERRAIN_HIGHLANDS:
+                self.minR = 400.0
+        elif l==self.__PARAMS_LINE_SEC_LEVEL:
+            self.maxR = 15000.0
+            if t==self.__PARAMS_TERRAIN_FLAT:
+                self.minR = 600.0
+            elif t==self.__PARAMS_TERRAIN_MIDDLE:
+                self.minR = 400.0
+            elif t==self.__PARAMS_TERRAIN_HIGHLANDS:
+                self.minR = 300.0
+        elif l==self.__PARAMS_LINE_LOCAL:
+            self.maxR = 15000.0
+            if t==self.__PARAMS_TERRAIN_FLAT:
+                self.minR = 400.0
+            elif t==self.__PARAMS_TERRAIN_MIDDLE:
+                self.minR = 250.0
+            elif t==self.__PARAMS_TERRAIN_HIGHLANDS:
+                self.minR = 200.0
+        
         for p in self.palletes:
             p.OnBaseParametersChange()
     
@@ -500,7 +568,7 @@ class BaseParametersForLineandStationPalette(wx.ScrolledWindow):
         palette.SetBaseParametersStoreClass(self)
         
 
-class PropertiesPalette(wx.ScrolledWindow):
+class PropertiesPalette(wx.ScrolledWindow, PropertiesBaseClass):
     """
     Base class for all properties palettes for tools
     """
@@ -560,7 +628,6 @@ class PropertiesPalette(wx.ScrolledWindow):
         
         self._properties_panel = self.GetSizer().Add(panel,1,wx.EXPAND).GetWindow()
         self._properties_panel.Show()
-        
         #Refresh
         self.Layout()
         
@@ -576,8 +643,18 @@ class PropertiesPalette(wx.ScrolledWindow):
             #Refresh
             self.Layout()
         
+    def OnBaseParametersChange(self):
+        if self._properties_panel != None:
+            self._properties_panel.OnBaseParametersChange()
 
-class BasePointProperties(wx.Panel):
+    def SetBaseParametersStoreClass(self, store):
+        self.param_store = store
+        for p in self._panels:
+            self._panels[p].SetBaseParametersStoreClass(self.param_store)
+        
+
+
+class BasePointProperties(wx.Panel, PropertiesBaseClass):
     def __init__(self, parent, editor=None, id=wx.ID_ANY):
         wx.Panel.__init__(self, parent, id)
         
@@ -665,7 +742,13 @@ class BasePointProperties(wx.Panel):
 
         editor.SetBasePoint(bp,True)
 
-class TrackPropertiesStraight(wx.Panel):
+#    def SetBaseParametersStoreClass(self, store):
+#        """
+#        Only for compatybile issues
+#        """
+#        pass
+
+class TrackPropertiesStraight(wx.Panel, PropertiesBaseClass):
     def __init__(self, parent, editor=None, id = wx.ID_ANY):
         wx.Panel.__init__(self, parent, id)
         
@@ -785,14 +868,8 @@ class TrackPropertiesStraight(wx.Panel):
                 editor.SetBasePoint(bp)
                 editor.SetSelection(None)
                 
-    def SetBaseParametersStoreClass(self, store):
-        self.param_store = store 
-        
-    def OnBaseParametersChange(self):
-        pass
     
-    
-class TrackPropertiesArc(wx.Panel):
+class TrackPropertiesArc(wx.Panel, PropertiesBaseClass):
     def __init__(self, parent, editor=None, id = wx.ID_ANY):
         wx.Panel.__init__(self, parent, id)
         
@@ -922,7 +999,9 @@ class TrackPropertiesArc(wx.Panel):
             editor.SetSelection(None)
             
     def SetBaseParametersStoreClass(self, store):
+        
         self.param_store = store 
         
     def OnBaseParametersChange(self):
-        pass
+        
+        self.sp_rad.SetRange(self.param_store.minR, self.param_store.maxR)

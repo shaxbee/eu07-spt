@@ -212,6 +212,11 @@ class MainWindow(wx.Frame):
         
         # Bypass bug in wxWidgets, that initialization size is wrong
         self._paneManager.GetPane(self.trackPaletteFrame).MinSize(wx.Size(0,0))
+        
+        # Register panes which should have informations about changing
+        # base parameters
+        self.parametersPaletteFrame.RegisterPalletesForChangingParametersIn(self.trackPaletteFrame)
+        self.parametersPaletteFrame.RegisterPalletesForChangingParametersIn(self.propertiesPaletteFrame)
 
     def CreateContent(self):
         """
