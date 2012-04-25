@@ -141,6 +141,11 @@ class TrackTool(wx.Panel, PropertiesBaseClass):
                           )
         
         s.Add(self._rb,0,wx.SHAPED, wx.ALIGN_CENTER)
+        self.Bind(wx.EVT_RADIOBOX, self.OnSelection)
+        
+        self._trcurve = wx.CheckBox(self,wx.ID_ANY,"Transition curve",style=wx.CHK_2STATE)
+        s.Add(self._trcurve,0,wx.SHAPED, wx.ALIGN_CENTER)
+        self._trcurve.Hide()
         
         self.SetSizer(s)
         
@@ -158,6 +163,18 @@ class TrackTool(wx.Panel, PropertiesBaseClass):
         sb.Realize()
         s.AddSpacer(8)
         s.Add(sb,0,wx.EXPAND, wx.ALIGN_CENTER)
+    
+    def OnSelection(self, event):
+        """
+        Show or hide checkbox for choosing trasnistion curve adding
+        with adding curve
+        """
+        
+        if self._rb.GetSelection() != 1:
+            self._trcurve.Show()
+        else:
+            self._trcurve.Hide()
+        self.Layout()
         
     def AddElement(self, event):
         """
@@ -1005,3 +1022,4 @@ class TrackPropertiesArc(wx.Panel, PropertiesBaseClass):
     def OnBaseParametersChange(self):
         
         self.sp_rad.SetRange(self.param_store.minR, self.param_store.maxR)
+        self.Vel = self.param_store.maxVel
