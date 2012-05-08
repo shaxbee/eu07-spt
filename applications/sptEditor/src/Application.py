@@ -26,7 +26,7 @@ import ui.palette
 import sptyaml
 #import ui.ribbon
 import ui.toolbar
-import osgwx
+#import osgwx
 
 from ui.toolbar import ID_MODE_TRACK_NORMAL, ID_MODE_TRACK_CLOSURE
 # Stock items
