@@ -20,7 +20,7 @@ from ui.rulers import Ruler
 import ui.views
 import ui.trackfc
 from sptmath import Vec3
-
+import copy
 
 # Constants here
 SCALE_MIN = 0.004 # It gives 800px/200km
@@ -166,7 +166,7 @@ class PlanePart(wx.ScrolledWindow):
         eventManager.Register(self.basePointMover.OnMouseRelease, wx.EVT_LEFT_UP, self)
         eventManager.Register(self.highlighter.OnMouseClick, wx.EVT_LEFT_DOWN, self)
         #eventManager.Register(self.highlighter.OnMouseMove, wx.EVT_MOTION, self)
-        #eventManager.Register(self.wheelScaler.OnMouseMove, wx.EVT_MOTION, self)
+        eventManager.Register(self.wheelScaler.OnMouseMove, wx.EVT_MOTION, self)
         eventManager.Register(self.sceneryDragger.OnMousePress, wx.EVT_MIDDLE_DOWN, self)
         eventManager.Register(self.sceneryDragger.MoveScenery, wx.EVT_MOTION, self)
         eventManager.Register(self.trackClosurer.OnMouseClick, wx.EVT_LEFT_UP, self)
@@ -314,7 +314,7 @@ class PlanePart(wx.ScrolledWindow):
         Scale preserves the center view.
         """
         assert isinstance(scale, Scale)
-
+        
         # 1) Get the center point of editor
         #if it's not position we calc position of center of the screen
         if position == None:
@@ -364,12 +364,12 @@ class PlanePart(wx.ScrolledWindow):
 
     def ModelToView(self, point = Vec3()):
         """
-        Converts 3D point of scenery coordiante into 2D point of
+        Converts 3D point of scenery coordinate into 2D point of
         UI editor coordinates.
         """        
         return self.bounds.ModelToView(point)
 
-    def CenterViewAt(self, (requiered_position_x, requiered_position_y)):
+    def CenterViewAt(self, (required_position_x, required_position_y)):
         """
         Centers the view on following point in pixels.
         """
@@ -378,10 +378,10 @@ class PlanePart(wx.ScrolledWindow):
         (scroll_rate_x, scroll_rate_y) = self.GetScrollPixelsPerUnit()
         
         #calculate position of left upper corner to which we scroll
-        corner_x = max(0, requiered_position_x - (window_size_width / 2))
-        corner_y = max(0, requiered_position_y - (window_size_height / 2))
+        corner_x = max(0, required_position_x - (window_size_width / 2))
+        corner_y = max(0, required_position_y - (window_size_height / 2))
         
-        #scroll to requiered position
+        #scroll to required position
         self.Scroll(corner_x / scroll_rate_x, corner_y / scroll_rate_y)
         #refresh rulers
         self.GetParent().leftRuler.Refresh()
@@ -1234,13 +1234,13 @@ class WheelScaler:
         delta = event.GetWheelRotation()
         mouse_logical_position_in_window = self.editor.CalcUnscrolledPosition(self.mouse_position)
                 
-        scale = self.editor.GetScale()
+        scale = copy.copy(self.editor.GetScale())
 
         if delta < 0:
-            scale.increase()
+            scale.decrease()
             self.editor.SetScale(scale, mouse_logical_position_in_window)
         else:
-            scale.decrease()
+            scale.increase()
             self.editor.SetScale(scale, mouse_logical_position_in_window)
             
         event.Skip()

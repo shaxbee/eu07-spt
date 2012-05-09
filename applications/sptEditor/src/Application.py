@@ -27,6 +27,7 @@ import sptyaml
 #import ui.ribbon
 import ui.toolbar
 #import osgwx
+import copy
 
 from ui.toolbar import ID_MODE_TRACK_NORMAL, ID_MODE_TRACK_CLOSURE
 # Stock items
@@ -537,7 +538,7 @@ class MainWindow(wx.Frame):
         """
         Zooms in the scenery by increasing scale.
         """
-        scale = self.editor.parts[0].GetScale()
+        scale = copy.copy(self.editor.parts[0].GetScale())
         scale.increase()
         self.editor.parts[0].SetScale(scale)
 
@@ -546,7 +547,7 @@ class MainWindow(wx.Frame):
         """
         Zooms out the scenery by decreasing scale.
         """
-        scale = self.editor.parts[0].GetScale()
+        scale = copy.copy(self.editor.parts[0].GetScale())
         scale.decrease()
         self.editor.parts[0].SetScale(scale)
 
