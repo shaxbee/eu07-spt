@@ -18,6 +18,7 @@ add_library(${LIB_NAME}
     Path.cpp 
     Track.cpp 
     Scenery.cpp 
+    Externals.cpp
     Sector.cpp 
     Switch.cpp 
     SwitchableTracking.cpp 
