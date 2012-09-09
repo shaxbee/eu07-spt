@@ -2,9 +2,7 @@
 #define SPTCORE_SECTOR_H 1
 
 #include <vector>
-
-#include <boost/tr1/unordered_map.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
+#include <memory>
 
 #include <osg/Vec3f>
 
@@ -13,15 +11,7 @@
 namespace sptCore
 {
 
-typedef boost::ptr_vector<Track> Tracks;
-
-struct External
-{
-    const TrackId track;
-    const osg::Vec3f sector;
-};
-
-typedef std::tr1::unordered_map<osg::Vec3f, External> Externals;
+typedef std::vector<std::unique_ptr<Track>> Tracks;
 
 class TrackVisitor;
 
@@ -30,24 +20,19 @@ class TrackVisitor;
 class Sector
 {
 public:
-    Sector(const osg::Vec3f& position, Tracks& trackings);
+    Sector(const osg::Vec2f& position, Tracks&& tracks);
 
-    const osg::Vec3f& getPosition() const { return _position; };
-
-    const External getExternal(const osg::Vec3f& position);
+    const osg::Vec2f& getPosition() const { return _position; };
+    const osg::Vec2f& getSize() const;
     const Track& getTrack(const TrackId index) const;
 
     void accept(TrackVisitor& visitor) const;
 
-    typedef boost::error_info<struct tag_position, osg::Vec3f> PositionInfo;
-    class UnknownConnectionException: public boost::exception { };
-
     static float SIZE;
 
 private:
-    const osg::Vec3f _position;
-    Externals _externals;
-    Tracks _trackings;
+    const osg::Vec2f _position;
+    Tracks _tracks;
 }; // class sptCore::Sector
 
 } // namespace sptCore

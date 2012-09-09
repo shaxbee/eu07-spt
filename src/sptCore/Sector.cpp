@@ -21,17 +21,21 @@ size_t hash_value(const osg::Vec3f& value)
 }
 };
 
-Sector::Sector(const osg::Vec3f& position, Tracks& trackings): _position(position)
+Sector::Sector(const osg::Vec2f& position, Tracks&& tracks): 
+    _position(position),
+    _tracks(std::move(tracks))
 {
-    _trackings.swap(trackings);
 }; // Sector::Sector(scenery)
 
 const Track& Sector::getTrack(const TrackId id) const
 {
-    return _trackings.at(id.value());
+    return *_tracks.at(id.value());
 };
 
 void Sector::accept(TrackVisitor& visitor) const
 {
-    std::for_each(_trackings.begin(), _trackings.end(), boost::bind(&Track::accept, _1, boost::ref(visitor)));
+    for(auto& track: _tracks)
+    {
+        track->accept(visitor);
+    };    
 };

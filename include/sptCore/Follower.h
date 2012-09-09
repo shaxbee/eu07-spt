@@ -20,7 +20,7 @@ class Follower
 public:
     Follower(SimpleTrack& track, float distance = 0.0f);
 
-    osg::Vec3f getSector() const { return _track->getSector(); }
+    osg::Vec2f getSector() const { return _track->getSector(); }
 
     const Track& getTrack() const { return *_track; }
     const Path& getPath() const { return *_path; }
@@ -43,7 +43,7 @@ private:
     void findPosition(osg::ref_ptr<osg::Vec3Array> points, osg::Vec3Array::const_iterator& iter, float& ratio) const;
 
     const Track* _track;
-    std::auto_ptr<const Path> _path;
+    std::shared_ptr<const Path> _path;
 
     float _distance;
 

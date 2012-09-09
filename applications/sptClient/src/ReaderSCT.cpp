@@ -41,7 +41,7 @@ public:
     {
         try
         {
-        	osg::Vec3f sector = sptDB::readSector(fin, getSceneryInstance());
+        	osg::Vec2f sector = sptDB::readSector(fin, getSceneryInstance());
             osg::ref_ptr<SectorNode> result = new SectorNode(sector);
             return ReadResult(result);
         }

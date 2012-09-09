@@ -20,9 +20,9 @@ public:
     Path(const osg::Vec3f& front, const osg::Vec3f& back): _front(front), _back(back) { };
     virtual ~Path() { };
 
-    virtual std::auto_ptr<Path> clone() const = 0;
+    virtual std::unique_ptr<Path> clone() const = 0;
     //! Return reversed path
-    virtual std::auto_ptr<Path> reverse() const = 0;
+    virtual std::unique_ptr<Path> reverse() const = 0;
 
     const osg::Vec3f& front() const { return _front; }
     const osg::Vec3f& back() const { return _back; }
@@ -48,8 +48,8 @@ public:
     StraightPath(const osg::Vec3f& front, const osg::Vec3f& back): Path(front, back) { };
     virtual ~StraightPath();
 
-    virtual std::auto_ptr<Path> clone() const;
-    virtual std::auto_ptr<Path> reverse() const;
+    virtual std::unique_ptr<Path> clone() const;
+    virtual std::unique_ptr<Path> reverse() const;
 
     virtual osg::Vec3f frontDir() const;
     virtual osg::Vec3f backDir() const;
@@ -66,8 +66,8 @@ public:
     BezierPath(const osg::Vec3f& front, const osg::Vec3f& frontCP, const osg::Vec3f& back, const osg::Vec3f& backCP, const float length);
     virtual ~BezierPath();
 
-    virtual std::auto_ptr<Path> clone() const;
-    virtual std::auto_ptr<Path> reverse() const;
+    virtual std::unique_ptr<Path> clone() const;
+    virtual std::unique_ptr<Path> reverse() const;
 
     virtual osg::Vec3f frontDir() const;
     virtual osg::Vec3f backDir() const;

@@ -1,17 +1,14 @@
 #ifndef SPTCORE_SCENERY_H
 #define SPTCORE_SCENERY_H 1
 
-#include <set>
-#include <map>
-#include <vector>
+#include "TrackLocator.h"
 
 #include <memory>
 #include <stdexcept>
+#include <vector>
 
-#include <boost/ptr_container/ptr_map.hpp>
-#include <boost/scoped_ptr.hpp>
-
-#include <osg/Vec3d>
+#include <osg/Vec2f>
+#include <osg/Vec3f>
 
 namespace sptCore
 {
@@ -21,9 +18,8 @@ class Sector;
 class Track;
 class SimpleTrack;
 class SwitchableTracking;
-class Switch;
 
-class ExternalsManager;
+class SceneryState;
 
 struct SceneryException: public std::runtime_error
 {
@@ -36,53 +32,28 @@ public:
     Scenery();
     ~Scenery();
 
-    const Sector& getSector(const osg::Vec3f& position) const;
-    Sector& getSector(const osg::Vec3f& position);
+    const Sector& getSector(const osg::Vec2f& position) const;
+    Sector& getSector(const osg::Vec2f& position);
 
-    bool hasSector(const osg::Vec3f& position) const;
+    bool hasSector(const osg::Vec2f& position) const;
 
     const Track& getNextTrack(const Track& track, const osg::Vec3f& from) const;
 
-    SimpleTrack& getTrack(const std::string& name);
-    SwitchableTracking& getSwitch(const std::string& name);
+    const SimpleTrack& getTrack(const std::string& name) const;
+    const SwitchableTracking& getSwitch(const std::string& name) const;
 
-//    const Statistics& getStatistics() const { return _statistics; };
-
-    //! \brief Add sector to scenery and manage its lifetime
+    //! Add sector to scenery and manage its lifetime
     //! \throw SceneryException if Sector with same name exists
-    void addSector(std::auto_ptr<Sector> sector);
+    void addSector(Sector&& sector);
 
-    //! \brief Remove sector from scenery and return ownership 
-    //! \throw SceneryException if Sector with same name exists
-    std::auto_ptr<Sector> removeSector(const osg::Vec3f& position);
+    //! Register track aliases
+    void addAliases(const osg::Vec2f& sector, std::vector<std::pair<std::string, TrackId>>& aliases);
 
-    //! \brief Add named Track
-    //! \throw SceneryException if Track with same name exists
-    void addTrack(const std::string& name, SimpleTrack& track);
-
-    //! \brief Remove named Track
-    //! \throw SceneryException when no Track with specified name is found
-    void removeTrack(const std::string& name);
-
-    //! \brief Add named SwitchableTracking
-    //! \throw SceneryException if tracking with same name exists
-    void addSwitch(const std::string& name, SwitchableTracking& track);
-
-    //! \brief Remove named SwitchableTracking
-    //! \throw SceneryException when no SwitchableTracking with specified name is found
-    void removeSwitch(const std::string& name);
+    //! Register external connections
+    void addExternals(const osg::Vec2f& sector, const std::vector<std::pair<osg::Vec3f, TrackId>>& entries);
 
 private:
-    typedef boost::ptr_map<osg::Vec3f, Sector> Sectors;
-    typedef std::map<std::string, SimpleTrack*> Tracks;
-    typedef std::map<std::string, SwitchableTracking*> Switches;
-
-    Sectors _sectors;
-    Tracks _tracks;
-    Switches _switches;
-
-//    Statistics _statistics;
-
+    std::unique_ptr<SceneryState> _state;
 }; // class sptCore::Scenery
 
 } // namespace sptCore

@@ -1,6 +1,9 @@
 #ifndef SPTCORE_TRACK_H
 #define SPTCORE_TRACK_H 1
 
+#include "Path.h"
+#include "TrackLocator.h"
+
 #include <stdint.h>
 
 #include <osg/Vec3>
@@ -8,29 +11,8 @@
 
 #include <boost/exception/all.hpp>
 
-#include <sptCore/Path.h>
-
 namespace sptCore
 {
-
-class TrackId
-{
-public:
-    explicit TrackId(uint32_t value);
-
-    bool operator==(TrackId other) const;
-
-    bool isNull() const;
-    bool isExternal() const;
-
-    uint32_t value() const;
-
-    static TrackId null();
-    static TrackId external();
-
-private:
-    uint32_t _value;
-};
 
 class TrackVisitor;
 
@@ -40,10 +22,10 @@ class Track
 {
 
 public:
-	Track(const osg::Vec3f& sector);
+	Track(const osg::Vec2f& sector);
     virtual ~Track();
 
-    osg::Vec3f getSector() const;
+    const osg::Vec2f& getSector() const;
 
     virtual void accept(TrackVisitor& visitor) const = 0;
 
@@ -53,7 +35,7 @@ public:
 
     //! Get path that begins at given position
     //! \throw UnknownEntryException if there is no path for given entry
-    virtual std::auto_ptr<Path> getPath(const osg::Vec3& entry) const = 0;
+    virtual std::shared_ptr<const Path> getPath(const osg::Vec3& entry) const = 0;
 
     //! Get connected track
     virtual TrackId getNextTrack(const osg::Vec3& entry) const = 0;
@@ -62,7 +44,7 @@ public:
     class UnknownEntryException: public boost::exception { };
 
 private:
-    osg::Vec3f _sector;
+    osg::Vec2f _sector;
 
 }; // class sptCore::Track
 

@@ -8,24 +8,22 @@
 #include <osg/Vec2f>
 #include <osg/Vec3f>
 
-#include "sptCore/Sector.h"
+#include "sptCore/TrackLocator.h"
 
 namespace sptCore
 {
 
-class TrackQuery;
-class ExternalsImpl;
+class ExternalsState;
 
 class Externals
 {
 public:
-    typedef std::vector<std::pair<osg::Vec3f, TrackId> > Entries;
+    TrackLocator getNextTrack(const osg::Vec2f& sector, const osg::Vec3f& position, const TrackId from) const;
 
-    std::pair<osg::Vec2f, TrackId> getNextTrack(const TrackQuery& query) const;
-    void add(const osg::Vec2f& sector, Entries entries);
+    void add(const osg::Vec2f& sector, std::vector<std::pair<osg::Vec3f, TrackId>> entries);
 
 private:
-    std::unique_ptr<ExternalsImpl> _impl;    
+    std::unique_ptr<ExternalsState> _state;    
 }; // class Externals
 
 }; // namespace sptCore

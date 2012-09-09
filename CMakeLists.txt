@@ -32,15 +32,14 @@ IF(WIN32)
 ENDIF(WIN32)
 
 if(UNIX)
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fPIC")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fPIC")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fPIC --std=gnu++0x")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fPIC --std=gnu++0x")
 endif(UNIX)
 
 find_package(Boost 1.42.0 REQUIRED python)
 find_package(OpenSceneGraph 2.8.3 REQUIRED osg osgDB osgGA osgUtil osgViewer)
 find_package(PythonLibs 2.7 REQUIRED)
 find_package(wxWidgets 2.8.11 REQUIRED base core gl)
-find_package(GTest 1.5.0 REQUIRED)
 
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 

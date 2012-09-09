@@ -12,8 +12,8 @@ namespace sptDB
 
 struct VariantSector
 {
-    int x;
-    int y;
+    float x;
+    float y;
     unsigned short variantId;
 };
 

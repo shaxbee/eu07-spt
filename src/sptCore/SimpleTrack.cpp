@@ -1,7 +1,14 @@
 #include "sptCore/SimpleTrack.h"
 #include "sptCore/TrackVisitor.h"
 
-using namespace sptCore;
+#include <stdexcept>
+#include <boost/format.hpp>
+
+using boost::format;
+using boost::str;
+
+namespace sptCore
+{
 
 void SimpleTrack::accept(TrackVisitor& visitor) const
 {
@@ -23,13 +30,17 @@ osg::Vec3 SimpleTrack::getExit(const osg::Vec3& entry) const
 
 }; // SimpleTrack::getNext
 
-std::auto_ptr<Path> SimpleTrack::getPath(const osg::Vec3& entry) const
+std::shared_ptr<const Path> SimpleTrack::getPath(const osg::Vec3& entry) const
 {
     if(entry == _path->front())
-        return _path->clone();
+    {    
+        return _path;
+    }    
 
     if(entry == _path->back())
+    {    
         return _path->reverse();
+    }    
 
     throw UnknownEntryException() << PositionInfo(entry);
 }; // SimpleTrack::getPath
@@ -46,6 +57,7 @@ TrackId SimpleTrack::getNextTrack(const osg::Vec3& entry) const
         return _back;
     };
 
-    throw UnknownEntryException() << PositionInfo(entry);
+    throw std::invalid_argument(str(format("Unknown entry (%s, %s, %s)") % entry.x() % entry.y() % entry.z()));
 }; // SimpleTrack::getNextTrack
 
+}; // namespace sptCore

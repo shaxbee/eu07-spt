@@ -6,8 +6,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/exception/all.hpp>
-
 namespace sptCore
 {
 
@@ -17,20 +15,16 @@ class SwitchableTracking: public Track
 {
 
 public:
-    SwitchableTracking(const osg::Vec3f& sector): Track(sector) { };
-    virtual ~SwitchableTracking() { };
+    SwitchableTracking(const osg::Vec2f& sector);
+    virtual ~SwitchableTracking();
 
-    std::string getPosition() const { return _position; };
+    const std::string& getPosition() const;
 
     //! \throw InvalidPositionException if position is not in vector of valid positions
     virtual void setPosition(const std::string& position);
-    bool isValidPosition(const std::string& position);
+    virtual bool isValidPosition(const std::string& position);
 
-    typedef std::vector<std::string> ValidPositions;
-    virtual const ValidPositions& getValidPositions() const = 0;
-
-    typedef boost::error_info<struct tag_name, std::string> NameInfo;
-    class InvalidPositionException: public boost::exception { };
+    virtual std::vector<std::string> getValidPositions() const = 0;
 
 private:
     std::string _position;

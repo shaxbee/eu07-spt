@@ -11,7 +11,7 @@ class SectorNode: public osg::Node
 public:
 	SectorNode();
 	SectorNode(const SectorNode& other, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
-    SectorNode(const osg::Vec3f& sector);
+    SectorNode(const osg::Vec2f& sector);
 
     virtual void traverse(osg::NodeVisitor& visitor);
 
@@ -20,7 +20,7 @@ public:
     const sptCore::Sector& getSector() const;
 
 private:
-    const osg::Vec3f& _sector;
+    const osg::Vec2f& _sector;
     osg::ref_ptr<osg::Geode> _geode;
 
 }; // class SectorNode

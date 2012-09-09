@@ -110,14 +110,14 @@ StraightPath::~StraightPath()
 {
 };
 
-std::auto_ptr<Path> StraightPath::clone() const
+std::unique_ptr<Path> StraightPath::clone() const
 {
-    return std::auto_ptr<Path>(new StraightPath(front(), back()));
+    return std::unique_ptr<Path>(new StraightPath(front(), back()));
 };
 
-std::auto_ptr<Path> StraightPath::reverse() const
+std::unique_ptr<Path> StraightPath::reverse() const
 {
-    return std::auto_ptr<Path>(new StraightPath(back(), front()));
+    return std::unique_ptr<Path>(new StraightPath(back(), front()));
 };
 
 float StraightPath::length() const
@@ -178,14 +178,14 @@ osg::Vec3f BezierPath::backDir() const
     return result;
 };
 
-std::auto_ptr<Path> BezierPath::clone() const
+std::unique_ptr<Path> BezierPath::clone() const
 {
-    return std::auto_ptr<Path>(new BezierPath(front(), _frontCP, back(), _backCP));
+    return std::unique_ptr<Path>(new BezierPath(front(), _frontCP, back(), _backCP));
 };
 
-std::auto_ptr<Path> BezierPath::reverse() const
+std::unique_ptr<Path> BezierPath::reverse() const
 {
-    std::auto_ptr<BezierPath> result(new BezierPath(back(), _backCP, front(), _frontCP, _length));
+    std::unique_ptr<BezierPath> result(new BezierPath(back(), _backCP, front(), _frontCP, _length));
 
     // if source path was initialized
     if(_points.valid())
@@ -195,7 +195,7 @@ std::auto_ptr<Path> BezierPath::reverse() const
         result->_points = reversed;
     };
 
-    return std::auto_ptr<Path>(result);
+    return std::move(result);
 };
 
 float BezierPath::length() const

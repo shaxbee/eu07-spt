@@ -1,11 +1,20 @@
-#include <sptCore/SwitchableTracking.h>
+#include "sptCore/SwitchableTracking.h"
 
-using namespace sptCore;
+#include <stdexcept>
+#include <boost/format.hpp>
+
+using boost::str;
+using boost::format;
+
+namespace sptCore
+{
 
 void SwitchableTracking::setPosition(const std::string& position)
 {
     if(!isValidPosition(position))
-        throw InvalidPositionException() << NameInfo(position);
+    {    
+        throw std::invalid_argument(str(format("Invalid position <%s>") % position));
+    }    
 
     _position = position;
 
@@ -13,8 +22,8 @@ void SwitchableTracking::setPosition(const std::string& position)
 
 bool SwitchableTracking::isValidPosition(const std::string& position)
 {
-    const ValidPositions& positions = getValidPositions();
-
-    ValidPositions::const_iterator iter = std::find(positions.begin(), positions.end(), position);
-    return iter != positions.end();
+    auto positions(std::move(getValidPositions()));
+    return std::find(positions.begin(), positions.end(), position) != positions.end();
 };
+
+}; // namespace sptCore

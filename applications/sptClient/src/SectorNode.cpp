@@ -19,8 +19,7 @@
 namespace
 {
 
-static osg::Vec3f INVALID_VEC3F = osg::Vec3f(
-	std::numeric_limits<float>::infinity(),
+static osg::Vec2f INVALID_VEC2F(
 	std::numeric_limits<float>::infinity(),
 	std::numeric_limits<float>::infinity());
 
@@ -47,7 +46,7 @@ osg::Geometry* createProfile()
 
 };
 
-void extrude(osg::Geode* target, osg::Geometry* profile, std::auto_ptr<sptCore::Path> path)
+void extrude(osg::Geode* target, osg::Geometry* profile, std::shared_ptr<const sptCore::Path> path)
 {
     osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
     geometry->setVertexArray(new osg::Vec3Array);
@@ -89,7 +88,7 @@ private:
 
 SectorNode::SectorNode():
 	Node(),
-	_sector(INVALID_VEC3F),
+	_sector(INVALID_VEC2F),
 	_geode()
 {
 }
@@ -101,7 +100,7 @@ SectorNode::SectorNode(const SectorNode& other, const osg::CopyOp& copyop):
 {
 }
 
-SectorNode::SectorNode(const osg::Vec3f& sector):
+SectorNode::SectorNode(const osg::Vec2f& sector):
 	Node(),
 	_sector(sector),
 	_geode(new osg::Geode())

@@ -38,11 +38,17 @@ TrackId TrackId::external()
 {
     return TrackId(std::numeric_limits<uint32_t>::max() - 1);
 }
-Track::Track(const osg::Vec3f& sector):
+
+Track::Track(const osg::Vec2f& sector):
 	_sector(sector)
 {
 
 }
+
+const osg::Vec2f& Track::getSector() const
+{
+    return _sector;
+}    
 
 Track::~Track()
 {

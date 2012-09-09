@@ -98,7 +98,7 @@ osg::Matrix Follower::getMatrix() const
 
 void Follower::changeTrack(osg::Vec3 position)
 {
-    const osg::Vec3f sector = _track->getSector();
+    const auto sector = _track->getSector();
 // TODO: refactor    _track = &(sector.getNextTrack(position, *_track));
 //    position -= (_track->getSector().getPosition() - sector.getPosition());
 //

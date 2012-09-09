@@ -11,27 +11,20 @@ namespace sptCore
 class SimpleTrack: public Track
 {
 public:
-    template <typename PathT>
-    SimpleTrack(const osg::Vec3& sector, PathT path, TrackId front, TrackId back):
-        Track(sector), 
-        _path(path),
-        _front(front),
-        _back(back)
-    { 
-    };
+    SimpleTrack(const osg::Vec2f& sector, std::shared_ptr<Path>, TrackId front, TrackId back);
 
     virtual ~SimpleTrack() { };
 
     virtual void accept(TrackVisitor& visitor) const;
     virtual osg::Vec3 getExit(const osg::Vec3& entry) const;
-    virtual std::auto_ptr<Path> getPath(const osg::Vec3& entry) const;
+    virtual std::shared_ptr<const Path> getPath(const osg::Vec3& entry) const;
     virtual TrackId getNextTrack(const osg::Vec3& entry) const;
 
     //! \brief Get default (forward) path
-    std::auto_ptr<Path> getDefaultPath() const { return _path->clone(); }
+    std::shared_ptr<const Path> getDefaultPath() const;
     
 private:
-    std::auto_ptr<Path> _path;
+    std::shared_ptr<Path> _path;
     TrackId _front;
     TrackId _back;
 };
