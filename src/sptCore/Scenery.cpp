@@ -31,7 +31,7 @@ struct SceneryState
 
 const Track& SceneryState::getTrack(const TrackLocator& locator) const
 {
-    return sectors.at(locator.sector).getTrack(locator.id);
+    return sectors.at(locator.sector()).getTrack(locator.id());
 }; // SceneryState::getTrack(Locator)    
 
 template <typename ResultT>
@@ -61,6 +61,18 @@ bool Scenery::hasSector(const osg::Vec2f& position) const
 {
     return (_state->sectors.find(position) != _state->sectors.end());
 }; // Scenery::hasSector
+
+const Track& Scenery::getNextTrack(const Track& track, const osg::Vec3f& from) const
+{
+    TrackId id = track.getNextTrack(from);
+
+    if(!id.isExternal())
+    {
+        return getSector(track.getSector()).getTrack(id);
+    }
+
+    TrackLocator locator = _state->externals.getNextTrack(track.getSector(), from);
+}; // Scenery::getNextTrack
 
 const SimpleTrack& Scenery::getTrack(const std::string& name) const
 {
@@ -98,8 +110,9 @@ void Scenery::addAliases(const osg::Vec2f& sector, Aliases&& aliases)
     };        
 };
 
-void Scenery::addExternals(const osg::Vec2f& sector, const std::vector<std::pair<osg::Vec3f, TrackId>>&& entries)
+void Scenery::addExternals(const osg::Vec2f& sector, std::vector<std::pair<osg::Vec3f, TrackId>>&& entries)
 {
+    _state->externals.add(sector, std::move(entries));
 };
 
 }; // namespace sptCore

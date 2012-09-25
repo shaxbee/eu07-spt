@@ -23,10 +23,31 @@ std::pair<osg::Vec2f, osg::Vec3f> normalized(const osg::Vec2f& sector, const osg
     };    
 };
 
+// based on boost::hash_combine
+template <typename T>
+std::size_t hash_combine(std::size_t& seed, const T& value)
+{
+    std::hash<T> hasher;
+    seed ^= hasher(value) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+};
+
 }; // anonymous namespace
 
 namespace sptCore
 {
+
+std::size_t Externals::LocationHash::operator()(const Location& value) const
+{
+    std::size_t result = 0;
+
+    ::hash_combine(result, value.first.x());
+    ::hash_combine(result, value.first.y());
+    ::hash_combine(result, value.second.x());
+    ::hash_combine(result, value.second.y());
+    ::hash_combine(result, value.second.z());
+
+    return result;
+};
 
 void Externals::add(const osg::Vec2f& sector, std::vector<std::pair<osg::Vec3f, TrackId>> entries)
 {
@@ -39,7 +60,7 @@ void Externals::add(const osg::Vec2f& sector, std::vector<std::pair<osg::Vec3f, 
         if(iter != _grid.end())
         {
             auto& value(iter->second);
-            if(!value.second.id.isNull())
+            if(!value.second.id())
             {
                 // osg::notify(osg::FATAL) << 
                 //    "Duplicate external connection at <" << sector << ">, <" << value.first << ">";
@@ -59,7 +80,7 @@ void Externals::add(const osg::Vec2f& sector, std::vector<std::pair<osg::Vec3f, 
     };
 };
 
-TrackLocator Externals::getNextTrack(const osg::Vec2f& sector, const osg::Vec3f& position, const TrackId from) const
+TrackLocator Externals::getNextTrack(const osg::Vec2f& sector, const osg::Vec3f& position) const
 {
     auto iter = _grid.find(normalized(sector, position));
 
@@ -67,12 +88,12 @@ TrackLocator Externals::getNextTrack(const osg::Vec2f& sector, const osg::Vec3f&
     {
         const auto& entry = iter->second;
 
-        if(entry.first.id == from)
+        if(entry.first.sector() != sector)
         {
-            return entry.second;
+            return entry.first;
         }
         
-        if(entry.second.id == from)
+        if(entry.second.sector() != sector)
         {
             return entry.first;
         }

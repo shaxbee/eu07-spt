@@ -14,15 +14,23 @@
 namespace sptCore
 {
 
+
 class Externals
 {
 public:
-    TrackLocator getNextTrack(const osg::Vec2f& sector, const osg::Vec3f& position, const TrackId from) const;
+    TrackLocator getNextTrack(const osg::Vec2f& sector, const osg::Vec3f& position) const;
 
     void add(const osg::Vec2f& sector, std::vector<std::pair<osg::Vec3f, TrackId>> entries);
 
 private:
-    std::unordered_map<std::pair<osg::Vec2f, osg::Vec3f>, std::pair<TrackLocator, TrackLocator>> _grid;
+    typedef std::pair<osg::Vec2f, osg::Vec3f> Location;
+
+    struct LocationHash
+    {
+        std::size_t operator()(const Location& value) const;
+    };
+     
+    std::unordered_map<Location, std::pair<TrackLocator, TrackLocator>, LocationHash> _grid;
 }; // class Externals
 
 }; // namespace sptCore
