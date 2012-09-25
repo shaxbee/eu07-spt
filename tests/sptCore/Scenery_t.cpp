@@ -22,24 +22,31 @@ protected:
     
 }; // class SceneryTestSuite
 
-TEST_F(SceneryTest, TrackAccess)
+Tracks makeDummyTracks(size_t count)
 {
-    std::auto_ptr<SimpleTrack> testTrack(new SimpleTrack(dummy, new StraightPath(dummy, dummy), TrackId::null(), TrackId::null()));
+    Tracks result;
 
-    scenery.addTrack("track1", *testTrack);
-
-    ASSERT_EQ(&scenery.getTrack("track1"), testTrack.get());
-    ASSERT_THROW(&scenery.getTrack("track2"), SceneryException);
-};
-
-TEST_F(SceneryTest, SwitchAccess)
-{
-    std::auto_ptr<Switch> testSwitch(new Switch(dummy, new StraightPath(dummy, dummy), new StraightPath(dummy, dummy), TrackId::null(), TrackId::null(), TrackId::null()));
-
-    scenery.addSwitch("switch1", *testSwitch);
+    while(count--)
+    {
+        result.push_back(std::unique_ptr<Track>(new SimpleTrack(
+            osg::Vec2f(),
+            std::make_shared<StraightPath>(osg::Vec3f(), osg::Vec3f()),
+            TrackId::null(),
+            TrackId::null()
+        )));
+    };
     
-    ASSERT_EQ(&scenery.getSwitch("switch1"), testSwitch.get());
-    ASSERT_THROW(&scenery.getSwitch("switch2"), SceneryException);
+    return std::move(result);        
+};        
+
+TEST_F(SceneryTest, Aliases)
+{
+    scenery.addSector(Sector(osg::Vec2f(), makeDummyTracks(1))); //std::move(tracks)));
+    scenery.addAliases(osg::Vec2f(), {{std::string("track1"), TrackId(0)}});
+
+    ASSERT_NO_THROW(scenery.getTrack("track1"));
+    ASSERT_THROW(scenery.getTrack("track2"), std::out_of_range);
+    ASSERT_THROW(scenery.getSwitch("track1"), std::bad_cast);
 };
 
 #if 0

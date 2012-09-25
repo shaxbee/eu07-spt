@@ -230,8 +230,8 @@ osg::Vec2f readSector(std::istream& input, Scenery& scenery)
     reader.endChunk("SECT");
 
     scenery.addSector(Sector(position, std::move(tracks)));
-    scenery.addAliases(position, aliases);
-    scenery.addExternals(position, externals);
+    scenery.addAliases(position, std::move(aliases));
+    scenery.addExternals(position, std::move(externals));
 
     return position;
 };

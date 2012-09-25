@@ -57,7 +57,7 @@ osg::Geometry* createProfile()
 
 };
 
-void extrude(osg::Geode* target, osg::Geometry* profile, std::auto_ptr<sptCore::Path> path)
+void extrude(osg::Geode* target, osg::Geometry* profile, std::unique_ptr<sptCore::Path> path)
 {
     osg::ref_ptr<osg::Geometry> geometry(new osg::Geometry);
 
@@ -142,14 +142,14 @@ int main()
     stateSet->setAttribute(program.get());
 
 #if 1
-    std::auto_ptr<sptCore::Path> path(new sptCore::BezierPath(
+    std::unique_ptr<sptCore::Path> path(new sptCore::BezierPath(
         osg::Vec3(0.0, 0.0, 0.0),
         osg::Vec3(100.0, 0.0, 0.0),
         osg::Vec3(100.0, 100.0, 0.0),
         osg::Vec3(0.0, 100.0, 0.0)
     ));
 #else
-    std::auto_ptr<sptCore::Path> path(new sptCore::StraightPath(
+    std::unique_ptr<sptCore::Path> path(new sptCore::StraightPath(
         osg::Vec3(0.0, 0.0, 0.0),
         osg::Vec3(100.0, 0.0, 0.0)
     ));

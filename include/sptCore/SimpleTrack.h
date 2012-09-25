@@ -11,9 +11,10 @@ namespace sptCore
 class SimpleTrack: public Track
 {
 public:
-    SimpleTrack(const osg::Vec2f& sector, std::shared_ptr<Path>, TrackId front, TrackId back);
+    SimpleTrack(const osg::Vec2f& sector, std::shared_ptr<Path> path, TrackId front, TrackId back);
+    SimpleTrack(SimpleTrack&& other);
 
-    virtual ~SimpleTrack() { };
+    virtual ~SimpleTrack();
 
     virtual void accept(TrackVisitor& visitor) const;
     virtual osg::Vec3 getExit(const osg::Vec3& entry) const;

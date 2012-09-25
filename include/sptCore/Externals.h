@@ -4,6 +4,7 @@
 #include <memory>
 #include <utility>
 #include <vector>
+#include <unordered_map>
 
 #include <osg/Vec2f>
 #include <osg/Vec3f>
@@ -13,8 +14,6 @@
 namespace sptCore
 {
 
-class ExternalsState;
-
 class Externals
 {
 public:
@@ -23,7 +22,7 @@ public:
     void add(const osg::Vec2f& sector, std::vector<std::pair<osg::Vec3f, TrackId>> entries);
 
 private:
-    std::unique_ptr<ExternalsState> _state;    
+    std::unordered_map<std::pair<osg::Vec2f, osg::Vec3f>, std::pair<TrackLocator, TrackLocator>> _grid;
 }; // class Externals
 
 }; // namespace sptCore

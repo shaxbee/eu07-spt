@@ -10,6 +10,26 @@ using boost::str;
 namespace sptCore
 {
 
+SimpleTrack::SimpleTrack(const osg::Vec2f& sector, std::shared_ptr<Path> path, TrackId front, TrackId back):
+    Track(sector),
+    _path(path),
+    _front(front),
+    _back(back)
+{
+}; // SimpleTrack::SimpleTrack
+
+SimpleTrack::SimpleTrack(SimpleTrack&& other):
+    Track(other.getSector()),
+    _path(std::move(other._path)),
+    _front(other._front),
+    _back(other._back)    
+{
+};
+
+SimpleTrack::~SimpleTrack()
+{
+}; // SimpleTrack::~SimpleTrack
+
 void SimpleTrack::accept(TrackVisitor& visitor) const
 {
     visitor.apply(*this);
@@ -44,6 +64,11 @@ std::shared_ptr<const Path> SimpleTrack::getPath(const osg::Vec3& entry) const
 
     throw UnknownEntryException() << PositionInfo(entry);
 }; // SimpleTrack::getPath
+
+std::shared_ptr<const Path> SimpleTrack::getDefaultPath() const
+{
+    return _path;
+}; // SimpleTrack::getDefaultPath    
 
 TrackId SimpleTrack::getNextTrack(const osg::Vec3& entry) const
 {

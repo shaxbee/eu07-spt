@@ -6,6 +6,30 @@
 using namespace sptCore;
 using namespace boost::assign;
 
+Switch::Switch(const osg::Vec2f& sector, std::shared_ptr<Path> straight, std::shared_ptr<Path> diverted, TrackId commonId, TrackId straightId, TrackId divertedId, const std::string& position):
+    SwitchableTracking(sector, position),
+    _straight(straight),
+    _diverted(diverted),
+    _commonId(commonId),
+    _straightId(straightId),
+    _divertedId(divertedId)
+{
+};
+
+Switch::Switch(Switch&& other):
+    SwitchableTracking(other.getSector(), other.getPosition()),
+    _straight(std::move(other._straight)),
+    _diverted(std::move(other._diverted)),
+    _commonId(other._commonId),
+    _straightId(other._straightId),
+    _divertedId(other._divertedId)
+{
+};
+
+Switch::~Switch()
+{
+}
+
 void Switch::accept(TrackVisitor& visitor) const
 {
     visitor.apply(*this);
@@ -27,7 +51,7 @@ osg::Vec3 Switch::getExit(const osg::Vec3& entry) const
     if(entry == _diverted->back())
         return _diverted->front();
 
-    throw UnknownEntryException() << PositionInfo(entry);
+    throw std::invalid_argument("Unknown entry");
 }; // Switch::getExit(entry)
 
 std::shared_ptr<const Path> Switch::getPath(const osg::Vec3& entry) const

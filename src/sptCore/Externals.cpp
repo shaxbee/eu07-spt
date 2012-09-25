@@ -28,20 +28,15 @@ std::pair<osg::Vec2f, osg::Vec3f> normalized(const osg::Vec2f& sector, const osg
 namespace sptCore
 {
 
-struct ExternalsState
-{
-    std::unordered_map<std::pair<osg::Vec2f, osg::Vec3f>, std::pair<TrackLocator, TrackLocator>> grid;
-};    
-
 void Externals::add(const osg::Vec2f& sector, std::vector<std::pair<osg::Vec3f, TrackId>> entries)
 {
     for(const auto& value: entries)
     {
         TrackLocator locator{sector, value.second};
-        auto iter = _state->grid.find(normalized(sector, value.first));
+        auto iter = _grid.find(normalized(sector, value.first));
 
         // if there is external 
-        if(iter != _state->grid.end())
+        if(iter != _grid.end())
         {
             auto& value(iter->second);
             if(!value.second.id.isNull())
@@ -56,7 +51,7 @@ void Externals::add(const osg::Vec2f& sector, std::vector<std::pair<osg::Vec3f, 
         // else add open external
         else
         {
-            _state->grid.insert({
+            _grid.insert({
                 { sector, value.first }, // key
                 { locator, { osg::Vec2f(), TrackId::null() } } // value
             }); 
@@ -66,9 +61,9 @@ void Externals::add(const osg::Vec2f& sector, std::vector<std::pair<osg::Vec3f, 
 
 TrackLocator Externals::getNextTrack(const osg::Vec2f& sector, const osg::Vec3f& position, const TrackId from) const
 {
-    auto iter = _state->grid.find(normalized(sector, position));
+    auto iter = _grid.find(normalized(sector, position));
 
-    if(iter != _state->grid.end())
+    if(iter != _grid.end())
     {
         const auto& entry = iter->second;
 

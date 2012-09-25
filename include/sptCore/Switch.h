@@ -19,7 +19,8 @@ public:
     //! \param diverted diverted path
     //! \param position initial position
     Switch(const osg::Vec2f& sector, std::shared_ptr<Path> straight, std::shared_ptr<Path> diverted, TrackId commonId, TrackId straightId, TrackId divertedId, const std::string& position = "STRAIGHT");
-    virtual ~Switch() { };
+    Switch(Switch&& other);
+    virtual ~Switch();
 
     virtual void accept(TrackVisitor& visitor) const;
     virtual osg::Vec3 getExit(const osg::Vec3& entry) const;

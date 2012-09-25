@@ -26,6 +26,8 @@ struct SceneryException: public std::runtime_error
     SceneryException(const std::string message): std::runtime_error(message) { };
 };
 
+typedef std::vector<std::pair<std::string, TrackId>> Aliases;
+
 class Scenery
 {
 public:
@@ -47,10 +49,10 @@ public:
     void addSector(Sector&& sector);
 
     //! Register track aliases
-    void addAliases(const osg::Vec2f& sector, std::vector<std::pair<std::string, TrackId>>& aliases);
+    void addAliases(const osg::Vec2f& sector, Aliases&& aliases);
 
     //! Register external connections
-    void addExternals(const osg::Vec2f& sector, const std::vector<std::pair<osg::Vec3f, TrackId>>& entries);
+    void addExternals(const osg::Vec2f& sector, const std::vector<std::pair<osg::Vec3f, TrackId>>&& entries);
 
 private:
     std::unique_ptr<SceneryState> _state;

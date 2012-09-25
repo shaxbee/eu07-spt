@@ -9,6 +9,20 @@ using boost::format;
 namespace sptCore
 {
 
+SwitchableTracking::SwitchableTracking(const osg::Vec2f& sector, const std::string& position):
+    Track(sector), _position(position)
+{
+};
+
+SwitchableTracking::~SwitchableTracking()
+{
+};
+
+const std::string& SwitchableTracking::getPosition() const
+{
+    return _position;
+}; // SwitchableTracking::getPosition    
+
 void SwitchableTracking::setPosition(const std::string& position)
 {
     if(!isValidPosition(position))

@@ -11,10 +11,9 @@ class SimpleTrackTest: public ::testing::Test
 {
 public:
     SimpleTrackTest():
-        sector(0.0f, 0.0f, 0.0f),
         begin(0.0f, 0.0f, 0.0f), 
         end(10.0f, 10.0f, 10.0f), 
-        track(sector, new StraightPath(begin, end), TrackId::null(), TrackId::null()) 
+        track(osg::Vec2f(), std::make_shared<StraightPath>(begin, end), TrackId::null(), TrackId::null()) 
     { 
     };
         

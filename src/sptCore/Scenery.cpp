@@ -3,6 +3,7 @@
 #include "sptCore/Sector.h"
 #include "sptCore/SimpleTrack.h"
 #include "sptCore/SwitchableTracking.h"
+#include "sptCore/Externals.h"
 
 #include <map>
 #include <unordered_map>
@@ -20,6 +21,7 @@ struct SceneryState
 {
     std::map<osg::Vec2f, Sector> sectors;
     std::unordered_map<std::string, TrackLocator> aliases;
+    Externals externals;
 
     template <typename ResultT>
     const ResultT& getAlias(const std::string& name) const;
@@ -84,5 +86,20 @@ void Scenery::addSector(Sector&& sector)
                     position.y()));
     };    
 }; // Scenery::addSector
+
+void Scenery::addAliases(const osg::Vec2f& sector, Aliases&& aliases)
+{
+    for(const auto& entry: aliases)
+    {
+        _state->aliases.insert({
+            entry.first,
+            { sector, entry.second }
+        });
+    };        
+};
+
+void Scenery::addExternals(const osg::Vec2f& sector, const std::vector<std::pair<osg::Vec3f, TrackId>>&& entries)
+{
+};
 
 }; // namespace sptCore

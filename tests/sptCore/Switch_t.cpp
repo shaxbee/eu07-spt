@@ -12,17 +12,14 @@ class SwitchTest: public ::testing::Test
     
 public:
     SwitchTest():
-        sector(0.0f, 0.0f, 0.0f),
         begin(0.0f, 0.0f, 0.0f), 
         straight(10.0f, 0.0f, 0.0f), 
         diverted(10.0f, 10.0f, 0.0f), 
-        switch_(sector, new StraightPath(begin, straight), new StraightPath(begin, diverted), TrackId::null(), TrackId::null(), TrackId::null(), "STRAIGHT") 
+        switch_(osg::Vec2f(), std::make_shared<StraightPath>(begin, straight), std::make_shared<StraightPath>(begin, diverted), TrackId::null(), TrackId::null(), TrackId::null(), "STRAIGHT") 
     { 
     };
 
 protected:
-    osg::Vec3 sector;
-
     osg::Vec3 begin;
     osg::Vec3 straight;
     osg::Vec3 diverted;
@@ -38,7 +35,7 @@ TEST_F(SwitchTest, SetPosition)
     switch_.setPosition("DIVERTED");
     ASSERT_EQ(switch_.getPosition(), "DIVERTED");
 
-    ASSERT_THROW(switch_.setPosition("INVALID"), Switch::InvalidPositionException);
+    ASSERT_THROW(switch_.setPosition("INVALID"), std::invalid_argument);
 };
 
 TEST_F(SwitchTest, GetExit)
@@ -49,7 +46,7 @@ TEST_F(SwitchTest, GetExit)
     ASSERT_EQ(switch_.getExit(straight), begin);    
     ASSERT_EQ(switch_.getExit(diverted), begin);
     
-    ASSERT_THROW(switch_.getExit(osg::Vec3f(0.0f, 0.0f, 1.0f)), Track::UnknownEntryException);        
+    ASSERT_THROW(switch_.getExit(osg::Vec3f(0.0f, 0.0f, 1.0f)), std::invalid_argument);
     
     switch_.setPosition("DIVERTED");
     
@@ -57,7 +54,7 @@ TEST_F(SwitchTest, GetExit)
     ASSERT_EQ(switch_.getExit(straight), begin);
     ASSERT_EQ(switch_.getExit(diverted), begin);
     
-    ASSERT_THROW(switch_.getExit(osg::Vec3f(0.0f, 0.0f, 1.0f)), Track::UnknownEntryException);    
+    ASSERT_THROW(switch_.getExit(osg::Vec3f(0.0f, 0.0f, 1.0f)), std::invalid_argument);
 };
   
 TEST_F(SwitchTest, GetPath)
@@ -74,7 +71,7 @@ TEST_F(SwitchTest, GetPath)
     ASSERT_NE(switch_.getPath(diverted)->front(), switch_.getPath(straight)->front());
 
     // incorrect entry point
-    ASSERT_THROW(switch_.getPath(osg::Vec3f(0.0f, 0.0f, 1.0f)), Track::UnknownEntryException);
+    ASSERT_THROW(switch_.getPath(osg::Vec3f(0.0f, 0.0f, 1.0f)), std::invalid_argument);
     
     switch_.setPosition("DIVERTED");        
     
@@ -88,5 +85,5 @@ TEST_F(SwitchTest, GetPath)
     ASSERT_NE(switch_.getPath(diverted)->front(), switch_.getPath(straight)->front());
             
     // incorrect entry point
-    ASSERT_THROW(switch_.getPath(osg::Vec3f(0.0f, 0.0f, 1.0f)), Track::UnknownEntryException);
+    ASSERT_THROW(switch_.getPath(osg::Vec3f(0.0f, 0.0f, 1.0f)), std::invalid_argument);
 };

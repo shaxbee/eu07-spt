@@ -22,9 +22,6 @@ IF(WIN32)
     set(wxWidgets_ROOT_DIR ${SPT_DEP_DIR}/wxWidgets-2.8.11)
     set(ENV{OSG_DIR} ${SPT_DEP_DIR}/OpenSceneGraph-3.0.1)
     
-    set(GTEST_ROOT ${SPT_DEP_DIR}/gtest-1.5.0)
-    set(GTEST_MSVC_SEARCH "MD")
-    
     set(CMAKE_PREFIX_PATH ${SPT_DEP_DIR})
     
     #disable MSVC safety warning triggered in boost
