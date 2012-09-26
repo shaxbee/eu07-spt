@@ -9,13 +9,13 @@ namespace
 
 std::pair<osg::Vec2f, osg::Vec3f> normalized(const osg::Vec2f& sector, const osg::Vec3f& position) 
 {
-    const float GRID_SIZE = 10000.0f;
+    const float GRID_SIZE = 1000.0f;
 
     osg::Vec2f delta(
         std::floor(position.x() / GRID_SIZE) * GRID_SIZE,
         std::floor(position.y() / GRID_SIZE) * GRID_SIZE
-    );    
-
+    );
+    
     return 
     {
         sector + delta,

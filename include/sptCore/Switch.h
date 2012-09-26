@@ -18,7 +18,7 @@ public:
     //! \param straight straight path
     //! \param diverted diverted path
     //! \param position initial position
-    Switch(const osg::Vec2f& sector, std::shared_ptr<Path> straight, std::shared_ptr<Path> diverted, TrackId commonId, TrackId straightId, TrackId divertedId, const std::string& position = "STRAIGHT");
+    Switch(TrackId id, const osg::Vec2f& sector, std::shared_ptr<Path> straight, std::shared_ptr<Path> diverted, TrackId commonId, TrackId straightId, TrackId divertedId, const std::string& position = "STRAIGHT");
     Switch(Switch&& other);
     virtual ~Switch();
 

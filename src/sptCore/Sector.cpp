@@ -29,7 +29,14 @@ Sector::Sector(const osg::Vec2f& position, Tracks&& tracks):
 
 const Track& Sector::getTrack(const TrackId id) const
 {
-    return *_tracks.at(id.value());
+    const auto& track = _tracks.at(id.value());
+
+    if(!track)
+    {
+        throw std::logic_error("Invalid track");
+    };
+        
+    return *track;
 };
 
 void Sector::accept(TrackVisitor& visitor) const

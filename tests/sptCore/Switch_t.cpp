@@ -15,7 +15,7 @@ public:
         begin(0.0f, 0.0f, 0.0f), 
         straight(10.0f, 0.0f, 0.0f), 
         diverted(10.0f, 10.0f, 0.0f), 
-        switch_(osg::Vec2f(), std::make_shared<StraightPath>(begin, straight), std::make_shared<StraightPath>(begin, diverted), TrackId::null(), TrackId::null(), TrackId::null(), "STRAIGHT") 
+        switch_(TrackId(0), osg::Vec2f(), std::make_shared<StraightPath>(begin, straight), std::make_shared<StraightPath>(begin, diverted), TrackId::null(), TrackId::null(), TrackId::null(), "STRAIGHT") 
     { 
     };
 

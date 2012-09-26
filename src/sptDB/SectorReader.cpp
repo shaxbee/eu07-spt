@@ -119,6 +119,7 @@ void readTracks(const osg::Vec2f& sector, BinaryReader& reader, Tracks& output, 
         auto path = readPath(reader);
 
         output.push_back(std::unique_ptr<Track>(new SimpleTrack(
+            TrackId(output.size()),
             sector, 
             path, 
             _readId(path->front()),
@@ -146,6 +147,7 @@ void readSwitches(const osg::Vec2f& sector, BinaryReader& reader, Tracks& output
         auto diverted = readPath(reader);
 
         output.push_back(std::unique_ptr<Track>(new Switch(
+            TrackId(output.size()),
             sector, 
             straight,
             diverted,

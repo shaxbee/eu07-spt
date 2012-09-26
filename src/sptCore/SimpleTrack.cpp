@@ -10,8 +10,8 @@ using boost::str;
 namespace sptCore
 {
 
-SimpleTrack::SimpleTrack(const osg::Vec2f& sector, std::shared_ptr<Path> path, TrackId front, TrackId back):
-    Track(sector),
+SimpleTrack::SimpleTrack(TrackId id, const osg::Vec2f& sector, std::shared_ptr<Path> path, TrackId front, TrackId back):
+    Track(id, sector),
     _path(path),
     _front(front),
     _back(back)
@@ -19,7 +19,7 @@ SimpleTrack::SimpleTrack(const osg::Vec2f& sector, std::shared_ptr<Path> path, T
 }; // SimpleTrack::SimpleTrack
 
 SimpleTrack::SimpleTrack(SimpleTrack&& other):
-    Track(other.getSector()),
+    Track(other.getId(), other.getSector()),
     _path(std::move(other._path)),
     _front(other._front),
     _back(other._back)    

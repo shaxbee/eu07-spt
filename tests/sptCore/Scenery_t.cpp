@@ -22,6 +22,16 @@ protected:
     
 }; // class SceneryTestSuite
 
+std::unique_ptr<Track> makeSimpleTrack(size_t id, osg::Vec2f sector, osg::Vec3f front, osg::Vec3f back, TrackId frontId, TrackId backId)
+{
+    return std::unique_ptr<Track>(new SimpleTrack(
+        TrackId(id), 
+        sector,
+        std::make_shared<StraightPath>(front, back),
+        frontId, backId
+    ));
+};    
+
 Tracks makeDummyTracks(size_t count)
 {
     Tracks result;
@@ -29,6 +39,7 @@ Tracks makeDummyTracks(size_t count)
     while(count--)
     {
         result.push_back(std::unique_ptr<Track>(new SimpleTrack(
+            TrackId(result.size()),
             osg::Vec2f(),
             std::make_shared<StraightPath>(osg::Vec3f(), osg::Vec3f()),
             TrackId::null(),
@@ -49,6 +60,62 @@ TEST_F(SceneryTest, Aliases)
     ASSERT_THROW(scenery.getSwitch("track1"), std::bad_cast);
 };
 
+TEST_F(SceneryTest, NextTrack)
+{
+    osg::Vec3f common(10.0f, 0.0f, 0.0f);
+
+    Tracks tracks;
+    tracks.push_back(makeSimpleTrack(0, osg::Vec2f(), osg::Vec3f(0.0f, 0.0f, 0.0f), common, TrackId::null(), TrackId(1)));
+    tracks.push_back(makeSimpleTrack(1, osg::Vec2f(), common, osg::Vec3f(20.0f, 0.0f, 0.0f), TrackId(0), TrackId::null()));
+
+    scenery.addSector(Sector(osg::Vec2f(), std::move(tracks)));
+
+    const Sector& sector = scenery.getSector(osg::Vec2f());
+
+    ASSERT_EQ(TrackId(1), scenery.getNextTrack(sector.getTrack(TrackId(0)), common).getId());
+    ASSERT_EQ(TrackId(0), scenery.getNextTrack(sector.getTrack(TrackId(1)), common).getId());
+    ASSERT_THROW(scenery.getNextTrack(sector.getTrack(TrackId(0)), osg::Vec3f(0.0f, 0.0f, 0.0f)), std::runtime_error);
+};     
+
+TEST_F(SceneryTest, Externals)
+{
+    // sector A
+    const osg::Vec2f sectorA(0.0f, 0.0f);
+    const osg::Vec3f externalA(1800.0f, 0.0f, 0.0f);
+    {
+        Tracks tracks;
+        tracks.push_back(makeSimpleTrack(
+            0,
+            sectorA, 
+            osg::Vec3f(0.0f, 0.0f, 0.0f), externalA, 
+            TrackId::null(), TrackId::external()
+        ));
+
+        scenery.addSector(Sector(sectorA, std::move(tracks)));
+        scenery.addExternals(sectorA, {{externalA, TrackId(0)}});
+    };
+    
+    // sector B
+    const osg::Vec2f sectorB(2000.0f, 0.0f);
+    const osg::Vec3f externalB(-200.0f, 0.0f, 0.0f);
+    {
+        Tracks tracks;
+        tracks.push_back(makeSimpleTrack(
+            0,
+            sectorB,
+            externalB, 
+            osg::Vec3f(200.0f, 0.0f, 0.0f), 
+            TrackId::external(), TrackId::null()
+        ));
+        
+        scenery.addSector(Sector(sectorB, std::move(tracks)));
+        scenery.addExternals(sectorB, {{externalB, TrackId(0)}});
+    };
+
+    // get track externally connected to trackA
+    const Track& trackB = scenery.getNextTrack(scenery.getSector(sectorA).getTrack(TrackId(0)), externalA);
+
+};
 #if 0
 TEST_F(SceneryTest, AddSector)
 {

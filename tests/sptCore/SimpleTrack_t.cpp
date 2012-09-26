@@ -13,7 +13,7 @@ public:
     SimpleTrackTest():
         begin(0.0f, 0.0f, 0.0f), 
         end(10.0f, 10.0f, 10.0f), 
-        track(osg::Vec2f(), std::make_shared<StraightPath>(begin, end), TrackId::null(), TrackId::null()) 
+        track(TrackId(0), osg::Vec2f(), std::make_shared<StraightPath>(begin, end), TrackId::null(), TrackId::null()) 
     { 
     };
         

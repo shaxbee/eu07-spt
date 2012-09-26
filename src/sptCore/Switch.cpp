@@ -6,8 +6,8 @@
 using namespace sptCore;
 using namespace boost::assign;
 
-Switch::Switch(const osg::Vec2f& sector, std::shared_ptr<Path> straight, std::shared_ptr<Path> diverted, TrackId commonId, TrackId straightId, TrackId divertedId, const std::string& position):
-    SwitchableTracking(sector, position),
+Switch::Switch(TrackId id, const osg::Vec2f& sector, std::shared_ptr<Path> straight, std::shared_ptr<Path> diverted, TrackId commonId, TrackId straightId, TrackId divertedId, const std::string& position):
+    SwitchableTracking(id, sector, position),
     _straight(straight),
     _diverted(diverted),
     _commonId(commonId),
@@ -17,7 +17,7 @@ Switch::Switch(const osg::Vec2f& sector, std::shared_ptr<Path> straight, std::sh
 };
 
 Switch::Switch(Switch&& other):
-    SwitchableTracking(other.getSector(), other.getPosition()),
+    SwitchableTracking(other.getId(), other.getSector(), other.getPosition()),
     _straight(std::move(other._straight)),
     _diverted(std::move(other._diverted)),
     _commonId(other._commonId),

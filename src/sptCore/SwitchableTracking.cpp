@@ -9,8 +9,8 @@ using boost::format;
 namespace sptCore
 {
 
-SwitchableTracking::SwitchableTracking(const osg::Vec2f& sector, const std::string& position):
-    Track(sector), _position(position)
+SwitchableTracking::SwitchableTracking(TrackId id, const osg::Vec2f& sector, const std::string& position):
+    Track(id, sector), _position(position)
 {
 };
 

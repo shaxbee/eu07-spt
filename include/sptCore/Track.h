@@ -22,9 +22,10 @@ class Track
 {
 
 public:
-	Track(const osg::Vec2f& sector);
+	Track(TrackId id, const osg::Vec2f& sector);
     virtual ~Track();
 
+    const TrackId& getId() const;
     const osg::Vec2f& getSector() const;
 
     virtual void accept(TrackVisitor& visitor) const = 0;
@@ -44,6 +45,7 @@ public:
     class UnknownEntryException: public boost::exception { };
 
 private:
+    TrackId _id;
     osg::Vec2f _sector;
 
 }; // class sptCore::Track

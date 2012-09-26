@@ -66,6 +66,11 @@ const Track& Scenery::getNextTrack(const Track& track, const osg::Vec3f& from) c
 {
     TrackId id = track.getNextTrack(from);
 
+    if(!id)
+    {
+        throw std::runtime_error("Null track");
+    };    
+
     if(!id.isExternal())
     {
         return getSector(track.getSector()).getTrack(id);

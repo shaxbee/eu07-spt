@@ -17,12 +17,12 @@ bool TrackId::operator==(const TrackId& other) const
 
 TrackId::operator bool() const
 {
-    return *this == null();
+    return _value != null()._value;
 }
 
 bool TrackId::isExternal() const
 {
-    return *this == external();
+    return _value == external()._value;
 }
 
 TrackId TrackId::null()

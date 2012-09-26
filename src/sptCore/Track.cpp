@@ -1,12 +1,18 @@
 #include "sptCore/Track.h"
 
-using namespace sptCore;
-
-Track::Track(const osg::Vec2f& sector):
-	_sector(sector)
+namespace sptCore
 {
 
+Track::Track(TrackId id, const osg::Vec2f& sector):
+    _id(id),
+	_sector(sector)
+{
 }
+
+const TrackId& Track::getId() const
+{
+    return _id;
+}    
 
 const osg::Vec2f& Track::getSector() const
 {
@@ -16,3 +22,5 @@ const osg::Vec2f& Track::getSector() const
 Track::~Track()
 {
 };
+
+}; // namespace sptCore
